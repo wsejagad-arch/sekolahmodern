@@ -1,0 +1,8 @@
+2026-06-30 00:52:17,903 - INFO - Anti-Spam Queue Worker thread started.
+2026-06-30 00:52:18,028 - INFO - Anti-Spam Queue Worker thread started.
+INFO:     Started server process [30797]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 98] error while attempting to bind on address ('0.0.0.0', 8000): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
