@@ -1,5 +1,9 @@
 <?php
 $currentPage = basename($_SERVER['PHP_SELF']);
+$basePath = '';
+if (isset($_SERVER['SCRIPT_NAME']) && strpos($_SERVER['SCRIPT_NAME'], '/jurnal') !== false) {
+    $basePath = '/jurnal';
+}
 ?>
 <style>
 /* GLOBAL SISWA FOOTER (GREEN THEME) */
@@ -101,17 +105,17 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 </style>
 
 <nav class="siswa-footer-nav">
-  <a href="<?= siswa_page('siswa') ?>" class="sfooter-item <?= $currentPage == 'siswa.php' ? 'active' : '' ?>">
+  <a href="<?= $basePath ?>/pages/siswa/siswa" class="sfooter-item <?= $currentPage == 'siswa.php' ? 'active' : '' ?>">
     <i class="fas fa-home"></i>
     <span class="sfooter-label">Beranda</span>
   </a>
-  <a href="<?= siswa_page('presensi') ?>" class="sfooter-item floating <?= $currentPage == 'presensi.php' ? 'active' : '' ?>">
+  <a href="<?= $basePath ?>/pages/siswa/presensi" class="sfooter-item floating <?= $currentPage == 'presensi.php' ? 'active' : '' ?>">
     <div class="icon-wrapper">
       <i class="fas fa-fingerprint"></i>
     </div>
     <span class="sfooter-label">Presensi</span>
   </a>
-  <a href="<?= siswa_page('profil') ?>" class="sfooter-item <?= $currentPage == 'profil.php' ? 'active' : '' ?>">
+  <a href="<?= $basePath ?>/pages/siswa/profil" class="sfooter-item <?= $currentPage == 'profil.php' ? 'active' : '' ?>">
     <i class="far fa-user"></i>
     <span class="sfooter-label">Profil</span>
   </a>
