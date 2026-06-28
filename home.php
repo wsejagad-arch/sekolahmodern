@@ -430,7 +430,9 @@ include "sidebar.php";
       }
     ?>
       <!-- End of konten include -->
-
+      <?php if ((int)($_SESSION['hak_akses'] ?? 0) === 2): ?>
+        <?php include "pages/guru/dashboard_guru.php"; ?>
+      <?php else: ?>
       <!-- Content Row -->
       <div class="row mx-auto">
 
@@ -1131,9 +1133,10 @@ include "sidebar.php";
       </div>
 
 
+    <?php endif; ?>
     <?php
-      // bracket di bawah ini adalah penutup else dari is isset request
-    }
+        // bracket di bawah ini adalah penutup else dari is isset request
+      }
     ?>
 
 
@@ -1142,6 +1145,8 @@ include "sidebar.php";
 
   </div>
   <!-- End of Main Content -->
+
+  <?php include "footer.php"; ?><!-- End of Main Content -->
 
   <!-- Bagian chart Pengisian Jurnal Guru telah dihapus -->
 
