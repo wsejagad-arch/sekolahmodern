@@ -72,3 +72,4 @@ jobs:
             **/vendor/**/less/**
             **/vendor/**/*.md
             **/vendor/**/*.json
+            phpqrcode/cache/**
