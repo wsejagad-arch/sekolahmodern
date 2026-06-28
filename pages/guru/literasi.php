@@ -251,9 +251,12 @@ if ($action === 'load_monitoring') {
                 <?php endif; ?>
 
                 <?php if (empty($ampuh_classes)): ?>
-                    <div class="alert alert-warning shadow">
-                        <h4><i class="fas fa-exclamation-triangle"></i> Akses Dibatasi</h4>
-                        Anda belum memiliki kelas yang diampu untuk modul Literasi. <?= $isPendampingLiterasi ? 'Silahkan pilih kelas yang ingin Anda ampu pada modul "Kelas Ampuhan Literasi Anda" di atas.' : 'Hubungi Administrator.'; ?>
+                    <div class="alert alert-warning py-2 px-3 d-flex align-items-center gap-2" style="font-size:.85rem; border-radius:8px;">
+                        <i class="fas fa-exclamation-triangle text-warning me-2" style="font-size:1rem; flex-shrink:0;"></i>
+                        <div>
+                            <strong>Akses Dibatasi.</strong>
+                            Anda belum memiliki kelas yang diampu untuk modul Literasi. <?= $isPendampingLiterasi ? 'Silahkan pilih kelas pada modul <em>"Kelas Ampuhan Literasi Anda"</em> di atas.' : 'Hubungi Administrator.'; ?>
+                        </div>
                     </div>
                 <?php else: ?>
                 
