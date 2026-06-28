@@ -66,7 +66,8 @@ jobs:
             backup/**
             .continue/**
             Microsoft/**
-            **/vendor/**/svgs/**
+            **/vendor/**/svgs*/**
+            **/vendor/**/*.svg
             **/vendor/**/src/**
             **/vendor/**/scss/**
             **/vendor/**/less/**
