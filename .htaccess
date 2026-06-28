@@ -1,26 +1,10 @@
-# SIMANIS - root hosting / local subfolder
-DirectoryIndex index.html login.php index.php
+# SIMANIS - root domain (file langsung di public_html/)
+DirectoryIndex index.php splash.php login.php
 Options -Indexes +FollowSymLinks
-
-<IfModule mime_module>
-  AddHandler application/x-httpd-php .php .php8 .phtml
-</IfModule>
-
-<FilesMatch "\.php$">
-  SetHandler application/x-httpd-php
-</FilesMatch>
 
 <IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteBase /jurnal/
-
-# Arahkan root domain ke halaman splash
-RewriteRule ^$ /jurnal/splash.php [R=302,L]
-
-# Arahkan subfolder lokal /jurnal/ ke splash
-RewriteCond %{REQUEST_URI} ^/jurnal/?$ [OR]
-RewriteCond %{REQUEST_URI} ^/jurnal$ 
-RewriteRule ^ /jurnal/splash.php [R=302,L]
+RewriteBase /
 
 RewriteRule ^masuk$ login.php [L,QSA]
 RewriteRule ^auth$ login_action.php [L,QSA]
