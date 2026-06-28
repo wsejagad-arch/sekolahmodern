@@ -24,20 +24,34 @@ jobs:
           protocol: ftp
           port: 21
           local-dir: ./
-          server-dir: /home/smasumb1/simanis.sman1sumber.sch.id/
+          server-dir: /simanis.sman1sumber.sch.id/
           exclude: |
             **/.git/**
             **/.git*
             **/.github/**
             **/.vscode/**
+            **/.qwen/**
             **/node_modules/**
             release/**
+            scratch/**
+            deploy/**
+            deploy_prod/**
+            temp/**
             **/*.zip
+            **/*.md
+            **/*.txt
+            **/*.ps1
+            **/*.bat
+            **/*.bak
+            **/*.log
+            **/*.sql
+            **/test_*.php
+            **/check_*.php
+            **/debug_*.php
+            **/tmp_*.php
+            **/dump*.php
+            **/setup_*.php
             config.hosting.php
             config.local.php
             koneksi_local.php
             .user.ini
-            deploy/**
-            deploy_prod/**
-            **/*.bak
-            **/*.log
