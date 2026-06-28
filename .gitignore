@@ -1,5 +1,4 @@
 node_modules
-koneksi.php
 .vscode/sftp.json
 config.hosting.php
 config.local.php
