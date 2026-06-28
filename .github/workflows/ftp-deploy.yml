@@ -24,7 +24,7 @@ jobs:
           protocol: ftp
           port: 21
           local-dir: ./
-          server-dir: /home/smasumb1/simanis.sman1sumber.sch.id
+          server-dir: /home/smasumb1/simanis.sman1sumber.sch.id/
           exclude: |
             .git*
             .github*
