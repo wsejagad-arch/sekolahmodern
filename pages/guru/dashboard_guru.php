@@ -543,7 +543,414 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
 ?>
 <link rel='stylesheet' href='pages/guru/css/guru-2026-scoped.css?v=1782641374'>
-<link rel='stylesheet' href='pages/guru/css/guru-desktop.css?v=<?php echo time(); ?>'>
+<style>
+/* DESKTOP MODE FOR DASHBOARD GURU */
+@media (min-width: 768px) {
+    body {
+        background: #fdfbf7; /* Light warm background from mockup */
+    }
+
+    /* Hide the original SB Admin 2 sidebar and topbar */
+    #accordionSidebar, 
+    #content > .topbar {
+        display: none !important;
+    }
+    
+    /* Remove padding/margin from original wrappers */
+    #content-wrapper {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
+    .container-fluid {
+        padding: 0 !important;
+    }
+    #wrapper {
+        background: transparent !important;
+    }
+
+    
+    /* Hide Mobile UI Elements */
+    .bottom-nav-wrap,
+    .hero-header {
+        display: none !important;
+    }
+
+    /* Redefine App Shell */
+    .app-shell {
+        max-width: 100%;
+        margin: 0;
+        margin-left: 260px; /* Width of sidebar */
+        padding: 24px 32px;
+        min-height: 100vh;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    /* DESKTOP SIDEBAR */
+    .desktop-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 260px;
+        height: 100vh;
+        background: #ffffff;
+        border-right: 1px solid #e2e8f0;
+        display: flex !important;
+        flex-direction: column;
+        padding: 24px 20px;
+        z-index: 1000;
+    }
+
+    .desktop-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 40px;
+        padding-left: 12px;
+    }
+    .desktop-logo i {
+        color: #3b82f6;
+        font-size: 1.5rem;
+    }
+
+    .desktop-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+    }
+
+    .desktop-nav a {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 16px;
+        text-decoration: none;
+        color: #64748b;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .desktop-nav a:hover,
+    .desktop-nav a.active {
+        background: #eff6ff;
+        color: #3b82f6;
+    }
+    
+    .desktop-nav a i {
+        font-size: 1.2rem;
+    }
+
+    .desktop-profile {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 12px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .desktop-profile img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .desktop-profile-info {
+        display: flex;
+        flex-direction: column;
+    }
+    .desktop-profile-info strong {
+        font-size: 0.9rem;
+        color: #1e293b;
+    }
+    .desktop-profile-info span {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    /* DESKTOP TOPBAR */
+    .desktop-topbar {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+    }
+
+    .desktop-topbar h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .desktop-topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .topbar-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        display: grid;
+        place-items: center;
+        color: #64748b;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    .topbar-btn:hover {
+        background: #f8fafc;
+        color: #1e293b;
+    }
+
+    /* DESKTOP GRID */
+    .desktop-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+    
+    /* Hide old elements inside app-shell */
+    .summary-card, .dual-card-grid, .quick-grid, .section-label, .att-track {
+        display: none !important;
+    }
+
+    /* NEW DESKTOP WIDGETS */
+    .dk-widget {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        height: 100%;
+    }
+    .dk-widget.welcome-widget {
+        background: #ffffff;
+        border: 1px solid #f1f5f9;
+    }
+    
+    .dk-widget-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    
+    .dk-widget-title a {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #3b82f6;
+        text-decoration: none;
+    }
+    
+    /* Welcome Text */
+    .welcome-text h2 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 4px;
+        line-height: 1.2;
+    }
+    .welcome-text p {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin: 0;
+    }
+    
+    /* Welcome Buttons */
+    .welcome-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: auto;
+    }
+    
+    .btn-dk {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        border-radius: 12px;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        transition: transform 0.2s;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+    }
+    .btn-dk:hover {
+        transform: translateY(-2px);
+    }
+    .btn-dk.blue {
+        background: #3b82f6;
+        box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+    }
+    .btn-dk.orange {
+        background: #f59e0b;
+        box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+    }
+    .btn-dk i {
+        font-size: 1.2rem;
+        background: rgba(255,255,255,0.2);
+        width: 32px; height: 32px;
+        border-radius: 8px;
+        display: grid; place-items: center;
+    }
+    .btn-dk span small {
+        display: block; font-size: 0.7rem; font-weight: 400; opacity: 0.8; margin-top: 2px;
+    }
+
+    /* Schedule List */
+    .dk-schedule-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .dk-schedule-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        border-radius: 16px;
+        text-decoration: none;
+    }
+    .dk-schedule-card .icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.8);
+        display: grid;
+        place-items: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+    .dk-schedule-card.blue { background: #eff6ff; color: #1d4ed8; }
+    .dk-schedule-card.blue .icon-box { color: #3b82f6; }
+    
+    .dk-schedule-card.green { background: #f0fdf4; color: #15803d; }
+    .dk-schedule-card.green .icon-box { color: #22c55e; }
+    
+    .dk-schedule-card.orange { background: #fffbeb; color: #b45309; }
+    .dk-schedule-card.orange .icon-box { color: #f59e0b; }
+    
+    .dk-schedule-card-info { flex: 1; }
+    .dk-schedule-card-info strong { display: block; font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .dk-schedule-card-info span { font-size: 0.8rem; opacity: 0.8; }
+    
+    .dk-schedule-card .action-icon {
+        width: 24px; height: 24px; border-radius: 50%;
+        background: #fff; display: grid; place-items: center; font-size: 0.8rem;
+    }
+
+    /* Activity List */
+    .dk-activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .dk-activity-item {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+    }
+    .dk-activity-avatar {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: #e2e8f0; display: grid; place-items: center; font-size: 1rem; color: #fff; flex-shrink: 0;
+    }
+    .dk-activity-avatar.blue { background: #3b82f6; }
+    .dk-activity-avatar.purple { background: #8b5cf6; }
+    .dk-activity-avatar.red { background: #ef4444; }
+    
+    .dk-activity-info p { margin: 0; font-size: 0.85rem; color: #334155; line-height: 1.4; }
+    .dk-activity-info span { font-size: 0.7rem; color: #94a3b8; }
+    
+    /* Grading List */
+    .dk-grading-list {
+        display: flex; flex-direction: column; gap: 12px;
+    }
+    .dk-grading-card {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 12px 16px; border: 1px solid #f1f5f9; border-radius: 12px;
+    }
+    .dk-grading-info { display: flex; align-items: center; gap: 12px; }
+    .dk-grading-icon {
+        width: 36px; height: 36px; border-radius: 8px; background: #eff6ff; color: #3b82f6;
+        display: grid; place-items: center; font-size: 1.1rem;
+    }
+    .dk-grading-info strong { display: block; font-size: 0.85rem; color: #1e293b; }
+    .dk-grading-info span { font-size: 0.75rem; color: #64748b; }
+    .dk-badge-red { background: #ef4444; color: #fff; font-size: 0.75rem; font-weight: 700; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; }
+    
+    /* Announcement Card */
+    .dk-announcement-card {
+        background: #eff6ff; border-radius: 12px; padding: 16px;
+        display: flex; gap: 12px; align-items: flex-start;
+    }
+    .dk-announcement-icon {
+        width: 40px; height: 40px; border-radius: 10px; background: #3b82f6; color: #fff;
+        display: grid; place-items: center; font-size: 1.2rem; flex-shrink: 0;
+    }
+    .dk-announcement-info strong { display: block; font-size: 0.9rem; color: #1d4ed8; margin-bottom: 4px; }
+    .dk-announcement-info p { margin: 0; font-size: 0.8rem; color: #475569; }
+
+    /* Ringkasan Kelas Chart */
+    .dk-chart-container {
+        display: flex;
+        gap: 16px;
+        align-items: flex-end;
+        height: 120px;
+        margin-top: 16px;
+    }
+    .dk-chart-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+    }
+    .dk-bar {
+        width: 100%;
+        background: #3b82f6;
+        border-radius: 4px 4px 0 0;
+        transition: height 0.5s ease;
+    }
+    .dk-bar.orange { background: #f59e0b; }
+    .dk-chart-label { font-size: 0.7rem; color: #64748b; font-weight: 600; }
+    .dk-chart-stats { display: flex; justify-content: space-between; margin-top: -10px; }
+    .dk-chart-stats > div { flex: 1; }
+    .dk-chart-stats h4 { margin: 0; font-size: 0.75rem; color: #64748b; font-weight: 500; }
+    .dk-chart-stats h2 { margin: 0; font-size: 1.8rem; color: #1e293b; font-weight: 800; line-height: 1; margin-top: 4px; }
+}
+
+/* Hide desktop elements on mobile */
+@media (max-width: 767px) {
+    .desktop-sidebar, .desktop-topbar, .desktop-grid {
+        display: none !important;
+    }
+}
+
+</style>
 <style>
 .app-shell {
   background: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.1) 0%, transparent 40%), radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 40%), radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.08) 0%, transparent 40%), radial-gradient(circle at 0% 100%, rgba(236, 72, 153, 0.06) 0%, transparent 40%), linear-gradient(135deg, #F8FAFC 0%, #EEF2F6 100%);
