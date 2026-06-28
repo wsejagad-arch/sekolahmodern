@@ -842,7 +842,7 @@ if ($hasClass && isset($_GET['cetak_pdf']) && (string) $_GET['cetak_pdf'] === '1
 
                                     <?php if (!empty($izin['foto_selfie'])): ?>
                                     <div class="mb-3">
-                                        <img src="/jurnal/uploads/izin/<?= htmlspecialchars($izin['foto_selfie']) ?>" class="img-fluid rounded" alt="Bukti Foto" style="max-height:150px; object-fit:cover;">
+                                        <img src="../../uploads/izin/<?= htmlspecialchars($izin['foto_selfie']) ?>" class="img-fluid rounded" alt="Bukti Foto" style="max-height:150px; object-fit:cover;">
                                     </div>
                                     <?php endif; ?>
                                     
