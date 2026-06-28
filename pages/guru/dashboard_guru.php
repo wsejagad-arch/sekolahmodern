@@ -543,6 +543,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
 ?>
 <link rel='stylesheet' href='pages/guru/css/guru-2026-scoped.css?v=1782641374'>
+<link rel='stylesheet' href='pages/guru/css/guru-desktop.css?v=<?php echo time(); ?>'>
 <style>
 .app-shell {
   background: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.1) 0%, transparent 40%), radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 40%), radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.08) 0%, transparent 40%), radial-gradient(circle at 0% 100%, rgba(236, 72, 153, 0.06) 0%, transparent 40%), linear-gradient(135deg, #F8FAFC 0%, #EEF2F6 100%);

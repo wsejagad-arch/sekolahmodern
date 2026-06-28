@@ -1,8 +1,27 @@
 /* DESKTOP MODE FOR DASHBOARD GURU */
-@media (min-width: 992px) {
+@media (min-width: 768px) {
     body {
         background: #fdfbf7; /* Light warm background from mockup */
     }
+
+    /* Hide the original SB Admin 2 sidebar and topbar */
+    #accordionSidebar, 
+    #content > .topbar {
+        display: none !important;
+    }
+    
+    /* Remove padding/margin from original wrappers */
+    #content-wrapper {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
+    .container-fluid {
+        padding: 0 !important;
+    }
+    #wrapper {
+        background: transparent !important;
+    }
+
     
     /* Hide Mobile UI Elements */
     .bottom-nav-wrap,
