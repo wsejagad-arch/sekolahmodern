@@ -62,3 +62,7 @@ jobs:
             composer.lock
             *.ps1
             *.bat
+            home5/**
+            backup/**
+            .continue/**
+            Microsoft/**
