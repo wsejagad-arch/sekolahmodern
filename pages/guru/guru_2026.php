@@ -879,6 +879,414 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             }
         }
     </style>
+<style>
+/* DESKTOP MODE FOR DASHBOARD GURU */
+@media (min-width: 768px) {
+    body {
+        background: #fdfbf7; /* Light warm background from mockup */
+    }
+
+    /* Hide the original SB Admin 2 sidebar and topbar */
+    #accordionSidebar, 
+    #content > .topbar {
+        display: none !important;
+    }
+    
+    /* Remove padding/margin from original wrappers */
+    #content-wrapper {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
+    .container-fluid {
+        padding: 0 !important;
+    }
+    #wrapper {
+        background: transparent !important;
+    }
+
+    
+    /* Hide Mobile UI Elements */
+    .bottom-nav-wrap,
+    .hero-header {
+        display: none !important;
+    }
+
+    /* Redefine App Shell */
+    .app-shell {
+        max-width: 100%;
+        margin: 0;
+        margin-left: 260px; /* Width of sidebar */
+        padding: 24px 32px;
+        min-height: 100vh;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    /* DESKTOP SIDEBAR */
+    .desktop-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 260px;
+        height: 100vh;
+        background: #ffffff;
+        border-right: 1px solid #e2e8f0;
+        display: flex !important;
+        flex-direction: column;
+        padding: 24px 20px;
+        z-index: 1000;
+    }
+
+    .desktop-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 40px;
+        padding-left: 12px;
+    }
+    .desktop-logo i {
+        color: #3b82f6;
+        font-size: 1.5rem;
+    }
+
+    .desktop-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+    }
+
+    .desktop-nav a {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 16px;
+        text-decoration: none;
+        color: #64748b;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .desktop-nav a:hover,
+    .desktop-nav a.active {
+        background: #eff6ff;
+        color: #3b82f6;
+    }
+    
+    .desktop-nav a i {
+        font-size: 1.2rem;
+    }
+
+    .desktop-profile {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 12px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .desktop-profile img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .desktop-profile-info {
+        display: flex;
+        flex-direction: column;
+    }
+    .desktop-profile-info strong {
+        font-size: 0.9rem;
+        color: #1e293b;
+    }
+    .desktop-profile-info span {
+        font-size: 0.75rem;
+        color: #64748b;
+    }
+
+    /* DESKTOP TOPBAR */
+    .desktop-topbar {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+    }
+
+    .desktop-topbar h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .desktop-topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .topbar-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        display: grid;
+        place-items: center;
+        color: #64748b;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    .topbar-btn:hover {
+        background: #f8fafc;
+        color: #1e293b;
+    }
+
+    /* DESKTOP GRID */
+    .desktop-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+    
+    /* Hide old elements inside app-shell */
+    .summary-card, .dual-card-grid, .quick-grid, .section-label, .att-track {
+        display: none !important;
+    }
+
+    /* NEW DESKTOP WIDGETS */
+    .dk-widget {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        height: 100%;
+    }
+    .dk-widget.welcome-widget {
+        background: #ffffff;
+        border: 1px solid #f1f5f9;
+    }
+    
+    .dk-widget-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    
+    .dk-widget-title a {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #3b82f6;
+        text-decoration: none;
+    }
+    
+    /* Welcome Text */
+    .welcome-text h2 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 4px;
+        line-height: 1.2;
+    }
+    .welcome-text p {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin: 0;
+    }
+    
+    /* Welcome Buttons */
+    .welcome-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: auto;
+    }
+    
+    .btn-dk {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        border-radius: 12px;
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        transition: transform 0.2s;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+    }
+    .btn-dk:hover {
+        transform: translateY(-2px);
+    }
+    .btn-dk.blue {
+        background: #3b82f6;
+        box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+    }
+    .btn-dk.orange {
+        background: #f59e0b;
+        box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+    }
+    .btn-dk i {
+        font-size: 1.2rem;
+        background: rgba(255,255,255,0.2);
+        width: 32px; height: 32px;
+        border-radius: 8px;
+        display: grid; place-items: center;
+    }
+    .btn-dk span small {
+        display: block; font-size: 0.7rem; font-weight: 400; opacity: 0.8; margin-top: 2px;
+    }
+
+    /* Schedule List */
+    .dk-schedule-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .dk-schedule-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        border-radius: 16px;
+        text-decoration: none;
+    }
+    .dk-schedule-card .icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.8);
+        display: grid;
+        place-items: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+    .dk-schedule-card.blue { background: #eff6ff; color: #1d4ed8; }
+    .dk-schedule-card.blue .icon-box { color: #3b82f6; }
+    
+    .dk-schedule-card.green { background: #f0fdf4; color: #15803d; }
+    .dk-schedule-card.green .icon-box { color: #22c55e; }
+    
+    .dk-schedule-card.orange { background: #fffbeb; color: #b45309; }
+    .dk-schedule-card.orange .icon-box { color: #f59e0b; }
+    
+    .dk-schedule-card-info { flex: 1; }
+    .dk-schedule-card-info strong { display: block; font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .dk-schedule-card-info span { font-size: 0.8rem; opacity: 0.8; }
+    
+    .dk-schedule-card .action-icon {
+        width: 24px; height: 24px; border-radius: 50%;
+        background: #fff; display: grid; place-items: center; font-size: 0.8rem;
+    }
+
+    /* Activity List */
+    .dk-activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .dk-activity-item {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+    }
+    .dk-activity-avatar {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: #e2e8f0; display: grid; place-items: center; font-size: 1rem; color: #fff; flex-shrink: 0;
+    }
+    .dk-activity-avatar.blue { background: #3b82f6; }
+    .dk-activity-avatar.purple { background: #8b5cf6; }
+    .dk-activity-avatar.red { background: #ef4444; }
+    
+    .dk-activity-info p { margin: 0; font-size: 0.85rem; color: #334155; line-height: 1.4; }
+    .dk-activity-info span { font-size: 0.7rem; color: #94a3b8; }
+    
+    /* Grading List */
+    .dk-grading-list {
+        display: flex; flex-direction: column; gap: 12px;
+    }
+    .dk-grading-card {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 12px 16px; border: 1px solid #f1f5f9; border-radius: 12px;
+    }
+    .dk-grading-info { display: flex; align-items: center; gap: 12px; }
+    .dk-grading-icon {
+        width: 36px; height: 36px; border-radius: 8px; background: #eff6ff; color: #3b82f6;
+        display: grid; place-items: center; font-size: 1.1rem;
+    }
+    .dk-grading-info strong { display: block; font-size: 0.85rem; color: #1e293b; }
+    .dk-grading-info span { font-size: 0.75rem; color: #64748b; }
+    .dk-badge-red { background: #ef4444; color: #fff; font-size: 0.75rem; font-weight: 700; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; }
+    
+    /* Announcement Card */
+    .dk-announcement-card {
+        background: #eff6ff; border-radius: 12px; padding: 16px;
+        display: flex; gap: 12px; align-items: flex-start;
+    }
+    .dk-announcement-icon {
+        width: 40px; height: 40px; border-radius: 10px; background: #3b82f6; color: #fff;
+        display: grid; place-items: center; font-size: 1.2rem; flex-shrink: 0;
+    }
+    .dk-announcement-info strong { display: block; font-size: 0.9rem; color: #1d4ed8; margin-bottom: 4px; }
+    .dk-announcement-info p { margin: 0; font-size: 0.8rem; color: #475569; }
+
+    /* Ringkasan Kelas Chart */
+    .dk-chart-container {
+        display: flex;
+        gap: 16px;
+        align-items: flex-end;
+        height: 120px;
+        margin-top: 16px;
+    }
+    .dk-chart-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+    }
+    .dk-bar {
+        width: 100%;
+        background: #3b82f6;
+        border-radius: 4px 4px 0 0;
+        transition: height 0.5s ease;
+    }
+    .dk-bar.orange { background: #f59e0b; }
+    .dk-chart-label { font-size: 0.7rem; color: #64748b; font-weight: 600; }
+    .dk-chart-stats { display: flex; justify-content: space-between; margin-top: -10px; }
+    .dk-chart-stats > div { flex: 1; }
+    .dk-chart-stats h4 { margin: 0; font-size: 0.75rem; color: #64748b; font-weight: 500; }
+    .dk-chart-stats h2 { margin: 0; font-size: 1.8rem; color: #1e293b; font-weight: 800; line-height: 1; margin-top: 4px; }
+}
+
+/* Hide desktop elements on mobile */
+@media (max-width: 767px) {
+    .desktop-sidebar, .desktop-topbar, .desktop-grid {
+        display: none !important;
+    }
+}
+
+</style>
 </head>
 <body>
 
@@ -904,9 +1312,266 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     <div class="dots"></div>
   </div>
 
+
+<!-- DESKTOP SIDEBAR -->
+<div class="desktop-sidebar">
+    <div class="desktop-logo">
+        <i class="bi bi-layers-fill"></i> GuruKita
+    </div>
+    <div class="desktop-nav">
+        <a href="?page=beranda" class="active"><i class="bi bi-house-door"></i> Beranda</a>
+        <a href="?page=kelas-saya"><i class="bi bi-calendar3"></i> Kelas Saya</a>
+        <a href="?page=siswa"><i class="bi bi-people"></i> Siswa</a>
+        <a href="inputnilai"><i class="bi bi-journal-check"></i> Nilai & Tugas</a>
+        <a href="?page=materi"><i class="bi bi-book"></i> Materi Pembelajaran</a>
+        <a href="?page=pesan"><i class="bi bi-chat-dots"></i> Pesan</a>
+        <a href="?page=pengaturan"><i class="bi bi-gear"></i> Pengaturan</a>
+    </div>
+    <div class="desktop-profile">
+        <?php $fotoAvatar = !empty($dataGuru["foto"]) ? "../../foto/" . $dataGuru["foto"] : "../../img/avatar.png"; ?>
+        <img src="<?= htmlspecialchars($fotoAvatar) ?>" alt="Profile">
+        <div class="desktop-profile-info">
+            <strong><?= htmlspecialchars($dataGuru["nama_guru"]) ?></strong>
+            <span><?= htmlspecialchars($lembaga["nama_instansi"]) ?></span>
+        </div>
+    </div>
+</div>
+
 <div class="app-shell">
     <!-- HEADER -->
-    <header class="hero-header">
+    
+<!-- DESKTOP TOPBAR -->
+<div class="desktop-topbar">
+    <h1>Dashboard</h1>
+    <div class="desktop-topbar-actions">
+        <a href="?page=tambah-tugas" class="topbar-btn"><i class="bi bi-calendar-plus"></i></a>
+        
+        <div class="notif-bell" onclick="toggleNotif(event)" style="background: #fff; color: #64748b; border: 1px solid #e2e8f0; width: 40px; height: 40px;">
+            <i class="bi bi-bell"></i>
+            <?php if($totalNotifCount > 0): ?>
+                <span class="notif-badge"><?= $totalNotifCount ?></span>
+            <?php endif; ?>
+            
+            <div class="notif-dropdown" id="notifDropdownDesktop" onclick="event.stopPropagation()">
+                <div class="notif-header">
+                    <span>Notifikasi Anda</span>
+                    <?php if($totalNotifCount > 0): ?>
+                        <span class="notif-badge-inline"><?= $totalNotifCount ?> Baru</span>
+                    <?php endif; ?>
+                </div>
+                <div class="notif-list">
+                    <?php if($totalNotifCount > 0): ?>
+                        <?php foreach($notifList as $n): ?>
+                            <a href="?page=notifikasi" class="notif-item <?= $n["is_read"] == 0 ? "unread" : "" ?>">
+                                <div class="notif-icon <?= $n["is_read"] == 0 ? "bg-primary text-white" : "bg-light text-secondary" ?>">
+                                    <i class="bi bi-info-circle"></i>
+                                </div>
+                                <div class="notif-content">
+                                    <div class="notif-title"><?= htmlspecialchars($n["judul"]) ?></div>
+                                    <div class="notif-time"><?= date("d M H:i", strtotime($n["created_at"])) ?></div>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div style="padding: 24px; text-align: center; color: #94a3b8; font-size: 0.85rem;">
+                            <i class="bi bi-bell-slash" style="font-size: 2rem; margin-bottom: 8px; display: block; opacity: 0.5;"></i>
+                            Belum ada notifikasi baru
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <a href="?page=notifikasi" class="notif-footer">
+                    Lihat Semua Notifikasi <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        
+        <img src="<?= htmlspecialchars($fotoAvatar) ?>" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+    </div>
+</div>
+
+<!-- DESKTOP GRID LAYOUT -->
+<div class="desktop-grid">
+    <!-- COLUMN 1 -->
+    <div style="display:flex; flex-direction:column; gap:24px;">
+        <!-- Welcome Widget -->
+        <div class="dk-widget welcome-widget">
+            <div class="welcome-text">
+                <h2>Selamat Pagi,<br><?= $dataGuru["nama_guru"] ?: "Ibu Sari" ?>!</h2>
+                <p><?= date("d F Y, H:i A") ?></p>
+            </div>
+            <div class="welcome-actions">
+                <a href="?page=tambah-tugas" class="btn-dk blue">
+                    <i class="bi bi-pencil-square"></i>
+                    <span>Buat Tugas Baru <small>Create New Assignment</small></span>
+                </a>
+                <a href="?page=jurnal" class="btn-dk orange">
+                    <i class="bi bi-check-circle"></i>
+                    <span>Mulai Presensi <small>Start Attendance</small></span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Perlu Dinilai -->
+        <div class="dk-widget">
+            <div class="dk-widget-title">
+                Perlu Dinilai
+                <a href="#">Sein all</a>
+            </div>
+            <div class="dk-grading-list">
+                <div class="dk-grading-card">
+                    <div class="dk-grading-info">
+                        <div class="dk-grading-icon"><i class="bi bi-file-earmark-text"></i></div>
+                        <div>
+                            <strong>Tugas Pecahan (5A)</strong>
+                            <span>Unread submissions</span>
+                        </div>
+                    </div>
+                    <div class="dk-badge-red">12</div>
+                </div>
+                <div class="dk-grading-card">
+                    <div class="dk-grading-info">
+                        <div class="dk-grading-icon"><i class="bi bi-file-earmark-text"></i></div>
+                        <div>
+                            <strong>Laporan Praktikum (4B)</strong>
+                            <span>Unread submissions</span>
+                        </div>
+                    </div>
+                    <div class="dk-badge-red">8</div>
+                </div>
+                <div class="dk-grading-card">
+                    <div class="dk-grading-info">
+                        <div class="dk-grading-icon"><i class="bi bi-file-earmark-text"></i></div>
+                        <div>
+                            <strong>Puisi (5A)</strong>
+                            <span>Unread submissions</span>
+                        </div>
+                    </div>
+                    <div class="dk-badge-red">15</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- COLUMN 2 -->
+    <div style="display:flex; flex-direction:column; gap:24px;">
+        <!-- Jadwal Hari Ini -->
+        <div class="dk-widget">
+            <div class="dk-widget-title">
+                Jadwal Hari Ini
+                <a href="#">Menui All</a>
+            </div>
+            <div class="dk-schedule-list">
+                <a href="#" class="dk-schedule-card blue">
+                    <div class="icon-box"><i class="bi bi-calculator"></i></div>
+                    <div class="dk-schedule-card-info">
+                        <strong>Matematika - Kelas 5A</strong>
+                        <span>08:00 - 09:30</span>
+                    </div>
+                    <div class="action-icon"><i class="bi bi-chevron-right"></i></div>
+                </a>
+                <a href="#" class="dk-schedule-card green">
+                    <div class="icon-box"><i class="bi bi-flower1"></i></div>
+                    <div class="dk-schedule-card-info">
+                        <strong>IPA - Kelas 4B</strong>
+                        <span>10:00 - 11:30</span>
+                    </div>
+                    <div class="action-icon"><i class="bi bi-gear-fill"></i></div>
+                </a>
+                <a href="#" class="dk-schedule-card orange">
+                    <div class="icon-box"><i class="bi bi-book"></i></div>
+                    <div class="dk-schedule-card-info">
+                        <strong>Bahasa Indonesia - Kelas 5A</strong>
+                        <span>13:00 - 14:30</span>
+                    </div>
+                    <div class="action-icon"><i class="bi bi-clock"></i></div>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Ringkasan Kelas -->
+        <div class="dk-widget">
+            <div class="dk-widget-title">
+                Ringkasan Kelas
+                <a href="#">Sein all</a>
+            </div>
+            <div style="display: flex; gap: 24px;">
+                <div style="flex:1;">
+                    <div class="dk-chart-label">Rata-rata Nilai</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color:#1e293b;">68.5 <span style="font-size:0.75rem; color:#64748b; font-weight:500;">per Klas</span></div>
+                    <div class="dk-chart-container">
+                        <svg viewBox="0 0 100 40" style="width:100%; height:40px; stroke:#3b82f6; stroke-width:2; fill:rgba(59,130,246,0.1);"><path d="M0,40 L0,30 Q20,10 40,30 T80,10 L100,5 L100,40 Z"></path></svg>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:4px; font-size:0.65rem; color:#94a3b8;">
+                        <span>5A</span><span>5B</span><span>5A</span><span>5A</span>
+                    </div>
+                </div>
+                <div style="flex:1;">
+                    <div class="dk-chart-label">Kehadiran Siswa</div>
+                    <div style="font-size: 1.5rem; font-weight: 800; color:#1e293b;">90%</div>
+                    <div class="dk-chart-container">
+                        <div class="dk-chart-col"><div class="dk-bar orange" style="height: 60%"></div></div>
+                        <div class="dk-chart-col"><div class="dk-bar" style="height: 40%"></div></div>
+                        <div class="dk-chart-col"><div class="dk-bar orange" style="height: 80%"></div></div>
+                        <div class="dk-chart-col"><div class="dk-bar" style="height: 50%"></div></div>
+                        <div class="dk-chart-col"><div class="dk-bar orange" style="height: 70%"></div></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:4px; font-size:0.65rem; color:#94a3b8; padding: 0 4px;">
+                        <span>5A</span><span>4B</span><span>5A</span><span>5A</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- COLUMN 3 -->
+    <div style="display:flex; flex-direction:column; gap:24px;">
+        <!-- Aktivitas Terbaru -->
+        <div class="dk-widget">
+            <div class="dk-widget-title">
+                Aktivitas Terbaru
+                <a href="#"><i class="bi bi-three-dots"></i></a>
+            </div>
+            <div class="dk-activity-list">
+                <div class="dk-activity-item">
+                    <img src="../../img/avatar.png" class="dk-activity-avatar" alt="Avatar">
+                    <div class="dk-activity-info">
+                        <p><strong>Budi Santoso</strong> mengumpulkan <strong>Tugas IPA</strong></p>
+                        <span>2 minutes ago</span>
+                    </div>
+                </div>
+                <div class="dk-activity-item">
+                    <img src="../../img/avatar.png" class="dk-activity-avatar" alt="Avatar">
+                    <div class="dk-activity-info">
+                        <p><strong>Siti Rahma</strong> mengirim pesan Siti Rahma.</p>
+                        <span>2 minutes ago</span>
+                    </div>
+                </div>
+                <div class="dk-activity-item">
+                    <div class="dk-activity-avatar purple"><i class="bi bi-chat-text"></i></div>
+                    <div class="dk-activity-info">
+                        <p><strong>Diskusi baru di Kelas 5A</strong><br>Diskusi baru nergumpulkan di Kelas 5A</p>
+                        <span>2 days ago</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pengumuman Sekolah -->
+        <div class="dk-widget">
+            <div class="dk-widget-title">Pengumuman Sekolah</div>
+            <div class="dk-announcement-card">
+                <div class="dk-announcement-icon"><i class="bi bi-megaphone-fill"></i></div>
+                <div class="dk-announcement-info">
+                    <strong>Pengumuman Sekolah</strong>
+                    <p>Pengumuman sekolah mengutrukan berbikam...</p>
+                    <div style="margin-top: 8px; text-align: center;"><i class="bi bi-chevron-down" style="color: #94a3b8;"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<header class="hero-header">
         <a href="profil-guru" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 15px; width: calc(100% - 70px);">
             <div class="profile-section" style="margin-bottom: 0;">
                 <div class="profile-photo">
@@ -2201,5 +2866,21 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         })();
     </script>
 <?php include __DIR__ . '/guru_common_footer.php'; ?>
+
+<script>
+function toggleNotif(event) {
+    event.stopPropagation();
+    var dropdown = document.getElementById("notifDropdownDesktop");
+    if(dropdown) {
+        dropdown.classList.toggle("show");
+    }
+}
+window.addEventListener("click", function(e) {
+    var dropdown = document.getElementById("notifDropdownDesktop");
+    if(dropdown && dropdown.classList.contains("show")) {
+        dropdown.classList.remove("show");
+    }
+});
+</script>
 </body>
 </html>
