@@ -1,10 +1,2 @@
-Options -Indexes
-
-<IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteRule ^guru/([a-zA-Z0-9_-]+)(?:\.php)?/?$ /jurnal/router.php?type=guru&page=$1 [L,QSA]
-RewriteRule ^siswa/([a-zA-Z0-9_-]+)(?:\.php)?/?$ /jurnal/router.php?type=siswa&page=$1 [L,QSA]
-RewriteRule ^admin/([a-zA-Z0-9_-]+)(?:\.php)?/?$ /jurnal/router.php?type=admin&page=$1 [L,QSA]
-RewriteRule ^([a-zA-Z0-9_-]+)(?:\.php)?/?$ /jurnal/router.php?type=public&page=$1 [L,QSA]
-</IfModule>
-
+# File ini dinonaktifkan karena aturan rute sudah ditangani oleh .htaccess di folder utama (root).
+# Menghapus aturan di sini untuk mencegah konflik path (/jurnal/ vs /) di server hosting.
