@@ -951,6 +951,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 $runningTarget = date('Y-m-d') . ' ' . $nextJadwal['jam_mulai'];
             }
         ?>
+        <?php if ($runningPanel !== null): ?>
             <div id="kbm-box" class="running-schedule-3d <?= $hasRunningSchedule ? 'is-live' : 'is-idle'; ?>" <?= $runningTarget !== '' ? 'data-target="' . htmlspecialchars($runningTarget, ENT_QUOTES, 'UTF-8') . '"' : ''; ?>>
                 <div class="running-live-orb">
                     <i class="bi <?= $hasRunningSchedule ? 'bi-broadcast-pin' : 'bi-calendar2-week'; ?>"></i>
@@ -961,16 +962,12 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         <?= htmlspecialchars($runningKickerLabel, ENT_QUOTES, 'UTF-8'); ?>
                     </div>
                     <h3 class="running-title">
-                        <?= $runningPanel !== null ? htmlspecialchars($runningPanel['nama_mapel']) : 'Belum ada KBM aktif hari ini'; ?>
+                        <?= htmlspecialchars($runningPanel['nama_mapel']); ?>
                     </h3>
                     <div class="running-meta">
-                        <?php if ($runningPanel !== null): ?>
-                            <span><i class="bi bi-door-open-fill"></i> Kelas <?= htmlspecialchars($runningPanel['kelas']); ?></span>
-                            <span style="opacity:.65;">|</span>
-                            <span><i class="bi bi-clock-fill"></i> <?= substr($runningPanel['jam_mulai'], 0, 5); ?> - <?= substr($runningPanel['jam_selesai'], 0, 5); ?></span>
-                        <?php else: ?>
-                            <span><i class="bi bi-check-circle-fill"></i> Semua jadwal selesai atau belum tersedia.</span>
-                        <?php endif; ?>
+                        <span><i class="bi bi-door-open-fill"></i> Kelas <?= htmlspecialchars($runningPanel['kelas']); ?></span>
+                        <span style="opacity:.65;">|</span>
+                        <span><i class="bi bi-clock-fill"></i> <?= substr($runningPanel['jam_mulai'], 0, 5); ?> - <?= substr($runningPanel['jam_selesai'], 0, 5); ?></span>
                     </div>
                 </div>
                 <div class="running-time-pill">
@@ -978,11 +975,10 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         <i class="bi <?= $runningStateIcon; ?>"></i>
                         <?= htmlspecialchars($runningCountdownLabel, ENT_QUOTES, 'UTF-8'); ?>
                     </span>
-                    <strong <?= $runningPanel !== null ? 'id="kbm-timer"' : ''; ?>>
-                        <?= $runningPanel !== null ? 'Calculating...' : 'Menunggu'; ?>
-                    </strong>
+                    <strong id="kbm-timer">Calculating...</strong>
                 </div>
             </div>
+        <?php endif; ?>
 
         <!-- Bottom Section: Metrics Grid -->
         <div class="summary-grid">
