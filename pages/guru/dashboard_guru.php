@@ -261,12 +261,76 @@ if ($isTimAduan) {
     $aduanGuruCount = (int)($rowAduanCount['total'] ?? 0);
 }
 
-// Hitung total notif - hide item-item kosong tidak dihitung
-$totalNotifCount = $problematicCount
-    + ($totalJadwalHari > 0 && $unfilledJurnalCount > 0 ? $unfilledJurnalCount : 0)
-    + ($nextJadwal !== null ? 1 : 0)
-    + $announcementCount
-    + $aduanGuruCount;
+// Hitung total notif - dropdown array
+$guru_all_notifications = [];
+
+// 1. Aduan Siswa
+if ($isTimAduan && $aduanGuruCount > 0) {
+    $guru_all_notifications[] = [
+        'type' => 'aduan',
+        'icon' => 'bi bi-shield-fill-exclamation',
+        'color' => '#dc2626',
+        'title' => 'Aduan Siswa Baru',
+        'text' => 'Ada ' . $aduanGuruCount . ' aduan siswa yang perlu ditindaklanjuti.',
+        'link' => '../../home.php?page=aduan-siswa'
+    ];
+}
+
+// 2. Siswa Butuh Pendampingan
+if (!empty($pendampinganKelasAll) && $problematicCount > 0) {
+    $guru_all_notifications[] = [
+        'type' => 'pendampingan',
+        'icon' => 'bi bi-heart-pulse-fill',
+        'color' => '#ef4444',
+        'title' => 'Pendampingan Siswa',
+        'text' => 'Ada ' . $problematicCount . ' siswa yang butuh perhatian.',
+        'link' => 'javascript:void(0)',
+        'action_onclick' => "openDashboardModal('#notifPanelModal')"
+    ];
+}
+
+// 3. Jurnal Belum Terisi
+if ($totalJadwalHari > 0 && $unfilledJurnalCount > 0) {
+    foreach ($unfilledJadwal as $j) {
+        $guru_all_notifications[] = [
+            'type' => 'jurnal',
+            'icon' => 'bi bi-journal-x',
+            'color' => '#f59e0b',
+            'title' => 'Jurnal Kosong: ' . htmlspecialchars($j['nama_mapel']),
+            'text' => 'Kelas ' . htmlspecialchars($j['kelas']) . ' belum diisi.',
+            'link' => 'javascript:void(0)',
+            'action_onclick' => 'openInputJurnal('.$j['id_mapel'].')'
+        ];
+    }
+}
+
+// 4. Jadwal Berikutnya
+if ($nextJadwal !== null) {
+    $guru_all_notifications[] = [
+        'type' => 'jadwal',
+        'icon' => 'bi bi-calendar-event',
+        'color' => '#3b82f6',
+        'title' => 'Jadwal Berikutnya',
+        'text' => htmlspecialchars($nextJadwal['nama_mapel']) . ' di Kelas ' . htmlspecialchars($nextJadwal['kelas']),
+        'link' => 'javascript:void(0)'
+    ];
+}
+
+// 5. Pengumuman
+if ($announcementCount > 0) {
+    foreach ($announcements as $ann) {
+        $guru_all_notifications[] = [
+            'type' => 'pengumuman',
+            'icon' => 'bi bi-megaphone-fill',
+            'color' => '#8b5cf6',
+            'title' => 'Pengumuman Baru',
+            'text' => htmlspecialchars($ann['judul']),
+            'link' => '?page=lihat-pengumuman'
+        ];
+    }
+}
+
+$totalNotifCount = count($guru_all_notifications);
 // Tugas Terbaru
 $tugasTerbaru = [];
 $qTugas = mysqli_query($conn, "SELECT * FROM tbl_tugas WHERE no_induk_guru='$nipEsc' ORDER BY id DESC LIMIT 3");
@@ -505,12 +569,41 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             </div>
         </a>
         <div style="display: flex; gap: 8px; align-items: center;">
-            <button class="notif-btn" id="btn-open-notif-drawer">
-                <i class="bi bi-bell"></i>
-                <?php if ($totalNotifCount > 0): ?>
+            <div class="notif-bell" onclick="toggleNotif(event)">
+                <i class="bi bi-bell-fill"></i>
+                <?php if($totalNotifCount > 0): ?>
                     <span class="notif-badge"><?= $totalNotifCount ?></span>
                 <?php endif; ?>
-            </button>
+                
+                <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
+                    <div class="notif-header">
+                        <span>Notifikasi Anda</span>
+                        <?php if($totalNotifCount > 0): ?>
+                            <span class="notif-badge-inline"><?= $totalNotifCount ?> Baru</span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="notif-list">
+                        <?php if($totalNotifCount > 0): ?>
+                            <?php foreach($guru_all_notifications as $n): ?>
+                                <a href="<?= htmlspecialchars($n['link']) ?>" class="notif-item" <?= isset($n['action_onclick']) ? 'onclick="'.htmlspecialchars($n['action_onclick']).'"' : '' ?>>
+                                    <div class="notif-icon-wrap" style="color: <?= htmlspecialchars($n['color']) ?>; background: <?= htmlspecialchars($n['color']) ?>15;">
+                                        <i class="<?= htmlspecialchars($n['icon']) ?>"></i>
+                                    </div>
+                                    <div class="notif-content">
+                                        <div class="notif-title"><?= htmlspecialchars($n['title']) ?></div>
+                                        <div class="notif-desc"><?= htmlspecialchars($n['text']) ?></div>
+                                    </div>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="notif-empty">
+                                <i class="bi bi-bell-slash"></i>
+                                Tidak ada notifikasi baru
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
             <a href="../../logout.php" onclick="return confirm('Apakah Anda yakin ingin keluar?');" class="notif-btn" style="text-decoration: none; color: var(--red); border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.05);" title="Keluar">
                 <i class="bi bi-box-arrow-right"></i>
             </a>
@@ -668,6 +761,69 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         0%,100% { box-shadow:0 8px 24px rgba(220,38,38,.3); }
         50% { box-shadow:0 8px 36px rgba(220,38,38,.6); }
     }
+            .notif-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            width: 320px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            border: 1px solid rgba(0,0,0,0.05);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            animation: notifSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: left;
+        }
+        .notif-dropdown.show { display: flex; }
+        @keyframes notifSlideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .notif-header {
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #1e293b;
+        }
+        .notif-list {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        .notif-item {
+            display: flex;
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+            text-decoration: none;
+            color: #1e293b;
+            transition: background 0.2s;
+        }
+        .notif-item:hover { background: #f8fafc; }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-icon-wrap {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+        }
+        .notif-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .notif-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 3px; }
+        .notif-desc { font-size: 0.75rem; color: #64748b; line-height: 1.3; }
+        .notif-empty { padding: 30px 15px; text-align: center; color: #64748b; font-size: 0.85rem; }
+        .notif-empty i { font-size: 2rem; color: #cbd5e1; margin-bottom: 10px; display: block; }
+        
+        .notif-bell { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: rgba(255,255,255,0.2); border-radius: 50%; color: #fff; transition: all 0.3s; }
+        .notif-badge-inline { background: #ef4444; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 10px; }
     </style>
     <?php endif; ?>
 
@@ -1543,10 +1699,21 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 $(this).addClass('active');
             });
 
-            // Notifikasi Toggle
-            $('#btn-open-notif-drawer').on('click', function() {
-                openDashboardModal('#notifPanelModal');
+                        // Notifikasi Toggle
+            window.toggleNotif = function(e) {
+                e.stopPropagation();
+                $('#notifDropdown').toggleClass('show');
+            };
+            $(document).on('click', function(e) {
+                var drop = $('#notifDropdown');
+                if (drop.length && drop.hasClass('show')) {
+                    drop.removeClass('show');
+                }
             });
+
+            // $('#btn-open-notif-drawer').on('click', function() {
+            //    openDashboardModal('#notifPanelModal');
+            // });
 
             $('.btn-open-guru-wali').on('click', function(e) {
                 e.preventDefault();
