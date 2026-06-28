@@ -1,0 +1,10 @@
+# Minimal untuk cPanel/LiteSpeed — hindari 403
+DirectoryIndex index.php index.html splash.php login.php
+Options -Indexes +FollowSymLinks
+
+# Handler PHP (sesuaikan versi di cPanel > MultiPHP Manager jika perlu)
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php81 .php .php8 .phtml
+  AddHandler application/x-httpd-ea-php80 .php .phtml
+  AddHandler application/x-httpd-ea-php74 .php .php7 .phtml
+</IfModule>

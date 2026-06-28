@@ -1,0 +1,46 @@
+# SIMANIS - subfolder (mis. public_html/jurnal/)
+DirectoryIndex index.php splash.php login.php
+Options -Indexes +FollowSymLinks
+# -MultiViews dimatikan: sering memicu 403 di shared hosting
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /jurnal/
+
+RewriteRule ^masuk$ login.php [L,QSA]
+RewriteRule ^auth$ login_action.php [L,QSA]
+RewriteRule ^keluar$ logout.php [L,QSA]
+RewriteRule ^lupa-password$ forgot-password.php [L,QSA]
+RewriteRule ^home/?$ home.php [L,QSA]
+RewriteRule ^home/([a-zA-Z0-9_-]+)$ home.php?page=$1 [L,QSA]
+RewriteRule ^detail-profil-siswa/([0-9a-zA-Z_-]+)$ detail-profil-siswa.php?no_induk=$1 [L,QSA]
+RewriteRule ^detail-guru/([0-9a-zA-Z_-]+)$ detail-guru.php?id=$1 [L,QSA]
+RewriteRule ^hapus-siswa/([0-9a-zA-Z_-]+)$ delete-siswa.php?no_induk=$1 [L,QSA]
+RewriteRule ^admin$ home.php?page=admin [L,QSA]
+RewriteRule ^guru$ home.php?page=guru [L,QSA]
+RewriteRule ^siswa$ home.php?page=siswa [L,QSA]
+RewriteRule ^kelas$ home.php?page=kelas [L,QSA]
+RewriteRule ^mapel$ home.php?page=mapel [L,QSA]
+RewriteRule ^jadwal$ home.php?page=jadwal [L,QSA]
+RewriteRule ^kehadiran$ home.php?page=kehadiran [L,QSA]
+RewriteRule ^jurnal$ home.php?page=jurnal [L,QSA]
+RewriteRule ^pengumuman$ home.php?page=pengumuman [L,QSA]
+
+RewriteRule ^pages/guru/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=guru&page=$1 [L,QSA]
+RewriteRule ^pages/siswa/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=siswa&page=$1 [L,QSA]
+RewriteRule ^pages/admin/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=admin&page=$1 [L,QSA]
+RewriteRule ^pages/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=public&page=$1 [L,QSA]
+</IfModule>
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)^(config\.php|config\.local\.php|config\.hosting\.php|koneksi\.php|koneksi_local\.php|koneksi_hosting\.php|bootstrap\.php|auth_helper\.php|functions\.php|composer\.json|composer\.lock|\.env|\.git|\.htpasswd)$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    <FilesMatch "(?i)^(config\.php|config\.local\.php|config\.hosting\.php|koneksi\.php|koneksi_local\.php|koneksi_hosting\.php|bootstrap\.php|auth_helper\.php|functions\.php|composer\.json|composer\.lock|\.env|\.git|\.htpasswd)$">
+        Order allow,deny
+        Deny from all
+    </FilesMatch>
+</IfModule>

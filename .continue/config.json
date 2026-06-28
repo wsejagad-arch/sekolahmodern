@@ -1,0 +1,24 @@
+name: Jurnal Continue Agent
+version: 1.0.0
+schema: v1
+apiBase: http://localhost:11434
+models:
+  - name: Llama 3.1 Chat
+    provider: ollama
+    model: llama3.1:latest
+    roles:
+      - chat
+      - edit
+      - apply
+      - autocomplete
+    capabilities:
+      - tool_use
+    defaultCompletionOptions:
+      temperature: 0.2
+      maxTokens: 1000
+      contextLength: 131072
+context:
+  - provider: file
+  - provider: code
+rules:
+  - Always prioritize local repository context and existing PHP code.

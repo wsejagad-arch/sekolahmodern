@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(build-hosting-simanis)"
+    ]
+  },
+  "$version": 4
+}

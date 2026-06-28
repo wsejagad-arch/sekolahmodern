@@ -1,0 +1,13 @@
+node_modules
+koneksi.php
+.vscode/sftp.json
+config.hosting.php
+config.local.php
+koneksi_local.php
+release/
+*.zip
+*.bak
+*.log
+deploy/
+deploy_prod/
+.user.ini

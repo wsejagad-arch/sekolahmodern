@@ -1,0 +1,24 @@
+FTP / SFTP Upload Instructions
+
+Options provided:
+1) `sftp.json` - template for VS Code "SFTP" extension (or similar). Fill in host/username/password and `remotePath`. Save as .vscode/sftp.json in project or open with extension.
+
+2) `ftp_upload.php` - CLI PHP uploader using PHP's ftp_* functions.
+   Usage:
+     php ftp_upload.php host username password /remote/path/ local_file
+   Example:
+     php ftp_upload.php ftp.example.com myuser mypass /public_html/jurnal/ C:\xampp\htdocs\jurnal\patch_date-to-tanggal.zip
+
+3) `ftp_upload.ps1` - PowerShell uploader.
+   Usage:
+     .\ftp_upload.ps1 -Host "ftp.example.com" -Username "user" -Password "pass" -LocalFile "C:\path\patch.zip" -RemotePath "/public_html/jurnal/"
+
+Security notes:
+- Do NOT commit credentials to source control. Add `sftp.json` or credential files to `.gitignore`.
+- Prefer SFTP/SSH when available.
+- If your host requires passive vs active mode, adjust `$req.UsePassive` in the PowerShell script or `ftp_pasv` in PHP as needed.
+
+If you want, saya bisa:
+- Menaruh `sftp.json` di `.vscode/` (but jangan commit credentials),
+- Otomasi upload ZIP langsung dari sini (but saya memerlukan kredensial),
+- Atur koneksi SFTP berbasis key (saya dapat berikan langkah membuat key dan menambahkan public key ke hosting).

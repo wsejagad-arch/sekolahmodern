@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Popup Quotes</title>
+    <link rel="stylesheet" href="../css/quotes-style.css">
+</head>
+<body>
+    <h1>Test Page untuk Popup Quotes</h1>
+    <p>Halaman ini untuk test popup quotes system.</p>
+    <button onclick="testPopup()">Test Popup</button>
+    <button onclick="clearSession()">Clear Session</button>
+
+    <!-- Quotes system disabled: script include and auto-test removed -->
+    <script>
+        function testPopup() {
+            console.log('Testing popup (disabled)');
+        }
+
+        function clearSession() {
+            sessionStorage.clear();
+            console.log('Session cleared');
+        }
+    </script>
+</body>
+</html>

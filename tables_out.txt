@@ -1,0 +1,2 @@
+tbl_izin: 0
+tbl_izin_siswa: 1

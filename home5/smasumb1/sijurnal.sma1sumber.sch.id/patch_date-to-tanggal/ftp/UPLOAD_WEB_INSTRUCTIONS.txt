@@ -1,0 +1,14 @@
+1) Upload these two files to the remote folder `/patch_date-to-tanggal/ftp/` using cPanel or SFTP:
+   - web_uploader.php
+   - extract_and_deploy.php
+
+2) Open in browser (replace domain):
+   https://sijurnal.sma1sumber.sch.id/patch_date-to-tanggal/ftp/web_uploader.php?token=r3nTv9KJx4
+
+3) Use the form to choose `patch_date-to-tanggal.zip` from your local machine and check "Ekstrak setelah upload" if you want extraction immediately.
+
+4) After successful extraction delete both `web_uploader.php` and `extract_and_deploy.php` from the server.
+
+Security notes:
+- The uploader uses a fixed token. Change `r3nTv9KJx4` in the files before uploading for better security.
+- Remove the scripts immediately after use.

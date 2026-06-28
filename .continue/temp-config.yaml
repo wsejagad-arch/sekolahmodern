@@ -1,0 +1,9 @@
+name: Continue Test
+version: 1.0.0
+schema: v1
+models:
+  - name: llava
+    provider: ollama
+    model: llava:latest
+    roles:
+      - chat

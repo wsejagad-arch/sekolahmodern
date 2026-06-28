@@ -1,0 +1,6 @@
+{
+    "require": {
+        "tecnickcom/tcpdf": "^6.6",
+        "spipu/html2pdf": "^5.2"
+    }
+}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Fixed DataTable & AJAX</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+</head>
+<body>
+  <h2>Test DataTable & AJAX Fix</h2>
+  
+  <h3>1. Test DataTable</h3>
+  <table id="testTable" class="display">
+    <thead>
+      <tr><th>ID</th><th>Name</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Test Class 1</td><td><button onclick="testDelete(1)">Delete</button></td></tr>
+      <tr><td>2</td><td>Test Class 2</td><td><button onclick="testDelete(2)">Delete</button></td></tr>
+    </tbody>
+  </table>
+  
+  <h3>2. Test AJAX</h3>
+  <button onclick="testAjax()">Test AJAX Connection</button>
+  <button onclick="testRealHapus()">Test Real Hapus (needs login)</button>
+  
+  <div id="result"></div>
+
+  <script>
+    $(document).ready(function() {
+      console.log('jQuery version:', $.fn.jquery);
+      console.log('DataTable available?', typeof $.fn.DataTable !== 'undefined');
+      
+      if (typeof $.fn.DataTable !== 'undefined') {
+        $('#testTable').DataTable();
+        console.log('DataTable initialized successfully');
+      } else {
+        console.error('DataTable not available');
+      }
+    });
+    
+    function testDelete(id) {
+      alert('Delete test for ID: ' + id);
+    }
+    
+    function testAjax() {
+      console.log('Testing AJAX connection...');
+      
+      fetch('test_ajax_simple.php', {
+        method: 'POST',
+        body: new FormData()
+      })
+      .then(r => r.json())
+      .then(data => {
+        console.log('AJAX test result:', data);
+        document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        alert('AJAX test successful!');
+      })
+      .catch(e => {
+        console.error('AJAX test failed:', e);
+        alert('AJAX test failed: ' + e.message);
+      });
+    }
+    
+    function testRealHapus() {
+      console.log('Testing real hapus...');
+      
+      const form = new FormData();
+      form.append('action', 'hapus_wali');
+      form.append('id_kelas', '1');
+      
+      fetch('ajax_update_wali_kelas.php', {
+        method: 'POST',
+        body: form
+      })
+      .then(r => r.text())
+      .then(text => {
+        console.log('Real hapus response:', text);
+        document.getElementById('result').innerHTML = '<pre>' + text + '</pre>';
+        try {
+          const json = JSON.parse(text);
+          alert('Response: ' + json.message);
+        } catch(e) {
+          alert('Raw response: ' + text);
+        }
+      })
+      .catch(e => {
+        console.error('Real hapus failed:', e);
+        alert('Real hapus failed: ' + e.message);
+      });
+    }
+  </script>
+</body>
+</html>

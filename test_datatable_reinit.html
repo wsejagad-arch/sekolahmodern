@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test DataTable Reinitialization Fix</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <h2>Test DataTable Reinitialization Fix</h2>
+  
+  <button onclick="initTable()">Initialize DataTable</button>
+  <button onclick="destroyTable()">Destroy DataTable</button>
+  <button onclick="reinitTable()">Reinitialize DataTable</button>
+  <button onclick="simulateReload()">Simulate Page Reload</button>
+  
+  <br><br>
+  
+  <table id="testTable" class="display">
+    <thead>
+      <tr><th>ID</th><th>Name</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Test Item 1</td><td>Active</td></tr>
+      <tr><td>2</td><td>Test Item 2</td><td>Inactive</td></tr>
+      <tr><td>3</td><td>Test Item 3</td><td>Active</td></tr>
+    </tbody>
+  </table>
+  
+  <div id="log" style="margin-top: 20px; background: #f0f0f0; padding: 10px; height: 200px; overflow-y: scroll;"></div>
+
+  <script>
+    function log(msg) {
+      console.log(msg);
+      const logDiv = document.getElementById('log');
+      logDiv.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + msg + '</div>';
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+    
+    function initTable() {
+      try {
+        log('Attempting to initialize DataTable...');
+        
+        if ($.fn.dataTable.isDataTable('#testTable')) {
+          log('WARNING: DataTable already initialized! This would cause the error.');
+          Swal.fire('Warning', 'DataTable already initialized!', 'warning');
+          return;
+        }
+        
+        $('#testTable').DataTable({
+          "responsive": true,
+          "pageLength": 5
+        });
+        
+        log('SUCCESS: DataTable initialized');
+        Swal.fire('Success', 'DataTable initialized', 'success');
+      } catch (e) {
+        log('ERROR: ' + e.message);
+        Swal.fire('Error', e.message, 'error');
+      }
+    }
+    
+    function destroyTable() {
+      try {
+        log('Attempting to destroy DataTable...');
+        
+        if (!$.fn.dataTable.isDataTable('#testTable')) {
+          log('WARNING: No DataTable to destroy');
+          Swal.fire('Warning', 'No DataTable to destroy', 'warning');
+          return;
+        }
+        
+        $('#testTable').DataTable().destroy();
+        log('SUCCESS: DataTable destroyed');
+        Swal.fire('Success', 'DataTable destroyed', 'success');
+      } catch (e) {
+        log('ERROR: ' + e.message);
+        Swal.fire('Error', e.message, 'error');
+      }
+    }
+    
+    function reinitTable() {
+      try {
+        log('Attempting to reinitialize DataTable (destroy first)...');
+        
+        // Destroy if exists
+        if ($.fn.dataTable.isDataTable('#testTable')) {
+          log('DataTable exists, destroying first...');
+          $('#testTable').DataTable().destroy();
+          log('Destroyed existing DataTable');
+        }
+        
+        // Initialize fresh
+        $('#testTable').DataTable({
+          "responsive": true,
+          "pageLength": 5
+        });
+        
+        log('SUCCESS: DataTable reinitialized safely');
+        Swal.fire('Success', 'DataTable reinitialized safely', 'success');
+      } catch (e) {
+        log('ERROR: ' + e.message);
+        Swal.fire('Error', e.message, 'error');
+      }
+    }
+    
+    function simulateReload() {
+      log('Simulating page reload sequence...');
+      
+      // Destroy before "reload"
+      if ($.fn.dataTable.isDataTable('#testTable')) {
+        log('Cleanup: Destroying DataTable before reload...');
+        $('#testTable').DataTable().destroy();
+      }
+      
+      // Simulate new page load after delay
+      setTimeout(function() {
+        log('Simulated reload: Reinitializing DataTable...');
+        reinitTable();
+      }, 1000);
+    }
+    
+    $(document).ready(function() {
+      log('Page ready. DataTable available: ' + (typeof $.fn.DataTable !== 'undefined'));
+    });
+  </script>
+</body>
+</html>

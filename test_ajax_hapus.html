@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test AJAX Hapus Wali</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <h2>Test AJAX Hapus Wali Kelas</h2>
+    <button onclick="testHapusWali()">Test Hapus Wali Kelas (ID: 58)</button>
+    
+    <div id="result"></div>
+
+    <script>
+    function testHapusWali() {
+        console.log('Memulai test AJAX...');
+        
+        $.ajax({
+            url: 'ajax_update_wali_kelas.php',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                action: 'hapus_wali',
+                id_kelas: '58'
+            },
+            success: function(response) {
+                console.log('Success Response:', response);
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(response, null, 2) + '</pre>';
+                
+                if(response.success) {
+                    alert('Berhasil: ' + response.message);
+                } else {
+                    alert('Gagal: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('Error Response:', xhr.responseText);
+                console.log('Status:', status);
+                console.log('Error:', error);
+                document.getElementById('result').innerHTML = '<div style="color:red;">Error: ' + xhr.responseText + '</div>';
+            }
+        });
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+Ringkasan tindakan cepat:
+
+1) Backup database (sangat penting).
+2) Deploy file PHP yang sudah diubah ke server (timpa file lama).
+3) Jalankan `trigger_sync_tanggal_date.sql` di phpMyAdmin atau mysql client.
+   - Jika MySQL versi lama (sebelum 8) yang tidak mendukung `ADD COLUMN IF NOT EXISTS`, tambahkan kolom `date` manual:
+     ALTER TABLE tbl_materi ADD COLUMN `date` DATE NULL AFTER `tanggal`;
+   - Lalu jalankan bagian UPDATE dan trigger (gunakan DELIMITER di phpMyAdmin).
+4) Uji: buka halaman guru dan isi jurnal; periksa apakah "Terisi" meningkat.
+
+Jika mau, saya bisa:
+- Membuat file ZIP dari folder `patch_date-to-tanggal` untuk Anda download,
+- atau membuat patch git (diff) jika Anda ingin PR ke repo hosted.
+
+Mau saya buatkan ZIP sekarang?

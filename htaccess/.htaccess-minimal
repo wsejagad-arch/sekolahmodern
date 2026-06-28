@@ -1,0 +1,3 @@
+# Gunakan sementara jika .htaccess utama memicu 403
+DirectoryIndex index.php splash.php login.php
+Options -Indexes +FollowSymLinks

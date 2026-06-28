@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Debug Hapus Wali</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <h2>Test Hapus Wali Kelas</h2>
+  <button onclick="testHapus()">Test Hapus ID=1</button>
+  <div id="result"></div>
+
+  <script>
+    function testHapus() {
+      console.log('Starting test...');
+      
+      const formData = new FormData();
+      formData.append('action', 'hapus_wali');
+      formData.append('id_kelas', '1');
+      
+      fetch('ajax_update_wali_kelas.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        return response.text();
+      })
+      .then(text => {
+        console.log('Raw response text:', text);
+        document.getElementById('result').innerHTML = `<pre>${text}</pre>`;
+        
+        try {
+          const json = JSON.parse(text);
+          console.log('Parsed JSON:', json);
+          alert('JSON Response: ' + JSON.stringify(json, null, 2));
+        } catch(e) {
+          console.error('JSON parse error:', e);
+          alert('Response is not valid JSON: ' + text);
+        }
+      })
+      .catch(error => {
+        console.error('Fetch error:', error);
+        alert('Fetch error: ' + error.message);
+      });
+    }
+  </script>
+</body>
+</html>

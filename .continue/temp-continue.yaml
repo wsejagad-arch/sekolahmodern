@@ -1,0 +1,17 @@
+name: Test Ollama Continue
+version: 1.0.0
+schema: v1
+models:
+  - name: llama3.1
+    provider: ollama
+    model: llama3.1:latest
+    roles:
+      - chat
+      - edit
+      - apply
+    capabilities:
+      - tool_use
+context:
+  - provider: file
+rules:
+  - Always prioritize local repository context and existing PHP code.

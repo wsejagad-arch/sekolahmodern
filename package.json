@@ -1,0 +1,53 @@
+{
+    "title": "SB Admin 2",
+    "name": "startbootstrap-sb-admin-2",
+    "version": "4.0.7",
+    "scripts": {
+        "start": "gulp watch"
+    },
+    "description": "An open source Bootstrap 4 admin theme.",
+    "keywords": [
+        "css",
+        "sass",
+        "html",
+        "responsive",
+        "theme",
+        "template",
+        "admin",
+        "app"
+    ],
+    "homepage": "https://startbootstrap.com/template-overviews/sb-admin-2",
+    "bugs": {
+        "url": "https://github.com/BlackrockDigital/startbootstrap-sb-admin-2/issues",
+        "email": "feedback@startbootstrap.com"
+    },
+    "license": "MIT",
+    "author": "Start Bootstrap",
+    "contributors": [
+        "David Miller (http://davidmiller.io/)"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/BlackrockDigital/startbootstrap-sb-admin-2.git"
+    },
+    "devDependencies": {
+        "@fortawesome/fontawesome-free": "^7.2.0",
+        "bootstrap": "^5.3.8",
+        "browser-sync": "^2.26.7",
+        "chart.js": "^4.5.1",
+        "datatables.net-bs4": "^2.3.8",
+        "del": "^5.1.0",
+        "gulp": "^4.0.2",
+        "gulp-autoprefixer": "^7.0.0",
+        "gulp-clean-css": "^4.2.0",
+        "gulp-header": "^2.0.9",
+        "gulp-plumber": "^1.2.1",
+        "gulp-rename": "^1.4.0",
+        "gulp-sass": "^6.0.1",
+        "gulp-uglify": "^3.0.2",
+        "jquery": "^4.0.0",
+        "jquery.easing": "^1.4.1",
+        "merge-stream": "^2.0.0",
+        "sass": "^1.99.0"
+    }
+}

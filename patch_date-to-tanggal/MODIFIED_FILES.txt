@@ -1,0 +1,30 @@
+Daftar file yang diubah oleh patch "date -> tanggal":
+
+- pages/guru/guru.php
+- pages/guru/detailmateri.php
+- pages/guru/simpanmateri.php
+- pages/guru.php
+- pages/gurubackupcopy.php
+- phpajax/jurnal_stats.php
+- phpajax/jurnal_progress_guru.php
+- deploy_prod/cetak-jurnal.php
+- deploy_prod/cetak-kelas.php
+- deploy_prod/jurnal.php
+- deploy_prod/kelas.php
+- deploy_prod/pages/guru/guru_jurnal.php
+- deploy_prod/pages/guru/detailmateri.php
+- deploy_prod/pages/guru/simpanmateri.php
+- deploy_prod/pages/guru/guru.php
+- deploy_prod/pages/guru/gurubackupcopy.php
+- cetak-kelas.php
+- debug_cetak_jurnal.php
+- debug_information_lengkap.php
+- test_cetak_jurnal_direct.php
+- test_browser.php
+- test_langsung.php
+- quick_test_cetak.php
+- tmp_select_last.php
+- tmp_check_tbl_materi.php
+- tmp_debug_jurnal.php
+
+Catatan: beberapa file berada di folder deploy_prod (salinan produksi). Pastikan meninjau dan menerapkan ke server produksi sesuai alur deploy Anda.

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test jQuery Loading Order</title>
+</head>
+<body>
+  <h2>Test jQuery Loading Order</h2>
+  <div id="log"></div>
+  
+  <script>
+    console.log('1. Initial script - jQuery available?', typeof $ !== 'undefined');
+    
+    function log(msg) {
+      console.log(msg);
+      const logDiv = document.getElementById('log');
+      if (logDiv) {
+        logDiv.innerHTML += '<p>' + msg + '</p>';
+      }
+    }
+    
+    log('1. Initial: jQuery = ' + (typeof $ !== 'undefined' ? 'LOADED' : 'NOT LOADED'));
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      log('2. DOMContentLoaded: jQuery = ' + (typeof $ !== 'undefined' ? 'LOADED' : 'NOT LOADED'));
+    });
+    
+    window.addEventListener('load', function() {
+      log('3. Window Load: jQuery = ' + (typeof $ !== 'undefined' ? 'LOADED' : 'NOT LOADED'));
+    });
+    
+    // Check every 100ms for first 3 seconds
+    let checkCount = 0;
+    const checkInterval = setInterval(function() {
+      checkCount++;
+      log(`Check ${checkCount}: jQuery = ${typeof $ !== 'undefined' ? 'LOADED' : 'NOT LOADED'}`);
+      
+      if (typeof $ !== 'undefined' || checkCount >= 30) {
+        clearInterval(checkInterval);
+        if (typeof $ !== 'undefined') {
+          log('jQuery FINALLY LOADED at check ' + checkCount);
+        } else {
+          log('jQuery NEVER LOADED after 30 checks');
+        }
+      }
+    }, 100);
+  </script>
+  
+  <!-- Simulate the same loading order as in the main app -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script>
+    log('4. After jQuery script tag: jQuery = ' + (typeof $ !== 'undefined' ? 'LOADED' : 'NOT LOADED'));
+    
+    if (typeof $ !== 'undefined') {
+      $(document).ready(function() {
+        log('5. jQuery document.ready executed successfully');
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+name: Deploy to Web Hosting
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  ftp-deploy:
+    name: FTP Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@4.4.0
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./
+          server-dir: /home/smasumb1/simanis.sman1sumber.sch.id
+          exclude: |
+            .git*
+            .github*
+            .vscode*
+            node_modules*
+            release*
+            *.zip
+            config.hosting.php
+            config.local.php
+            koneksi_local.php
+            .user.ini
+            deploy*
+            deploy_prod*
+            *.bak
+            *.log
