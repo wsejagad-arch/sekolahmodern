@@ -868,3 +868,900 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     <div class="bottom-nav-wrap">
         
 </div>
+
+
+<div class="journal-modal-backdrop" id="schedulePickerModal" aria-hidden="true">
+    <div class="journal-modal journal-modal-sm" role="dialog" aria-modal="true" aria-labelledby="schedulePickerTitle">
+        <div class="journal-modal-head">
+            <div>
+                <h5 id="schedulePickerTitle">Pilih Jadwal</h5>
+                <p>Jurnal akan diisi sesuai jadwal yang dipilih.</p>
+            </div>
+            <button class="journal-modal-close" type="button" data-close-modal aria-label="Tutup"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="journal-modal-body">
+            <?php if (empty($jadwalHariIni)): ?>
+                <div class="journal-empty">Belum ada jadwal mengajar hari ini.</div>
+            <?php else: ?>
+                <div class="journal-picker-list">
+                    <?php foreach ($jadwalHariIni as $j):
+                        $idMapel = (int)($j['id_mapel'] ?? 0);
+                        $kelasJadwal = (string)($j['kelas'] ?? '');
+                        $mapelJadwal = (string)($j['nama_mapel'] ?? '');
+                        $isJurnalTerisi = isset($jurnalStatusByMapel[$idMapel]);
+                    ?>
+                        <div class="journal-picker-row <?= $isJurnalTerisi ? 'is-filled' : 'is-empty'; ?>" data-id="<?= $idMapel; ?>">
+                            <button class="journal-picker-main" type="button" data-id="<?= $idMapel; ?>">
+                                <span class="journal-picker-meta">
+                                    <strong><?= htmlspecialchars($kelasJadwal, ENT_QUOTES, 'UTF-8'); ?></strong>
+                                    <small><?= htmlspecialchars($mapelJadwal, ENT_QUOTES, 'UTF-8'); ?></small>
+                                    <span class="journal-status-badge <?= $isJurnalTerisi ? 'done' : 'todo'; ?>">
+                                        <i class="bi <?= $isJurnalTerisi ? 'bi-check2-circle' : 'bi-clock-history'; ?>"></i>
+                                        <?= $isJurnalTerisi ? 'Sudah terisi' : 'Belum terisi'; ?>
+                                    </span>
+                                </span>
+                                <em class="journal-time"><?= htmlspecialchars(substr((string)($j['jam_mulai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars(substr((string)($j['jam_selesai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?></em>
+                            </button>
+                            <div class="journal-picker-actions">
+                                <button class="journal-action-btn primary btn-open-schedule-journal" type="button" data-id="<?= $idMapel; ?>">
+                                    <i class="bi bi-journal-plus"></i> <?= $isJurnalTerisi ? 'Lihat/Edit Jurnal' : 'Input Jurnal'; ?>
+                                </button>
+                                <a class="journal-action-btn score" href="inputnilai?getDetail=<?= $idMapel; ?>">
+                                    <i class="bi bi-clipboard2-check"></i> Input Nilai
+                                </a>
+                                <button class="journal-action-btn danger btn-reset-jurnal" type="button" data-id="<?= $idMapel; ?>" data-kelas="<?= htmlspecialchars($kelasJadwal, ENT_QUOTES, 'UTF-8'); ?>" <?= $isJurnalTerisi ? '' : 'disabled'; ?>>
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reset Jurnal
+                                </button>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<div class="journal-modal-backdrop" id="journalInputModal" aria-hidden="true">
+    <div class="journal-modal journal-modal-lg" role="dialog" aria-modal="true" aria-labelledby="journalInputTitle">
+        <div class="journal-modal-head">
+            <div>
+                <h5 id="journalInputTitle">Input Jurnal Mengajar</h5>
+                <p>Lengkapi materi, kegiatan, dan presensi siswa.</p>
+            </div>
+            <button class="journal-modal-close" type="button" data-close-modal aria-label="Tutup"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="journal-modal-body">
+            <div class="modal-data">
+                <div class="journal-loading">
+                    <span class="spinner-border spinner-border-sm text-primary me-2"></span>
+                    <span>Memuat form jurnal...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="journal-modal-backdrop" id="notifPanelModal" aria-hidden="true">
+    <div class="journal-modal" role="dialog" aria-modal="true" aria-labelledby="notifPanelTitle" style="max-height: 85vh; width: min(100%, 460px);">
+        <div class="journal-modal-head" style="background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: #fff; padding: 16px 20px;">
+            <div>
+                <h5 id="notifPanelTitle" style="color:#fff; font-size:16px; font-weight:600; margin:0;"><i class="bi bi-bell-fill me-2"></i> Notifikasi & Tindak Lanjut</h5>
+                <p style="color:rgba(255,255,255,0.8); font-size:11px; margin:4px 0 0 0;">Informasi penting hari ini.</p>
+            </div>
+            <button class="journal-modal-close" type="button" data-close-modal aria-label="Tutup" style="background:rgba(255,255,255,0.15); color:#fff; border:none; width:32px; height:32px; border-radius:10px;"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="journal-modal-body" style="padding: 16px; background: #f8fafc;">
+            <div class="notif-sections-list" style="display: flex; flex-direction: column; gap: 16px;">
+                
+                <!-- ADUAN SISWA: Hanya tampil untuk Tim Aduan yang ditugaskan admin -->
+                <?php if ($isTimAduan): ?>
+                <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(220, 38, 38, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 11.5px; font-weight: 700; color: #dc2626; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-shield-fill-exclamation"></i> Aduan Siswa
+                            <span style="background: #fef2f2; color: #9f1239; font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 600; text-transform: none; letter-spacing: 0;"><i class="bi bi-incognito"></i> Anonim</span>
+                        </span>
+                        <span style="background: #fee2e2; color: #dc2626; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
+                            <?= $aduanGuruCount ?> Aktif
+                        </span>
+                    </div>
+                    <?php if ($aduanGuruCount === 0): ?>
+                        <p style="font-size: 11px; color: #64748b; margin: 0; text-align: left;">Tidak ada aduan siswa yang masuk saat ini.</p>
+                    <?php else: ?>
+                        <p style="font-size: 10px; color: #9f1239; background: #fef2f2; border-radius: 8px; padding: 6px 10px; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-eye-slash-fill"></i> <strong>Aduan bersifat anonim.</strong> Identitas pelapor dirahasiakan. Tim aduan bertanggung jawab mencari fakta.
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <?php foreach ($aduanGuruRows as $ad): ?>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #fff1f2; border-radius: 10px; border: 1px dashed rgba(220, 38, 38, 0.15);">
+                                    <div style="text-align: left;">
+                                        <strong style="font-size: 12px; color: #1e293b; display: block; text-align: left;"><?= htmlspecialchars($ad['judul']) ?></strong>
+                                        <span style="font-size: 10px; color: #64748b; display: block; text-align: left; margin-top: 2px;">
+                                            <?= htmlspecialchars($ad['kode_aduan']) ?> &bull; <?= htmlspecialchars($ad['kategori']) ?>
+                                        </span>
+                                        <div style="margin-top: 4px;">
+                                            <span style="background: #fee2e2; color: #dc2626; font-size: 8.5px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Prioritas: <?= htmlspecialchars($ad['prioritas']) ?></span>
+                                            <span style="background: #fef3c7; color: #92400e; font-size: 8.5px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Masuk: <?= date('d M', strtotime($ad['created_at'])) ?></span>
+                                        </div>
+                                    </div>
+                                    <a href="../../home.php?page=aduan-siswa" style="background: #dc2626; color: #fff; font-size: 10px; padding: 5px 10px; border-radius: 8px; text-decoration: none; font-weight: 600; flex-shrink: 0; margin-left: 8px;">Tindak Lanjut</a>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <?php endif; /* end isTimAduan */ ?>
+                
+                <!-- 1. SISWA BUTUH PENDAMPINGAN (wali kelas + guru mapel) -->
+                <?php if (!empty($pendampinganKelasAll)): ?>
+                <div class="notif-card" id="notifPendampinganCard" style="background: #fff; border-radius: 16px; border: 1px solid rgba(239, 68, 68, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 11.5px; font-weight: 700; color: #ef4444; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-heart-pulse-fill"></i> Siswa Butuh Pendampingan
+                        </span>
+                        <span style="background: #fee2e2; color: #ef4444; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
+                            <?= $problematicCount ?> Siswa
+                        </span>
+                    </div>
+                    <?php if ($problematicCount === 0): ?>
+                        <p style="font-size: 11px; color: #64748b; margin: 0; text-align: left;">Alhamdulillah, tidak ada siswa yang membutuhkan pendampingan khusus saat ini.</p>
+                    <?php else: ?>
+                        <!-- MENU SPLIT PER KELAS: klik kelas untuk expand/collapse daftar siswa -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <?php foreach ($pendampinganByKelas as $kelasGrp => $siswaGrp): ?>
+                                <?php $grpId = 'pendamp-grp-' . preg_replace('/[^a-zA-Z0-9]/', '_', $kelasGrp); ?>
+                                <!-- Header Kelas - bisa diklik -->
+                                <div class="pendamp-kelas-header" data-target="<?= $grpId ?>" 
+                                     style="display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; background: linear-gradient(135deg, #fef2f2, #fff5f5); border-radius: 10px; border: 1px solid rgba(239,68,68,0.18); cursor: pointer; user-select: none;">
+                                    <span style="font-size: 12px; font-weight: 700; color: #dc2626; display: inline-flex; align-items: center; gap: 7px;">
+                                        <i class="bi bi-people-fill"></i>
+                                        Kelas <?= htmlspecialchars($kelasGrp) ?>
+                                    </span>
+                                    <span style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="background: #fee2e2; color: #dc2626; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 99px;"><?= count($siswaGrp) ?> siswa</span>
+                                        <i class="bi bi-chevron-down pendamp-chevron" style="font-size: 11px; color: #ef4444; transition: transform 0.25s;"></i>
+                                    </span>
+                                </div>
+                                <!-- Daftar Siswa per Kelas - collapsed by default -->
+                                <div id="<?= $grpId ?>" style="display: none; flex-direction: column; gap: 6px; padding: 0 2px;">
+                                    <?php foreach ($siswaGrp as $s): ?>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #fff5f5; border-radius: 10px; border: 1px dashed rgba(239, 68, 68, 0.1);">
+                                            <div style="text-align: left; min-width: 0;">
+                                                <strong style="font-size: 12px; color: #1e293b; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($s['nama_siswa']) ?></strong>
+                                                <div style="margin-top: 4px; display: flex; gap: 5px; flex-wrap: wrap;">
+                                                    <?php if ($s['alpha_count'] > 0): ?>
+                                                        <span style="background: #fee2e2; color: #ef4444; font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Alpha: <?= $s['alpha_count'] ?>x</span>
+                                                    <?php endif; ?>
+                                                    <?php if ($s['telat_count'] > 0): ?>
+                                                        <span style="background: #fef3c7; color: #d97706; font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Telat: <?= $s['telat_count'] ?>x</span>
+                                                    <?php endif; ?>
+                                                    <?php if ($s['pelanggaran_count'] > 0): ?>
+                                                        <span style="background: #f3e8ff; color: #7c3aed; font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Pelanggaran: <?= $s['pelanggaran_count'] ?>x</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                            <a href="laporan-kelas?kelas=<?= urlencode($s['kelas']) ?>" style="background: #ef4444; color: #fff; font-size: 10px; padding: 5px 10px; border-radius: 8px; text-decoration: none; font-weight: 600; flex-shrink: 0; margin-left: 8px; white-space: nowrap;">Lihat</a>
+                                        </div>
+                                    <?php endforeach; ?>
+                                    <div style="text-align: right; margin-top: 2px;">
+                                        <a href="laporan-kelas?kelas=<?= urlencode($kelasGrp) ?>" style="font-size: 10px; color: #ef4444; text-decoration: none; font-weight: 600;"><i class="bi bi-arrow-right"></i> Tindak Lanjut Kelas <?= htmlspecialchars($kelasGrp) ?></a>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <?php endif; /* end pendampinganKelasAll */ ?>
+
+                <!-- 2. JURNAL BELUM TERISI: hidden jika tidak ada jadwal hari ini -->
+                <?php if ($totalJadwalHari > 0): ?>
+                <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(245, 158, 11, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 11.5px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-journal-x"></i> Jurnal Belum Terisi
+                        </span>
+                        <span style="background: #fef3c7; color: #d97706; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
+                            <?= $unfilledJurnalCount ?> Jadwal
+                        </span>
+                    </div>
+                    <?php if ($unfilledJurnalCount === 0): ?>
+                        <p style="font-size: 11px; color: #64748b; margin: 0; text-align: left;">Hebat! Semua jurnal mengajar Anda hari ini sudah terisi dengan lengkap.</p>
+                    <?php else: ?>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <?php foreach ($unfilledJadwal as $j): ?>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #fffbeb; border-radius: 10px; border: 1px dashed rgba(245, 158, 11, 0.15);">
+                                    <div style="text-align: left;">
+                                        <strong style="font-size: 12px; color: #1e293b; display: block; text-align: left;"><?= htmlspecialchars($j['nama_mapel']) ?></strong>
+                                        <span style="font-size: 10px; color: #64748b; display: block; text-align: left; margin-top: 2px;">Kelas: <?= htmlspecialchars($j['kelas']) ?> (<?= substr($j['jam_mulai'],0,5) ?> - <?= substr($j['jam_selesai'],0,5) ?>)</span>
+                                    </div>
+                                    <button class="btn-open-jurnal-from-notif" data-id="<?= $j['id_mapel'] ?>" style="background: #f59e0b; color: #fff; border: none; font-size: 10px; padding: 5px 10px; border-radius: 8px; font-weight: 600; cursor: pointer; flex-shrink: 0; margin-left: 8px;">Isi Sekarang</button>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <?php endif; /* end totalJadwalHari */ ?>
+
+                <?php if ($nextJadwal !== null): ?>
+                <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(59, 130, 246, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                    <div style="margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                        <span style="font-size: 11.5px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-calendar-event"></i> Jadwal Berikutnya
+                        </span>
+                        <span style="background: #eff6ff; color: #3b82f6; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;"><?= substr($nextJadwal['jam_mulai'],0,5) ?></span>
+                    </div>
+                    <div style="padding: 10px; background: #eff6ff; border-radius: 10px; border: 1px solid rgba(59, 130, 246, 0.1); text-align: left;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="font-size: 13px; color: #1e293b; display: block; text-align: left;"><?= htmlspecialchars($nextJadwal['nama_mapel']) ?></strong>
+                        </div>
+                        <span style="font-size: 11px; color: #64748b; display:block; margin-top:4px; text-align: left;">Kelas: <?= htmlspecialchars($nextJadwal['kelas']) ?></span>
+                        <span style="font-size: 11px; color: #64748b; display:block; text-align: left;">Ruang: <?= htmlspecialchars($nextJadwal['ruang'] ?? 'R. Kelas') ?></span>
+                    </div>
+                </div>
+                <?php endif; /* end nextJadwal */ ?>
+
+                <!-- 4. PENGUMUMAN ADMIN: hidden jika tidak ada pengumuman -->
+                <?php if ($announcementCount > 0): ?>
+                <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(124, 58, 237, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 11.5px; font-weight: 700; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-megaphone-fill"></i> Pengumuman dari Admin
+                        </span>
+                        <span style="background: #f3e8ff; color: #7c3aed; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
+                            <?= $announcementCount ?> Baru
+                        </span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <?php foreach ($announcements as $ann): ?>
+                            <div style="padding: 10px; background: #faf5ff; border-radius: 10px; border: 1px solid rgba(124, 58, 237, 0.1); text-align: left;">
+                                <strong style="font-size: 12px; color: #1e293b; display: block; text-align: left;"><?= htmlspecialchars($ann['judul']) ?></strong>
+                                <p style="font-size: 10.5px; color: #475569; margin: 4px 0 0 0; line-height: 1.4; text-align: left;"><?= nl2br(htmlspecialchars($ann['isi'])) ?></p>
+                                <small style="font-size: 9px; color: #94a3b8; display: block; margin-top: 6px; text-align: left;"><i class="bi bi-clock"></i> <?= date('d M Y, H:i', strtotime($ann['created_at'])) ?></small>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; /* end announcementCount */ ?>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="journal-modal-backdrop" id="guruWaliModal" aria-hidden="true">
+    <div class="journal-modal" role="dialog" aria-modal="true" aria-labelledby="guruWaliTitle" style="max-height: 88vh; width: min(100%, 520px);">
+        <div class="journal-modal-head" style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); color: #fff; padding: 16px 20px;">
+            <div>
+                <h5 id="guruWaliTitle" style="color:#fff; font-size:16px; font-weight:700; margin:0;"><i class="bi bi-person-workspace me-2"></i>Guru Wali</h5>
+                <p style="color:rgba(255,255,255,0.85); font-size:11px; margin:4px 0 0 0;">Tambahkan siswa yang menjadi binaan pribadi Anda.</p>
+            </div>
+            <button class="journal-modal-close" type="button" data-close-modal aria-label="Tutup" style="background:rgba(255,255,255,0.15); color:#fff; border:none; width:32px; height:32px; border-radius:10px;"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="journal-modal-body" style="padding: 16px; background: #f8fafc;">
+            <div style="display:grid; grid-template-columns:1fr; gap:12px;">
+                <a href="guru-wali-siswa" style="display:flex; align-items:center; gap:14px; padding:16px; background:#fff; border:1px solid rgba(20,184,166,.18); border-radius:18px; text-decoration:none; box-shadow:0 10px 24px rgba(15,23,42,.06);">
+                    <span style="width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:#ccfbf1; color:#0f766e; font-size:25px; flex:0 0 auto;"><i class="bi bi-person-plus-fill"></i></span>
+                    <span style="min-width:0;">
+                        <strong style="display:block; color:#0f172a; font-size:15px;">Tambah Siswa</strong>
+                        <small style="display:block; color:#64748b; margin-top:3px; line-height:1.35;">Pilih kelas dan siswa untuk menambahkan daftar binaan guru wali.</small>
+                    </span>
+                    <i class="bi bi-chevron-right" style="margin-left:auto; color:#94a3b8;"></i>
+                </a>
+                <a href="guru-wali-jurnal" style="display:flex; align-items:center; gap:14px; padding:16px; background:#fff; border:1px solid rgba(67,56,202,.18); border-radius:18px; text-decoration:none; box-shadow:0 10px 24px rgba(15,23,42,.06);">
+                    <span style="width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:#e0e7ff; color:#4338ca; font-size:25px; flex:0 0 auto;"><i class="bi bi-journal-text"></i></span>
+                    <span style="min-width:0;">
+                        <strong style="display:block; color:#0f172a; font-size:15px;">Jurnal Pendampingan</strong>
+                        <small style="display:block; color:#64748b; margin-top:3px; line-height:1.35;">Catat pendampingan, tindak lanjut, dan status siswa binaan.</small>
+                    </span>
+                    <i class="bi bi-chevron-right" style="margin-left:auto; color:#94a3b8;"></i>
+                </a>
+            </div>
+            <div style="display:none;">
+            <?php if ($guruWaliFlash !== ''): ?>
+                <div class="alert alert-<?= htmlspecialchars($guruWaliFlashType, ENT_QUOTES, 'UTF-8'); ?> py-2 mb-3" style="font-size:12px; border-radius:12px;">
+                    <?= htmlspecialchars($guruWaliFlash, ENT_QUOTES, 'UTF-8'); ?>
+                </div>
+            <?php endif; ?>
+
+            <form method="post" id="guruWaliForm" style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:14px; box-shadow:0 8px 20px rgba(15,23,42,.05);">
+                <input type="hidden" name="guru_wali_action" value="add">
+                <div class="mb-3">
+                    <label class="form-label" for="kelasBinaan" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Pilih Kelas</label>
+                    <select class="form-select" id="kelasBinaan" name="kelas_binaan" required style="border-radius:12px; font-size:13px;">
+                        <option value="">Pilih kelas</option>
+                        <?php foreach ($guruWaliKelasOptions as $kelasOption): ?>
+                            <option value="<?= htmlspecialchars($kelasOption, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($kelasOption, ENT_QUOTES, 'UTF-8'); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="siswaBinaan" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Pilih Siswa</label>
+                    <select class="form-select" id="siswaBinaan" name="siswa_binaan" required disabled style="border-radius:12px; font-size:13px;">
+                        <option value="">Pilih kelas terlebih dahulu</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn w-100" style="background:#0f766e; color:#fff; border-radius:12px; font-weight:800; font-size:13px;">
+                    <i class="bi bi-plus-circle me-1"></i> Tambah Siswa Binaan
+                </button>
+            </form>
+
+            <div style="margin-top:16px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                    <strong style="font-size:13px; color:#0f172a;">Daftar Siswa Binaan</strong>
+                    <span style="background:#ccfbf1; color:#0f766e; font-size:10px; font-weight:800; padding:3px 8px; border-radius:999px;"><?= count($guruWaliBinaan); ?> siswa</span>
+                </div>
+                <?php if (empty($guruWaliBinaan)): ?>
+                    <div style="background:#fff; border:1px dashed #cbd5e1; border-radius:14px; padding:16px; color:#64748b; font-size:12px; text-align:center;">
+                        Belum ada siswa binaan. Pilih kelas dan siswa untuk mulai menambahkan.
+                    </div>
+                <?php else: ?>
+                    <div style="display:flex; flex-direction:column; gap:8px; max-height:260px; overflow:auto;">
+                        <?php foreach ($guruWaliBinaan as $binaan): ?>
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:10px 12px;">
+                                <div style="min-width:0;">
+                                    <strong style="display:block; font-size:12.5px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                        <?= htmlspecialchars((string)($binaan['nama_siswa'] ?: $binaan['no_induk_siswa']), ENT_QUOTES, 'UTF-8'); ?>
+                                    </strong>
+                                    <span style="display:block; font-size:10.5px; color:#64748b; margin-top:2px;">
+                                        Kelas <?= htmlspecialchars((string)$binaan['kelas'], ENT_QUOTES, 'UTF-8'); ?> · NIS <?= htmlspecialchars((string)$binaan['no_induk_siswa'], ENT_QUOTES, 'UTF-8'); ?>
+                                    </span>
+                                </div>
+                                <form method="post" onsubmit="return confirm('Hapus siswa dari daftar binaan?');" style="margin:0;">
+                                    <input type="hidden" name="guru_wali_action" value="delete">
+                                    <input type="hidden" name="id_binaan" value="<?= (int)$binaan['id']; ?>">
+                                    <button type="submit" title="Hapus" style="width:32px; height:32px; border:0; border-radius:10px; background:#fee2e2; color:#dc2626; display:grid; place-items:center;">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div style="margin-top:18px; border-top:1px solid #e2e8f0; padding-top:16px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                    <strong style="font-size:13px; color:#0f172a;"><i class="bi bi-journal-text me-1"></i>Jurnal Pendampingan Guru Wali</strong>
+                    <span style="background:#e0e7ff; color:#4338ca; font-size:10px; font-weight:800; padding:3px 8px; border-radius:999px;"><?= count($guruWaliJurnal); ?> catatan</span>
+                </div>
+
+                <form method="post" style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:14px; box-shadow:0 8px 20px rgba(15,23,42,.05);">
+                    <input type="hidden" name="guru_wali_action" value="journal_add">
+                    <div class="row g-2">
+                        <div class="col-12 col-md-7">
+                            <label class="form-label" for="jurnalSiswaBinaan" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Siswa Binaan</label>
+                            <select class="form-select" id="jurnalSiswaBinaan" name="jurnal_siswa_binaan" required style="border-radius:12px; font-size:13px;">
+                                <option value="">Pilih siswa binaan</option>
+                                <?php foreach ($guruWaliBinaan as $binaan): ?>
+                                    <option value="<?= htmlspecialchars((string)$binaan['no_induk_siswa'], ENT_QUOTES, 'UTF-8'); ?>">
+                                        <?= htmlspecialchars((string)($binaan['nama_siswa'] ?: $binaan['no_induk_siswa']), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars((string)$binaan['kelas'], ENT_QUOTES, 'UTF-8'); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <label class="form-label" for="jurnalTanggal" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Tanggal</label>
+                            <input class="form-control" type="date" id="jurnalTanggal" name="jurnal_tanggal" value="<?= date('Y-m-d'); ?>" required style="border-radius:12px; font-size:13px;">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="jurnalCatatan" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Catatan Pendampingan</label>
+                            <textarea class="form-control" id="jurnalCatatan" name="jurnal_catatan" rows="3" required placeholder="Contoh: Siswa perlu pendampingan terkait kedisiplinan, motivasi belajar, atau komunikasi dengan orang tua." style="border-radius:12px; font-size:13px;"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="jurnalTindakLanjut" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Tindak Lanjut</label>
+                            <textarea class="form-control" id="jurnalTindakLanjut" name="jurnal_tindak_lanjut" rows="2" placeholder="Rencana tindak lanjut atau hasil komunikasi." style="border-radius:12px; font-size:13px;"></textarea>
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <label class="form-label" for="jurnalStatus" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Status</label>
+                            <select class="form-select" id="jurnalStatus" name="jurnal_status" style="border-radius:12px; font-size:13px;">
+                                <option value="Dipantau">Dipantau</option>
+                                <option value="Perlu Tindak Lanjut">Perlu Tindak Lanjut</option>
+                                <option value="Selesai">Selesai</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-7 d-flex align-items-end">
+                            <button type="submit" class="btn w-100" style="background:#4338ca; color:#fff; border-radius:12px; font-weight:800; font-size:13px;" <?= empty($guruWaliBinaan) ? 'disabled title="Tambahkan siswa binaan terlebih dahulu"' : ''; ?>>
+                                <i class="bi bi-journal-plus me-1"></i> Simpan Jurnal Pendampingan
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div style="margin-top:12px;">
+                    <?php if (empty($guruWaliJurnal)): ?>
+                        <div style="background:#fff; border:1px dashed #cbd5e1; border-radius:14px; padding:16px; color:#64748b; font-size:12px; text-align:center;">
+                            Belum ada jurnal pendampingan guru wali.
+                        </div>
+                    <?php else: ?>
+                        <div style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow:auto;">
+                            <?php foreach ($guruWaliJurnal as $jurnalWali): ?>
+                                <?php
+                                    $statusWali = (string)($jurnalWali['status'] ?? 'Dipantau');
+                                    $statusColor = $statusWali === 'Selesai' ? '#16a34a' : ($statusWali === 'Perlu Tindak Lanjut' ? '#dc2626' : '#4338ca');
+                                ?>
+                                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:11px 12px;">
+                                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
+                                        <div style="min-width:0;">
+                                            <strong style="display:block; font-size:12.5px; color:#0f172a;"><?= htmlspecialchars((string)($jurnalWali['nama_siswa'] ?: $jurnalWali['no_induk_siswa']), ENT_QUOTES, 'UTF-8'); ?></strong>
+                                            <span style="display:block; font-size:10.5px; color:#64748b; margin-top:2px;">
+                                                <?= date('d M Y', strtotime((string)$jurnalWali['tanggal'])); ?> · Kelas <?= htmlspecialchars((string)$jurnalWali['kelas'], ENT_QUOTES, 'UTF-8'); ?>
+                                            </span>
+                                        </div>
+                                        <span style="background:<?= $statusColor; ?>18; color:<?= $statusColor; ?>; font-size:9.5px; font-weight:800; padding:3px 7px; border-radius:999px; white-space:nowrap;">
+                                            <?= htmlspecialchars($statusWali, ENT_QUOTES, 'UTF-8'); ?>
+                                        </span>
+                                    </div>
+                                    <div style="font-size:11.5px; color:#334155; margin-top:8px; line-height:1.45;"><?= nl2br(htmlspecialchars((string)$jurnalWali['catatan'], ENT_QUOTES, 'UTF-8')); ?></div>
+                                    <?php if (!empty($jurnalWali['tindak_lanjut'])): ?>
+                                        <div style="font-size:11px; color:#64748b; margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0;">
+                                            <strong>Tindak lanjut:</strong> <?= nl2br(htmlspecialchars((string)$jurnalWali['tindak_lanjut'], ENT_QUOTES, 'UTF-8')); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="journal-modal-backdrop" id="pelanggaranModal" aria-hidden="true">
+    <div class="journal-modal" style="max-width:620px;">
+        <div class="journal-modal-head" style="background:linear-gradient(135deg,#dc2626,#991b1b); color:#fff;">
+            <div>
+                <h3 style="margin:0; color:#fff;"><i class="bi bi-exclamation-triangle-fill me-2"></i>Catat Pelanggaran Siswa</h3>
+                <p style="margin:4px 0 0; color:rgba(255,255,255,.78); font-size:12px;">Pilih siswa, kategori, jenis pelanggaran, dan tindak lanjut.</p>
+            </div>
+            <button type="button" data-close-modal aria-label="Tutup" style="width:36px; height:36px; border:0; border-radius:12px; background:rgba(255,255,255,.16); color:#fff;">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="journal-modal-body">
+            <form id="formPelanggaran" style="display:grid; gap:12px;">
+                <div class="row g-2">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="selectKelasP" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Kelas</label>
+                        <select class="form-select" id="selectKelasP" name="kelas" required style="border-radius:12px; font-size:13px;">
+                            <option value="">Pilih kelas</option>
+                            <?php foreach ($guruWaliKelasOptions as $kelasOption): ?>
+                                <option value="<?= htmlspecialchars($kelasOption, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($kelasOption, ENT_QUOTES, 'UTF-8'); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="selectSiswaP" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Siswa</label>
+                        <select class="form-select" id="selectSiswaP" name="no_induk" required disabled style="border-radius:12px; font-size:13px;">
+                            <option value="">Pilih kelas terlebih dahulu</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="kategoriPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Kategori</label>
+                        <select class="form-select" id="kategoriPelanggaran" name="kategori_pelanggaran" required style="border-radius:12px; font-size:13px;">
+                            <option value="">Pilih kategori</option>
+                            <option value="Ringan">Ringan</option>
+                            <option value="Sedang">Sedang</option>
+                            <option value="Berat">Berat</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label" for="jenisPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Jenis Pelanggaran</label>
+                        <select class="form-select" id="jenisPelanggaran" name="jenis_pelanggaran" required disabled style="border-radius:12px; font-size:13px;">
+                            <option value="">Pilih kategori terlebih dahulu</option>
+                        </select>
+                    </div>
+                    <div class="col-12" id="jenisPelanggaranKustomWrapper" style="display:none; margin-top:8px;">
+                        <label class="form-label" for="jenisPelanggaranKustom" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Jenis Pelanggaran Lainnya</label>
+                        <input class="form-control" type="text" id="jenisPelanggaranKustom" name="jenis_pelanggaran_kustom" placeholder="Sebutkan jenis pelanggaran..." style="border-radius:12px; font-size:13px;">
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label" for="deskripsiPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Deskripsi</label>
+                    <textarea class="form-control" id="deskripsiPelanggaran" name="deskripsi_pelanggaran" rows="3" placeholder="Jelaskan detail pelanggaran yang dilakukan." style="border-radius:12px; font-size:13px;"></textarea>
+                </div>
+                <div>
+                    <label class="form-label" for="tindakanGuru" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Tindakan yang Diambil</label>
+                    <textarea class="form-control" id="tindakanGuru" name="tindakan_guru" rows="2" placeholder="Teguran, pembinaan, komunikasi wali, atau tindak lanjut lain." style="border-radius:12px; font-size:13px;"></textarea>
+                </div>
+                <div class="row g-2">
+                    <div class="col-12">
+                        <label class="form-label" for="statusPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Status</label>
+                        <select class="form-select" id="statusPelanggaran" name="status_pelanggaran" style="border-radius:12px; font-size:13px;">
+                            <option value="Aktif">Aktif</option>
+                            <option value="Diselesaikan">Diselesaikan</option>
+                            <option value="Follow Up">Perlu Follow Up</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="pelanggaranStatus" style="display:none; font-size:12px; border-radius:12px; padding:10px 12px;"></div>
+                <div style="display:flex; gap:10px; justify-content:flex-end; padding-top:4px;">
+                    <button type="button" data-close-modal class="btn btn-light" style="border-radius:12px; font-weight:800;">Batal</button>
+                    <button type="submit" id="btnSimpanPelanggaran" class="btn" style="background:#dc2626; color:#fff; border-radius:12px; font-weight:800;">
+                        <i class="bi bi-check-lg me-1"></i>Simpan Catatan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+    <!-- SCRIPTS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function() {
+            var jadwalToday = <?= json_encode(array_map(static function ($j) use ($jurnalStatusByMapel) {
+                $idMapel = (int)($j['id_mapel'] ?? 0);
+                return [
+                    'id_mapel' => $idMapel,
+                    'kelas' => (string)($j['kelas'] ?? ''),
+                    'nama_mapel' => (string)($j['nama_mapel'] ?? ''),
+                    'jam_mulai' => (string)($j['jam_mulai'] ?? ''),
+                    'jam_selesai' => (string)($j['jam_selesai'] ?? ''),
+                    'jurnal_terisi' => isset($jurnalStatusByMapel[$idMapel])
+                ];
+            }, $jadwalHariIni), JSON_UNESCAPED_SLASHES); ?>;
+            var guruWaliStudentsByClass = <?= json_encode($guruWaliStudentsByClass, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+
+            window.showToast = window.showToast || function(message) {
+                alert(message);
+            };
+
+            function openDashboardModal(selector) {
+                $(selector).addClass('is-open').attr('aria-hidden', 'false');
+                $('body').addClass('modal-open-dashboard');
+            }
+
+            function closeDashboardModal(selector) {
+                $(selector).removeClass('is-open').attr('aria-hidden', 'true');
+                if ($('.journal-modal-backdrop.is-open').length === 0) {
+                    $('body').removeClass('modal-open-dashboard');
+                }
+            }
+
+            function openInputJurnal(idMapel) {
+                if (!idMapel) {
+                    alert('Jadwal tidak valid.');
+                    return;
+                }
+                var $modalData = $('.modal-data').removeClass('journal-loading');
+                $modalData.html('<div class="journal-loading"><span class="spinner-border spinner-border-sm text-primary me-2"></span><span>Memuat form jurnal...</span></div>');
+                openDashboardModal('#journalInputModal');
+                $.post('detailmateri.php', { getDetail: idMapel }, function(data) {
+                    $modalData.html(data);
+                }).fail(function() {
+                    $modalData.html('<div class="alert alert-danger mb-0">Gagal memuat form jurnal.</div>');
+                });
+            }
+
+            function startInputJurnal() {
+                if (jadwalToday.length === 0) {
+                    alert('Belum ada jadwal mengajar hari ini.');
+                    return;
+                }
+                openDashboardModal('#schedulePickerModal');
+            }
+
+            // Animasi Ring Progress
+            setTimeout(function() {
+                var ring = $('#ringProgress');
+                var pct = ring.data('progress');
+                var r = 45;
+                var c = 2 * Math.PI * r;
+                var offset = c - (pct / 100) * c;
+                ring.css('stroke-dashoffset', offset);
+            }, 100);
+
+            // Handler Input Jurnal
+            $('.btn-open-input-jurnal').on('click', function() {
+                startInputJurnal();
+            });
+
+            // Auto-open schedule picker if coming from other pages with open_jurnal parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('open_jurnal')) {
+                startInputJurnal();
+            }
+
+            $('.journal-picker-main, .btn-open-schedule-journal').on('click', function() {
+                var idMapel = parseInt($(this).data('id'), 10);
+                closeDashboardModal('#schedulePickerModal');
+                openInputJurnal(idMapel);
+            });
+
+            $('.btn-reset-jurnal').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                var $btn = $(this);
+                var idMapel = parseInt($btn.data('id'), 10);
+                var kelas = $btn.data('kelas') || 'kelas ini';
+
+                if (!idMapel || $btn.prop('disabled')) {
+                    return;
+                }
+
+                if (!confirm('Reset jurnal untuk ' + kelas + ' hari ini? Data jurnal dan presensi pada jadwal ini akan dihapus.')) {
+                    return;
+                }
+
+                var originalHtml = $btn.html();
+                $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Reset...');
+
+                $.post('reset-jurnal.php', { idmapel: idMapel }, function(response) {
+                    var payload = response;
+                    if (typeof response === 'string') {
+                        try {
+                            payload = JSON.parse(response);
+                        } catch (err) {
+                            payload = null;
+                        }
+                    }
+
+                    if (payload && payload.success) {
+                        window.location.href = 'guru_legacy?reset=jurnal';
+                        return;
+                    }
+
+                    alert((payload && payload.message) ? payload.message : 'Reset jurnal gagal.');
+                    $btn.prop('disabled', false).html(originalHtml);
+                }).fail(function() {
+                    alert('Gagal menghubungi server reset jurnal.');
+                    $btn.prop('disabled', false).html(originalHtml);
+                });
+            });
+
+            $('[data-close-modal]').on('click', function() {
+                closeDashboardModal('#schedulePickerModal');
+                closeDashboardModal('#journalInputModal');
+                closeDashboardModal('#notifPanelModal');
+                closeDashboardModal('#guruWaliModal');
+                closeDashboardModal('#pelanggaranModal');
+            });
+
+            $('.journal-modal-backdrop').on('click', function(e) {
+                if (e.target === this) {
+                    closeDashboardModal('#' + this.id);
+                }
+            });
+
+            $(document).on('click', '[data-bs-dismiss="modal"]', function() {
+                closeDashboardModal('#journalInputModal');
+            });
+
+            // Navigasi Bottom
+            $('.nav-link, .nav-center').on('click', function(e) {
+                var href = $(this).attr('href') || '#';
+                if (href !== '#') {
+                    return;
+                }
+                e.preventDefault();
+                $('.nav-link').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            // Notifikasi Toggle
+            $('#btn-open-notif-drawer').on('click', function() {
+                openDashboardModal('#notifPanelModal');
+            });
+
+            $('.btn-open-guru-wali').on('click', function(e) {
+                e.preventDefault();
+                openDashboardModal('#guruWaliModal');
+            });
+
+            $('.btn-open-pelanggaran').on('click', function(e) {
+                e.preventDefault();
+                openDashboardModal('#pelanggaranModal');
+            });
+
+            <?php if ($guruWaliFlash !== ''): ?>
+            openDashboardModal('#guruWaliModal');
+            <?php endif; ?>
+
+            $('#kelasBinaan').on('change', function() {
+                var selectedClass = $(this).val();
+                var students = guruWaliStudentsByClass[selectedClass] || [];
+                var $siswa = $('#siswaBinaan');
+
+                $siswa.empty();
+                if (!selectedClass) {
+                    $siswa.append('<option value="">Pilih kelas terlebih dahulu</option>');
+                    $siswa.prop('disabled', true);
+                    return;
+                }
+
+                if (students.length === 0) {
+                    $siswa.append('<option value="">Tidak ada siswa aktif di kelas ini</option>');
+                    $siswa.prop('disabled', true);
+                    return;
+                }
+
+                $siswa.append('<option value="">Pilih siswa</option>');
+                students.forEach(function(student) {
+                    var label = (student.nama_siswa || student.no_induk) + ' - ' + student.no_induk;
+                    $('<option></option>').val(student.no_induk).text(label).appendTo($siswa);
+                });
+                $siswa.prop('disabled', false);
+            });
+
+            var jenisPelanggaranData = {
+                'Berat': ['Tindak kekerasan', 'Membawa minuman keras', 'Membawa senjata tajam/berbahaya', 'Merokok di area sekolah', 'Membawa/menggunakan narkoba', 'Perbuatan asusila', 'Bullying/intimidasi', 'Mencuri', 'Bolos berkepanjangan (>3 hari berturut)', 'Lainnya'],
+                'Sedang': ['Seragam tidak sesuai aturan', 'Terlambat berulang kali', 'Alpha tanpa keterangan (2-3 kali)', 'Tidak mengerjakan tugas berulang kali', 'Membawa HP saat ujian', 'Berkelahi ringan', 'Tidak hormat pada guru', 'Lainnya'],
+                'Ringan': ['Terlambat masuk kelas', 'Alpha tanpa keterangan (1 kali)', 'Tidak mengerjakan PR', 'Ramai di kelas', 'Tidak membawa buku/alat tulis', 'Makan di kelas saat pelajaran', 'Tidur di kelas', 'Lainnya']
+            };
+
+            $('#selectKelasP').on('change', function() {
+                var selectedClass = $(this).val();
+                var students = guruWaliStudentsByClass[selectedClass] || [];
+                var $siswa = $('#selectSiswaP');
+
+                $siswa.empty();
+                if (!selectedClass) {
+                    $siswa.append('<option value="">Pilih kelas terlebih dahulu</option>');
+                    $siswa.prop('disabled', true);
+                    return;
+                }
+                if (students.length === 0) {
+                    $siswa.append('<option value="">Tidak ada siswa aktif di kelas ini</option>');
+                    $siswa.prop('disabled', true);
+                    return;
+                }
+                $siswa.append('<option value="">Pilih siswa</option>');
+                students.forEach(function(student) {
+                    var label = (student.nama_siswa || student.no_induk) + ' - ' + student.no_induk;
+                    $('<option></option>').val(student.no_induk).text(label).appendTo($siswa);
+                });
+                $siswa.prop('disabled', false);
+            });
+
+            $('#kategoriPelanggaran').on('change', function() {
+                var kategori = $(this).val();
+                var $jenis = $('#jenisPelanggaran');
+
+                $jenis.empty();
+                $('#jenisPelanggaranKustomWrapper').hide();
+                $('#jenisPelanggaranKustom').prop('required', false).val('');
+                if (!kategori || !jenisPelanggaranData[kategori]) {
+                    $jenis.append('<option value="">Pilih kategori terlebih dahulu</option>');
+                    $jenis.prop('disabled', true);
+                    return;
+                }
+                $jenis.append('<option value="">Pilih jenis pelanggaran</option>');
+                jenisPelanggaranData[kategori].forEach(function(jenis) {
+                    $('<option></option>').val(jenis).text(jenis).appendTo($jenis);
+                });
+                $jenis.prop('disabled', false);
+            });
+
+            $('#jenisPelanggaran').on('change', function() {
+                var val = $(this).val();
+                if (val === 'Lainnya') {
+                    $('#jenisPelanggaranKustomWrapper').show();
+                    $('#jenisPelanggaranKustom').prop('required', true).focus();
+                } else {
+                    $('#jenisPelanggaranKustomWrapper').hide();
+                    $('#jenisPelanggaranKustom').prop('required', false).val('');
+                }
+            });
+
+            $('#formPelanggaran').on('submit', function(e) {
+                e.preventDefault();
+                var form = this;
+                if (!form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+
+                var $btn = $('#btnSimpanPelanggaran');
+                var $status = $('#pelanggaranStatus');
+                var originalHtml = $btn.html();
+
+                $status.hide().removeClass('alert alert-success alert-danger').text('');
+                $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Menyimpan...');
+
+                $.ajax({
+                    url: '../../simpan_pelanggaran.php',
+                    method: 'POST',
+                    data: new FormData(form),
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json'
+                }).done(function(response) {
+                    if (response && response.success) {
+                        $status.addClass('alert alert-success').text(response.message || 'Catatan pelanggaran berhasil disimpan.').show();
+                        form.reset();
+                        $('#selectSiswaP').prop('disabled', true).html('<option value="">Pilih kelas terlebih dahulu</option>');
+                        $('#jenisPelanggaran').prop('disabled', true).html('<option value="">Pilih kategori terlebih dahulu</option>');
+                        $('#jenisPelanggaranKustomWrapper').hide();
+                        $('#jenisPelanggaranKustom').prop('required', false).val('');
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 700);
+                    } else {
+                        $status.addClass('alert alert-danger').text((response && response.message) ? response.message : 'Gagal menyimpan catatan pelanggaran.').show();
+                    }
+                }).fail(function(xhr) {
+                    var message = 'Gagal menghubungi server simpan pelanggaran.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    }
+                    $status.addClass('alert alert-danger').text(message).show();
+                }).always(function() {
+                    $btn.prop('disabled', false).html(originalHtml);
+                });
+            });
+
+            $(document).on('click', '.btn-open-jurnal-from-notif', function() {
+                var idMapel = parseInt($(this).data('id'), 10);
+                closeDashboardModal('#notifPanelModal');
+                openInputJurnal(idMapel);
+            });
+
+            // === TOGGLE EXPAND/COLLAPSE SISWA BUTUH PENDAMPINGAN ===
+            $(document).on('click', '.pendamp-kelas-header', function() {
+                var targetId = $(this).data('target');
+                var $panel = $('#' + targetId);
+                var $chevron = $(this).find('.pendamp-chevron');
+
+                if ($panel.css('display') === 'none') {
+                    $panel.css('display', 'flex');
+                    $chevron.css('transform', 'rotate(180deg)');
+                } else {
+                    $panel.css('display', 'none');
+                    $chevron.css('transform', 'rotate(0deg)');
+                }
+            });
+        });
+    </script>
+    <script>
+        // KBM Countdown Timer
+        (function() {
+            var timerInterval = null;
+            
+            function initTimer() {
+                if (timerInterval) clearInterval(timerInterval);
+                
+                var timerVal = document.getElementById("kbm-timer");
+                if (!timerVal) return;
+                
+                var kbmBox = document.getElementById("kbm-box");
+                var targetStr = kbmBox.getAttribute("data-target");
+                if (!targetStr) return;
+                
+                var targetDate = new Date(targetStr).getTime();
+                
+                function updateTimer() {
+                    var now = new Date().getTime();
+                    var diff = targetDate - now;
+                    
+                    if (diff <= 0) {
+                        timerVal.textContent = "00m 00s";
+                        clearInterval(timerInterval);
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 2000);
+                        return;
+                    }
+                    
+                    var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    
+                    var display = "";
+                    if (hours > 0) display += String(hours).padStart(2, '0') + "j ";
+                    display += String(minutes).padStart(2, '0') + "m " + String(seconds).padStart(2, '0') + "s";
+                    
+                    timerVal.textContent = display;
+                }
+                
+                updateTimer();
+                timerInterval = setInterval(updateTimer, 1000);
+            }
+
+            initTimer();
+        })();
+    </script>
