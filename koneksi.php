@@ -128,8 +128,6 @@ try {
     error_log('[koneksi.php] MySQL exception: ' . $e->getMessage());
     $conn = null;
 }
-?>
-
 
 // === AUTO-ALPA & AUTO-EXPIRE IZIN ===
 // Cek izin yang belum divalidasi dan sudah lewat hari
