@@ -398,7 +398,7 @@
 }
 
 /* Hide desktop elements on mobile */
-@media (max-width: 991px) {
+@media (max-width: 767px) {
     .desktop-sidebar, .desktop-topbar, .desktop-grid {
         display: none !important;
     }
