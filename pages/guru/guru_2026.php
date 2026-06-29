@@ -1587,7 +1587,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
 <!-- Modal Isi Jurnal (Bootstrap) -->
 <div class="modal fade" id="show" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen-sm-down modal-lg">
+    <div class="modal-dialog modal-fullscreen-sm-down modal-lg" style="max-width: 950px;">
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title">Isi Jurnal</h6>
