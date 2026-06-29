@@ -1556,24 +1556,24 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                             $mapelJadwal = (string)($j['nama_mapel'] ?? '');
                             $isJurnalTerisi = isset($jurnalStatusByMapel[$idMapel]);
                         ?>
-                            <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-2 rounded shadow-sm border-0" style="cursor: default;">
-                                <div>
-                                    <h6 class="mb-1 fw-bold text-primary"><?= htmlspecialchars($kelasJadwal, ENT_QUOTES, 'UTF-8'); ?> <span class="text-dark">&bull; <?= htmlspecialchars($mapelJadwal, ENT_QUOTES, 'UTF-8'); ?></span></h6>
-                                    <div class="d-flex align-items-center gap-2 mt-2">
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25"><i class="bi bi-clock"></i> <?= htmlspecialchars(substr((string)($j['jam_mulai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars(substr((string)($j['jam_selesai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?></span>
+                            <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2 rounded shadow-sm border-0" style="cursor: default;">
+                                <div class="mb-3 mb-md-0">
+                                    <h6 class="mb-1 text-primary" style="font-weight: 700;"><?= htmlspecialchars($kelasJadwal, ENT_QUOTES, 'UTF-8'); ?> <span class="text-dark">&bull; <?= htmlspecialchars($mapelJadwal, ENT_QUOTES, 'UTF-8'); ?></span></h6>
+                                    <div class="d-flex align-items-center mt-2 flex-wrap">
+                                        <span class="badge badge-secondary mr-2 mb-1 p-2"><i class="bi bi-clock"></i> <?= htmlspecialchars(substr((string)($j['jam_mulai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars(substr((string)($j['jam_selesai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?></span>
                                         <?php if ($isJurnalTerisi): ?>
-                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i class="bi bi-check2-circle"></i> Sudah terisi</span>
+                                            <span class="badge badge-success mb-1 p-2"><i class="bi bi-check2-circle"></i> Sudah terisi</span>
                                         <?php else: ?>
-                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25"><i class="bi bi-clock-history"></i> Belum terisi</span>
+                                            <span class="badge badge-warning text-dark mb-1 p-2"><i class="bi bi-clock-history"></i> Belum terisi</span>
                                         <?php endif; ?>
                                     </div>
                                 </div>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-sm btn-primary btn-open-schedule-journal flex-grow-1 shadow-sm" type="button" data-id="<?= $idMapel; ?>">
-                                        <i class="bi bi-journal-plus"></i> <?= $isJurnalTerisi ? 'Lihat/Edit Jurnal' : 'Input Jurnal'; ?>
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-sm btn-primary btn-open-schedule-journal mr-2 shadow-sm" type="button" data-id="<?= $idMapel; ?>" style="white-space: nowrap;">
+                                        <i class="bi bi-journal-plus"></i> <?= $isJurnalTerisi ? 'Lihat/Edit' : 'Input Jurnal'; ?>
                                     </button>
-                                    <a class="btn btn-sm btn-outline-primary flex-grow-1 shadow-sm" href="inputnilai?getDetail=<?= $idMapel; ?>">
-                                        <i class="bi bi-clipboard2-check"></i> Input Nilai
+                                    <a class="btn btn-sm btn-outline-primary shadow-sm" href="inputnilai?getDetail=<?= $idMapel; ?>" style="white-space: nowrap;">
+                                        <i class="bi bi-clipboard2-check"></i> Nilai
                                     </a>
                                 </div>
                             </div>
