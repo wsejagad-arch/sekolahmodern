@@ -636,8 +636,36 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         <div class="welcome-banner-card">
             <div class="welcome-banner-info">
                 <h2>Hello <?= htmlspecialchars(explode(' ', $dataGuru['nama_guru'])[0]) ?>!</h2>
-                <p>You have <?= $unfilledJurnalCount ?> pending journals today. Let's start filling them up!</p>
-                <a href="javascript:void(0)" onclick="$('html, body').animate({scrollTop: $('#list-jadwal-mengajar').offset().top}, 500);">Review schedule</a>
+                <?php
+                $filledJurnalCount = max(0, $totalJadwalHari - $unfilledJurnalCount);
+                $jurnalPercentage = ($totalJadwalHari > 0) ? round(($filledJurnalCount / $totalJadwalHari) * 100) : 100;
+                ?>
+                <p style="font-size: 0.95rem; opacity: 0.9; margin-bottom: 12px;">Anda memiliki <?= $unfilledJurnalCount ?> jurnal yang belum diisi hari ini.</p>
+                
+                <?php if ($totalJadwalHari > 0): ?>
+                <div style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 12px 16px; width: 100%; max-width: 320px; margin-bottom: 16px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.2);">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 8px;">
+                        <span>Progress Jurnal Harian</span>
+                        <span><?= $jurnalPercentage ?>%</span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; margin-bottom: 6px;">
+                        <div style="height: 100%; width: <?= $jurnalPercentage ?>%; background: #fff; border-radius: 4px; transition: width 1s ease-in-out;"></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.8);">
+                        <?= $filledJurnalCount ?> dari <?= $totalJadwalHari ?> kelas terselesaikan
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($unfilledJurnalCount > 0 && !empty($unfilledJadwal)): ?>
+                    <a href="javascript:void(0)" onclick="openInputJurnal(<?= $unfilledJadwal[0]['id_mapel'] ?>)" style="display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #4f46e5; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';">
+                        <i class="bi bi-pencil-square"></i> Input Jurnal Sekarang
+                    </a>
+                <?php else: ?>
+                    <a href="javascript:void(0)" onclick="$('html, body').animate({scrollTop: $('#list-jadwal-mengajar').offset().top}, 500);" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.2); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; border: 1px solid rgba(255,255,255,0.3); font-size: 0.9rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)';" onmouseout="this.style.background='rgba(255,255,255,0.2)';">
+                        <i class="bi bi-calendar-check"></i> Lihat Jadwal
+                    </a>
+                <?php endif; ?>
             </div>
             <!-- 3D style SVG graphic of teacher studying -->
             <svg class="welcome-banner-illustration" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
