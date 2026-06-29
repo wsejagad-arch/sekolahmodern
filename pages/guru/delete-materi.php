@@ -17,8 +17,10 @@ $id = $_REQUEST['id'];
 $fmateri = $_REQUEST['file'];
 $sql = mysqli_query($conn, "DELETE FROM tbl_materi WHERE id_materi='$id'");
 if($sql) { 
-	unlink('../../materi/' . $fmateri);
-	header('location:guru.php?hapusmateri');	
+	if ($fmateri) {
+		@unlink('../../materi/' . $fmateri);
+	}
+	header('location:../../home.php?p=dashboard_guru&sukses=hapusjurnal');	
 } else { 
-	header('location:guru.php?gagalhapusmateri');
+	header('location:../../home.php?p=dashboard_guru&gagal=hapusjurnal');
 }

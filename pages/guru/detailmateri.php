@@ -106,7 +106,7 @@ if(isset($_POST['getDetail'])) {
                 }
             }
             
-            $hapusUrl = 'delete-materi?id=' . $idMateri . ($file ? ('&file=' . rawurlencode($file)) : '');
+            $hapusUrl = 'pages/guru/delete-materi.php?id=' . $idMateri . ($file ? ('&file=' . rawurlencode($file)) : '');
             echo '<div id="ringkasanJurnal" class="card mb-3">'
               .'<div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">'
               .'<span class="fw-semibold">Ringkasan Jurnal Hari Ini</span>'
@@ -269,6 +269,17 @@ $existingKeterangan = $existingKeterangan ?? '';
 
 <script>
 (function() {
+    // 0. Logic Tombol Edit Jurnal
+    var btnEdit = document.getElementById('btnEditJurnal');
+    if (btnEdit) {
+        btnEdit.onclick = function() {
+            var ringkasan = document.getElementById('ringkasanJurnal');
+            var formEdit = document.getElementById('formEditJurnal');
+            if (ringkasan) ringkasan.style.display = 'none';
+            if (formEdit) formEdit.style.display = 'block';
+        };
+    }
+
     // 1. Logic Tombol "Semua Hadir"
     var btnAll = document.getElementById('btnAllHadir');
     if(btnAll) {
