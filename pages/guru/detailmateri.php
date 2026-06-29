@@ -188,8 +188,8 @@ $existingKeterangan = $existingKeterangan ?? '';
             </div>
 
             <style>
-                .absen-radio { appearance:none; width:28px; height:28px; border:2px solid #dee2e6; border-radius:50%; position:relative; cursor:pointer; background:#fff; transition:.2s; display:inline-block; }
-                .absen-radio::after { content: attr(data-letter); position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:11px; font-weight:bold; color:#adb5bd; text-transform:uppercase; }
+                .absen-radio { appearance:none; width:22px; height:22px; border:1px solid #dee2e6; border-radius:50%; position:relative; cursor:pointer; background:#fff; transition:.2s; display:inline-block; margin: 0; }
+                .absen-radio::after { content: attr(data-letter); position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:10px; font-weight:bold; color:#adb5bd; text-transform:uppercase; }
                 .absen-radio:checked { transform: scale(1.1); }
                 .absen-radio[value="Hadir"]:checked { background-color:#198754; border-color:#198754; } 
                 .absen-radio[value="Ijin"]:checked { background-color:#0dcaf0; border-color:#0dcaf0; }
@@ -198,8 +198,12 @@ $existingKeterangan = $existingKeterangan ?? '';
                 .absen-radio[value="Dispen"]:checked { background-color:#6f42c1; border-color:#6f42c1; }
                 .absen-radio[value="Telat"]:checked { background-color:#fd7e14; border-color:#fd7e14; }
                 .absen-radio:checked::after { color:#fff; }
-                .blink { display:inline-block; animation: blink 1s steps(1,start) infinite; }
-                @keyframes blink { 50% { opacity: 0; } }
+                
+                /* Compact table styling */
+                .table-absen { table-layout: auto; width: 100%; }
+                .table-absen th, .table-absen td { padding: 4px 2px !important; vertical-align: middle; }
+                .table-absen th.col-radio, .table-absen td.col-radio { width: 28px; text-align: center; }
+                .table-absen td.col-nama { font-size: 12px; padding-left: 8px !important; line-height: 1.2; }
             </style>
 
             <?php
@@ -210,14 +214,14 @@ $existingKeterangan = $existingKeterangan ?? '';
                 $siswaQuery = mysqli_query($conn, $queryS);
 
                 if($siswaQuery && mysqli_num_rows($siswaQuery) > 0) {
-                    echo "<div class='table-responsive border rounded' style='max-height: 400px; overflow-y:auto;'>
-                          <table class='table table-striped table-hover align-middle table-sm mb-0' style='font-size:0.9rem'>
+                    echo "<div class='border rounded' style='max-height: 400px; overflow-y:auto; overflow-x:hidden;'>
+                          <table class='table table-striped table-hover align-middle mb-0 table-absen'>
                           <thead class='table-light sticky-top'>
                             <tr>
-                              <th>Nama Siswa</th>
-                              <th class='text-center'>H</th><th class='text-center'>I</th>
-                              <th class='text-center'>S</th><th class='text-center'>D</th>
-                              <th class='text-center'>A</th><th class='text-center'>T</th>
+                              <th class='col-nama'>Nama Siswa</th>
+                              <th class='col-radio'>H</th><th class='col-radio'>I</th>
+                              <th class='col-radio'>S</th><th class='col-radio'>D</th>
+                              <th class='col-radio'>A</th><th class='col-radio'>T</th>
                             </tr>
                           </thead>
                           <tbody>";
@@ -234,13 +238,13 @@ $existingKeterangan = $existingKeterangan ?? '';
                         $checkedAlpha = $statusSiswa === 'alpha' ? ' checked' : '';
                         $checkedTelat = $statusSiswa === 'telat' ? ' checked' : '';
                         echo "<tr>
-                                <td>" . htmlspecialchars($s['nama_siswa']) . "</td>
-                                <td class='text-center'><input class='absen-radio' type='radio' data-letter='h' name='absen[".$nis."]' value='Hadir'".$checkedHadir."></td>
-                                <td class='text-center'><input class='absen-radio' type='radio' data-letter='i' name='absen[".$nis."]' value='Ijin'".$checkedIjin."></td>
-                                <td class='text-center'><input class='absen-radio' type='radio' data-letter='s' name='absen[".$nis."]' value='Sakit'".$checkedSakit."></td>
-                                <td class='text-center'><input class='absen-radio' type='radio' data-letter='d' name='absen[".$nis."]' value='Dispen'".$checkedDispen."></td>
-                                <td class='text-center'><input class='absen-radio' type='radio' data-letter='a' name='absen[".$nis."]' value='Alpha'".$checkedAlpha."></td>
-                                <td class='text-center'><input class='absen-radio' type='radio' data-letter='t' name='absen[".$nis."]' value='Telat'".$checkedTelat."></td>
+                                <td class='col-nama'>" . htmlspecialchars($s['nama_siswa']) . "</td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='h' name='absen[".$nis."]' value='Hadir'".$checkedHadir."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='i' name='absen[".$nis."]' value='Ijin'".$checkedIjin."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='s' name='absen[".$nis."]' value='Sakit'".$checkedSakit."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='d' name='absen[".$nis."]' value='Dispen'".$checkedDispen."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='a' name='absen[".$nis."]' value='Alpha'".$checkedAlpha."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='t' name='absen[".$nis."]' value='Telat'".$checkedTelat."></td>
                               </tr>";
                     }
                     echo "</tbody></table></div>";
