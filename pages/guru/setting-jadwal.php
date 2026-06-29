@@ -203,6 +203,7 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
     <title>Setting Jadwal - SIMANIS</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/guru-desktop.css?v=<?= time() ?>">
     <style>
         :root { --line:#e2e8f0; --ink:#0f172a; --muted:#64748b; --brand:#2563eb; }
         body { margin:0; font-family:"Plus Jakarta Sans", system-ui, sans-serif; background:linear-gradient(135deg,#eff6ff,#f8fafc 48%,#ecfeff); color:var(--ink); padding-bottom:72px; }
@@ -220,12 +221,72 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
         .mobile-nav a { color:#64748b; text-decoration:none; font-size:12px; font-weight:800; display:flex; flex-direction:column; align-items:center; }
         .mobile-nav i { font-size:20px; }
         @media (max-width:640px) { .shell { padding:16px; } .hero { padding:20px; } }
+        
+        /* Desktop specific styling overrides */
+        @media (min-width: 768px) {
+            .mobile-nav, 
+            .guru-common-footer-wrap,
+            body.guru-common-footer-active {
+                display: none !important;
+                padding-bottom: 0 !important;
+            }
+            body {
+                padding-bottom: 0 !important;
+                background: #ebf1f6 !important;
+            }
+            /* Shift main content container */
+            .shell {
+                margin-left: 260px !important;
+                max-width: calc(100% - 260px) !important;
+                padding: 32px !important;
+            }
+            .hero {
+                background: #ffffff !important;
+                color: #1e293b !important;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.02) !important;
+                border: 1px solid rgba(226,232,240,.9) !important;
+            }
+            .hero h1 {
+                color: #1e293b !important;
+                font-weight: 800 !important;
+            }
+            .hero p {
+                color: #64748b !important;
+            }
+            .hero a {
+                color: #3c58b9 !important;
+                font-weight: 700 !important;
+            }
+        }
     </style>
 </head>
 <body>
+
+<!-- DESKTOP SIDEBAR -->
+<div class="desktop-sidebar">
+    <div class="desktop-logo">
+        <i class="bi bi-book-half"></i> SIMANIS
+    </div>
+    <div class="desktop-nav">
+        <a href="../../home.php"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+        <a href="setting-jadwal" class="active"><i class="bi bi-calendar3"></i> Kelas Saya</a>
+        <a href="data-siswa"><i class="bi bi-people"></i> Data Siswa</a>
+        <a href="nilai"><i class="bi bi-journal-check"></i> Nilai & Tugas</a>
+        <a href="materi"><i class="bi bi-book"></i> Materi</a>
+        <a href="laporan-kelas"><i class="bi bi-cpu"></i> Laporan & AI</a>
+        <a href="ekinerja"><i class="bi bi-speedometer2"></i> e-Kinerja</a>
+        <a href="profil-guru"><i class="bi bi-gear"></i> Pengaturan</a>
+    </div>
+    <div class="desktop-logout-wrap">
+        <a href="../../logout.php" onclick="return confirm('Apakah Anda yakin ingin keluar?');" class="btn-desktop-logout">
+            <i class="bi bi-box-arrow-right"></i> Log Out
+        </a>
+    </div>
+</div>
+
 <main class="shell">
     <section class="hero">
-        <a href="guru_2026"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+        <a href="../../home.php"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
         <h1 class="mt-3 mb-2">Setting Jadwal</h1>
         <p class="mb-0 text-white-50">Kelola jadwal mengajar milik Anda sendiri. Jadwal yang diubah di sini langsung dipakai oleh dashboard, jurnal mengajar, dan presensi siswa.</p>
     </section>
@@ -346,7 +407,7 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
 </main>
 
 <nav class="mobile-nav">
-    <a href="guru_2026"><i class="bi bi-house-door"></i><span>Beranda</span></a>
+    <a href="../../home.php"><i class="bi bi-house-door"></i><span>Beranda</span></a>
     <a href="setting-jadwal" style="color:#2563eb;"><i class="bi bi-calendar-week"></i><span>Jadwal</span></a>
     <a href="materi"><i class="bi bi-journal-text"></i><span>Jurnal</span></a>
     <a href="profil-guru"><i class="bi bi-person"></i><span>Profil</span></a>
