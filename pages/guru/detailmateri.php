@@ -317,7 +317,7 @@ $existingKeterangan = $existingKeterangan ?? '';
 
             // Kirim Data
             var formData = new FormData(form);
-            fetch('simpanmateri', {
+            fetch('pages/guru/simpanmateri.php', {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -355,7 +355,7 @@ $existingKeterangan = $existingKeterangan ?? '';
                             modal.setAttribute('aria-hidden', 'true');
                         }
                         document.body.classList.remove('modal-open-dashboard');
-                        window.location.href = '../../home.php?sukses=jurnal';
+                        window.location.href = 'home.php?sukses=jurnal';
                     }, 900);
                 } else {
                     btn.innerHTML = 'Coba Lagi';
