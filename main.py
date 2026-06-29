@@ -288,10 +288,10 @@ async def pair_whatsapp(data: dict):
     if not number:
         raise HTTPException(status_code=400, detail="Number is required")
     try:
-        res = requests.post(f"{NODE_WORKER_URL}/pair", json={"number": number, "device_id": device_id}, timeout=10)
+        res = requests.post(f"{NODE_WORKER_URL}/pair", json={"number": number, "device_id": device_id}, timeout=30)
         return JSONResponse(status_code=res.status_code, content=res.json())
     except requests.exceptions.RequestException as e:
-        raise HTTPException(status_code=500, detail=f"Engine communication error: {e}")
+        return JSONResponse(status_code=500, content={"error": f"Engine communication error: {e}"})
 
 # Proxy to Node worker for logout (Disconnect WhatsApp connection)
 @app.post("/api/logout", dependencies=[Depends(verify_auth)])

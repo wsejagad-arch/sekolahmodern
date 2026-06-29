@@ -252,9 +252,15 @@ app.post("/pair", async (req, res) => {
         return res.status(400).json({ error: `Device ${deviceId} is already connected` });
     }
 
+    // Clean number for pairing (must include country code, e.g., 62 instead of 0)
+    let cleanNumber = number.replace(/[^0-9]/g, "");
+    if (cleanNumber.startsWith("0")) {
+        cleanNumber = "62" + cleanNumber.substring(1);
+    }
+
     try {
-        console.log(`🔑 [Device ${deviceId}] Generating pairing code for ${number}...`);
-        devices[deviceId].pairingNumber = number;
+        console.log(`🔑 [Device ${deviceId}] Generating pairing code for ${cleanNumber}...`);
+        devices[deviceId].pairingNumber = cleanNumber;
         
         // Always clear existing session files to start 100% fresh for new pairing request
         const deviceSessionDir = path.join(SESSION_DIR, `device_${deviceId}`);
@@ -284,7 +290,7 @@ app.post("/pair", async (req, res) => {
         }
         
         // Request pairing code from baileys
-        const code = await sock.requestPairingCode(number);
+        const code = await sock.requestPairingCode(cleanNumber);
         devices[deviceId].latestPairingCode = code;
         devices[deviceId].connectionState = "qr"; // We use QR state/login phase
         
@@ -310,7 +316,7 @@ app.post("/pair", async (req, res) => {
                 throw new Error("Fresh socket could not be initialized");
             }
             
-            const code = await freshSock.requestPairingCode(number);
+            const code = await freshSock.requestPairingCode(cleanNumber);
             devices[deviceId].latestPairingCode = code;
             devices[deviceId].connectionState = "qr";
             
