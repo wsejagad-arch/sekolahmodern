@@ -2068,19 +2068,19 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 alert(message);
             };
 
-            function openDashboardModal(selector) {
+            window.openDashboardModal = function(selector) {
                 $(selector).addClass('is-open').attr('aria-hidden', 'false');
                 $('body').addClass('modal-open-dashboard');
-            }
+            };
 
-            function closeDashboardModal(selector) {
+            window.closeDashboardModal = function(selector) {
                 $(selector).removeClass('is-open').attr('aria-hidden', 'true');
                 if ($('.journal-modal-backdrop.is-open').length === 0) {
                     $('body').removeClass('modal-open-dashboard');
                 }
-            }
+            };
 
-            function openInputJurnal(idMapel) {
+            window.openInputJurnal = function(idMapel) {
                 if (!idMapel) {
                     alert('Jadwal tidak valid.');
                     return;
@@ -2093,7 +2093,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 }).fail(function() {
                     $modalData.html('<div class="alert alert-danger mb-0">Gagal memuat form jurnal.</div>');
                 });
-            }
+            };
 
             function startInputJurnal() {
                 if (jadwalToday.length === 0) {
