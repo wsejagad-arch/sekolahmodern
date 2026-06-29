@@ -119,6 +119,30 @@
         font-weight: 800;
     }
 
+    .desktop-nav a i {
+        font-size: 1.25rem;
+        transition: transform 0.2s ease, color 0.2s ease;
+        width: 24px;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Flat color scheme for sidebar icons */
+    .desktop-nav a i.bi-grid-1x2-fill { color: #60a5fa !important; }      /* Dashboard - Blue */
+    .desktop-nav a i.bi-calendar3 { color: #818cf8 !important; }          /* Kelas Saya - Indigo */
+    .desktop-nav a i.bi-people { color: #34d399 !important; }             /* Data Siswa - Emerald */
+    .desktop-nav a i.bi-journal-check { color: #fbbf24 !important; }      /* Nilai - Amber */
+    .desktop-nav a i.bi-book { color: #c084fc !important; }               /* Materi - Purple */
+    .desktop-nav a i.bi-cpu { color: #f472b6 !important; }                /* Laporan & AI - Rose */
+    .desktop-nav a i.bi-speedometer2 { color: #2dd4bf !important; }       /* e-Kinerja - Teal */
+    .desktop-nav a i.bi-gear { color: #94a3b8 !important; }              /* Pengaturan - Slate */
+
+    .desktop-nav a.active i {
+        color: #3c58b9 !important;
+    }
+
     /* Curve cutouts using pseudo-elements */
     .desktop-nav a.active::before,
     .desktop-nav a.active::after {
