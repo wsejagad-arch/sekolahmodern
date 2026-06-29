@@ -1496,8 +1496,8 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-center">
-                                    <button class="btn btn-sm btn-primary btn-open-schedule-journal mr-2 shadow-sm" type="button" data-id="<?= $idMapel; ?>" style="white-space: nowrap;">
-                                        <i class="bi bi-journal-plus"></i> <?= $isJurnalTerisi ? 'Lihat/Edit' : 'Input Jurnal'; ?>
+                                    <button class="btn btn-sm btn-primary btn-open-schedule-journal mr-2 shadow-sm text-white" type="button" data-id="<?= $idMapel; ?>" style="white-space: nowrap; color: #fff !important;">
+                                        <i class="bi bi-journal-plus" style="color: #fff !important;"></i> <?= $isJurnalTerisi ? 'Lihat/Edit' : 'Input Jurnal'; ?>
                                     </button>
                                     <a class="btn btn-sm btn-outline-primary shadow-sm" href="inputnilai?getDetail=<?= $idMapel; ?>" style="white-space: nowrap;">
                                         <i class="bi bi-clipboard2-check"></i> Nilai

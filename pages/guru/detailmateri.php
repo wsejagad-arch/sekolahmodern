@@ -111,7 +111,7 @@ if(isset($_POST['getDetail'])) {
               .'<div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">'
               .'<span class="fw-semibold">Ringkasan Jurnal Hari Ini</span>'
               .'<div class="d-flex gap-2">'
-              .'<button type="button" id="btnEditJurnal" class="btn btn-sm btn-primary">Edit Jurnal</button>'
+              .'<button type="button" id="btnEditJurnal" class="btn btn-sm btn-primary text-white" style="color: #fff !important;">Edit Jurnal</button>'
               .'<a class="btn btn-sm btn-outline-danger" href="'.$hapusUrl.'" onclick="return confirm(\'Yakin mau menghapus isian jurnal ini?\');">Hapus Jurnal</a>'
               .'</div>'
               .'</div><div class="card-body">';
@@ -271,8 +271,8 @@ $existingKeterangan = $existingKeterangan ?? '';
 
         <div id="msgBox"></div>
 
-        <button type="submit" id="btnSimpan" class="btn btn-primary w-100 py-2">
-            <i class="bi bi-save me-2"></i> Simpan Jurnal
+        <button type="submit" id="btnSimpan" class="btn btn-primary w-100 py-2 text-white" style="color: #fff !important;">
+            <i class="bi bi-save me-2" style="color: #fff !important;"></i> Simpan Jurnal
         </button>
     </form>
 </div>
