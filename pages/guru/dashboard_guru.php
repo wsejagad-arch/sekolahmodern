@@ -580,9 +580,9 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         </div>
         <div class="desktop-topbar-actions">
             <span class="topbar-lang">ENG <i class="bi bi-chevron-down"></i></span>
-            <button class="topbar-icon-btn"><i class="bi bi-envelope"></i></button>
+            <div class="topbar-icon-btn" role="button"><i class="bi bi-envelope"></i></div>
             
-            <button class="topbar-icon-btn" onclick="toggleNotif(event)">
+            <div class="topbar-icon-btn" role="button" onclick="toggleNotif(event)">
                 <i class="bi bi-bell"></i>
                 <?php if($totalNotifCount > 0): ?>
                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width: 8px; height: 8px;"></span>
@@ -616,7 +616,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         <?php endif; ?>
                     </div>
                 </div>
-            </button>
+            </div>
             
             <div class="topbar-profile-card" onclick="window.location='pages/guru/profil-guru'">
                 <img src="<?= htmlspecialchars($foto) ?>" alt="Profile">
