@@ -74,7 +74,7 @@ async function connectToWhatsApp(deviceId) {
         auth: state,
         logger: logger,
         version: version,
-        browser: Browsers.windows('Desktop'),
+        browser: Browsers.ubuntu('Chrome'),
         markOnlineOnConnect: true
     });
 
