@@ -551,13 +551,13 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     </div>
     <div class="desktop-nav">
         <a href="?page=beranda" class="active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
-        <a href="?page=kelas-saya"><i class="bi bi-calendar3"></i> Kelas Saya</a>
-        <a href="?page=siswa"><i class="bi bi-people"></i> Data Siswa</a>
-        <a href="inputnilai"><i class="bi bi-journal-check"></i> Nilai & Tugas</a>
-        <a href="?page=materi"><i class="bi bi-book"></i> Materi</a>
-        <a href="laporan-kelas"><i class="bi bi-cpu"></i> Laporan & AI</a>
-        <a href="ekinerja"><i class="bi bi-speedometer2"></i> e-Kinerja</a>
-        <a href="?page=pengaturan"><i class="bi bi-gear"></i> Pengaturan</a>
+        <a href="pages/guru/setting-jadwal"><i class="bi bi-calendar3"></i> Kelas Saya</a>
+        <a href="pages/guru/data-siswa"><i class="bi bi-people"></i> Data Siswa</a>
+        <a href="pages/guru/nilai"><i class="bi bi-journal-check"></i> Nilai & Tugas</a>
+        <a href="pages/guru/materi"><i class="bi bi-book"></i> Materi</a>
+        <a href="pages/guru/laporan-kelas"><i class="bi bi-cpu"></i> Laporan & AI</a>
+        <a href="pages/guru/ekinerja"><i class="bi bi-speedometer2"></i> e-Kinerja</a>
+        <a href="pages/guru/profil-guru"><i class="bi bi-gear"></i> Pengaturan</a>
     </div>
     <div class="desktop-profile">
         <?php 
@@ -691,7 +691,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             </div>
             
             <div class="dk-quick-grid">
-                <a href="validasi-izin" class="dk-quick-btn">
+                <a href="pages/guru/validasi-izin" class="dk-quick-btn">
                     <i class="bi bi-person-check-fill text-success"></i>
                     <span>Validasi Izin</span>
                 </a>
@@ -699,19 +699,19 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     <i class="bi bi-exclamation-triangle-fill text-danger"></i>
                     <span>Pelanggaran</span>
                 </a>
-                <a href="jurnal" class="dk-quick-btn">
+                <a href="pages/guru/jurnal" class="dk-quick-btn">
                     <i class="bi bi-journal-plus text-primary"></i>
                     <span>Isi Jurnal</span>
                 </a>
-                <a href="literasi.php" class="dk-quick-btn">
+                <a href="pages/guru/literasi" class="dk-quick-btn">
                     <i class="bi bi-book-half text-info"></i>
                     <span>Literasi</span>
                 </a>
-                <a href="ekinerja" class="dk-quick-btn">
+                <a href="pages/guru/ekinerja" class="dk-quick-btn">
                     <i class="bi bi-speedometer2 text-warning"></i>
                     <span>e-Kinerja</span>
                 </a>
-                <a href="apresiasi-guru" class="dk-quick-btn">
+                <a href="pages/guru/apresiasi-guru" class="dk-quick-btn">
                     <i class="bi bi-award-fill text-primary"></i>
                     <span>Apresiasi</span>
                 </a>
