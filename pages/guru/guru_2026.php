@@ -2088,7 +2088,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 var $modalData = $('.modal-data').removeClass('journal-loading');
                 $modalData.html('<div class="journal-loading"><span class="spinner-border spinner-border-sm text-primary me-2"></span><span>Memuat form jurnal...</span></div>');
                 openDashboardModal('#journalInputModal');
-                $.post('detailmateri.php', { getDetail: idMapel }, function(data) {
+                $.post('pages/guru/detailmateri.php', { getDetail: idMapel }, function(data) {
                     $modalData.html(data);
                 }).fail(function() {
                     $modalData.html('<div class="alert alert-danger mb-0">Gagal memuat form jurnal.</div>');
@@ -2149,7 +2149,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 var originalHtml = $btn.html();
                 $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Reset...');
 
-                $.post('reset-jurnal.php', { idmapel: idMapel }, function(response) {
+                $.post('pages/guru/reset-jurnal.php', { idmapel: idMapel }, function(response) {
                     var payload = response;
                     if (typeof response === 'string') {
                         try {
@@ -2160,7 +2160,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     }
 
                     if (payload && payload.success) {
-                        window.location.href = 'guru_2026?reset=jurnal';
+                        window.location.href = '?page=beranda&reset=jurnal';
                         return;
                     }
 
