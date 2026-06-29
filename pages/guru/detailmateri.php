@@ -188,9 +188,9 @@ $existingKeterangan = $existingKeterangan ?? '';
             </div>
 
             <style>
-                .absen-radio { appearance:none; width:22px; height:22px; border:1px solid #dee2e6; border-radius:50%; position:relative; cursor:pointer; background:#fff; transition:.2s; display:inline-block; margin: 0; }
-                .absen-radio::after { content: attr(data-letter); position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:10px; font-weight:bold; color:#adb5bd; text-transform:uppercase; }
-                .absen-radio:checked { transform: scale(1.1); }
+                .absen-radio { appearance:none; width:24px; height:24px; border:1px solid #dee2e6; border-radius:50%; position:relative; cursor:pointer; background:#fff; transition:.2s; display:inline-block; margin: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+                .absen-radio::after { content: attr(data-letter); position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:11px; font-weight:bold; color:#adb5bd; text-transform:uppercase; }
+                .absen-radio:checked { transform: scale(1.15); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
                 .absen-radio[value="Hadir"]:checked { background-color:#198754; border-color:#198754; } 
                 .absen-radio[value="Ijin"]:checked { background-color:#0dcaf0; border-color:#0dcaf0; }
                 .absen-radio[value="Sakit"]:checked { background-color:#ffc107; border-color:#ffc107; }
@@ -198,11 +198,21 @@ $existingKeterangan = $existingKeterangan ?? '';
                 .absen-radio[value="Dispen"]:checked { background-color:#6f42c1; border-color:#6f42c1; }
                 .absen-radio[value="Telat"]:checked { background-color:#fd7e14; border-color:#fd7e14; }
                 .absen-radio:checked::after { color:#fff; }
-                /* Compact table styling */
+                
+                /* Base (Mobile) Compact table styling */
                 .table-absen { table-layout: fixed; width: 100%; word-wrap: break-word; }
-                .table-absen th, .table-absen td { padding: 4px 1px !important; vertical-align: middle; }
-                .table-absen th.col-radio, .table-absen td.col-radio { width: 30px; text-align: center; overflow: hidden; }
-                .table-absen th.col-nama, .table-absen td.col-nama { width: auto; font-size: 12px; padding-left: 6px !important; line-height: 1.2; word-break: break-word; }
+                .table-absen th, .table-absen td { padding: 6px 2px !important; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
+                .table-absen th.col-radio, .table-absen td.col-radio { width: 32px; text-align: center; overflow: hidden; }
+                .table-absen th.col-nama, .table-absen td.col-nama { width: auto; font-size: 12px; padding-left: 8px !important; line-height: 1.3; word-break: break-word; }
+                
+                /* Desktop Larger Columns */
+                @media (min-width: 768px) {
+                    .table-absen th, .table-absen td { padding: 10px 4px !important; }
+                    .table-absen th.col-radio, .table-absen td.col-radio { width: 85px; }
+                    .table-absen th.col-nama, .table-absen td.col-nama { font-size: 14px; padding-left: 16px !important; font-weight: 500; }
+                    .absen-radio { width: 28px; height: 28px; }
+                    .absen-radio::after { font-size: 12px; }
+                }
             </style>
 
             <?php
