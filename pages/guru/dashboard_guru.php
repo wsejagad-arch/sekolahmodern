@@ -619,7 +619,13 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             </div>
             
             <div class="topbar-profile-card" onclick="window.location='pages/guru/profil-guru'">
-                <img src="<?= htmlspecialchars($foto) ?>" alt="Profile">
+                <div class="topbar-profile-avatar-wrap">
+                    <?php if (!empty($dataGuru['foto'])): ?>
+                        <img src="../../foto/<?= htmlspecialchars($dataGuru['foto']) ?>" alt="Profile">
+                    <?php else: ?>
+                        <?= get_guru_avatar_svg(get_guru_gender($dataGuru['no_induk'], $dataGuru['nama_guru'])) ?>
+                    <?php endif; ?>
+                </div>
                 <span><?= htmlspecialchars(explode(' ', $dataGuru['nama_guru'])[0]) ?></span>
             </div>
         </div>
