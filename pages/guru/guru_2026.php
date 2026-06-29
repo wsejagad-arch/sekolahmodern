@@ -1277,7 +1277,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 </div>
 
 <!-- MOBILE-ONLY LAYOUT WRAPPER -->
-    <div class="mobile-only-layout">
+    <div class="mobile-only-layout app-shell">
         <h3 class="section-label">Aksi Cepat</h3>
     <div class="quick-grid">
         <!-- 1. Validasi Izin -->

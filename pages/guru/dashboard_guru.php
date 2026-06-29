@@ -920,7 +920,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     <!-- But actually our CSS `guru-desktop.css` already hides specific elements like `.summary-card`, `.quick-grid`, etc. using `display: none !important;`. -->
     
     <!-- MOBILE-ONLY LAYOUT WRAPPER -->
-    <div class="mobile-only-layout">
+    <div class="mobile-only-layout app-shell">
         <!-- HEADER -->
         <header class="hero-header">
         <a href="profil-guru" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 15px; width: calc(100% - 70px);">
