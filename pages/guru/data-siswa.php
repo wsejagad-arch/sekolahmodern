@@ -425,7 +425,7 @@ if ($hasKelasFilter && !empty($kelasOptions)) {
 <main class="page-shell">
     <div class="topbar">
         <div>
-            <a href="guru_legacy" class="btn btn-sm btn-outline-secondary mb-3"><i class="bi bi-arrow-left"></i> Kembali</a>
+            <a href="guru_2026" class="btn btn-sm btn-outline-secondary mb-3"><i class="bi bi-arrow-left"></i> Kembali</a>
             <h1 class="page-title mb-1">Data Siswa</h1>
             <div class="page-eyebrow">Pilih kelas yang diampu oleh <?= guru_ds_h($namaGuru); ?></div>
         </div>
@@ -548,9 +548,9 @@ if ($hasKelasFilter && !empty($kelasOptions)) {
 
 <div class="bottom-nav-wrap">
     <nav class="bottom-nav" aria-label="Navigasi guru">
-        <a href="guru_legacy" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
+        <a href="guru_2026" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
         <a href="data-siswa" class="nav-link active"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
-        <a href="guru_legacy?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
+        <a href="guru_2026?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
         <a href="inputtugas" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Tugas</span></a>
         <a href="profil-guru" class="nav-link"><i class="bi bi-person-fill"></i><span>Profil</span></a>
     </nav>

@@ -2054,7 +2054,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     }
 
                     if (payload && payload.success) {
-                        window.location.href = 'guru_legacy?reset=jurnal';
+                        window.location.href = 'guru_2026?reset=jurnal';
                         return;
                     }
 

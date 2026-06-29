@@ -20,7 +20,7 @@ if (!function_exists('guru_nav_url')) {
 <?php if ($guruLayoutVisible): ?>
     <!-- Mobile Bottom Nav (Standard Style) -->
     <nav class="bottom-nav d-lg-none">
-        <a href="<?= guru_nav_url('guru_legacy'); ?>" class="nav-item">
+        <a href="<?= guru_nav_url('guru_2026'); ?>" class="nav-item">
             <i class="bi bi-house-door"></i>
             <span>Beranda</span>
         </a>
@@ -64,7 +64,7 @@ if (!function_exists('guru_nav_url')) {
 
     // Set active nav item for mobile bottom nav
     function setActiveNavItem() {
-        const currentPage = window.location.pathname.split('/').pop() || 'guru_legacy';
+        const currentPage = window.location.pathname.split('/').pop() || 'guru_2026';
         document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
             item.classList.remove('active');
             const href = item.getAttribute('href');

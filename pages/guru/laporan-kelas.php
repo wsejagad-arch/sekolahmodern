@@ -67,7 +67,7 @@ $dateStartEsc = mysqli_real_escape_string($conn, $dateStart);
 $dateEndEsc = mysqli_real_escape_string($conn, $dateEnd);
 $periodLabel = date('d M Y', strtotime($dateStart)) . ' - ' . date('d M Y', strtotime($dateEnd));
 $backHomeUrl = php_sapi_name() === 'cli-server' ? 'guru_2026.php' : 'guru_2026';
-$inputJurnalUrl = php_sapi_name() === 'cli-server' ? 'guru_legacy.php?open_jurnal=1' : 'guru_legacy?open_jurnal=1';
+$inputJurnalUrl = php_sapi_name() === 'cli-server' ? 'guru_2026.php?open_jurnal=1' : 'guru_2026?open_jurnal=1';
 
 // Get Gemini API Key
 $geminiApiKey = '';
@@ -1479,7 +1479,7 @@ try {
 <!-- Bottom Navigation for Teacher Mobile Context -->
 <div class="bottom-nav-wrap">
     <nav class="bottom-nav" aria-label="Navigasi guru">
-        <a href="guru_legacy.php" class="nav-link-item"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
+        <a href="guru_2026.php" class="nav-link-item"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
         <a href="data-siswa.php" class="nav-link-item"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
         <a href="<?= htmlspecialchars($inputJurnalUrl, ENT_QUOTES, 'UTF-8'); ?>" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
         <a href="nilai.php" class="nav-link-item"><i class="bi bi-clipboard-check"></i><span>Nilai</span></a>

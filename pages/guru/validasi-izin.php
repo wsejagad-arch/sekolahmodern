@@ -34,7 +34,7 @@ if ($qBk && mysqli_num_rows($qBk) > 0) {
 }
 
 if (!$is_wali_kelas && !$is_guru_bk) {
-    echo "<script>alert('Anda tidak memiliki akses ke halaman ini.'); window.location='guru_legacy';</script>";
+    echo "<script>alert('Anda tidak memiliki akses ke halaman ini.'); window.location='guru_2026';</script>";
     exit;
 }
 
@@ -284,7 +284,7 @@ $title = 'Validasi Izin Siswa';
 <body>
 <div class="vi-wrap">
 
-<a href="guru_legacy" class="vi-back"><i class="fas fa-arrow-left"></i> Kembali ke Dashboard</a>
+<a href="guru_2026" class="vi-back"><i class="fas fa-arrow-left"></i> Kembali ke Dashboard</a>
 
 <div class="vi-hdr">
     <h1>Validasi Pengajuan Izin</h1>

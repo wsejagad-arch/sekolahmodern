@@ -723,7 +723,7 @@ if ($hasClass && isset($_GET['cetak_pdf']) && (string) $_GET['cetak_pdf'] === '1
 <body>
 <main class="page-shell">
     <section class="hero">
-        <a href="guru_legacy" class="text-white-50 text-decoration-none"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+        <a href="guru_2026" class="text-white-50 text-decoration-none"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
         <h1 class="mt-3 mb-2">Ruang Analisis Walikelas</h1>
         <p class="mb-0 text-white-50">Pantau kehadiran, nilai, rencana siswa, dan cetak laporan resmi wali kelas.</p>
     </section>

@@ -22,7 +22,7 @@ $title = 'Fitur Guru';
         <div class="bg-white border rounded-3 p-4 shadow-sm">
             <h1 class="h4 fw-bold mb-2">Fitur belum tersedia di salinan lokal</h1>
             <p class="text-muted mb-4">File halaman ini belum ditemukan di backup lokal project. Halaman utama guru dan Data Siswa tetap dapat digunakan.</p>
-            <a href="guru_legacy" class="btn btn-primary">Kembali ke Dashboard</a>
+            <a href="guru_2026" class="btn btn-primary">Kembali ke Dashboard</a>
         </div>
     </main>
 <?php include __DIR__ . '/guru_common_footer.php'; ?>

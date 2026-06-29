@@ -131,7 +131,7 @@ $qGuru = mysqli_query($conn, "SELECT * FROM tbl_guru WHERE no_induk='$noIndukEsc
 $guru = $qGuru ? mysqli_fetch_assoc($qGuru) : null;
 
 if (!$guru) {
-    echo "<script>alert('Data guru tidak ditemukan'); window.location='guru_legacy';</script>";
+    echo "<script>alert('Data guru tidak ditemukan'); window.location='guru_2026';</script>";
     exit;
 }
 
@@ -463,7 +463,7 @@ textarea.form-control-profile {
             <p>Kelola identitas dan foto profil Anda.</p>
         </div>
 
-        <a href="guru_legacy" class="btn-profile btn-light-profile">
+        <a href="guru_2026" class="btn-profile btn-light-profile">
             <i class="bi bi-arrow-left"></i> Dashboard
         </a>
     </div>
@@ -565,7 +565,7 @@ textarea.form-control-profile {
             </div>
 
             <div class="action-row">
-                <a href="guru_legacy" class="btn-profile btn-light-profile">
+                <a href="guru_2026" class="btn-profile btn-light-profile">
                     <i class="bi bi-x-lg"></i> Batal
                 </a>
                 <button type="submit" class="btn-profile btn-primary-profile" <?= !$izinEditProfilGuru ? 'disabled style="opacity:.55;cursor:not-allowed;"' : '' ?>>

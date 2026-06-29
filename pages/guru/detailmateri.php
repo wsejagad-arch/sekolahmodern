@@ -355,7 +355,7 @@ $existingKeterangan = $existingKeterangan ?? '';
                             modal.setAttribute('aria-hidden', 'true');
                         }
                         document.body.classList.remove('modal-open-dashboard');
-                        window.location.href = 'guru_legacy?sukses=jurnal';
+                        window.location.href = 'guru_2026?sukses=jurnal';
                     }, 900);
                 } else {
                     btn.innerHTML = 'Coba Lagi';

@@ -106,7 +106,7 @@ while ($qTasks && ($row = mysqli_fetch_assoc($qTasks))) {
 <body>
 <main class="shell">
     <section class="hero mb-3">
-        <a href="guru_legacy" class="text-white-50 text-decoration-none"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+        <a href="guru_2026" class="text-white-50 text-decoration-none"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
         <h1 class="mt-3 mb-1">Tugas Siswa</h1>
         <p class="mb-0 text-white-50">Kelola dan pantau tugas yang sudah diberikan ke kelas.</p>
     </section>

@@ -599,7 +599,7 @@ sort($classes);
 <div class="app-shell">
     <!-- HEADER -->
     <header class="hero-header">
-        <a href="guru_legacy" class="notif-btn" style="text-decoration: none; display: grid; place-items: center;" title="Kembali ke Beranda">
+        <a href="guru_2026" class="notif-btn" style="text-decoration: none; display: grid; place-items: center;" title="Kembali ke Beranda">
             <i class="bi bi-chevron-left"></i>
         </a>
         <div class="greet-block">
@@ -709,9 +709,9 @@ sort($classes);
     <!-- BOTTOM NAV (INTEGRATED SHELL NAVIGATION) -->
     <div class="bottom-nav-wrap">
         <nav class="bottom-nav">
-            <a href="guru_legacy" class="nav-link"><i class="bi bi-house-door"></i><span>Beranda</span></a>
+            <a href="guru_2026" class="nav-link"><i class="bi bi-house-door"></i><span>Beranda</span></a>
             <a href="data-siswa" class="nav-link"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
-            <a href="guru_legacy?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
+            <a href="guru_2026?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
             <a href="nilai" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Nilai</span></a>
             <a href="profil-guru.php" class="nav-link">
                 <div style="width: 20px; height: 20px; border-radius: 50%; overflow: hidden; border: 1.5px solid #cbd5e1; margin-bottom: 2px; position: relative;">

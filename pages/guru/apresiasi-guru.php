@@ -576,7 +576,7 @@ if (!empty($rows)) {
 </main>
 
 <nav class="mobile-nav">
-    <a href="guru_legacy"><i class="bi bi-house-door"></i><span>Beranda</span></a>
+    <a href="guru_2026"><i class="bi bi-house-door"></i><span>Beranda</span></a>
     <a href="laporan-kelas"><i class="bi bi-bar-chart"></i><span>Laporan</span></a>
     <a href="apresiasi-guru" style="color:#0f766e;"><i class="bi bi-award"></i><span>Apresiasi</span></a>
     <a href="profil-guru"><i class="bi bi-person"></i><span>Profil</span></a>
