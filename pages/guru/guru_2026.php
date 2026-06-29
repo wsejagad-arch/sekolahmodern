@@ -909,7 +909,12 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 <!-- DESKTOP SIDEBAR -->
 <div class="desktop-sidebar">
     <div class="desktop-logo">
-        <i class="bi bi-book-half"></i> SIMANIS
+        <?php if (!empty($lembaga['logo'])): ?>
+            <img src="img/<?= htmlspecialchars($lembaga['logo']) ?>" alt="Logo">
+        <?php else: ?>
+            <i class="bi bi-book-half"></i>
+        <?php endif; ?>
+        <span>SIMANIS</span>
     </div>
     <div class="desktop-nav">
         <a href="?page=beranda" class="active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
