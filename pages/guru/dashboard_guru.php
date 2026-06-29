@@ -1157,6 +1157,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             <i class="bi bi-chevron-right" style="font-size:18px; flex-shrink:0;"></i>
         </div>
     </a>
+    <?php endif; ?>
     <style>
     @keyframes pendingPulse {
         0%,100% { box-shadow:0 8px 24px rgba(220,38,38,.3); }
@@ -1226,7 +1227,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         .notif-bell { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: rgba(255,255,255,0.2); border-radius: 50%; color: #fff; transition: all 0.3s; }
         .notif-badge-inline { background: #ef4444; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 10px; }
     </style>
-    <?php endif; ?>
+
 
     <!-- AKSI CEPAT -->
     <h3 class="section-label">Aksi Cepat</h3>
