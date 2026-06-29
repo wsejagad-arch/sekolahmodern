@@ -2116,6 +2116,12 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 startInputJurnal();
             });
 
+            // Pindahkan modal Bootstrap ke luar dari parent container agar z-index backdrop berfungsi dengan baik
+            $(document).ready(function() {
+                $('#schedulePickerModal').appendTo('body');
+                $('#show').appendTo('body');
+            });
+
             // Auto-open schedule picker if coming from other pages with open_jurnal parameter
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.has('open_jurnal')) {
