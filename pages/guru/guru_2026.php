@@ -921,31 +921,25 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         <a href="pages/guru/ekinerja"><i class="bi bi-speedometer2"></i> e-Kinerja</a>
         <a href="pages/guru/profil-guru"><i class="bi bi-gear"></i> Pengaturan</a>
     </div>
-    <div class="desktop-profile">
-        <?php 
-            $foto = !empty($dataGuru['foto']) ? "img/guru/" . $dataGuru['foto'] : "img/avatar.png";
-        ?>
-        <img src="<?= htmlspecialchars($foto) ?>" alt="Profile">
-        <div class="desktop-profile-info">
-            <strong><?= htmlspecialchars($dataGuru['nama_guru']) ?></strong>
-            <span><?= htmlspecialchars($dataGuru['jabatan'] ?? 'Guru Bidang Studi') ?></span>
-        </div>
+    <div class="desktop-logout-wrap">
+        <a href="../../logout.php" onclick="return confirm('Apakah Anda yakin ingin keluar?');" class="btn-desktop-logout">
+            <i class="bi bi-box-arrow-right"></i> Log Out
+        </a>
     </div>
 </div>
 
 <div class="app-shell">
     <!-- DESKTOP TOPBAR -->
-    <div class="desktop-topbar">
-        <h1>Teacher Dashboard</h1>
+    <div class="desktop-topbar-wrapper">
+        <div class="topbar-search-wrap">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Search students, classes...">
+        </div>
         <div class="desktop-topbar-actions">
-            <!-- Search Bar -->
-            <div class="topbar-search-wrap">
-                <i class="bi bi-search"></i>
-                <input type="text" placeholder="Search students, classes...">
-            </div>
-
-            <!-- Notifications -->
-            <div class="topbar-btn" onclick="toggleNotif(event)">
+            <span class="topbar-lang">ENG <i class="bi bi-chevron-down"></i></span>
+            <button class="topbar-icon-btn"><i class="bi bi-envelope"></i></button>
+            
+            <button class="topbar-icon-btn" onclick="toggleNotif(event)">
                 <i class="bi bi-bell"></i>
                 <?php if($totalNotifCount > 0): ?>
                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width: 8px; height: 8px;"></span>
@@ -979,298 +973,216 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         <?php endif; ?>
                     </div>
                 </div>
-            </div>
+            </button>
             
-            <img src="<?= htmlspecialchars($foto) ?>" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
+            <div class="topbar-profile-card" onclick="window.location='pages/guru/profil-guru'">
+                <img src="<?= htmlspecialchars($foto) ?>" alt="Profile">
+                <span><?= htmlspecialchars(explode(' ', $dataGuru['nama_guru'])[0]) ?></span>
+            </div>
         </div>
     </div>
 
-    <!-- FIRST ROW: Class Overview, Upcoming Activities, Quick Actions -->
-    <div class="desktop-grid">
-        <!-- Widget 1: Class Overview -->
-        <div class="dk-widget">
-            <div class="dk-widget-title-wrap">
-                <h3 class="dk-widget-title">Class Overview</h3>
-                <span class="dk-widget-badge"><?= $totalKelasAmpu ?> Kelas</span>
+    <!-- MAIN CENTER COLUMN -->
+    <div class="desktop-center-column">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner-card">
+            <div class="welcome-banner-info">
+                <h2>Hello <?= htmlspecialchars(explode(' ', $dataGuru['nama_guru'])[0]) ?>!</h2>
+                <p>You have <?= $unfilledJurnalCount ?> pending journals today. Let's start filling them up!</p>
+                <a href="javascript:void(0)" onclick="$('html, body').animate({scrollTop: $('#list-jadwal-mengajar').offset().top}, 500);">Review schedule</a>
             </div>
-            
-            <div class="dk-overview-grid">
-                <div class="dk-overview-subcard blue">
-                    <span>Active Students</span>
-                    <strong><?= $totalSiswa ?></strong>
-                </div>
-                <div class="dk-overview-subcard green">
-                    <span>Jurnal Progress</span>
-                    <strong><?= $jurnalProgress ?>%</strong>
-                </div>
-                <div class="dk-overview-subcard orange">
-                    <span>Recent Alerts</span>
-                    <strong><?= $unfilledJurnalCount ?></strong>
-                </div>
-            </div>
-
-            <a href="javascript:void(0)" onclick="$('html, body').animate({scrollTop: $('#list-jadwal-mengajar').offset().top}, 500);" class="dk-widget-footer-link">
-                <span>
-                    <i class="bi bi-exclamation-circle-fill <?= $unfilledJurnalCount > 0 ? 'warn-icon' : '' ?>"></i>
-                    <?= $unfilledJurnalCount > 0 ? $unfilledJurnalCount . ' jurnal belum diisi hari ini' : 'Semua jurnal hari ini telah terisi' ?>
-                </span>
-                <i class="bi bi-chevron-right"></i>
-            </a>
+            <!-- 3D style SVG graphic of teacher studying -->
+            <svg class="welcome-banner-illustration" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="100" cy="100" r="80" fill="#e0e7ff"/>
+                <rect x="60" y="80" width="80" height="60" rx="10" fill="#3c58b9"/>
+                <rect x="70" y="90" width="60" height="40" rx="5" fill="#ffffff"/>
+                <rect x="90" y="140" width="20" height="30" fill="#64748b"/>
+                <rect x="80" y="170" width="40" height="5" fill="#334155"/>
+                <!-- Person avatar -->
+                <circle cx="100" cy="70" r="20" fill="#fed7aa"/>
+                <path d="M80 110 C80 90, 120 90, 120 110 Z" fill="#312e81"/>
+                <circle cx="93" cy="68" r="2" fill="#1e293b"/>
+                <circle cx="107" cy="68" r="2" fill="#1e293b"/>
+                <path d="M96 76 Q100 80 104 76" stroke="#1e293b" stroke-width="2" fill="none"/>
+                <path d="M90 58 Q100 48 110 58" stroke="#312e81" stroke-width="6" fill="none"/>
+            </svg>
         </div>
 
-        <!-- Widget 2: Upcoming Activities -->
-        <div class="dk-widget">
-            <div class="dk-widget-title-wrap">
-                <h3 class="dk-widget-title"><i class="bi bi-calendar-event text-primary"></i> Jadwal Mengajar Hari Ini</h3>
-                <button class="icon-btn" title="Detail Jadwal" onclick="window.location='setting-jadwal'"><i class="bi bi-three-dots"></i></button>
+        <!-- Performance & Visits Grid -->
+        <div class="stats-row-grid">
+            <!-- Performance: Classes Progress -->
+            <div class="smart-card">
+                <div class="smart-card-title-wrap">
+                    <h3 class="smart-card-title">Performance</h3>
+                    <select class="smart-filter-select">
+                        <option>Today</option>
+                    </select>
+                </div>
+                <div class="performance-chart-container">
+                    <div class="performance-summary">
+                        <h2><?= $jurnalProgress ?>%</h2>
+                        <span>Total journals filled</span>
+                    </div>
+                    <div class="smart-bar-chart">
+                        <?php
+                            $pBars = [
+                                ['label' => 'Sen', 'val' => 60, 'c' => ''],
+                                ['label' => 'Sel', 'val' => 85, 'c' => 'accent'],
+                                ['label' => 'Rab', 'val' => $hadirPct, 'c' => ''],
+                                ['label' => 'Kam', 'val' => 70, 'c' => 'accent'],
+                                ['label' => 'Jum', 'val' => 90, 'c' => ''],
+                            ];
+                            foreach($pBars as $b):
+                                $h = ($b['val'] ?: 10) . '%';
+                        ?>
+                            <div class="smart-bar-col">
+                                <div class="smart-bar-track">
+                                    <div class="smart-bar-fill <?= $b['c'] ?>" style="height: <?= $h ?>;"></div>
+                                </div>
+                                <span class="smart-bar-label"><?= $b['label'] ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
             </div>
-            
-            <div class="dk-upcoming-list">
+
+            <!-- My Visit: Radial Donut indicators -->
+            <div class="smart-card">
+                <div class="smart-card-title-wrap">
+                    <h3 class="smart-card-title">Attendance Stats</h3>
+                </div>
+                <div class="radial-grid">
+                    <!-- Stat 1: Present -->
+                    <div class="radial-item">
+                        <div class="radial-circle-wrap">
+                            <svg class="radial-circle-svg" viewBox="0 0 36 36">
+                                <path class="radial-circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="radial-circle-indicator" stroke-dasharray="<?= $hadirPct ?>, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="radial-circle-text"><?= $hadirPct ?>%</div>
+                        </div>
+                        <span class="radial-label">Hadir Today</span>
+                    </div>
+
+                    <!-- Stat 2: Jurnal Filled -->
+                    <div class="radial-item">
+                        <div class="radial-circle-wrap">
+                            <svg class="radial-circle-svg" viewBox="0 0 36 36">
+                                <path class="radial-circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="radial-circle-indicator accent" stroke-dasharray="<?= $jurnalProgress ?>, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="radial-circle-text"><?= $jurnalProgress ?>%</div>
+                        </div>
+                        <span class="radial-label">Jurnal Progress</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Linked Teachers / Guru Wali -->
+        <div class="smart-card">
+            <div class="smart-card-title-wrap">
+                <h3 class="smart-card-title">Guru Wali & Rekan</h3>
+                <a href="pages/guru/validasi-izin" style="font-size: 0.85rem; font-weight: 700; color: #3c58b9; text-decoration: none;">See all</a>
+            </div>
+            <div class="teachers-list">
+                <?php if (empty($problematicStudents)): ?>
+                    <div class="teacher-item-card">
+                        <div class="teacher-profile-wrap">
+                            <div class="teacher-avatar-placeholder"><i class="bi bi-person"></i></div>
+                            <div class="teacher-profile-info">
+                                <strong>Mary Johnson (Counselor)</strong>
+                                <span>Guidance & Counseling</span>
+                            </div>
+                        </div>
+                        <div class="teacher-action-btns">
+                            <a href="#" class="teacher-action-btn"><i class="bi bi-envelope"></i></a>
+                            <a href="#" class="teacher-action-btn"><i class="bi bi-telephone"></i></a>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <?php foreach(array_slice($problematicStudents, 0, 2) as $rowP): ?>
+                        <div class="teacher-item-card">
+                            <div class="teacher-profile-wrap">
+                                <div class="teacher-avatar-placeholder"><?= strtoupper(substr($rowP['nama_siswa'], 0, 2)) ?></div>
+                                <div class="teacher-profile-info">
+                                    <strong><?= htmlspecialchars($rowP['nama_siswa']) ?> (Siswa Binaan)</strong>
+                                    <span>Kelas <?= htmlspecialchars($rowP['kelas']) ?></span>
+                                </div>
+                            </div>
+                            <div class="teacher-action-btns">
+                                <a href="pages/guru/data-siswa" class="teacher-action-btn" title="Detail Siswa"><i class="bi bi-person-badge"></i></a>
+                                <a href="#" class="teacher-action-btn btn-open-pelanggaran" title="Catat Pelanggaran"><i class="bi bi-exclamation-triangle"></i></a>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN: CALENDAR & TIMELINE -->
+    <div class="desktop-right-column">
+        <!-- Calendar Schedule Timeline -->
+        <div class="smart-card calendar-timeline-card">
+            <div class="timeline-title-wrap">
+                <h3 class="smart-card-title">Schedule</h3>
+                <select class="smart-filter-select">
+                    <option>Today</option>
+                </select>
+            </div>
+            <div class="timeline-list">
                 <?php if($totalJadwalHari == 0): ?>
-                    <p style="font-size:0.8rem; color:#64748b; padding: 10px 0;">Tidak ada jadwal mengajar hari ini.</p>
+                    <div class="timeline-item">
+                        <span class="timeline-time">No Class</span>
+                        <div class="timeline-card-block">
+                            <strong>Hari Ini Bebas KBM</strong>
+                            <span>Tidak ada jadwal mengajar hari ini.</span>
+                        </div>
+                    </div>
                 <?php else: ?>
                     <?php 
-                    $colors = ['blue', 'orange', 'purple', 'pink', 'green'];
-                    $cIndex = 0;
-                    foreach(array_slice($jadwalHariIni, 0, 3) as $j): 
-                        $col = $colors[$cIndex % 5];
-                        $cIndex++;
+                    $tIndex = 0;
+                    foreach($jadwalHariIni as $j): 
+                        $isCurrent = ($tIndex == 0); // Mark first class as active timeline
+                        $tIndex++;
                     ?>
-                        <div class="dk-upcoming-item <?= $col ?>">
-                            <span class="dk-upcoming-time"><?= substr($j['jam_mulai'],0,5) ?></span>
-                            <div class="dk-upcoming-divider"></div>
-                            <span class="dk-upcoming-name"><?= htmlspecialchars($j['nama_mapel']) ?> (<?= htmlspecialchars($j['kelas']) ?>)</span>
+                        <div class="timeline-item <?= $isCurrent ? 'active' : '' ?>">
+                            <span class="timeline-time"><?= substr($j['jam_mulai'],0,5) ?> - <?= substr($j['jam_selesai'],0,5) ?></span>
+                            <div class="timeline-card-block">
+                                <strong><?= htmlspecialchars($j['nama_mapel']) ?></strong>
+                                <span>Kelas <?= htmlspecialchars($j['kelas']) ?></span>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
         </div>
 
-        <!-- Widget 3: Quick Actions -->
-        <div class="dk-widget">
-            <div class="dk-widget-title-wrap">
-                <h3 class="dk-widget-title">Quick Actions</h3>
+        <!-- Upcoming Events / Announcements -->
+        <div class="smart-card">
+            <div class="smart-card-title-wrap">
+                <h3 class="smart-card-title">Announcements</h3>
             </div>
-            
-            <div class="dk-quick-grid">
-                <a href="pages/guru/validasi-izin" class="dk-quick-btn">
-                    <i class="bi bi-person-check-fill text-success"></i>
-                    <span>Validasi Izin</span>
-                </a>
-                <a href="#" class="dk-quick-btn btn-open-pelanggaran">
-                    <i class="bi bi-exclamation-triangle-fill text-danger"></i>
-                    <span>Pelanggaran</span>
-                </a>
-                <a href="pages/guru/jurnal" class="dk-quick-btn">
-                    <i class="bi bi-journal-plus text-primary"></i>
-                    <span>Isi Jurnal</span>
-                </a>
-                <a href="pages/guru/literasi" class="dk-quick-btn">
-                    <i class="bi bi-book-half text-info"></i>
-                    <span>Literasi</span>
-                </a>
-                <a href="pages/guru/ekinerja" class="dk-quick-btn">
-                    <i class="bi bi-speedometer2 text-warning"></i>
-                    <span>e-Kinerja</span>
-                </a>
-                <a href="pages/guru/apresiasi-guru" class="dk-quick-btn">
-                    <i class="bi bi-award-fill text-primary"></i>
-                    <span>Apresiasi</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- SECOND ROW: Class Performance Analytics, Student Progress Snapshot, Attendance Overview & Class Roster -->
-    <div class="desktop-second-grid">
-        <!-- Widget 4: Class Performance Analytics -->
-        <div class="dk-widget">
-            <div class="dk-widget-title-wrap">
-                <h3 class="dk-widget-title">Class Analytics</h3>
-                <button class="icon-btn"><i class="bi bi-three-dots-vertical"></i></button>
-            </div>
-            
-            <div class="dk-chart-flex">
-                <div>
-                    <span class="dk-chart-label">Jurnal Kehadiran Kelas (Mingguan)</span>
-                    <div class="dk-bar-chart-container">
-                        <?php
-                            $bars = [
-                                ['label' => 'Sen', 'val' => 60, 'c' => 'c1'],
-                                ['label' => 'Sel', 'val' => 85, 'c' => 'c2'],
-                                ['label' => 'Rab', 'val' => $hadirPct, 'c' => 'c3'],
-                                ['label' => 'Kam', 'val' => 70, 'c' => 'c4'],
-                                ['label' => 'Jum', 'val' => 90, 'c' => 'c5'],
-                            ];
-                            foreach($bars as $b):
-                                $h = ($b['val'] ?: 10) . '%';
-                        ?>
-                            <div class="dk-bar-chart-col">
-                                <div class="dk-bar-chart-bar <?= $b['c'] ?>" style="height: <?= $h ?>;" data-value="<?= $b['val'] ?>%"></div>
-                                <span class="dk-bar-chart-label"><?= $b['label'] ?></span>
+            <div class="events-list">
+                <?php if($announcementCount == 0): ?>
+                    <p style="font-size:0.8rem; color:#94a3b8;">Belum ada pengumuman baru.</p>
+                <?php else: ?>
+                    <?php 
+                    $eIndex = 0;
+                    foreach(array_slice($announcements, 0, 2) as $ann): 
+                        $eClass = ($eIndex == 0) ? '' : 'accent';
+                        $eIndex++;
+                    ?>
+                        <div class="event-item-card">
+                            <div class="event-icon-circle <?= $eClass ?>"><i class="bi bi-megaphone"></i></div>
+                            <div class="event-item-info">
+                                <strong><?= htmlspecialchars($ann['judul']) ?></strong>
+                                <span><?= date('d M Y', strtotime($ann['created_at'] ?? 'now')) ?></span>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-
-                <div>
-                    <span class="dk-chart-label">Rata-rata Nilai Kelas Binaan</span>
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px;">
-                        <span style="font-size: 1.4rem; font-weight: 800; color: #1e293b;">B+ (84%)</span>
-                        <span style="font-size: 0.75rem; color: #22c55e; font-weight: 700; background: #d1fae5; padding: 2px 8px; border-radius: 6px;"><i class="bi bi-arrow-up"></i> +2.4%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Widget 5: Student Progress Snapshot -->
-        <div class="dk-widget">
-            <div class="dk-widget-title-wrap">
-                <h3 class="dk-widget-title">Student Snapshot</h3>
-                <button class="icon-btn"><i class="bi bi-three-dots-vertical"></i></button>
-            </div>
-            
-            <div class="dk-student-snapshot-section">
-                <span class="dk-student-snapshot-section-title">Top List (Kehadiran Terbaik)</span>
-                <div class="dk-student-snapshot-list">
-                    <?php if (empty($posterApresiasiTanpaAlpha)): ?>
-                        <p style="font-size:0.75rem; color:#64748b;">Belum ada data prestasi.</p>
-                    <?php else: ?>
-                        <?php 
-                        $pColors = ['blue', 'teal', 'purple'];
-                        $idx = 0;
-                        foreach(array_slice($posterApresiasiTanpaAlpha, 0, 2) as $sItem): 
-                            $initials = strtoupper(substr($sItem['nama_siswa'], 0, 2));
-                            $clr = $pColors[$idx % 3];
-                            $idx++;
-                        ?>
-                            <div class="dk-student-snapshot-item">
-                                <div class="dk-student-snapshot-avatar-placeholder"><?= $initials ?></div>
-                                <div class="dk-student-snapshot-info">
-                                    <div class="dk-student-snapshot-name">
-                                        <span><?= htmlspecialchars(substr($sItem['nama_siswa'], 0, 14)) ?>...</span>
-                                        <span class="pct"><?= $sItem['attendance_rate'] ?>%</span>
-                                    </div>
-                                    <div class="dk-student-snapshot-progress-bg">
-                                        <div class="dk-student-snapshot-progress-bar <?= $clr ?>" style="width: <?= $sItem['attendance_rate'] ?>%;"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <div class="dk-student-snapshot-section" style="margin-top: 8px;">
-                <span class="dk-student-snapshot-section-title">Needs Attention</span>
-                <div class="dk-student-snapshot-list">
-                    <?php if (empty($problematicStudents)): ?>
-                        <p style="font-size:0.75rem; color:#64748b;">Semua siswa dalam kondisi baik.</p>
-                    <?php else: ?>
-                        <?php 
-                        $idx = 0;
-                        foreach(array_slice($problematicStudents, 0, 2) as $sItem): 
-                            $initials = strtoupper(substr($sItem['nama_siswa'], 0, 2));
-                            $pct = max(50, 100 - ($sItem['indeks_masalah'] * 3));
-                        ?>
-                            <div class="dk-student-snapshot-item">
-                                <div class="dk-student-snapshot-avatar-placeholder" style="background:#fee2e2; color:#ef4444;"><?= $initials ?></div>
-                                <div class="dk-student-snapshot-info">
-                                    <div class="dk-student-snapshot-name">
-                                        <span><?= htmlspecialchars(substr($sItem['nama_siswa'], 0, 14)) ?>...</span>
-                                        <span class="pct" style="color: #ef4444;"><?= $pct ?>%</span>
-                                    </div>
-                                    <div class="dk-student-snapshot-progress-bg">
-                                        <div class="dk-student-snapshot-progress-bar orange" style="width: <?= $pct ?>%;"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-
-        <!-- Widget 6: Attendance Overview & Class Roster -->
-        <div style="display: flex; flex-direction: column; gap: 24px;">
-            <!-- Attendance Overview -->
-            <div class="dk-widget" style="min-height: auto; padding: 20px;">
-                <div class="dk-widget-title-wrap" style="margin-bottom: 12px;">
-                    <h3 class="dk-widget-title">Attendance Overview</h3>
-                </div>
-                
-                <div class="dk-attendance-content">
-                    <div class="dk-attendance-chart-wrap">
-                        <svg viewBox="0 0 36 36" style="width: 100%; height: 100%;">
-                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#f1f5f9" stroke-width="3.5" />
-                            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10b981" stroke-width="3.5" stroke-dasharray="<?= $hadirPct ?>, 100" />
-                        </svg>
-                        <div class="dk-attendance-chart-center">
-                            <strong><?= $hadirPct ?>%</strong>
-                            <span>Present</span>
                         </div>
-                    </div>
-
-                    <div class="dk-attendance-legend">
-                        <div class="dk-attendance-legend-item">
-                            <div class="dk-attendance-legend-label">
-                                <div class="dk-attendance-legend-dot green"></div>
-                                <span>Present</span>
-                            </div>
-                            <span><?= $hadirToday ?></span>
-                        </div>
-                        <div class="dk-attendance-legend-item">
-                            <div class="dk-attendance-legend-label">
-                                <div class="dk-attendance-legend-dot orange"></div>
-                                <span>Excused (I/S)</span>
-                            </div>
-                            <span><?= $totalAbsen - $hadirToday ?></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Class Roster -->
-            <div class="dk-widget" style="min-height: auto; padding: 20px;">
-                <div class="dk-widget-title-wrap" style="margin-bottom: 8px;">
-                    <h3 class="dk-widget-title">Class Roster</h3>
-                    <button class="icon-btn"><i class="bi bi-three-dots"></i></button>
-                </div>
-                
-                <table class="dk-roster-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Class</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($problematicStudents)): ?>
-                            <tr>
-                                <td colspan="3" style="text-align:center; color:#94a3b8; font-size:0.75rem; padding: 12px 0;">No student data.</td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach(array_slice($problematicStudents, 0, 3) as $rowP): ?>
-                                <tr>
-                                    <td>
-                                        <div class="dk-roster-student">
-                                            <span><?= htmlspecialchars(substr($rowP['nama_siswa'], 0, 10)) ?>...</span>
-                                        </div>
-                                    </td>
-                                    <td><?= htmlspecialchars($rowP['kelas']) ?></td>
-                                    <td>
-                                        <?php if ($rowP['indeks_masalah'] > 10): ?>
-                                            <span class="dk-badge-status intervention">Needs Attention</span>
-                                        <?php else: ?>
-                                            <span class="dk-badge-status on-track">On Track</span>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
     </div>
