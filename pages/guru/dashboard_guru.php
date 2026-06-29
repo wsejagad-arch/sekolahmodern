@@ -1461,53 +1461,53 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 </div>
 
 
-<div class="journal-modal-backdrop" id="schedulePickerModal" aria-hidden="true">
-    <div class="journal-modal journal-modal-sm" role="dialog" aria-modal="true" aria-labelledby="schedulePickerTitle">
-        <div class="journal-modal-head">
-            <div>
-                <h5 id="schedulePickerTitle">Pilih Jadwal</h5>
-                <p>Jurnal akan diisi sesuai jadwal yang dipilih.</p>
-            </div>
-            <button class="journal-modal-close" type="button" data-close-modal aria-label="Tutup"><i class="bi bi-x-lg"></i></button>
-        </div>
-        <div class="journal-modal-body">
-            <?php if (empty($jadwalHariIni)): ?>
-                <div class="journal-empty">Belum ada jadwal mengajar hari ini.</div>
-            <?php else: ?>
-                <div class="journal-picker-list">
-                    <?php foreach ($jadwalHariIni as $j):
-                        $idMapel = (int)($j['id_mapel'] ?? 0);
-                        $kelasJadwal = (string)($j['kelas'] ?? '');
-                        $mapelJadwal = (string)($j['nama_mapel'] ?? '');
-                        $isJurnalTerisi = isset($jurnalStatusByMapel[$idMapel]);
-                    ?>
-                        <div class="journal-picker-row <?= $isJurnalTerisi ? 'is-filled' : 'is-empty'; ?>" data-id="<?= $idMapel; ?>">
-                            <button class="journal-picker-main" type="button" data-id="<?= $idMapel; ?>">
-                                <span class="journal-picker-meta">
-                                    <strong><?= htmlspecialchars($kelasJadwal, ENT_QUOTES, 'UTF-8'); ?></strong>
-                                    <small><?= htmlspecialchars($mapelJadwal, ENT_QUOTES, 'UTF-8'); ?></small>
-                                    <span class="journal-status-badge <?= $isJurnalTerisi ? 'done' : 'todo'; ?>">
-                                        <i class="bi <?= $isJurnalTerisi ? 'bi-check2-circle' : 'bi-clock-history'; ?>"></i>
-                                        <?= $isJurnalTerisi ? 'Sudah terisi' : 'Belum terisi'; ?>
-                                    </span>
-                                </span>
-                                <em class="journal-time"><?= htmlspecialchars(substr((string)($j['jam_mulai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars(substr((string)($j['jam_selesai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?></em>
-                            </button>
-                            <div class="journal-picker-actions">
-                                <button class="journal-action-btn primary btn-open-schedule-journal" type="button" data-id="<?= $idMapel; ?>">
-                                    <i class="bi bi-journal-plus"></i> <?= $isJurnalTerisi ? 'Lihat/Edit Jurnal' : 'Input Jurnal'; ?>
-                                </button>
-                                <a class="journal-action-btn score" href="inputnilai?getDetail=<?= $idMapel; ?>">
-                                    <i class="bi bi-clipboard2-check"></i> Input Nilai
-                                </a>
-                                <button class="journal-action-btn danger btn-reset-jurnal" type="button" data-id="<?= $idMapel; ?>" data-kelas="<?= htmlspecialchars($kelasJadwal, ENT_QUOTES, 'UTF-8'); ?>" <?= $isJurnalTerisi ? '' : 'disabled'; ?>>
-                                    <i class="bi bi-arrow-counterclockwise"></i> Reset Jurnal
-                                </button>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
+<!-- Modal Pilih Jadwal (Bootstrap) -->
+<div class="modal fade" id="schedulePickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title mb-0 fw-bold" id="schedulePickerTitle">Pilih Jadwal</h5>
+                    <p class="text-muted mb-0 small">Jurnal akan diisi sesuai jadwal yang dipilih.</p>
                 </div>
-            <?php endif; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body bg-light p-3">
+                <?php if (empty($jadwalHariIni)): ?>
+                    <div class="alert alert-warning text-center mb-0 border-0 shadow-sm"><i class="bi bi-exclamation-circle me-2"></i>Belum ada jadwal mengajar hari ini.</div>
+                <?php else: ?>
+                    <div class="list-group">
+                        <?php foreach ($jadwalHariIni as $j):
+                            $idMapel = (int)($j['id_mapel'] ?? 0);
+                            $kelasJadwal = (string)($j['kelas'] ?? '');
+                            $mapelJadwal = (string)($j['nama_mapel'] ?? '');
+                            $isJurnalTerisi = isset($jurnalStatusByMapel[$idMapel]);
+                        ?>
+                            <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-2 rounded shadow-sm border-0" style="cursor: default;">
+                                <div>
+                                    <h6 class="mb-1 fw-bold text-primary"><?= htmlspecialchars($kelasJadwal, ENT_QUOTES, 'UTF-8'); ?> <span class="text-dark">&bull; <?= htmlspecialchars($mapelJadwal, ENT_QUOTES, 'UTF-8'); ?></span></h6>
+                                    <div class="d-flex align-items-center gap-2 mt-2">
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25"><i class="bi bi-clock"></i> <?= htmlspecialchars(substr((string)($j['jam_mulai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars(substr((string)($j['jam_selesai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?></span>
+                                        <?php if ($isJurnalTerisi): ?>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i class="bi bi-check2-circle"></i> Sudah terisi</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25"><i class="bi bi-clock-history"></i> Belum terisi</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-primary btn-open-schedule-journal flex-grow-1 shadow-sm" type="button" data-id="<?= $idMapel; ?>">
+                                        <i class="bi bi-journal-plus"></i> <?= $isJurnalTerisi ? 'Lihat/Edit Jurnal' : 'Input Jurnal'; ?>
+                                    </button>
+                                    <a class="btn btn-sm btn-outline-primary flex-grow-1 shadow-sm" href="inputnilai?getDetail=<?= $idMapel; ?>">
+                                        <i class="bi bi-clipboard2-check"></i> Input Nilai
+                                    </a>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>
@@ -2031,7 +2031,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     alert('Belum ada jadwal mengajar hari ini.');
                     return;
                 }
-                openDashboardModal('#schedulePickerModal');
+                $('#schedulePickerModal').modal('show');
             }
 
             // Animasi Ring Progress
@@ -2057,7 +2057,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
             $('.journal-picker-main, .btn-open-schedule-journal').on('click', function() {
                 var idMapel = parseInt($(this).data('id'), 10);
-                closeDashboardModal('#schedulePickerModal');
+                $('#schedulePickerModal').modal('hide');
                 openInputJurnal(idMapel);
             });
 
