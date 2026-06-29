@@ -1,5 +1,5 @@
 <?php
-header("Location: splash.php");
+header("Location: login.php");
 exit();
 ?>
 

@@ -1,6 +1,17 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/nocache.php';
 require_once __DIR__ . '/google_auth.php';
+
+// Redirect if already logged in
+if (isset($_SESSION['username']) && (is_admin() || is_guru() || is_siswa())) {
+    header('Location: home.php');
+    exit;
+} elseif (isset($_SESSION['username']) && is_admin_pusat()) {
+    header('Location: admin-pusat.php');
+    exit;
+}
+
 
 function login_page_data_lembaga(): array
 {

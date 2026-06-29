@@ -1,5 +1,15 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
+
+// Redirect if already logged in
+if (isset($_SESSION['username']) && (is_admin() || is_guru() || is_siswa())) {
+    header('Location: home.php');
+    exit;
+} elseif (isset($_SESSION['username']) && is_admin_pusat()) {
+    header('Location: admin-pusat.php');
+    exit;
+}
+
 $lembaga = data_lembaga();
 $namaAplikasi = $lembaga['nama_aplikasi'] ?? 'SIMANIS';
 $namaSekolah = $lembaga['nmsekolah'] ?? 'SIMANIS';

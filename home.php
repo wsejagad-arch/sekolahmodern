@@ -1675,6 +1675,14 @@ include "sidebar.php";
     document.addEventListener('DOMContentLoaded', function() {
       // Only run on dashboard (home page without parameters)
       if (!window.location.search.includes('page=')) {
+        // Intercept back button to stay on beranda
+        if (window.history && window.history.pushState) {
+          window.history.pushState('forward', null, window.location.href);
+          window.addEventListener('popstate', function() {
+            window.history.pushState('forward', null, window.location.href);
+          });
+        }
+
         updateAgendaHomeCountdowns();
         setInterval(updateAgendaHomeCountdowns, 1000);
         refreshAgendaHome();
