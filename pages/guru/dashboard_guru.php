@@ -272,7 +272,7 @@ if ($isTimAduan && $aduanGuruCount > 0) {
         'color' => '#dc2626',
         'title' => 'Aduan Siswa Baru',
         'text' => 'Ada ' . $aduanGuruCount . ' aduan siswa yang perlu ditindaklanjuti.',
-        'link' => '../../home.php?page=aduan-siswa'
+        'link' => '?page=aduan-siswa'
     ];
 }
 
@@ -284,8 +284,7 @@ if (!empty($pendampinganKelasAll) && $problematicCount > 0) {
         'color' => '#ef4444',
         'title' => 'Pendampingan Siswa',
         'text' => 'Ada ' . $problematicCount . ' siswa yang butuh perhatian.',
-        'link' => 'javascript:void(0)',
-        'action_onclick' => "openDashboardModal('#notifPanelModal')"
+        'link' => $isWaliKelas ? 'pages/guru/walikelas' : 'pages/guru/laporan-kelas'
     ];
 }
 
