@@ -75,7 +75,11 @@ async function connectToWhatsApp(deviceId) {
         logger: logger,
         version: version,
         browser: Browsers.ubuntu('Chrome'),
-        markOnlineOnConnect: true
+        markOnlineOnConnect: false,
+        syncFullHistory: false,
+        generateHighQualityLinkPreview: false,
+        keepAliveIntervalMs: 30000,
+        defaultQueryTimeoutMs: 60000
     });
 
     devices[deviceId].sock = sock;
