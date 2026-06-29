@@ -426,7 +426,7 @@ if ($akses === 'auto' || $akses === '') {
 		set_guru_session($guru);
 		session_regenerate_id(true);
 		record_login_attempt($ip, true);
-		redirect_login_success(guru_page('guru_legacy'));
+		redirect_login_success('home.php');
 	}
 
 	ensure_jabatan_column_exists();
@@ -508,7 +508,7 @@ if ($akses == 1) {
 		set_guru_session($guru);
 		session_regenerate_id(true);
 		record_login_attempt($ip, true);
-		redirect_login_success(guru_page('guru_legacy'));
+		redirect_login_success('home.php');
 	}
 
 	record_login_attempt($ip, false);

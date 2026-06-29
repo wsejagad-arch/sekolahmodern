@@ -105,7 +105,7 @@ if (!empty($nip_check) && isset($conn)) {
                 <span>SIMANIS</span>
             </div>
             <nav class="sidebar-nav">
-                <a href="<?= guru_nav_url('guru_2026'); ?>" class="sidebar-link"><i class="bi bi-house-door"></i> <span>Dashboard</span></a>
+                <a href="<?= guru_nav_url('../../home.php'); ?>" class="sidebar-link"><i class="bi bi-house-door"></i> <span>Dashboard</span></a>
                 <?php if($is_wali_kelas_or_bk): ?><a href="<?= guru_nav_url('validasi-izin'); ?>" class="sidebar-link"><i class="bi bi-patch-check"></i> <span>Validasi Izin</span></a><?php endif; ?>
                 <a href="<?= guru_nav_url('data-siswa'); ?>" class="sidebar-link"><i class="bi bi-people"></i> <span>Data Siswa</span></a>
                 <a href="<?= guru_nav_url('nilai'); ?>" class="sidebar-link"><i class="bi bi-clipboard-data"></i> <span>Input Nilai</span></a>

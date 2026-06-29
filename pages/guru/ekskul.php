@@ -224,7 +224,7 @@ if ($id_ekskul_active > 0) {
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4><a href="guru_2026.php" class="text-decoration-none text-dark"><i class="bi bi-arrow-left"></i></a> Manajemen Ekstrakurikuler</h4>
+        <h4><a href="../../home.php" class="text-decoration-none text-dark"><i class="bi bi-arrow-left"></i></a> Manajemen Ekstrakurikuler</h4>
     </div>
 
     <?php if (empty($my_ekskul)): ?>
@@ -238,7 +238,7 @@ if ($id_ekskul_active > 0) {
                     Anda belum ditugaskan oleh Administrator sebagai pembina ekstrakurikuler manapun. 
                     Silakan hubungi pihak Admin sekolah untuk melakukan pengaturan pembina ekstrakurikuler.
                 </p>
-                <a href="guru_2026.php" class="btn btn-primary px-4 py-2 rounded-pill border-0" style="background-color: #EC4899;">
+                <a href="../../home.php" class="btn btn-primary px-4 py-2 rounded-pill border-0" style="background-color: #EC4899;">
                     <i class="bi bi-house-door"></i> Kembali ke Beranda
                 </a>
             </div>

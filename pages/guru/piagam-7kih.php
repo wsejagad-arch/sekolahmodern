@@ -240,7 +240,7 @@ $avgFinal = !empty($rows) ? array_sum(array_column($rows, 'final_score')) / coun
 <body>
 <main class="shell">
     <section class="hero">
-        <a href="guru_2026"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+        <a href="../../home.php"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
         <h1 class="mt-3 mb-2">Piagam 7 KAIH (Tujuh Kebiasaan Anak Indonesia Hebat)</h1>
         <p class="mb-0 text-white-50">Analisis otomatis Jurnal 7 Kebiasaan Anak Indonesia Hebat berdasarkan kelengkapan, konsistensi harian, dan ketepatan waktu siswa mengirim selfie jurnal.</p>
     </section>
@@ -354,7 +354,7 @@ $avgFinal = !empty($rows) ? array_sum(array_column($rows, 'final_score')) / coun
 </main>
 
 <nav class="mobile-nav">
-    <a href="guru_2026"><i class="bi bi-house-door"></i><span>Beranda</span></a>
+    <a href="../../home.php"><i class="bi bi-house-door"></i><span>Beranda</span></a>
     <a href="piagam-7kih" style="color:#16a34a;"><i class="bi bi-patch-check"></i><span>7 KAIH</span></a>
     <a href="apresiasi-guru"><i class="bi bi-award"></i><span>Apresiasi</span></a>
     <a href="profil-guru"><i class="bi bi-person"></i><span>Profil</span></a>

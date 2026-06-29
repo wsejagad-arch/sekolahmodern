@@ -761,7 +761,7 @@ $tanggalCetak = tgl_indo(date('Y-m-d')) . ' pukul ' . date('H:i:s') . ' WIB';
   </div>
 <main class="page-shell">
     <section class="hero">
-        <a class="back-link" href="guru_2026"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+        <a class="back-link" href="../../home.php"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
         <div class="hero-content">
             <div>
                 <h1 class="page-title">Lihat Kehadiran Kelas</h1>
@@ -992,9 +992,9 @@ $tanggalCetak = tgl_indo(date('Y-m-d')) . ' pukul ' . date('H:i:s') . ' WIB';
 
 <div class="bottom-nav-wrap">
     <nav class="bottom-nav" aria-label="Navigasi guru">
-        <a href="guru_2026" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
+        <a href="../../home.php" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
         <a href="<?= guru_rk_h($kelasDetailUrl); ?>" class="nav-link active"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
-        <a href="guru_2026?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
+        <a href="../../home.php?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
         <a href="inputtugas" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Tugas</span></a>
         <a href="profil-guru" class="nav-link"><i class="bi bi-person-fill"></i><span>Profil</span></a>
     </nav>

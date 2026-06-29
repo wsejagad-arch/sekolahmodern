@@ -14,7 +14,7 @@ if (!function_exists('guru_common_footer_url')) {
 $currentGuruFooterPage = strtolower((string)($_GET['page'] ?? basename($_SERVER['PHP_SELF'] ?? '')));
 $currentGuruFooterPage = preg_replace('/\.php$/', '', $currentGuruFooterPage);
 $footerItems = [
-    'home' => ['page' => 'guru_2026', 'label' => 'Beranda', 'icon' => 'bi-house-door-fill', 'aliases' => ['guru', 'guru_2026', 'guru_mobile_app', 'guru_mobile_app_with_external_css', 'guru_2026']],
+    'home' => ['page' => '../../home.php', 'label' => 'Beranda', 'icon' => 'bi-house-door-fill', 'aliases' => ['guru', '../../home.php', 'guru_mobile_app', 'guru_mobile_app_with_external_css', '../../home.php']],
     'kelas' => ['page' => 'data-siswa', 'label' => 'Kelas', 'icon' => 'bi-grid-fill', 'aliases' => ['data-siswa', 'walikelas', 'guru-wali-siswa', 'laporan-kelas', 'rekap-kehadiran', 'leger']],
     'tugas' => ['page' => 'history-tugas', 'label' => 'Tugas', 'icon' => 'bi-clipboard-check-fill', 'aliases' => ['history-tugas', 'history-tugas-simple', 'history-tugas-content', 'inputtugas', 'task-detail']],
     'profil' => ['page' => 'profil-guru', 'label' => 'Profil', 'icon' => 'bi-person-fill', 'aliases' => ['profil-guru']],
@@ -142,7 +142,7 @@ $isActiveFooterItem = static function (array $item) use ($currentGuruFooterPage)
             <i class="bi <?= htmlspecialchars($footerItems['kelas']['icon'], ENT_QUOTES, 'UTF-8'); ?>"></i>
             <span><?= htmlspecialchars($footerItems['kelas']['label'], ENT_QUOTES, 'UTF-8'); ?></span>
         </a>
-        <a href="<?= htmlspecialchars(guru_common_footer_url('guru_2026', ['open_jurnal' => '1']), ENT_QUOTES, 'UTF-8'); ?>" class="guru-common-footer-center" aria-label="Input jurnal">
+        <a href="<?= htmlspecialchars(guru_common_footer_url('../../home.php', ['open_jurnal' => '1']), ENT_QUOTES, 'UTF-8'); ?>" class="guru-common-footer-center" aria-label="Input jurnal">
             <i class="bi bi-fingerprint"></i>
         </a>
         <a href="<?= htmlspecialchars(guru_common_footer_url($footerItems['tugas']['page']), ENT_QUOTES, 'UTF-8'); ?>" class="guru-common-footer-item <?= $isActiveFooterItem($footerItems['tugas']) ? 'is-active' : ''; ?>">

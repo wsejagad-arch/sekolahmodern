@@ -1,7 +1,7 @@
 <?php
-// guru_2026_view.php – Versi tampilan dashboard guru.
-// Menyajikan tata letak dan menu yang sama seperti guru_2026.php.
-// Dapat diakses melalui http://localhost/jurnal/pages/guru/guru_2026_view.php
+// ../../home.php_view.php – Versi tampilan dashboard guru.
+// Menyajikan tata letak dan menu yang sama seperti ../../home.php.
+// Dapat diakses melalui http://localhost/jurnal/pages/guru/../../home.php_view.php
 
 require_once '../../koneksi_local.php';
 require_once '../../topbar.php';
@@ -9,7 +9,7 @@ require_once '../../footer.php';
 
 // Menangkap output dari halaman asli agar UI tetap sama.
 ob_start();
-include 'guru_2026.php';
+include '../../home.php';
 $pageContent = ob_get_clean();
 ?>
 <!DOCTYPE html>

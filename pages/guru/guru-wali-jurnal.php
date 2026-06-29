@@ -122,7 +122,7 @@ while ($qJurnal && ($row = mysqli_fetch_assoc($qJurnal))) {
         </div>
         <div class="d-flex gap-2 flex-wrap">
             <a class="btn btn-outline-primary rounded-pill fw-bold" href="guru-wali-siswa"><i class="bi bi-person-plus"></i> Tambah Siswa</a>
-            <a class="btn btn-outline-secondary rounded-pill fw-bold" href="guru_2026"><i class="bi bi-arrow-left"></i> Dashboard</a>
+            <a class="btn btn-outline-secondary rounded-pill fw-bold" href="../../home.php"><i class="bi bi-arrow-left"></i> Dashboard</a>
         </div>
     </section>
 

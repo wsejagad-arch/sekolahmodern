@@ -381,7 +381,7 @@ while ($qItems && ($item = mysqli_fetch_assoc($qItems))) {
 <body>
 <main class="shell">
     <section class="hero">
-        <a href="guru_2026"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+        <a href="../../home.php"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
         <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mt-3">
             <div>
                 <h1 class="mb-2">Menu WKS</h1>
@@ -572,10 +572,10 @@ while ($qItems && ($item = mysqli_fetch_assoc($qItems))) {
 
 <div class="bottom-nav-wrap">
     <nav class="bottom-nav">
-        <a href="guru_2026" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
+        <a href="../../home.php" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
         <a href="<?= wks_h($kelasDetailUrl); ?>" class="nav-link"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
-        <a href="guru_2026?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
-        <a href="guru_2026" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Tugas</span></a>
+        <a href="../../home.php?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
+        <a href="../../home.php" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Tugas</span></a>
         <a href="profil-guru" class="nav-link">
             <div style="width:24px; height:24px; border-radius:50%; overflow:hidden; border:1.5px solid #cbd5e1; margin-bottom:2px; position:relative;">
                 <?php if (!empty($guru['foto'])): ?>

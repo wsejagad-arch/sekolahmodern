@@ -58,7 +58,7 @@ while ($row = mysqli_fetch_assoc($ampuh_q)) {
 
 // Guard: hanya pembina/pendamping literasi yang boleh mengakses halaman ini
 if (!$isPendampingLiterasi && empty($ampuh_classes)) {
-    header('Location: guru_2026.php?akses_ditolak=literasi');
+    header('Location: ../../home.php?akses_ditolak=literasi');
     exit;
 }
 
@@ -197,7 +197,7 @@ if ($action === 'load_monitoring') {
         <div id="content">
             <!-- Topbar -->
             <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow d-flex justify-content-between px-4">
-                <a href="guru_2026.php" class="btn btn-outline-primary btn-sm rounded-pill font-weight-bold d-flex align-items-center px-3 shadow-sm" style="gap: 6px; width: fit-content;">
+                <a href="../../home.php" class="btn btn-outline-primary btn-sm rounded-pill font-weight-bold d-flex align-items-center px-3 shadow-sm" style="gap: 6px; width: fit-content;">
                     <i class="fas fa-chevron-circle-left" style="font-size: 1.1rem;"></i> Kembali
                 </a>
                 <h5 class="mt-2 font-weight-bold mb-0 text-right" style="color:#0ea5e9; font-size:1.1rem;"><i class="fas fa-book-reader"></i> Literasi SIMANIS</h5>
