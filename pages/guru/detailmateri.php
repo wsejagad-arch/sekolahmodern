@@ -198,12 +198,11 @@ $existingKeterangan = $existingKeterangan ?? '';
                 .absen-radio[value="Dispen"]:checked { background-color:#6f42c1; border-color:#6f42c1; }
                 .absen-radio[value="Telat"]:checked { background-color:#fd7e14; border-color:#fd7e14; }
                 .absen-radio:checked::after { color:#fff; }
-                
                 /* Compact table styling */
-                .table-absen { table-layout: auto; width: 100%; }
-                .table-absen th, .table-absen td { padding: 4px 2px !important; vertical-align: middle; }
-                .table-absen th.col-radio, .table-absen td.col-radio { width: 28px; text-align: center; }
-                .table-absen td.col-nama { font-size: 12px; padding-left: 8px !important; line-height: 1.2; }
+                .table-absen { table-layout: fixed; width: 100%; word-wrap: break-word; }
+                .table-absen th, .table-absen td { padding: 4px 1px !important; vertical-align: middle; }
+                .table-absen th.col-radio, .table-absen td.col-radio { width: 30px; text-align: center; overflow: hidden; }
+                .table-absen th.col-nama, .table-absen td.col-nama { width: auto; font-size: 12px; padding-left: 6px !important; line-height: 1.2; word-break: break-word; }
             </style>
 
             <?php
