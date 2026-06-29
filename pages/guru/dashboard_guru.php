@@ -662,8 +662,8 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         <i class="bi bi-pencil-square"></i> Input Jurnal Sekarang
                     </a>
                 <?php else: ?>
-                    <a href="javascript:void(0)" onclick="$('html, body').animate({scrollTop: $('#list-jadwal-mengajar').offset().top}, 500);" style="display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; color: #475569; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; border: 1px solid #e2e8f0; font-size: 0.9rem; transition: all 0.2s;" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f1f5f9';">
-                        <i class="bi bi-calendar-check"></i> Lihat Jadwal
+                    <a href="javascript:void(0)" onclick="startInputJurnal()" style="display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; color: #475569; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; border: 1px solid #e2e8f0; font-size: 0.9rem; transition: all 0.2s;" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f1f5f9';">
+                        <i class="bi bi-journal-check"></i> Lihat Jurnal
                     </a>
                 <?php endif; ?>
             </div>
