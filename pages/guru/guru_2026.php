@@ -1579,20 +1579,18 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     </div>
 </div>
 
-<div class="journal-modal-backdrop" id="journalInputModal" aria-hidden="true">
-    <div class="journal-modal journal-modal-lg" role="dialog" aria-modal="true" aria-labelledby="journalInputTitle">
-        <div class="journal-modal-head">
-            <div>
-                <h5 id="journalInputTitle">Input Jurnal Mengajar</h5>
-                <p>Lengkapi materi, kegiatan, dan presensi siswa.</p>
+<!-- Modal Isi Jurnal (Bootstrap) -->
+<div class="modal fade" id="show" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-sm-down modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">Isi Jurnal</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <button class="journal-modal-close" type="button" data-close-modal aria-label="Tutup"><i class="bi bi-x-lg"></i></button>
-        </div>
-        <div class="journal-modal-body">
-            <div class="modal-data">
-                <div class="journal-loading">
-                    <span class="spinner-border spinner-border-sm text-primary me-2"></span>
-                    <span>Memuat form jurnal...</span>
+            <div class="modal-body">
+                <div class="modal-data" style="text-align: center; padding: 20px;">
+                    <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                    <span class="text-muted">Memuat...</span>
                 </div>
             </div>
         </div>
@@ -2086,8 +2084,8 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     return;
                 }
                 var $modalData = $('.modal-data').removeClass('journal-loading');
-                $modalData.html('<div class="journal-loading"><span class="spinner-border spinner-border-sm text-primary me-2"></span><span>Memuat form jurnal...</span></div>');
-                openDashboardModal('#journalInputModal');
+                $modalData.html('<div style="text-align: center; padding: 20px;"><div class="spinner-border spinner-border-sm text-primary me-2"></div><span class="text-muted">Memuat form jurnal...</span></div>');
+                $('#show').modal('show');
                 $.post('pages/guru/detailmateri.php', { getDetail: idMapel }, function(data) {
                     $modalData.html(data);
                 }).fail(function() {
