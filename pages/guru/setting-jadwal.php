@@ -8,8 +8,8 @@ if (!isset($_SESSION['no_induk']) || (int)($_SESSION['hak_akses'] ?? 0) !== 2) {
     exit;
 }
 
-require_once __DIR__ . '/../../koneksi.php';
-date_default_timezone_set('Asia/Jakarta');
+require_once __DIR__ . '/../../bootstrap.php';
+// date_default_timezone_set is already in bootstrap.php
 
 function sj_h($value): string
 {
