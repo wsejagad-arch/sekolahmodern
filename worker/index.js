@@ -74,7 +74,7 @@ async function connectToWhatsApp(deviceId) {
         auth: state,
         logger: logger,
         version: version,
-        browser: ["Windows", "Chrome", "110.0.5481.177"],
+        browser: Browsers.windows('Desktop'),
         markOnlineOnConnect: true
     });
 
@@ -417,7 +417,11 @@ app.post("/logout", async (req, res) => {
     try {
         if (device.sock) {
             device.sock.isManualShutdown = true;
-            await device.sock.logout();
+            try {
+                await device.sock.logout();
+            } catch (e) {
+                console.warn(`[Device ${deviceId}] sock.logout() error:`, e.message);
+            }
         }
         device.connectionState = "disconnected";
         device.latestQR = null;

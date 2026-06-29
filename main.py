@@ -253,9 +253,10 @@ async def process_login(response: Response, username: str = Form(...), password:
     raise HTTPException(status_code=401, detail="Invalid username or password")
 
 @app.post("/logout")
-async def process_logout(response: Response):
+async def process_logout():
+    response = RedirectResponse(url="/login", status_code=303)
     response.delete_cookie(key=SESSION_COOKIE_NAME)
-    return RedirectResponse(url="/login", status_code=303)
+    return response
 
 @app.get("/", response_class=HTMLResponse)
 async def index_page(session: Optional[str] = Cookie(None)):
