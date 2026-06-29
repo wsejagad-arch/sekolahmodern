@@ -668,11 +668,17 @@
         background: #fee2e2;
         color: #991b1b;
     }
+    .mobile-only-layout {
+        display: none !important;
+    }
 }
 
 /* Hide desktop elements on mobile */
 @media (max-width: 767px) {
     .desktop-sidebar, .desktop-topbar, .desktop-grid, .desktop-second-grid {
         display: none !important;
+    }
+    .mobile-only-layout {
+        display: block !important;
     }
 }

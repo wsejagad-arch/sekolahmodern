@@ -1276,8 +1276,9 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     </div>
 </div>
 
-<!-- End Desktop Grid (Redesigned) -->
-    <h3 class="section-label">Aksi Cepat</h3>
+<!-- MOBILE-ONLY LAYOUT WRAPPER -->
+    <div class="mobile-only-layout">
+        <h3 class="section-label">Aksi Cepat</h3>
     <div class="quick-grid">
         <!-- 1. Validasi Izin -->
         <?php if ($isWaliKelas || $isGuruBK): ?>
@@ -2386,6 +2387,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             initTimer();
         })();
     </script>
+</div>
 <?php include __DIR__ . '/guru_common_footer.php'; ?>
 
 <script>
