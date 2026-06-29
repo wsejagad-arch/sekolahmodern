@@ -2099,13 +2099,13 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 });
             };
 
-            function startInputJurnal() {
+            window.startInputJurnal = function() {
                 if (jadwalToday.length === 0) {
                     alert('Belum ada jadwal mengajar hari ini.');
                     return;
                 }
                 $('#schedulePickerModal').modal('show');
-            }
+            };
 
             // Animasi Ring Progress
             setTimeout(function() {
