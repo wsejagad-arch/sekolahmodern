@@ -225,8 +225,7 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
         /* Desktop specific styling overrides */
         @media (min-width: 768px) {
             .mobile-nav, 
-            .guru-common-footer-wrap,
-            body.guru-common-footer-active {
+            .guru-common-footer-wrap {
                 display: none !important;
                 padding-bottom: 0 !important;
             }
