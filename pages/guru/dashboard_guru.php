@@ -284,7 +284,7 @@ if (!empty($pendampinganKelasAll) && $problematicCount > 0) {
         'color' => '#ef4444',
         'title' => 'Pendampingan Siswa',
         'text' => 'Ada ' . $problematicCount . ' siswa yang butuh perhatian.',
-        'link' => $isWaliKelas ? 'pages/guru/walikelas' : 'pages/guru/laporan-kelas'
+        'link' => !empty($waliKelasList) ? 'pages/guru/walikelas' : 'pages/guru/laporan-kelas'
     ];
 }
 
