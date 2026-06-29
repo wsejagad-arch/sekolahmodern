@@ -646,6 +646,119 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             </svg>
         </div>
 
+        <!-- Quick Actions Card (All 16 Actions) -->
+        <div class="smart-card">
+            <div class="smart-card-title-wrap">
+                <h3 class="smart-card-title">Aksi Cepat</h3>
+            </div>
+            <div class="smart-quick-actions-grid">
+                <!-- 1. Validasi Izin -->
+                <?php if ($isWaliKelas || $isGuruBK): ?>
+                <a href="pages/guru/validasi-izin" class="smart-quick-action-btn" style="position:relative;">
+                    <i class="bi bi-patch-check-fill text-danger"></i>
+                    <?php if ($pendingIzinCount > 0): ?>
+                    <span style="position:absolute; top:6px; right:6px; background:#dc2626; color:#fff; font-size:9px; font-weight:800; min-width:16px; height:16px; border-radius:999px; display:flex; align-items:center; justify-content:center; padding:0 3px;"><?= $pendingIzinCount ?></span>
+                    <?php endif; ?>
+                    <span>Validasi Izin</span>
+                </a>
+                <?php endif; ?>
+
+                <!-- 2. LENTERA Literasi -->
+                <?php if ($isPembinaLiterasi): ?>
+                <a href="pages/guru/literasi" class="smart-quick-action-btn">
+                    <i class="bi bi-book-half text-info"></i>
+                    <span>LENTERA Literasi</span>
+                </a>
+                <?php endif; ?>
+
+                <!-- 3. Data Kehadiran -->
+                <a href="pages/guru/rekap-kehadiran" class="smart-quick-action-btn">
+                    <i class="bi bi-clipboard2-data-fill text-success"></i>
+                    <span>Data Kehadiran</span>
+                </a>
+
+                <!-- 4. Catat Pelanggaran -->
+                <a href="#" class="smart-quick-action-btn btn-open-pelanggaran">
+                    <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                    <span>Catat Pelanggaran</span>
+                </a>
+
+                <!-- 5. Setting Jadwal -->
+                <a href="pages/guru/setting-jadwal" class="smart-quick-action-btn">
+                    <i class="bi bi-calendar-week-fill text-primary"></i>
+                    <span>Setting Jadwal</span>
+                </a>
+
+                <!-- 6. Materi Pembelajaran -->
+                <a href="pages/guru/materi" class="smart-quick-action-btn">
+                    <i class="bi bi-book-half text-purple"></i>
+                    <span>Materi</span>
+                </a>
+
+                <!-- 7. Nilai Siswa -->
+                <a href="pages/guru/nilai" class="smart-quick-action-btn">
+                    <i class="bi bi-table text-warning"></i>
+                    <span>Nilai Siswa</span>
+                </a>
+
+                <!-- 8. Wali Kelas -->
+                <?php if ($isWaliKelas): ?>
+                <a href="pages/guru/walikelas" class="smart-quick-action-btn">
+                    <i class="bi bi-person-vcard-fill text-primary"></i>
+                    <span>Wali Kelas</span>
+                </a>
+                <?php endif; ?>
+
+                <!-- 9. Guru Wali -->
+                <a href="#" class="smart-quick-action-btn btn-open-guru-wali">
+                    <i class="bi bi-person-workspace text-info"></i>
+                    <span>Guru Wali</span>
+                </a>
+
+                <!-- 10. Monitoring Kelas -->
+                <a href="pages/guru/laporan-kelas" class="smart-quick-action-btn">
+                    <i class="bi bi-bar-chart-fill text-warning"></i>
+                    <span>Monitoring Kelas</span>
+                </a>
+
+                <!-- 11. Ekstra kurikuler -->
+                <a href="pages/guru/ekskul" class="smart-quick-action-btn">
+                    <i class="bi bi-dribbble text-danger"></i>
+                    <span>Ekskul</span>
+                </a>
+
+                <!-- 12. Leger Nilai -->
+                <a href="pages/guru/leger" class="smart-quick-action-btn">
+                    <i class="bi bi-file-earmark-spreadsheet-fill text-success"></i>
+                    <span>Leger Nilai</span>
+                </a>
+
+                <!-- 13. File Ekin -->
+                <a href="pages/guru/ekinerja" class="smart-quick-action-btn">
+                    <i class="bi bi-file-earmark-bar-graph-fill text-primary"></i>
+                    <span>File Ekin</span>
+                </a>
+
+                <!-- 14. Apresiasi Guru -->
+                <a href="pages/guru/apresiasi-guru" class="smart-quick-action-btn">
+                    <i class="bi bi-award-fill text-warning"></i>
+                    <span>Apresiasi Guru</span>
+                </a>
+
+                <!-- 15. Piagam 7 KAIH -->
+                <a href="pages/guru/piagam-7kih" class="smart-quick-action-btn">
+                    <i class="bi bi-patch-check-fill text-success"></i>
+                    <span>Piagam 7 KAIH</span>
+                </a>
+
+                <!-- 16. INFO WKS -->
+                <a href="pages/guru/wks" class="smart-quick-action-btn">
+                    <i class="bi bi-diagram-3-fill text-info"></i>
+                    <span>INFO WKS</span>
+                </a>
+            </div>
+        </div>
+
         <!-- Performance & Visits Grid -->
         <div class="stats-row-grid">
             <!-- Performance: Classes Progress -->
