@@ -41,47 +41,11 @@
                 Device Authentication
             </div>
 
-            <!-- Device Selector Row -->
-            <div class="device-selector" id="device-selector" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <!-- Device Selector Row (Hidden for Single Device) -->
+            <div class="device-selector" id="device-selector" style="display: none;">
                 <button class="device-tab-btn active" data-device="1">
                     <span class="device-dot disconnected" id="device-dot-1"></span>
                     Dev 1
-                </button>
-                <button class="device-tab-btn" data-device="2">
-                    <span class="device-dot disconnected" id="device-dot-2"></span>
-                    Dev 2
-                </button>
-                <button class="device-tab-btn" data-device="3">
-                    <span class="device-dot disconnected" id="device-dot-3"></span>
-                    Dev 3
-                </button>
-                <button class="device-tab-btn" data-device="4">
-                    <span class="device-dot disconnected" id="device-dot-4"></span>
-                    Dev 4
-                </button>
-                <button class="device-tab-btn" data-device="5">
-                    <span class="device-dot disconnected" id="device-dot-5"></span>
-                    Dev 5
-                </button>
-                <button class="device-tab-btn" data-device="6">
-                    <span class="device-dot disconnected" id="device-dot-6"></span>
-                    Dev 6
-                </button>
-                <button class="device-tab-btn" data-device="7">
-                    <span class="device-dot disconnected" id="device-dot-7"></span>
-                    Dev 7
-                </button>
-                <button class="device-tab-btn" data-device="8">
-                    <span class="device-dot disconnected" id="device-dot-8"></span>
-                    Dev 8
-                </button>
-                <button class="device-tab-btn" data-device="9">
-                    <span class="device-dot disconnected" id="device-dot-9"></span>
-                    Dev 9
-                </button>
-                <button class="device-tab-btn" data-device="10">
-                    <span class="device-dot disconnected" id="device-dot-10"></span>
-                    Dev 10
                 </button>
             </div>
 
@@ -196,20 +160,10 @@
                         <label for="send-phone">Recipient Phone Number (e.g. 62812345678)</label>
                         <input type="text" id="send-phone" class="form-control" placeholder="62812345678" required>
                     </div>
-                    <div class="form-group">
-                        <label for="send-device">Routing Device (Optional)</label>
+                    <div class="form-group" style="display: none;">
+                        <label for="send-device">Routing Device</label>
                         <select id="send-device" class="form-control" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-glass); color: var(--text-primary); font-family: var(--font-sans); border-radius: 8px; padding: 0.5rem 0.75rem;">
-                            <option value="">Auto (Any Connected Device)</option>
                             <option value="1">Device 1</option>
-                            <option value="2">Device 2</option>
-                            <option value="3">Device 3</option>
-                            <option value="4">Device 4</option>
-                            <option value="5">Device 5</option>
-                            <option value="6">Device 6</option>
-                            <option value="7">Device 7</option>
-                            <option value="8">Device 8</option>
-                            <option value="9">Device 9</option>
-                            <option value="10">Device 10</option>
                         </select>
                     </div>
                     <div class="form-group">

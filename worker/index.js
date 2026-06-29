@@ -35,7 +35,7 @@ if (!fs.existsSync(SESSION_DIR)) {
     fs.mkdirSync(SESSION_DIR, { recursive: true });
 }
 
-const DEVICE_COUNT = 10;
+const DEVICE_COUNT = 1;
 const devices = {};
 
 // Initialize device objects
