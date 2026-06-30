@@ -75,13 +75,14 @@ async function connectToWhatsApp(deviceId) {
     }
 
     const sock = makeWASocket({
+        version,
+        logger,
+        printQRInTerminal: false,
         auth: state,
-        logger: logger,
-        version: version,
-        browser: Browsers.ubuntu('Chrome'),
+        browser: ["Ubuntu", "Chrome", "20.0.04"],
         markOnlineOnConnect: false,
+        generateHighQualityLinkPreview: true,
         syncFullHistory: false,
-        generateHighQualityLinkPreview: false,
         keepAliveIntervalMs: 30000,
         defaultQueryTimeoutMs: 60000
     });
@@ -291,8 +292,15 @@ app.post("/pair", async (req, res) => {
         if (!sock) {
             console.log(`[Device ${deviceId}] No active socket found. Initializing fresh socket connection...`);
             await connectToWhatsApp(deviceId);
-            await delay(5000); // Wait for connection
             sock = devices[deviceId].sock;
+            if (sock) {
+                console.log(`[Device ${deviceId}] Waiting for socket to be ready for pairing...`);
+                try {
+                    await sock.waitForConnectionUpdate((update) => !!update.qr || update.connection === 'open' || update.isOnline);
+                } catch(e) {
+                    console.log(`[Device ${deviceId}] wait for connection update error:`, e.message);
+                }
+            }
         }
 
         if (!sock) {
@@ -319,9 +327,14 @@ app.post("/pair", async (req, res) => {
             }
             
             await connectToWhatsApp(deviceId);
-            await delay(5000); // Wait 5 seconds for connection
-            
             const freshSock = devices[deviceId].sock;
+            if (freshSock) {
+                console.log(`[Device ${deviceId}] Waiting for fresh socket to be ready...`);
+                try {
+                    await freshSock.waitForConnectionUpdate((update) => !!update.qr || update.connection === 'open' || update.isOnline);
+                } catch(e) {}
+            }
+            
             if (!freshSock) {
                 throw new Error("Fresh socket could not be initialized");
             }
