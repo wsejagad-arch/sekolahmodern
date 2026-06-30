@@ -106,15 +106,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 pairingCodeDisplay.style.display = "none";
             } else {
                 isConnected = false;
-                logoutBtn.style.display = "none";
                 authSection.style.display = "block";
                 dashboardSection.style.display = "none";
 
                 if (current.state === "connecting") {
+                    logoutBtn.style.display = "block"; // Allow user to force disconnect if stuck
                     statusText.innerText = `Device ${activeDevice}: Connecting to WhatsApp...`;
                     qrWrapper.style.display = "none";
                     pairingCodeDisplay.style.display = "none";
                 } else if (current.state === "qr") {
+                    logoutBtn.style.display = "none";
                     statusText.innerText = `Device ${activeDevice}: Ready to Link Device`;
                     
                     if (current.qr) {
@@ -131,6 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         pairingCodeDisplay.style.display = "none";
                     }
                 } else {
+                    logoutBtn.style.display = "none";
                     statusText.innerText = `Device ${activeDevice}: Disconnected`;
                     qrWrapper.style.display = "none";
                     pairingCodeDisplay.style.display = "none";

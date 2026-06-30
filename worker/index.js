@@ -172,6 +172,7 @@ async function connectToWhatsApp(deviceId) {
             if (!shouldReconnect) {
                 devices[deviceId].connectionState = "disconnected";
                 devices[deviceId].user = null;
+                devices[deviceId].sock = null;
             } else {
                 // Keep the user info and set state to connecting so the frontend doesn't drop the session view
                 devices[deviceId].connectionState = "connecting";
@@ -447,6 +448,7 @@ app.post("/logout", async (req, res) => {
         device.latestQR = null;
         device.latestPairingCode = null;
         device.user = null;
+        device.sock = null;
         
         // Delete session dir to clear cache
         if (fs.existsSync(deviceSessionDir)) {
