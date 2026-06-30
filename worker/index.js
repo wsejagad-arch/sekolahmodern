@@ -163,13 +163,24 @@ async function connectToWhatsApp(deviceId) {
         }
 
         if (connection === "close") {
-            const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut && !sock.isManualShutdown;
-            devices[deviceId].connectionState = "disconnected";
+            const isManualShutdown = sock.isManualShutdown;
+            const statusCode = lastDisconnect?.error?.output?.statusCode;
+            
+            // Only stop reconnecting if the user explicitly clicked disconnect (manual shutdown)
+            const shouldReconnect = !isManualShutdown;
+
+            if (!shouldReconnect) {
+                devices[deviceId].connectionState = "disconnected";
+                devices[deviceId].user = null;
+            } else {
+                // Keep the user info and set state to connecting so the frontend doesn't drop the session view
+                devices[deviceId].connectionState = "connecting";
+            }
+            
             devices[deviceId].latestQR = null;
             devices[deviceId].latestPairingCode = null;
-            devices[deviceId].user = null;
 
-            console.log(`❌ [Device ${deviceId}] Connection closed. Reason:`, lastDisconnect?.error?.message || "Unknown");
+            console.log(`❌ [Device ${deviceId}] Connection closed. Reason:`, lastDisconnect?.error?.message || "Unknown", "Status Code:", statusCode);
 
             // Clean up the socket listeners so this instance won't trigger any more event callbacks
             try {
@@ -179,16 +190,15 @@ async function connectToWhatsApp(deviceId) {
             }
 
             if (shouldReconnect) {
-                console.log(`🔄 [Device ${deviceId}] Reconnecting...`);
+                console.log(`🔄 [Device ${deviceId}] Reconnecting in 3 seconds...`);
                 setTimeout(() => connectToWhatsApp(deviceId), 3000);
             } else {
-                console.log(`🚫 [Device ${deviceId}] Logged out. Deleting session directory and starting fresh...`);
+                console.log(`🚫 [Device ${deviceId}] Logged out manually. Deleting session directory...`);
                 try {
                     fs.rmSync(deviceSessionDir, { recursive: true, force: true });
                 } catch (e) {
                     console.error(`[Device ${deviceId}] Failed to clear session:`, e);
                 }
-                setTimeout(() => connectToWhatsApp(deviceId), 1000);
             }
         }
     });
