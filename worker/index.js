@@ -54,6 +54,10 @@ for (let i = 1; i <= DEVICE_COUNT; i++) {
 const logger = pino({ level: "silent" });
 
 async function connectToWhatsApp(deviceId) {
+    // Immediately set state to connecting so UI shows progress
+    devices[deviceId].connectionState = "connecting";
+    devices[deviceId].latestQR = null;
+
     const deviceSessionDir = path.join(SESSION_DIR, `device_${deviceId}`);
     const { state, saveCreds } = await useMultiFileAuthState(deviceSessionDir);
 
