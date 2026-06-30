@@ -61,19 +61,15 @@ async function connectToWhatsApp(deviceId) {
     const deviceSessionDir = path.join(SESSION_DIR, `device_${deviceId}`);
     const { state, saveCreds } = await useMultiFileAuthState(deviceSessionDir);
 
-    let version = [2, 3000, 1015901307]; // Fallback stable version
-    try {
-        const { version: latestVersion, isLatest } = await fetchLatestBaileysVersion();
-        if (deviceId === 1) {
-            console.log(`🌐 Using WhatsApp Web v${latestVersion.join(".")}, isLatest: ${isLatest}`);
-        }
-    } catch (err) {
-        if (deviceId === 1) {
-            console.warn("Failed to fetch latest WhatsApp version:", err.message);
-        }
+    // Use a known stable version to bypass the 405 error
+    const version = [2, 3000, 1033893291];
+
+    if (deviceId === 1) {
+        console.log(`🌐 Using WhatsApp Web v${version.join(".")}`);
     }
 
     const sock = makeWASocket({
+        version,
         logger,
         printQRInTerminal: false,
         auth: state,
