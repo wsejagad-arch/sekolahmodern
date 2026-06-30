@@ -111,7 +111,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (current.state === "connecting") {
                     logoutBtn.style.display = "block"; // Allow user to force disconnect if stuck
-                    statusText.innerText = `Device ${activeDevice}: Connecting to WhatsApp...`;
+                    if (current.last_disconnect_reason) {
+                        statusText.innerText = `Device ${activeDevice}: Reconnecting (Last error: ${current.last_disconnect_reason})...`;
+                    } else {
+                        statusText.innerText = `Device ${activeDevice}: Connecting to WhatsApp...`;
+                    }
                     qrWrapper.style.display = "none";
                     pairingCodeDisplay.style.display = "none";
                 } else if (current.state === "qr") {

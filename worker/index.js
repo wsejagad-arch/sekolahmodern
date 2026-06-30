@@ -64,22 +64,20 @@ async function connectToWhatsApp(deviceId) {
     let version = [2, 3000, 1015901307]; // Fallback stable version
     try {
         const { version: latestVersion, isLatest } = await fetchLatestBaileysVersion();
-        version = latestVersion;
         if (deviceId === 1) {
-            console.log(`🌐 Using WhatsApp Web v${version.join(".")}, isLatest: ${isLatest}`);
+            console.log(`🌐 Using WhatsApp Web v${latestVersion.join(".")}, isLatest: ${isLatest}`);
         }
     } catch (err) {
         if (deviceId === 1) {
-            console.warn("Failed to fetch latest WhatsApp version, using fallback stable version:", err.message);
+            console.warn("Failed to fetch latest WhatsApp version:", err.message);
         }
     }
 
     const sock = makeWASocket({
-        version,
         logger,
         printQRInTerminal: false,
         auth: state,
-        browser: ["Ubuntu", "Chrome", "20.0.04"],
+        browser: Browsers.macOS('Desktop'),
         markOnlineOnConnect: false,
         generateHighQualityLinkPreview: true,
         syncFullHistory: false,
@@ -174,7 +172,11 @@ async function connectToWhatsApp(deviceId) {
         if (connection === "close") {
             const isManualShutdown = sock.isManualShutdown;
             const statusCode = lastDisconnect?.error?.output?.statusCode;
+            const reason = lastDisconnect?.error?.message || lastDisconnect?.error?.output?.payload?.message || "Unknown error";
             
+            // Store it so we can debug on the UI
+            devices[deviceId].lastDisconnectReason = reason;
+
             // Only stop reconnecting if the user explicitly clicked disconnect (manual shutdown)
             const shouldReconnect = !isManualShutdown;
 
@@ -244,7 +246,8 @@ app.get("/status", (req, res) => {
                 state: devices[requestedDeviceId].connectionState,
                 qr: devices[requestedDeviceId].latestQR,
                 pairingCode: devices[requestedDeviceId].latestPairingCode,
-                user: devices[requestedDeviceId].user
+                user: devices[requestedDeviceId].user,
+                last_disconnect_reason: devices[requestedDeviceId].lastDisconnectReason
             }
         });
     }
