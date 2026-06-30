@@ -285,29 +285,16 @@ app.post("/pair", async (req, res) => {
         console.log(`🔑 [Device ${deviceId}] Generating pairing code for ${cleanNumber}...`);
         devices[deviceId].pairingNumber = cleanNumber;
         
-        // Always clear existing session files to start 100% fresh for new pairing request
-        const deviceSessionDir = path.join(SESSION_DIR, `device_${deviceId}`);
-        console.log(`[Device ${deviceId}] Clearing old session files for fresh pairing...`);
-        try {
-            if (fs.existsSync(deviceSessionDir)) {
-                fs.rmSync(deviceSessionDir, { recursive: true, force: true });
-            }
-        } catch(e) {
-            console.error(`Failed to clear session dir:`, e);
+        let sock = devices[deviceId].sock;
+        
+        // If socket doesn't exist, connect it
+        if (!sock) {
+            console.log(`[Device ${deviceId}] No active socket found. Initializing fresh socket connection...`);
+            await connectToWhatsApp(deviceId);
+            await delay(5000); // Wait for connection
+            sock = devices[deviceId].sock;
         }
 
-        // Initialize fresh socket connection and wait
-        console.log(`[Device ${deviceId}] Initializing fresh socket connection...`);
-        if (devices[deviceId].sock) {
-            try {
-                devices[deviceId].sock.isManualShutdown = true;
-                devices[deviceId].sock.end();
-            } catch(e) {}
-        }
-        await connectToWhatsApp(deviceId);
-        await delay(5000); // Wait 5 seconds for socket initialization and handshake
-        
-        const sock = devices[deviceId].sock;
         if (!sock) {
             return res.status(500).json({ error: `Socket for device ${deviceId} not initialized. Please try again.` });
         }
