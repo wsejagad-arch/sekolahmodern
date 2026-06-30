@@ -141,18 +141,22 @@ async function connectToWhatsApp(deviceId) {
     sock.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect, qr } = update;
 
-        if (qr) {
-            devices[deviceId].connectionState = "qr";
-            try {
-                devices[deviceId].latestQR = await QRCode.toDataURL(qr);
-            } catch (err) {
-                console.error(`[Device ${deviceId}] Failed to generate QR data URL:`, err);
+        if (connection === "connecting") {
+            // Only set connecting if we don't already have a QR
+            if (devices[deviceId].connectionState !== "qr") {
+                devices[deviceId].connectionState = "connecting";
             }
         }
 
-        if (connection === "connecting") {
-            devices[deviceId].connectionState = "connecting";
-            devices[deviceId].latestQR = null;
+        if (qr) {
+            console.log(`[Device ${deviceId}] Received QR code from Baileys!`);
+            devices[deviceId].connectionState = "qr";
+            try {
+                devices[deviceId].latestQR = await QRCode.toDataURL(qr);
+                console.log(`[Device ${deviceId}] QR successfully converted to image.`);
+            } catch (err) {
+                console.error(`[Device ${deviceId}] Failed to generate QR data URL:`, err);
+            }
         }
 
         if (connection === "open") {
