@@ -597,19 +597,48 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         </div>
         <div class="desktop-topbar-actions">
             <span class="topbar-lang"><i class="bi bi-globe"></i> ID</span>
-            <div class="topbar-icon-btn" onclick="toggleNotifications(event)" title="Notifikasi">
-                <i class="bi bi-bell"></i>
-                <?php if($totalNotifCount > 0): ?><span style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:800;"><?= min($totalNotifCount,9) ?></span><?php endif; ?>
-            </div>
-            <div class="topbar-profile-card" onclick="toggleProfileMenu()">
-                <div class="topbar-profile-avatar-wrap">
-                    <?php if (!empty($dataGuru['foto'])): ?>
-                    <img src="../../foto/<?= htmlspecialchars($dataGuru['foto']) ?>" alt="Profile">
+            <div style="position:relative;">
+                <div class="topbar-icon-btn" onclick="toggleNotifications(event)" title="Notifikasi">
+                    <i class="bi bi-bell"></i>
+                    <?php if($totalNotifCount > 0): ?><span style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:800;"><?= min($totalNotifCount,9) ?></span><?php endif; ?>
+                </div>
+                <div id="notifDropdownDesktop" class="topbar-dropdown" style="position:absolute;top:100%;right:0;width:320px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-height:400px;overflow-y:auto;z-index:1000;display:none;" onclick="event.stopPropagation()">
+                    <div style="padding:12px;border-bottom:1px solid #e5e7eb;font-weight:600;font-size:0.9rem;color:#1f2937;">Notifikasi</div>
+                    <?php if($totalNotifCount > 0): ?>
+                        <?php foreach($guru_all_notifications as $notif): ?>
+                        <div style="padding:12px;border-bottom:1px solid #f3f4f6;font-size:0.85rem;color:#374151;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+                            <div style="font-weight:500;margin-bottom:2px;"><?= htmlspecialchars($notif['title'] ?? 'Notifikasi') ?></div>
+                            <div style="font-size:0.8rem;color:#6b7280;margin-bottom:4px;"><?= htmlspecialchars(substr($notif['message'] ?? '', 0, 60)) ?>...</div>
+                            <div style="font-size:0.75rem;color:#9ca3af;"><?= date('d/m/Y H:i', strtotime($notif['created_at'] ?? 'now')) ?></div>
+                        </div>
+                        <?php endforeach; ?>
                     <?php else: ?>
-                    <div style="width:100%;height:100%;background:#3c58b9;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem;"><?= strtoupper(substr($dataGuru['nama_guru'],0,1)) ?></div>
+                        <div style="padding:20px;text-align:center;color:#9ca3af;font-size:0.9rem;">Tidak ada notifikasi</div>
                     <?php endif; ?>
                 </div>
-                <span><?= htmlspecialchars(explode(' ', $dataGuru['nama_guru'])[0]) ?></span>
+            </div>
+            <div style="position:relative;">
+                <div class="topbar-profile-card" onclick="toggleProfileMenu()">
+                    <div class="topbar-profile-avatar-wrap">
+                        <?php if (!empty($dataGuru['foto'])): ?>
+                        <img src="../../foto/<?= htmlspecialchars($dataGuru['foto']) ?>" alt="Profile">
+                        <?php else: ?>
+                        <div style="width:100%;height:100%;background:#3c58b9;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem;"><?= strtoupper(substr($dataGuru['nama_guru'],0,1)) ?></div>
+                        <?php endif; ?>
+                    </div>
+                    <span><?= htmlspecialchars(explode(' ', $dataGuru['nama_guru'])[0]) ?></span>
+                </div>
+                <div id="profileMenuDesktop" class="topbar-dropdown" style="position:absolute;top:100%;right:0;width:200px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;display:none;" onclick="event.stopPropagation()">
+                    <a href="profil-guru" style="display:block;padding:12px 16px;color:#374151;text-decoration:none;font-size:0.9rem;border-bottom:1px solid #f3f4f6;transition:background 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+                        <i class="bi bi-person me-2"></i> Profil Saya
+                    </a>
+                    <a href="../../pengaturan-layout.php" style="display:block;padding:12px 16px;color:#374151;text-decoration:none;font-size:0.9rem;border-bottom:1px solid #f3f4f6;transition:background 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+                        <i class="bi bi-gear me-2"></i> Pengaturan
+                    </a>
+                    <a href="../../logout.php" style="display:block;padding:12px 16px;color:#dc2626;text-decoration:none;font-size:0.9rem;transition:background 0.2s;" onclick="return confirm('Yakin mau logout?')" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
+                        <i class="bi bi-box-arrow-left me-2"></i> Logout
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -2313,6 +2342,35 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         });
     </script>
     <script>
+        // Toggle Notifications (Desktop Topbar)
+        function toggleNotifications(e) {
+            e.stopPropagation();
+            var dropdown = document.getElementById('notifDropdownDesktop');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        // Toggle Profile Menu (Desktop Topbar)
+        function toggleProfileMenu() {
+            var menu = document.getElementById('profileMenuDesktop');
+            if (menu) {
+                menu.classList.toggle('show');
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            var notifDropdown = document.getElementById('notifDropdownDesktop');
+            var profileMenu = document.getElementById('profileMenuDesktop');
+            if (notifDropdown && !notifDropdown.contains(e.target) && !e.target.closest('.topbar-icon-btn')) {
+                notifDropdown.classList.remove('show');
+            }
+            if (profileMenu && !profileMenu.contains(e.target) && !e.target.closest('.topbar-profile-card')) {
+                profileMenu.classList.remove('show');
+            }
+        });
+
         // KBM Countdown Timer
         (function() {
             var timerInterval = null;
