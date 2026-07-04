@@ -1,0 +1,70 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
+if (!isset($_SESSION['username'])) {
+    header("location:index.php?haruslogin");
+    exit();
+}
+if ($_SESSION['hak_akses'] != 1) {
+    header("location:404.html");
+    exit();
+}
+
+include "koneksi.php";
+
+$wantJson = isset($_GET['mode']) && $_GET['mode'] === 'json';
+$id = trim($_REQUEST['no_induk'] ?? '');
+
+// Validasi parameter
+if ($id === '') {
+    if ($wantJson) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Parameter no_induk tidak valid']);
+        exit;
+    }
+    echo '<script>alert("Parameter tidak valid");window.location="home.php?page=data-siswa";</script>';
+    exit;
+}
+
+$idEsc = mysqli_real_escape_string($conn, $id);
+
+// Cek apakah siswa ada
+$cek = mysqli_query($conn, "SELECT nama_siswa FROM tbl_siswa WHERE no_induk='$idEsc' LIMIT 1");
+if (!$cek || mysqli_num_rows($cek) === 0) {
+    if ($wantJson) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Data siswa tidak ditemukan']);
+        exit;
+    }
+    echo '<script>alert("Data siswa tidak ditemukan");window.location="home.php?page=data-siswa";</script>';
+    exit;
+}
+$rowSiswa = mysqli_fetch_assoc($cek);
+$namaSiswa = $rowSiswa['nama_siswa'];
+
+date_default_timezone_set('Asia/Jakarta');
+$tglskr = date('Y-m-d H:i:s');
+$namaAdmin = $_SESSION['nama'] ?? 'Admin';
+
+// Hapus akun login siswa terlebih dahulu (jika ada)
+mysqli_query($conn, "DELETE FROM tbl_pengguna WHERE no_induk='$idEsc'");
+
+// Hapus data siswa
+$sqlHapus = mysqli_query($conn, "DELETE FROM tbl_siswa WHERE no_induk='$idEsc'");
+
+if ($sqlHapus && mysqli_affected_rows($conn) > 0) {
+    $isilog = mysqli_real_escape_string($conn, "$namaAdmin menghapus data siswa $namaSiswa (NIS: $id)");
+    mysqli_query($conn, "INSERT INTO tbl_log (waktu, isi_log) VALUES ('$tglskr', '$isilog')");
+    if ($wantJson) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'message' => 'Data siswa berhasil dihapus']);
+        exit;
+    }
+    echo '<script>window.location="home.php?page=data-siswa&deleted=1";</script>';
+} else {
+    if ($wantJson) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'error' => 'Gagal menghapus data siswa: ' . mysqli_error($conn)]);
+        exit;
+    }
+    echo '<script>alert("Gagal menghapus data! ' . addslashes(mysqli_error($conn)) . '");window.location="home.php?page=data-siswa";</script>';
+}

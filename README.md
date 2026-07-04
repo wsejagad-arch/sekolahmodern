@@ -1,65 +1,112 @@
-# [Start Bootstrap - SB Admin 2](https://startbootstrap.com/template-overviews/sb-admin-2/)
+# WhatsApp Notification Sender (Anti-Spam & aaPanel Ready)
 
-[SB Admin 2](https://startbootstrap.com/template-overviews/sb-admin-2/) is an open source admin dashboard theme for [Bootstrap](http://getbootstrap.com/) created by [Start Bootstrap](http://startbootstrap.com/).
+Project gateway pengiriman notifikasi WhatsApp otomatis berbasis **Python (FastAPI)** dan **Node.js (@whiskeysockets/baileys)**. Didesain khusus untuk dijalankan di **aaPanel** dengan performa tinggi, UI premium glassmorphism, dan sistem pengiriman **Anti-Spam/Anti-Ban Queue** (pesan diantrekan dan dikirim dengan jeda acak manusiawi disertai status "sedang mengetik").
 
-For the legacy Bootstrap 3 version of this theme, you can view the [last stable release](https://github.com/BlackrockDigital/startbootstrap-sb-admin-2/releases/tag/v3.3.7%2B1) of SB Admin 2 for Bootstrap 3.
+## Fitur Utama
 
-## Preview
+- **Login Multi-Device**:
+  - Scan **QR Code** langsung dari halaman dashboard.
+  - Link dengan nomor telepon (**Pairing Code**) jika kamera ponsel Anda bermasalah.
+- **Anti-Spam Queue**: Notifikasi masuk antrean database SQLite secara instan, lalu dikirim berurutan dengan jeda acak 3-7 detik dan simulasi status "typing..." selama 2 detik untuk meniru pola manusia.
+- **REST API Sederhana**: Integrasikan sistem notifikasi ini ke website, aplikasi billing, WHMCS, atau sistem Anda lainnya.
+- **Dashboard Premium**: Tampilan Dark Mode modern, responsif, grafik status pengiriman notifikasi (Pending, Sent, Failed), dan log history real-time.
 
-[![SB Admin 2 Preview](https://startbootstrap.com/assets/img/screenshots/themes/sb-admin-2.png)](https://blackrockdigital.github.io/startbootstrap-sb-admin-2/)
+---
 
-**[Launch Live Preview](https://blackrockdigital.github.io/startbootstrap-sb-admin-2/)**
+## Panduan Instalasi di aaPanel
 
-## Status
+Ikuti langkah-langkah di bawah ini untuk memasang aplikasi di aaPanel Anda:
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/BlackrockDigital/startbootstrap-sb-admin-2/master/LICENSE)
-[![npm version](https://img.shields.io/npm/v/startbootstrap-sb-admin-2.svg)](https://www.npmjs.com/package/startbootstrap-sb-admin-2)
-[![Build Status](https://travis-ci.org/BlackrockDigital/startbootstrap-sb-admin-2.svg?branch=master)](https://travis-ci.org/BlackrockDigital/startbootstrap-sb-admin-2)
-[![dependencies Status](https://david-dm.org/BlackrockDigital/startbootstrap-sb-admin-2/status.svg)](https://david-dm.org/BlackrockDigital/startbootstrap-sb-admin-2)
-[![devDependencies Status](https://david-dm.org/BlackrockDigital/startbootstrap-sb-admin-2/dev-status.svg)](https://david-dm.org/BlackrockDigital/startbootstrap-sb-admin-2?type=dev)
+### Langkah 1: Unggah Berkas
+1. Kompres semua berkas proyek ini menjadi format `.zip`.
+2. Buka aaPanel -> **Files**, lalu buat folder baru di `/www/wwwroot/wa-sender`.
+3. Unggah berkas `.zip` tersebut ke folder tersebut dan ekstrak.
 
-## Download and Installation
+---
 
-To begin using this template, choose one of the following options to get started:
+### Langkah 2: Jalankan Engine WhatsApp (Node.js Worker)
+Engine WhatsApp berjalan di latar belakang menggunakan Node.js dan PM2 Manager untuk menjaga sesi login tetap aktif.
 
--   [Download the latest release on Start Bootstrap](https://startbootstrap.com/template-overviews/sb-admin-2/)
--   Install via npm: `npm i startbootstrap-sb-admin-2`
--   Clone the repo: `git clone https://github.com/BlackrockDigital/startbootstrap-sb-admin-2.git`
--   [Fork, Clone, or Download on GitHub](https://github.com/BlackrockDigital/startbootstrap-sb-admin-2)
+1. Masuk ke aaPanel -> **App Store**, lalu instal **PM2 Manager** (jika belum terpasapng).
+2. Buka terminal server Anda melalui menu **Terminal** di aaPanel atau SSH, lalu jalankan perintah berikut untuk menginstal dependensi worker:
+   ```bash
+   cd /www/wwwroot/wa-sender/worker
+   npm install
+   ```
+3. Kembali ke **PM2 Manager** di aaPanel:
+   - Pilih tab **Node List** atau **Project List** -> klik **Add Project**.
+   - **Startup File**: Pilih `/www/wwwroot/wa-sender/worker/index.js`.
+   - **Run Directory**: `/www/wwwroot/wa-sender/worker`.
+   - **Project Name**: `wa-worker`.
+   - **Port**: `9000`.
+   - Klik **Submit** untuk menjalankan.
 
-## Usage
+---
 
-After installation, run `npm install` and then run `npm start` which will open up a preview of the template in your default browser, watch for changes to core template files, and live reload the browser when changes are saved. You can view the `gulpfile.js` to see which tasks are included with the dev environment.
+### Langkah 3: Jalankan Web Server Dashboard & API (Python FastAPI)
+FastAPI bertindak sebagai antarmuka dashboard, API gateway, dan pengelola antrean (queue).
 
-### Gulp Tasks
+1. Buka aaPanel -> **App Store**, lalu instal **Python Manager** (jika belum terpasang).
+2. Buka **Python Manager**:
+   - Klik **Add Project**.
+   - **Project Name**: `wa-sender-api`.
+   - **Project Path**: `/www/wwwroot/wa-sender`.
+   - **Framework**: `FastAPI` (atau Custom/Uvicorn).
+   - **Startup File**: `/www/wwwroot/wa-sender/main.py`.
+   - **Python Version**: Pilih Python 3.9 ke atas.
+   - **Requirements.txt**: Pilih `/www/wwwroot/wa-sender/requirements.txt` agar otomatis terinstal.
+   - **Port**: `8000`.
+   - Centang **Auto Start** agar otomatis berjalan kembali jika server restart.
+   - Klik **Submit**.
 
--   `gulp` the default task that builds everything
--   `gulp watch` browserSync opens the project in your default browser and live reloads when changes are made
--   `gulp css` compiles SCSS files into CSS and minifies the compiled CSS
--   `gulp js` minifies the themes JS file
--   `gulp vendor` copies dependencies from node_modules to the vendor directory
+---
 
-You must have npm installed globally in order to use this build environment. This theme was built using node v11.6.0 and the Gulp CLI v2.0.1. If Gulp is not running properly after running `npm install`, you may need to update node and/or the Gulp CLI locally.
+### Langkah 4: Hubungkan ke Domain dengan Reverse Proxy Nginx (Opsional but Recommended)
+Agar dashboard dapat diakses via nama domain (misalnya `wa.domainanda.com`) dan menggunakan SSL/HTTPS:
 
-## Bugs and Issues
+1. Pergi ke menu **Website** -> klik **Add site**.
+2. Masukkan domain Anda (misal: `wa.domainanda.com`), pilih **Pure-静态** (Static/Pure HTML) karena backend kita ditangani Python, klik **Submit**.
+3. Buka konfigurasi website tersebut (klik nama domain di list) -> pergi ke menu **SSL** -> pasang Let's Encrypt SSL gratis.
+4. Pergi ke menu **Reverse Proxy** (di dalam pengaturan website yang sama):
+   - Klik **Add Reverse Proxy**.
+   - **Proxy Name**: `wa-proxy`.
+   - **Target URL**: `http://127.0.0.1:8000`.
+   - **Sent Domain**: `$host`.
+   - Klik **Submit**.
+5. Selesai! Sekarang buka domain Anda di browser untuk mengakses Dashboard WA Sender.
 
-Have a bug or an issue with this template? [Open a new issue](https://github.com/BlackrockDigital/startbootstrap-sb-admin-2/issues) here on GitHub or leave a comment on the [template overview page at Start Bootstrap](http://startbootstrap.com/template-overviews/sb-admin-2/).
+---
 
-## About
+## Cara Penggunaan API (Integrasi Website/Aplikasi Lain)
 
-Start Bootstrap is an open source library of free Bootstrap templates and themes. All of the free templates and themes on Start Bootstrap are released under the MIT license, which means you can use them for any purpose, even for commercial projects.
+Kirim permintaan HTTP POST dari sistem Anda untuk mengirim notifikasi secara aman:
 
--   <https://startbootstrap.com>
--   <https://twitter.com/SBootstrap>
+- **Endpoint**: `http://IP_SERVER_ANDA:8000/api/send` (atau `https://domainanda.com/api/send`)
+- **Method**: `POST`
+- **Headers**:
+  ```json
+  {
+    "Content-Type": "application/json"
+  }
+  ```
+- **Body / Payload (JSON)**:
+  ```json
+  {
+    "number": "62812345678",
+    "message": "Halo! Tagihan invoice #10294 Anda telah lunas."
+  }
+  ```
 
-Start Bootstrap was created by and is maintained by **[David Miller](http://davidmiller.io/)**.
+---
 
--   <http://davidmiller.io>
--   <https://twitter.com/davidmillerskt>
--   <https://github.com/davidtmiller>
-
-Start Bootstrap is based on the [Bootstrap](http://getbootstrap.com/) framework created by [Mark Otto](https://twitter.com/mdo) and [Jacob Thorton](https://twitter.com/fat).
-
-## Copyright and License
-
-Copyright 2013-2019 Blackrock Digital LLC. Code released under the [MIT](https://github.com/BlackrockDigital/startbootstrap-resume/blob/gh-pages/LICENSE) license.
+## Konfigurasi Tambahan Anti-Spam (Jika Diperlukan)
+Jeda waktu pengiriman bawaan adalah jeda acak **3 s.d. 7 detik** antar pesan. Anda dapat mengubah parameter ini di berkas [main.py](file:///c:/Users/sman1/wa/main.py) pada baris berikut:
+```python
+# Ubah angka 3.0 dan 7.0 sesuai dengan kebutuhan keamanan Anda
+delay_sec = random.uniform(3.0, 7.0)
+```
+Dan waktu status "composing/typing" dapat diubah di berkas [worker/index.js](file:///c:/Users/sman1/wa/worker/index.js) pada baris berikut:
+```javascript
+// Simulasi mengetik selama 2 detik sebelum kirim
+await delay(2000); 
+```

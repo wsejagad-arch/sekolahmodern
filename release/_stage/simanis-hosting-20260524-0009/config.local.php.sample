@@ -1,0 +1,15 @@
+<?php
+// Salin file ini menjadi config.local.php lalu sesuaikan jika diperlukan
+// Contoh jika user root memiliki password atau DB/port berbeda
+//$host = 'localhost';
+//$user = 'root';
+//$password = 'your_root_password_here';
+//$db = 'jurnal';
+//$port = 3307; // sesuaikan dengan port MySQL Anda
+
+// Opsional: Login dengan Gmail/Google.
+// Redirect URI di Google Cloud Console:
+// http://127.0.0.1:8000/google-callback.php
+//$google_client_id = 'ISI_CLIENT_ID_GOOGLE';
+//$google_client_secret = 'ISI_CLIENT_SECRET_GOOGLE';
+//$google_redirect_uri = 'http://127.0.0.1:8000/google-callback.php';

@@ -1,0 +1,140 @@
+=== PANDUAN LENGKAP SETUP DATABASE JURNAL ===
+
+Karena ada masalah koneksi MySQL melalui PHP, ikuti panduan ini:
+
+------------------------------------------------------------------
+LANGKAH 1: SETUP XAMPP DAN PHPMYADMIN
+------------------------------------------------------------------
+
+1. Buka XAMPP Control Panel (sebagai Administrator)
+2. Klik "Start" pada Apache (harus hijau)
+3. Klik "Start" pada MySQL (harus hijau)
+4. Klik "Admin" di sebelah MySQL untuk buka phpMyAdmin
+
+ATAU:
+Buka browser dan akses: http://localhost/phpmyadmin
+
+------------------------------------------------------------------
+LANGKAH 2: BUAT DATABASE JURNAL
+------------------------------------------------------------------
+
+1. Di phpMyAdmin, login dengan:
+   - Username: root
+   - Password: (kosong/empty)
+
+2. Klik tab "Databases" di atas
+3. Di kolom "Create database":
+   - Database name: jurnal
+   - Collation: utf8mb4_general_ci
+4. Klik tombol "Create"
+
+------------------------------------------------------------------
+LANGKAH 3: IMPORT STRUKTUR TABEL
+------------------------------------------------------------------
+
+1. Klik database "jurnal" di sidebar kiri
+2. Klik tab "Import" di atas
+3. Klik tombol "Choose File"
+4. Pilih file: C:\xampp\htdocs\jurnal\include\db_appsiswa.sql
+5. Klik tombol "Go" di bawah
+
+------------------------------------------------------------------
+LANGKAH 4: TAMBAHKAN DATA SAMPLE
+------------------------------------------------------------------
+
+Setelah import selesai, klik tab "SQL" dan jalankan query berikut satu per satu:
+
+-- TAMBAH GURU SAMPLE:
+INSERT INTO tbl_guru (no_induk, nama_guru, status_kepegawaian, foto, status)
+VALUES ('123456789', 'Ahmad Surya', 'PNS', '', 'Aktif');
+
+INSERT INTO tbl_guru (no_induk, nama_guru, status_kepegawaian, foto, status)
+VALUES ('987654321', 'Siti Aminah', 'PNS', '', 'Aktif');
+
+-- TAMBAH JADWAL SAMPLE:
+INSERT INTO tbl_mapel_ampu (no_induk, nama_mapel, kelas, hari, jam_mulai, jam_selesai)
+VALUES ('123456789', 'Matematika', 'X-A', 'Senin', '07:00', '08:30');
+
+INSERT INTO tbl_mapel_ampu (no_induk, nama_mapel, kelas, hari, jam_mulai, jam_selesai)
+VALUES ('123456789', 'Bahasa Indonesia', 'X-B', 'Selasa', '08:30', '10:00');
+
+INSERT INTO tbl_mapel_ampu (no_induk, nama_mapel, kelas, hari, jam_mulai, jam_selesai)
+VALUES ('987654321', 'Fisika', 'XI-A', 'Rabu', '10:00', '11:30');
+
+------------------------------------------------------------------
+LANGKAH 5: VERIFIKASI SETUP
+------------------------------------------------------------------
+
+1. Klik tab "Databases" → klik database "jurnal"
+2. Anda harus melihat tabel:
+   - tbl_guru
+   - tbl_mapel_ampu
+   - tbl_materi
+   - dll.
+
+3. Klik tabel "tbl_guru" → klik tab "Browse"
+   - Harus ada data guru dengan NIP 123456789
+
+4. Klik tabel "tbl_mapel_ampu" → klik tab "Browse"
+   - Harus ada data jadwal
+
+------------------------------------------------------------------
+LANGKAH 6: TEST SISTEM CETAK JURNAL
+------------------------------------------------------------------
+
+1. Buka browser baru
+2. Akses: http://localhost:8080
+3. Sistem akan redirect ke halaman login
+4. Login sebagai guru:
+   - Hak Akses: Guru
+   - Username/NIP: 123456789
+   - Password: (kosong)
+5. Setelah login, akses menu "Cetak Jurnal"
+6. Sistem harus menampilkan data jadwal dan jurnal
+
+------------------------------------------------------------------
+TROUBLESHOOTING
+------------------------------------------------------------------
+
+Jika masih ada masalah:
+
+1. **Error "Access denied" di phpMyAdmin:**
+   - Restart XAMPP
+   - Pastikan MySQL service berjalan
+   - Coba buka phpMyAdmin lagi
+
+2. **File SQL tidak bisa di-import:**
+   - Pastikan path file benar: C:\xampp\htdocs\jurnal\include\db_appsiswa.sql
+   - Cek ukuran file (harus ada isinya)
+   - Import per bagian jika file terlalu besar
+
+3. **Tidak bisa login:**
+   - Pastikan data guru sudah ditambahkan dengan benar
+   - NIP harus sesuai: 123456789
+   - Password kosong untuk guru
+
+4. **Cetak jurnal masih kosong:**
+   - Pastikan ada data di tbl_mapel_ampu
+   - Cek NIP guru sesuai dengan data jadwal
+   - Lihat debug information di halaman cetak jurnal
+
+------------------------------------------------------------------
+HASIL YANG DIHARAPKAN
+------------------------------------------------------------------
+
+Setelah setup berhasil:
+✅ Database jurnal terhubung
+✅ Sistem cetak jurnal menampilkan data
+✅ Debug information menunjukkan data ditemukan
+✅ Guru bisa login dengan NIP 123456789
+✅ Cetak jurnal menampilkan jadwal dari awal tahun ajaran
+
+------------------------------------------------------------------
+FILE BANTUAN YANG SUDAH DIBUAT
+------------------------------------------------------------------
+
+- INSTRUKSI_SETUP_DATABASE.txt - Panduan lengkap
+- test_database_final.php - Script test koneksi
+- diagnosa_database.php - Script diagnosa lengkap
+
+SELAMAT MENCOBA! 🚀

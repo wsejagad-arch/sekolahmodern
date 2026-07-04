@@ -1,0 +1,3 @@
+; Salin file ini ke hosting sebagai: .user.ini
+; Lokasi: public_html/simanis/.user.ini (satu folder dengan index.php)
+engine = On

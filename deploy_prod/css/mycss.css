@@ -1,0 +1,64 @@
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0.5cm 0.5cm 0.5cm 0.5cm;
+  }
+}
+
+.laporan {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.laporan-table {
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.laporan-table th, .laporan-table td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+.laporan-table th {
+  border-top: 1px solid #dddddd;
+  border-bottom: 1px solid #dddddd;
+}
+
+.laporan-table tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+h3{
+	font-family: Arial, sans-serif;
+	text-align: center;
+}
+
+p {
+	font-family: Arial, sans-serif;
+	font-size: 12px;
+	text-align: center;
+}
+
+.backgroundna {
+		background : linear-gradient(90deg, #5D54A4, #7C78B8);
+		animation : anim 2.5s infinite ease-in-out;
+	}
+@keyframes anim {
+	0% {
+		background-position: 0 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0 50%;
+	}
+}
+

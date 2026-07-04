@@ -1,0 +1,51 @@
+PANDUAN MANUAL CREATE DEPLOYMENT PACKAGE
+========================================
+
+🎯 TARGET: www.simanis.sman1sumber.sch.id
+👤 Database: smasumb1_simanis1 / W@hyu123! / smasumb1_simanis
+
+📁 LANGKAH-LANGKAH:
+
+1. BUAT FOLDER BARU:
+   - Folder: release\_stage\simanis-www-deploy
+   - Copy semua isi dari: release\_stage\simanis-sman1sumber-deploy
+
+2. UPDATE KONFIGURASI DATABASE:
+   - File: config.hosting.php
+   - Isi dengan:
+     ```php
+     return [
+         'host'     => 'localhost',
+         'port'     => 3306,
+         'user'     => 'smasumb1_simanis1',
+         'password' => 'W@hyu123!',
+         'database' => 'smasumb1_simanis',
+         'site_url' => 'https://www.simanis.sman1sumber.sch.id',
+     ];
+     ```
+
+3. UPDATE URL DI cek-hosting.php:
+   - Ganti: https://simanis.sman1sumber.sch.id/cek-hosting.php
+   - Menjadi: https://www.simanis.sman1sumber.sch.id/cek-hosting.php
+
+4. BUAT ZIP FILE:
+   - Nama: simanis-www-deploy.zip
+   - Isi: seluruh folder simanis-www-deploy
+   - Gunakan: WinRAR/7-Zip atau PowerShell: Compress-Archive
+
+5. FILE YANG PERLU DIPERIKSA:
+   - .htaccess (untuk LiteSpeed/cPanel)
+   - .user.ini
+   - config.hosting.php (sudah otomatis)
+   - Semua file aplikasi ada
+
+🔍 VERIFIKASI:
+- Database credentials sudah benar
+- Site URL sesuai subdomain
+- File .htaccess support PHP
+- Permission folder 755, file 644
+
+📦 HASIL AKHIR:
+- File: simanis-www-deploy.zip
+- Ukuran: ~34 MB
+- Siap upload ke www.simanis.sman1sumber.sch.id

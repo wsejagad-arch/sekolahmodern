@@ -1,0 +1,30 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^guru/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=guru&page=$1 [L,QSA]
+RewriteRule ^siswa/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=siswa&page=$1 [L,QSA]
+RewriteRule ^admin/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=admin&page=$1 [L,QSA]
+RewriteRule ^([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=public&page=$1 [L,QSA]
+</IfModule>
+
+# Blokir akses langsung ke PHP, kecuali router
+<Files "router.php">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</Files>
+
+<FilesMatch "\.php$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

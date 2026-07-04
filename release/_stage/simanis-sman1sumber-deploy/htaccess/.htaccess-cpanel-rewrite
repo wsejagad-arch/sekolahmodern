@@ -1,0 +1,22 @@
+# Pasang SETELAH situs bisa dibuka (rename jadi .htaccess atau gabungkan)
+DirectoryIndex index.php splash.php login.php
+Options -Indexes +FollowSymLinks
+
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php81 .php .php8 .phtml
+  AddHandler application/x-httpd-ea-php80 .php .phtml
+  AddHandler application/x-httpd-ea-php74 .php .php7 .phtml
+</IfModule>
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+RewriteRule ^masuk$ login.php [L,QSA]
+RewriteRule ^auth$ login_action.php [L,QSA]
+RewriteRule ^keluar$ logout.php [L,QSA]
+RewriteRule ^home/?$ home.php [L,QSA]
+RewriteRule ^pages/guru/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=guru&page=$1 [L,QSA]
+RewriteRule ^pages/siswa/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=siswa&page=$1 [L,QSA]
+RewriteRule ^pages/admin/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=admin&page=$1 [L,QSA]
+</IfModule>

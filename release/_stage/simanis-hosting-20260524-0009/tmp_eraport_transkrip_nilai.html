@@ -1,0 +1,818 @@
+﻿<!doctype html>
+<html lang="en"  class="sma-theme     ">
+
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--favicon-->
+	<link rel="icon" href="http://103.131.217.1:8239/assets/images/favicon-32x32.png" type="image/png" />
+	<!--plugins-->
+	<link rel="stylesheet" href="http://103.131.217.1:8239/assets/plugins/notifications/css/lobibox.min.css" />
+	<link href="http://103.131.217.1:8239/assets/plugins/simplebar/css/simplebar.css" rel="stylesheet" />
+	<link href="http://103.131.217.1:8239/assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css" rel="stylesheet" />
+	<link href="http://103.131.217.1:8239/assets/plugins/metismenu/css/metisMenu.min.css" rel="stylesheet" />
+	 
+	<link href="http://103.131.217.1:8239/assets/plugins/select2/css/select2.min.css" rel="stylesheet" />
+	<link href="http://103.131.217.1:8239/assets/plugins/select2/css/select2-bootstrap4.css" rel="stylesheet" />
+	<link href="http://103.131.217.1:8239/assets/plugins/datatable/css/responsive.bootstrap5.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="http://103.131.217.1:8239/assets/plugins/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.min.css">
+	<!-- loader-->
+	<link rel="stylesheet" href="http://103.131.217.1:8239/assets/plugins/sweetalert/sweetalert.css">
+	
+	<link href="http://103.131.217.1:8239/assets/css/pace.min.css" rel="stylesheet" />
+	<script src="http://103.131.217.1:8239/assets/js/pace.min.js"></script>
+	<!-- Bootstrap CSS -->
+	<link href="http://103.131.217.1:8239/assets/css/bootstrap.min.css" rel="stylesheet">
+	<link href="http://103.131.217.1:8239/assets/css/bootstrap-extended.css" rel="stylesheet">
+	<link href="http://103.131.217.1:8239/assets/material/css/roboto.min.css?family=Roboto%3Awght%40400%3B500&display=swap" rel="stylesheet">
+	<link href="http://103.131.217.1:8239/assets/material/css/material-icons.min.css?family=Material+Icons" rel="stylesheet">
+	<link href="http://103.131.217.1:8239/assets/css/app.css" rel="stylesheet">
+	<link href="http://103.131.217.1:8239/assets/css/icons.css" rel="stylesheet">
+	<!-- Theme Style CSS -->
+	<link rel="stylesheet" href="http://103.131.217.1:8239/assets/css/dark-theme.css" />
+	<link rel="stylesheet" href="http://103.131.217.1:8239/assets/css/semi-dark.css" />
+	<link rel="stylesheet" href="http://103.131.217.1:8239/assets/css/sma-theme.css" />
+	<link rel="stylesheet" href="http://103.131.217.1:8239/assets/css/header-colors.css" />
+	
+	<title>e-Rapor SMA - Aplikasi e-Rapor Jenjang Sekolah Menengah Atas | Direktorat SMA </title>
+	<script type="text/javascript">
+		const _BASE_URL = 'http://103.131.217.1:8239/',
+			_CURRENT_URL = 'http://103.131.217.1:8239/transkrip_nilai';
+	</script>
+</head>
+
+<body  onload="load_konten()" class="content">
+	<!--wrapper-->
+	<div class="wrapper">
+		<!--sidebar wrapper -->
+		<div class="sidebar-wrapper" data-simplebar="true">
+			<div class="sidebar-header">
+				<div>
+					<img src="http://103.131.217.1:8239/assets/images/logo-icon.png" class="logo-icon" alt="logo icon">
+				</div>
+				<div>
+				<h4 class="logo-text">e-Rapor SMA</h4>
+				</div>
+				<div class="toggle-icon ms-auto"><i class='bx bx-arrow-to-left'></i>
+				</div>
+			</div>
+			<!--navigation-->
+			<ul class="metismenu" id="menu">
+				<li class="">
+					<a href="http://103.131.217.1:8239/dashboard">
+						<div class="parent-icon"> <i class="bx bxs-dashboard"></i>
+						</div>
+						<div class="menu-title">Dashboard</div>
+					</a>
+				</li>
+				<li class="">
+					<a href="http://103.131.217.1:8239/profile_admin">
+						<div class="bx bx-id-card"></div>
+						<div class="menu-title">Profil</div>
+					</a>
+				</li>
+				 <li class="">
+					<a href="http://103.131.217.1:8239/koneksi">
+						<div class="parent-icon"><i class="bx bxs-cog"></i>
+						</div>
+						<div class="menu-title">Web Service Dapodik</div>
+					</a>
+				</li>
+				<li class="">
+					<a href="http://103.131.217.1:8239/ambildapo">
+						<div class="parent-icon"><i class="bx bxs-data"></i>
+						</div>
+						<div class="menu-title">Ambil Data Dapodik</div>
+					</a>
+				</li>
+				<li class="">
+					<a href="http://103.131.217.1:8239/data_pengguna">
+						<div class="parent-icon"> <i class="bx bxs-user-account"></i>
+						</div>
+						<div class="menu-title">Data Pengguna</div>
+					</a>
+				</li>
+ 
+				<li class="">
+					<a href="javascript:;" class="has-arrow">
+						<div class="parent-icon"><i class='bx bx-laptop'></i>
+						</div>
+						<div class="menu-title">Data Referensi</div>
+					</a>
+					<ul>
+						<li class=""> <a href="http://103.131.217.1:8239/data_sekolah"><i class="bx bx-right-arrow-alt"></i>Data Sekolah</a>
+						</li>
+						<li class=""> <a href="http://103.131.217.1:8239/data_guru"><i class="bx bx-right-arrow-alt"></i>Data Guru</a>
+						</li>
+						
+						<li class=""> <a href="http://103.131.217.1:8239/data_siswa"><i class="bx bx-right-arrow-alt"></i>Data Siswa</a>
+						</li>
+						<li class=""> <a href="http://103.131.217.1:8239/data_kelas"><i class="bx bx-right-arrow-alt"></i>Data Kelas</a>
+						</li>
+						<li class=""> <a href="http://103.131.217.1:8239/data_mapel"><i class="bx bx-right-arrow-alt"></i>Data Mata Pelajaran</a>
+						</li>
+						<li class=""> <a href="http://103.131.217.1:8239/data_pembelajaran"><i class="bx bx-right-arrow-alt"></i>Data Pembelajaran</a>
+						</li> 
+						<li class=""> <a href="http://103.131.217.1:8239/data_ekskul"><i class="bx bx-right-arrow-alt"></i>Data Ekstra Kurikuler</a>
+						</li> 
+						
+							
+							<li class=""> <a href="http://103.131.217.1:8239/data_kelompok"><i class="bx bx-right-arrow-alt"></i>Data Kelompok Mapel</a>
+						</li> 	
+						<li class=""> <a href="http://103.131.217.1:8239/gabung_mapel"><i class="bx bx-right-arrow-alt"></i>Gabung Mapel</a>
+						</li> 
+												<li class=""> <a href="http://103.131.217.1:8239/map_mapel"><i class="bx bx-right-arrow-alt"></i>Data Mapping Rapor</a>
+						</li> 
+						<li class=""> <a href="http://103.131.217.1:8239/data_logottd"><i class="bx bx-right-arrow-alt"></i>Data Logo dan TTD</a>
+						</li>  
+						<li class=""> <a href="http://103.131.217.1:8239/tanggal_rapor"><i class="bx bx-right-arrow-alt"></i>Data Tanggal Rapor</a>
+						</li> 
+						<li class=""> <a href="http://103.131.217.1:8239/foto_siswa"><i class="bx bx-right-arrow-alt"></i>Foto Siswa</a>
+						</li> 
+					</ul>
+				</li>
+			  
+
+								<li class="">
+					<a href="javascript:;" class="has-arrow">
+						<div class="parent-icon"><i class='bx bx-book'></i>
+						</div>
+						<div class="menu-title">Data Kokurikuler</div>
+					</a>
+					<ul>
+						<li class=""> <a href="http://103.131.217.1:8239/tema_kokurikuler"><i class="bx bx-right-arrow-alt"></i>Daftar Tema</a>
+						</li>
+						<li class=""> <a href="http://103.131.217.1:8239/data_kokurikuler"><i class="bx bx-right-arrow-alt"></i>Kegiatan Kokurikuler</a>
+						</li>
+						<li class=""> <a href="http://103.131.217.1:8239/kelompok_kukurikuler"><i class="bx bx-right-arrow-alt"></i>Kelompok Kokurikuler</a>
+						</li>
+						 
+					</ul>
+				</li>
+								<li class="">
+					<a href="javascript:;" class="has-arrow">
+					<div class="parent-icon"><i class="bx bxs-chart"></i>
+						</div>
+						<div class="menu-title">Status Penilaian</div>
+					</a>
+					<ul>
+					
+						<li class=""> <a href="http://103.131.217.1:8239/status_penilaian"><i class="bx bx-right-arrow-alt"></i>Status Penilaian</a></li> 
+						<li class=""> <a href="http://103.131.217.1:8239/statistik_nilai"><i class="bx bx-right-arrow-alt"></i>Statistik Nilai Rapor</a></li> 
+											</ul>
+				</li>
+				<li class="">
+					<a href="javascript:;" class="has-arrow">
+					<div class="parent-icon"><i class="bx bx-bar-chart-square"></i>
+						</div>
+						<div class="menu-title">Perkembangan Nilai</div>
+					</a>
+					<ul>						
+						<li class=""> <a href="http://103.131.217.1:8239/ketuntasan_rapor"><i class="bx bx-right-arrow-alt"></i>Perkembangan Nilai</a></li> 
+						<li class=""> <a href="http://103.131.217.1:8239/riwayat_nilaisiswa"><i class="bx bx-right-arrow-alt"></i>Grafik Nilai Rapor</a></li>  
+					</ul>
+				</li>
+					
+				<li class="mm-show">
+					<a href="javascript:;" class="has-arrow">
+					<div class="parent-icon"><i class="bx bx-receipt"></i>
+						</div>
+						<div class="menu-title">Buku Induk & TNR</div>
+					</a>
+					<ul>
+						<li class=""> <a href="http://103.131.217.1:8239/group_mapel"><i class="bx bx-right-arrow-alt"></i>Group Mapel</a></li>
+						<li class=""> <a href="http://103.131.217.1:8239/map_mapel_bukuinduk"><i class="bx bx-right-arrow-alt"></i>Mapping Mapel</a></li>
+						<li class=""> <a href="http://103.131.217.1:8239/buku_induk"><i class="bx bx-right-arrow-alt"></i>Cetak Buku Induk</a></li>
+						<li class="mm-active"> <a href="http://103.131.217.1:8239/transkrip_nilai"><i class="bx bx-right-arrow-alt"></i>Cetak Transkrip Rapor</a></li> 
+					</ul>
+				</li> 
+							<li class="">
+					<a href="javascript:;" class="has-arrow">
+					<div class="parent-icon"><i class="bx bxs-file-pdf"></i>
+						</div>
+						<div class="menu-title">Transkrip Ijazah </div>
+					</a>
+					<ul>
+						<li class=""> <a href="http://103.131.217.1:8239/importdata_nomorijazah"><i class="bx bx-right-arrow-alt"></i>Import Nomor Ijazah</a></li>
+						<li class=""> <a href="http://103.131.217.1:8239/setting_transkrip"><i class="bx bx-right-arrow-alt"></i>Setting Transkrip</a></li>
+						<li class=""> <a href="http://103.131.217.1:8239/map_mapel_ijazah"><i class="bx bx-right-arrow-alt"></i>Mapping Mapel</a></li>
+						<li class=""> <a href="http://103.131.217.1:8239/input_nilaiijazah"><i class="bx bx-right-arrow-alt"></i>Input Nilai Transkrip</a></li> 
+						<li class=""> <a href="http://103.131.217.1:8239/import_nilaiijazah"><i class="bx bx-right-arrow-alt"></i>Import Nilai Transkrip</a></li> 
+						<li class=""> <a href="http://103.131.217.1:8239/cetak_transkrip_nilijazah"><i class="bx bx-right-arrow-alt"></i>Cetak Transkrip Nilai</a></li> 
+					</ul>
+				</li> 
+				 
+				<li class="">
+					<a href="javascript:;" class="has-arrow">
+						<div class="parent-icon"><i class="bx bx-printer"></i>
+						</div>
+						<div class="menu-title">Cetak Nilai</div>
+					</a>
+					<ul>
+				
+					<li class=""> <a href="http://103.131.217.1:8239/leger_kelas"><i class="bx bx-right-arrow-alt"></i>Leger Rapor</a></li>
+						<li class=""> <a href="http://103.131.217.1:8239/plk_rapor"><i class="bx bx-right-arrow-alt"></i>Pelengkap Rapor</a></li>
+						<li class=""> <a href="http://103.131.217.1:8239/nilai_rapor"><i class="bx bx-right-arrow-alt"></i>Nilai Rapor</a></li>
+						 	
+					</ul>
+				</li> 
+				<li class="">
+					<a href="http://103.131.217.1:8239/kirim_datadapo">
+						<div class="parent-icon"> <i class="bx bx-upload"></i>
+						</div>
+						<div class="menu-title">Kirim Nilai Ke Dapodik</div>
+					</a>
+				</li>
+	
+				<li class="">
+					<a href="http://103.131.217.1:8239/backup_restore">
+						<div class="parent-icon"> <i class="bx bxs-data"></i>
+						</div>
+						<div class="menu-title">Backup & Restore</div>
+					</a>
+				</li>
+	
+ 
+				<li> <li class="menu-label">Keluar</li>
+					<a href="http://103.131.217.1:8239/logout">
+						<div class="bx bx-log-out"></div>
+						<div class="menu-title">Keluar</div>
+					</a>
+				</li>
+				<li class="menu-label"></li>
+				<li class="menu-label"></li>
+			</ul>			<!--end navigation-->
+		</div>
+		<!--end sidebar wrapper -->
+		<!--start header -->
+		<header>
+			<div class="topbar d-flex align-items-center">
+				<nav class="navbar navbar-expand">
+					<div class="mobile-toggle-menu"><i class='bx bx-menu'></i>
+					</div>
+					<div class="search-bar flex-grow-1">
+					<div class="position-relative search-bar-box fw-bold fs-5 text-light">
+						e-Rapor | Jenjang : SMA | 2025/2026 Genap							
+						</div>
+					</div>
+					<div class="top-menu ms-auto">
+						
+					</div>
+					<div class="user-box dropdown">
+						<a class="d-flex align-items-center nav-link dropdown-toggle dropdown-toggle-nocaret" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+						<img src="http://103.131.217.1:8239/assets/images/tutwuri.png" class="user-img" alt="user avatar">
+						 	<div class="user-info ps-3">
+								<p class="user-name mb-0">Administrator</p>
+								<p class="designattion mb-0">Admin</p>
+							</div>
+						</a>
+						<ul class="dropdown-menu dropdown-menu-end">
+							<li><a class="dropdown-item" href="http://103.131.217.1:8239/profile_admin"><i class="bx bx-user"></i><span>Profil</span></a>
+							</li>
+							<li>
+								<div class="dropdown-divider mb-0"></div>
+							</li>
+							<li><a class="dropdown-item" href="javascript:;" onclick="ubah_thema()"><i class="bx bx-cog"></i><span>Ubah Tampilan</span></a>
+							</li> 
+							<li>
+								<div class="dropdown-divider mb-0"></div>
+							</li>
+							<li><a class="dropdown-item" onClick="info_apperapor()"><i class="bx bxs-info-circle"></i><span>Info Aplikasi</span></a>
+							</li>
+							<li>
+								<div class="dropdown-divider mb-0"></div>
+							</li>
+							<li><a class="dropdown-item" href="http://103.131.217.1:8239/logout"><i class='bx bx-log-out-circle'></i><span>Keluar</span></a>
+							</li>
+						</ul>
+					</div>
+				</nav>
+			</div>
+		</header>
+		<!--end header -->
+		<!--start page wrapper -->
+		<div class="page-wrapper">
+			<div class="page-content">
+			<div class="my-3 border-top"></div>  
+				 	<div class="row">
+	 <div class="col-12 col-lg-12 col-xl-12">
+			<div class="card card-body">
+			<h6 class="mb-0 text-uppercase">Cetak Transkrip Nilai Rapor Siswa</h6>
+			<div class="my-3 border-top"></div>
+			<h6 class="mb-0">Pengaturan Hasil Cetak</h6>
+				<div class="row row-cols-2 row-cols-sm-3 row-cols-md-6 row-cols-xl-6"> 
+					<div class="col">
+						<div  class="col p-1 mx-2">
+						<label for="kertas" class="form-label fw-bold mt-1">Ukuran Kertas:</label>
+						<select class="form-control form-control-sm" name="kertas" id="kertas"  style="text-align: center;">
+								<option value="KA4" selected>A4</option>
+								<option value="KF4">F4 (Folio)</option>
+							</select>                			
+						</div>
+					</div>
+					
+					<div class="col">
+						<div  class="col p-1 mx-2">
+						<label for="kiri" class="form-label fw-bold mt-1">Margin Kiri (mm):</label>
+						<input class="form-control form-control-sm" type="text" name="kiri" id="kiri" value="20" style="text-align: center;">            			
+					</div>
+					</div>
+					<div class="col">
+						<div  class="col p-1 mx-2">
+						<label for="kanan" class="form-label fw-bold mt-1">Margin Kanan (mm):</label>
+						<input class="form-control form-control-sm" type="text" name="kanan" id="kanan" value="20" style="text-align: center;">            			
+					</div>
+					</div>
+					<div class="col">
+						<div  class="col p-1 mx-2">
+						<label for="atas" class="form-label fw-bold mt-1">Margin Atas (mm):</label>
+						<input class="form-control form-control-sm" type="text" name="atas" id="atas" value="20" style="text-align: center;">            			
+					</div>
+					</div>
+					<div class="col">
+						<div  class="col p-1 mx-2">
+						<label for="bawah" class="form-label fw-bold mt-1">Margin Bawah (mm):</label>
+						<input class="form-control form-control-sm" type="text" name="bawah" id="bawah" value="10" style="text-align: center;">            			
+					</div>
+					</div>
+					<div class="col">
+						<div  class="col p-1 mx-2">
+						<label for="halawal" class="form-label fw-bold mt-1">Isi Tanda Tangan:</label>
+						<select class="form-control form-control-sm" name="isittd" id="isittd"  style="text-align: center;">
+								<option value="0" selected>Tanpa Tanda Tangan</option>
+								<option value="1">Isi Tanda Tangan</option>
+							</select>    
+						    			
+					</div>
+					</div>
+				</div>
+				<div class="row row-cols-1">  
+					<div class="col">
+						<div  class="col p-2 mx-2 ">
+						<label for="kelas" class="form-label fw-bold mt-1">Pilih Kelas :</label>
+						<input type="hidden" class="form-control form-control-sm" name="smtke" id="smtke" value="2">
+									<select class="form-control form-control-sm" name="kelas" id="kelas" onchange="pilihstatus()">
+										<option value=''> Pilih Kelas </option>
+																					<option value='d3057787-caff-44f9-9ce1-9822d9289903'> X E1 </option>
+																					<option value='4abcfd92-dd97-4f45-ac20-a5e279db7bfe'> X E2 </option>
+																					<option value='443fa839-b387-4e64-a2e4-3d2009f61a45'> X E3 </option>
+																					<option value='4c91d0e9-4bbb-4106-ad29-9ab8215bc97d'> X E4 </option>
+																					<option value='aab2ff50-ab91-4d15-9213-726609d0f2b0'> X E5 </option>
+																					<option value='9fada02e-705c-499f-b5b3-54b5c2d1aee9'> X E6 </option>
+																					<option value='b1f0c765-4479-497c-ba16-1a0cd266323f'> X E7 </option>
+																					<option value='5d439915-436d-4e96-9d00-65c8444cc8b0'> X E8 </option>
+																					<option value='6e6f854b-f2de-4f86-907d-f031880c0ebe'> XI F1 </option>
+																					<option value='c679be50-92fb-4540-b0db-ac75158fc4cb'> XI F2 </option>
+																					<option value='7a591652-c59d-4e4a-be8a-b0e2ef92f56e'> XI F3 </option>
+																					<option value='abc49af0-a3a7-4307-851a-435183f50444'> XI F4 </option>
+																					<option value='6850b46f-0c6c-4f9d-a0ca-e84421c14aea'> XI F5 </option>
+																					<option value='8dbfb503-3897-4dc0-801d-d3933649162e'> XI F6 </option>
+																					<option value='2ae5f2ac-c092-429e-8651-089e92a61f46'> XI F7 </option>
+																					<option value='23a72ef5-cd5f-4215-a40f-e4cc0c9e620a'> XI F8 </option>
+																					<option value='324f66ef-47b8-4376-930a-ca1bd10c57d3'> XII F1 </option>
+																					<option value='57e8080f-43a2-4449-9c9d-f83358a33f4c'> XII F2 </option>
+																					<option value='b9663117-239c-4069-bef9-57a6cbbd2d74'> XII F3 </option>
+																					<option value='23983b01-bb25-432a-af88-59085404b3a4'> XII F4 </option>
+																					<option value='a410d71f-b9a8-46a0-97dd-c9843f8b4754'> XII F5 </option>
+																					<option value='aa3da237-7483-44e2-8a0b-af8cfd5779d1'> XII F6 </option>
+																					<option value='3fd29f16-bc8d-497b-955b-d8150b943b41'> XII F7 </option>
+																			</select>
+						     			
+					</div>
+					</div>
+				</div>
+		 
+				<div class="my-3 border-top"></div>
+			</div>
+			
+		</div>
+
+ 
+		<div class="col-12 col-lg-12 col-xl-12">
+			<div class="card card-body">
+				<div id="table-datadapo"></div>
+			</div>
+		</div>
+
+	</div>
+
+ 
+<script type="text/javascript">
+	function pilihstatus() {
+		var kls = $("#kelas").val();
+		var smtke = $("#smtke").val();
+		if (smtke == '' || kls == '') {
+			$('#table-datadapo').html("");
+		} else {
+			var lt = {
+			rombel: kls,
+			smtke: smtke, 
+		};
+			$('.content').LoadingOverlay('show');
+			$.post(_BASE_URL + 'list_transkripnilai',lt, function(f) {
+				$("#table-datadapo").html(f);
+				$('.content').LoadingOverlay('hide');
+			}, 'html');
+		}
+	}
+
+
+	function cetak_langsung_kelas($rombel, $smtke) {
+		$('.content').LoadingOverlay('show');
+		var lt = {
+			rombel: $rombel,
+			smtke: $smtke,
+			kertas: $("#kertas").val(),
+			kiri: $("#kiri").val(),
+			kanan: $("#kanan").val(),
+			atas: $("#atas").val(),
+			bawah: $("#bawah").val(),
+			isittd: $("#isittd").val(),
+		};
+		$.post(_BASE_URL + "buat_transkripnilai", lt, function(f) {
+			$('.content').LoadingOverlay('hide');
+			if (f.type == 'success') {
+				round_success_noti(f.message);
+				download_file(f.download, f.nmfile, '2', '1');
+			} else {
+				round_error_noti(f.message);
+			}
+ 
+		});
+
+	}
+
+
+
+	
+
+	function cetak_kelas($rombel, $smtke) {
+		$('.content').LoadingOverlay('show');
+		var lt = {
+			rombel: $rombel,
+			smtke: $smtke,
+			kertas: $("#kertas").val(),
+			kiri: $("#kiri").val(),
+			kanan: $("#kanan").val(),
+			atas: $("#atas").val(),
+			bawah: $("#bawah").val(),
+			isittd: $("#isittd").val(),
+			itemsiswa: 'semua',
+		};
+		$.post(_BASE_URL + "generate_transkripnilai", lt, function(f) {
+			$('.content').LoadingOverlay('hide');
+			if (f.type == 'success') {
+				round_success_noti(f.message);
+				pilihstatus();
+			} else {
+				round_error_noti(f.message);
+			}
+ 
+		});
+
+	}
+
+	function cetak_kelas_siswa($rombel, $smtke,$idsiswa) {
+		$('.content').LoadingOverlay('show');
+		var lt = {
+			rombel: $rombel,
+			smtke: $smtke,
+			kertas: $("#kertas").val(),
+			kiri: $("#kiri").val(),
+			kanan: $("#kanan").val(),
+			atas: $("#atas").val(),
+			bawah: $("#bawah").val(),
+			isittd: $("#isittd").val(),
+			itemsiswa: $idsiswa,
+		};
+		$.post(_BASE_URL + "generate_transkripnilai", lt, function(f) {
+			$('.content').LoadingOverlay('hide');
+			if (f.type == 'success') {
+				round_success_noti(f.message);
+				pilihstatus();
+			} else {
+				round_error_noti(f.message);
+			}
+ 
+		});
+
+	}
+
+ 
+
+
+
+	function tampil_pelengkap(a, b) {
+		var kls = $("#kelas").val();
+		var smtke = $("#smtke").val();
+		$('.content').LoadingOverlay('show');
+		var lt = {
+			tabel: 'tambah.tabel_transkrip_nilai',
+			semua: '0',
+			rombel: a,
+			nilai: b, 
+		};
+
+		$.post(_BASE_URL + 'tampil_filekesiswa',lt, function(f) {
+			$('.content').LoadingOverlay('hide');
+			if (f.type == 'success') {
+				round_success_noti(f.message);
+				pilihstatus();
+			} else {
+				round_error_noti(f.message);
+			}
+
+		});
+
+	}
+
+
+	function tampil_semuapelengkap(a, b) {
+		var kls = $("#kelas").val();
+		var smtke = $("#smtke").val();
+		$('.content').LoadingOverlay('show');
+		var lt = {
+			tabel: 'tambah.tabel_transkrip_nilai',
+			semua: '1',
+			rombel: a,
+			nilai: b, 
+		};
+		$.post(_BASE_URL + 'tampil_filekesiswa',lt, function(f) {
+			$('.content').LoadingOverlay('hide');
+			if (f.type == 'success') {
+				round_success_noti(f.message);
+				pilihstatus();
+			} else {
+				round_error_noti(f.message);
+			}
+
+		});
+
+
+
+	}
+
+	function download_file(fileURL, fileName, jenis, id) {
+		if (!window.ActiveXObject) {
+			var save = document.createElement('a');
+			save.href = fileURL;
+			save.target = '_blank';
+			var filename = fileURL.substring(fileURL.lastIndexOf('/') + 1);
+			save.download = fileName || filename;
+			if (navigator.userAgent.toLowerCase().match(/(ipad|iphone|safari)/) && navigator.userAgent.search("Chrome") < 0) {
+				document.location = save.href;
+				// window event not working here
+			} else {
+				var evt = new MouseEvent('click', {
+					'view': window,
+					'bubbles': true,
+					'cancelable': false
+				});
+				save.dispatchEvent(evt);
+				(window.URL || window.webkitURL).revokeObjectURL(save.href);
+			}
+		}
+
+		// for IE <script 11
+		else if (!!window.ActiveXObject && document.execCommand) {
+			var _window = window.open(fileURL, '_blank');
+			_window.document.close();
+			_window.document.execCommand('SaveAs', true, fileName || fileURL)
+			_window.close();
+		}
+
+
+	}
+</script> 
+
+				<div class="row">
+				<div class="col-md-12" id="modalku">
+
+				</div>
+				</div>
+
+			</div>
+		</div>
+		<!--end page wrapper -->
+		<!--start overlay-->
+		<div class="overlay toggle-icon"></div>
+		<!--end overlay-->
+		<!--Start Back To Top Button--> <a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
+		<!--End Back To Top Button-->
+		<footer class="page-footer">
+		<p class="mb-0 text-light"><span> Aplikasi e-Rapor SMA </span> | <small class=" ">Versi 2025</small> | Direktorat Sekolah Menengah Atas | Ditjen PAUD Dikdasmen | Kemendikdasmen</small></p>
+ 
+		</footer>
+	</div>
+	<!--end wrapper-->
+	<!--start switcher-->
+	<div class="switcher-wrapper"> 
+		<div class="switcher-body">
+			<div class="d-flex align-items-center">
+				<h5 class="mb-0 text-uppercase">Ubah Tampilan</h5>
+				<button type="button" class="btn-close ms-auto close-switcher" aria-label="Close"></button>
+			</div>
+			<hr/>
+			<h6 class="mb-0">Gaya Tampilan</h6>
+			<hr/>
+			<div class="d-flex align-items-center justify-content-between">
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="flexRadioDefault" id="lightmode"  onclick="temanya('light-theme')"  >
+					<label class="form-check-label" for="lightmode">Terang</label>
+				</div>
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="flexRadioDefault" id="darkmode" onclick="temanya('dark-theme')"   >
+					<label class="form-check-label" for="darkmode">Gelap</label>
+				</div>
+				<div class="form-check">
+					<input class="form-check-input" type="radio" name="flexRadioDefault" id="semidark" onclick="temanya('semi-dark')"   >
+					<label class="form-check-label" for="semidark">Semi</label>
+				</div>
+			</div>
+			<hr/>
+			 
+			<div class="d-flex align-items-center justify-content-between">
+			<div class="form-check">
+				<input class="form-check-input" type="radio" id="smatheme" name="flexRadioDefault" onclick="temanya('sma-theme')"  checked>
+				<label class="form-check-label" for="smatheme">Default</label>
+			</div>
+			<div class="form-check">
+				<input class="form-check-input" type="radio" id="minimaltheme" name="flexRadioDefault" onclick="temanya('minimal-theme')"   >
+				<label class="form-check-label" for="minimaltheme">Minim</label>
+			</div>
+			<div class="form-check">
+				<input class="form-check-input" type="radio" name="resetthema"  onclick="reset_thema()"  >
+				<label class="form-check-label" for="resetthema">Reset</label>
+			</div>
+			</div>
+			<hr/>
+			<h6 class="mb-0">Warna Header</h6>
+			<hr/>
+			<div class="header-colors-indigators">
+				<div class="row row-cols-auto g-3">
+					<div class="col">
+						<div class="indigator headercolor1" onclick="warnaheader('color-header headercolor1')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor2"  onclick="warnaheader('color-header headercolor2')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor3"  onclick="warnaheader('color-header headercolor3')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor4"  onclick="warnaheader('color-header headercolor4')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor5"  onclick="warnaheader('color-header headercolor5')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor6" onclick="warnaheader('color-header headercolor6')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor7"  onclick="warnaheader('color-header headercolor7')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator headercolor8" onclick="warnaheader('color-header headercolor8')"></div>
+					</div>
+				</div>
+			</div>
+			<hr/>
+			<h6 class="mb-0">Warna Menu</h6>
+			<hr/>
+			<div class="header-colors-indigators">
+				<div class="row row-cols-auto g-3">
+					<div class="col">
+						<div class="indigator sidebarcolor1" id="sidebarcolor1" onclick="warnaside('color-sidebar sidebarcolor1')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor2" id="sidebarcolor2" onclick="warnaside('color-sidebar sidebarcolor2')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor3" id="sidebarcolor3" onclick="warnaside('color-sidebar sidebarcolor3')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor4" id="sidebarcolor4" onclick="warnaside('color-sidebar sidebarcolor4')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor5" id="sidebarcolor5" onclick="warnaside('color-sidebar sidebarcolor5')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor6" id="sidebarcolor6" onclick="warnaside('color-sidebar sidebarcolor6')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor7" id="sidebarcolor7" onclick="warnaside('color-sidebar sidebarcolor7')"></div>
+					</div>
+					<div class="col">
+						<div class="indigator sidebarcolor8" id="sidebarcolor8" onclick="warnaside('color-sidebar sidebarcolor8')"></div>
+					</div>
+				</div>
+			</div> 
+					 
+		</div>
+	</div>
+	<!--end switcher-->
+	<!-- Bootstrap JS -->
+	<script src="http://103.131.217.1:8239/assets/js/bootstrap.bundle.min.js"></script>
+	<!--plugins-->
+	<script src="http://103.131.217.1:8239/assets/js/jquery.min.js"></script>
+	<script src="http://103.131.217.1:8239/assets/plugins/simplebar/js/simplebar.min.js"></script>
+	<script src="http://103.131.217.1:8239/assets/plugins/metismenu/js/metisMenu.min.js"></script>
+	<script src="http://103.131.217.1:8239/assets/plugins/perfect-scrollbar/js/perfect-scrollbar.js"></script>
+	<script src="http://103.131.217.1:8239/assets/plugins/datatable/js/jquery.dataTables.min.js"></script>
+	
+	<script src="http://103.131.217.1:8239/assets/plugins/datatable/js/dataTables.bootstrap5.min.js"></script>
+	<script src="http://103.131.217.1:8239/assets/plugins/datatable/js/responsive.bootstrap5.min.js"></script>
+	<script src="http://103.131.217.1:8239/assets/plugins/datatable/js/responsive.bootstrap5.min.js"></script>
+	<script src="http://103.131.217.1:8239/assets/plugins/notifications/js/lobibox.min.js"></script>
+	<script src="http://103.131.217.1:8239/assets/plugins/notifications/js/notifications.min.js"></script>
+	<script src="http://103.131.217.1:8239/assets/plugins/notifications/js/notification-custom-script.js"></script>
+	<!--app JS-->
+ 
+	<script src="http://103.131.217.1:8239/assets/plugins/bootstrap-material-datetimepicker/js/moment.min.js"></script>	
+	<script src="http://103.131.217.1:8239/assets/plugins/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.min.js"></script>
+<script src="http://103.131.217.1:8239/assets/plugins/sweetalert/sweetalert.min.js"></script>
+<script src="http://103.131.217.1:8239/assets/js/loadingoverlay.min.js"></script>
+	<!--app JS-->
+	<!--app dari lama-->
+	 
+	<!--app dari lama-->
+	<script src="http://103.131.217.1:8239/assets/js/app.js"></script>
+	
+	<script type="text/javascript">
+$.LoadingOverlay("show");	
+function load_konten() {
+	$.LoadingOverlay("hide");
+	
+}
+function ubah_thema() { 
+		$(".switcher-wrapper").toggleClass("switcher-toggled");
+}
+
+function temanya(a) {
+		$(".content").LoadingOverlay('show');
+		$.ajax({
+			url: "http://103.131.217.1:8239/pilihtema",
+			method: "POST",
+			data: {
+				iddata: a
+			},
+			success: function(f) {
+				location.reload();
+			}
+		})
+
+	}
+ 
+	function warnaheader(a) {
+		$(".content").LoadingOverlay('show');
+		$.ajax({
+			url: "http://103.131.217.1:8239/pilihwarnaheader",
+			method: "POST",
+			data: {
+				iddata: a
+			},
+			success: function(f) {
+				location.reload();
+			}
+		})
+
+	}
+ 
+	function warnaside(a) {
+		$(".content").LoadingOverlay('show');
+		$.ajax({
+			url: "http://103.131.217.1:8239/pilihwarnaside",
+			method: "POST",
+			data: {
+				iddata: a
+			},
+			success: function(f) {
+				location.reload();
+			}
+		})
+
+	}
+	function reset_thema() {
+		$(".content").LoadingOverlay('show');
+		$.ajax({
+			url: "http://103.131.217.1:8239/resetthema",
+			method: "POST",
+			success: function(f) {
+				location.reload();
+			}
+		})
+
+	}
+function info_apperapor() {
+		$(".content").LoadingOverlay('show');
+		$.post(_BASE_URL + 'info_aplikasi', function(f) {
+			$("#modalku").html(f);
+			$(".content").LoadingOverlay('hide');
+			$("#modal-aplikasi").modal('show');
+		}, 'html');
+	}
+</script>
+</body>
+
+</html>

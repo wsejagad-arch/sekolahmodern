@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Minimal Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <h2>Test Minimal Hapus Wali</h2>
+  <button onclick="testSimple()">Hapus ID=1 (Minimal)</button>
+  <div id="log"></div>
+
+  <script>
+    function log(msg) {
+      console.log(msg);
+      document.getElementById('log').innerHTML += '<p>' + msg + '</p>';
+    }
+    
+    function testSimple() {
+      log('Starting minimal test...');
+      
+      const form = new FormData();
+      form.append('action', 'hapus_wali');
+      form.append('id_kelas', '1');
+      
+      log('Sending POST to ajax_update_wali_kelas.php');
+      
+      fetch('ajax_update_wali_kelas.php', {
+        method: 'POST',
+        body: form
+      })
+      .then(r => {
+        log('Got response: ' + r.status);
+        return r.text();
+      })
+      .then(text => {
+        log('Response: ' + text);
+        try {
+          const json = JSON.parse(text);
+          if (json.success) {
+            log('SUCCESS!');
+            alert('Success: ' + json.message);
+          } else {
+            log('FAILED: ' + json.message);
+            alert('Failed: ' + json.message);
+          }
+        } catch(e) {
+          log('Parse error: ' + e.message);
+          alert('Parse error: ' + text);
+        }
+      })
+      .catch(e => {
+        log('Error: ' + e.message);
+        alert('Error: ' + e.message);
+      });
+    }
+  </script>
+</body>
+</html>

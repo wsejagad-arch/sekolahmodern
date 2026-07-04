@@ -1,0 +1,247 @@
+/* ===== GURU CLEAN MINIMALIST THEME ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary: #3b82f6;
+  --primary-light: #60a5fa;
+  --secondary: #64748b;
+  --success: #10b981;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font-main: 'Plus Jakarta Sans', 'Inter', sans-serif;
+}
+
+body {
+  font-family: var(--font-main);
+  background: #f8fafc url('../../img/minimalist_bg.png') no-repeat center center fixed;
+  background-size: cover;
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== APP CONTAINER ===== */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* ===== MINIMALIST HEADER ===== */
+.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-school-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.hdr-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.hdr-btn:hover {
+  background: #f1f5f9;
+  color: var(--primary);
+  border-color: var(--primary-light);
+}
+
+.hdr-profile {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  background: #f8fafc;
+}
+
+.hdr-profile img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.hdr-profile svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ===== MINIMALIST SIDEBAR ===== */
+.desktop-sidebar {
+  width: 240px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  height: calc(100vh - 61px);
+  position: fixed;
+  left: 0;
+  top: 61px;
+  padding: 24px 12px;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+  transition: all 0.2s;
+}
+
+.sidebar-link:hover {
+  background: #f1f5f9;
+  color: var(--text);
+}
+
+.sidebar-link.active {
+  background: #eff6ff;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* ===== CONTENT CARDS ===== */
+.content-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title i { color: var(--primary); }
+
+/* ===== WELCOME CARD ===== */
+.welcome-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+
+.wc-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+/* ===== TABLES ===== */
+.table { color: var(--text) !important; }
+.table th {
+  background: #f8fafc;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+  background: var(--primary) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  font-weight: 600 !important;
+}
+
+/* ===== 3D BUTTON PLUS ===== */
+.btn-3d-plus {
+  background: linear-gradient(145deg, #3b82f6, #2563eb) !important;
+  border: none !important;
+  color: white !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 0 #1d4ed8, 0 8px 15px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.1s ease !important;
+  position: relative;
+  cursor: pointer;
+}
+
+.btn-3d-plus:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #1d4ed8, 0 10px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.btn-3d-plus:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #1d4ed8, 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn-3d-plus i {
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  filter: drop-shadow(0 0 5px rgba(255,255,255,0.4));
+}
+
+
+@media (max-width: 991px) {
+  .desktop-sidebar { display: none; }
+  .app-container { margin-left: 0; }
+}

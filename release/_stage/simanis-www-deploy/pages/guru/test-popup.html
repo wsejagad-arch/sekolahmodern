@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Popup Quotes</title>
+    <link rel="stylesheet" href="../css/quotes-style.css">
+</head>
+<body>
+    <h1>Test Page untuk Popup Quotes</h1>
+    <p>Halaman ini untuk test popup quotes system.</p>
+    <button onclick="testPopup()">Test Popup</button>
+    <button onclick="clearSession()">Clear Session</button>
+
+    <script src="../js/quotes-system.js"></script>
+    <script>
+        function testPopup() {
+            console.log('Testing popup...');
+            initWelcomePopup('Test User', {
+                forceShow: true,
+                showNewQuoteButton: true
+            });
+        }
+
+        function clearSession() {
+            sessionStorage.clear();
+            console.log('Session cleared');
+        }
+
+        // Auto test pada page load
+        window.addEventListener('load', function() {
+            console.log('Page loaded, testing popup...');
+            setTimeout(() => {
+                testPopup();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

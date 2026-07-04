@@ -1,0 +1,82 @@
+# FIX ERROR: Syntax Error & index.js undefined
+
+## Error Yang Muncul:
+1. `index.js:3 Uncaught ReferenceError: exports is not defined`
+2. `home.php?page=pengumuman:692 Uncaught SyntaxError: Unexpected token '}'`
+
+## Solusi:
+
+### 1. Hapus file index.js di hosting (jika ada)
+   - File ini corrupt atau tidak diperlukan
+   - Di cPanel File Manager, cari file `index.js` di folder `js/` atau root
+   - Hapus file tersebut
+
+### 2. Upload ulang home.php yang sudah diperbaiki
+   File source: `C:\xampp\htdocs\jurnal\deploy_prod\home.php`
+   Upload ke: `sijurnal.sma1sumber.sch.id/home.php`
+   
+   **PENTING:** Overwrite file lama, jangan rename!
+
+### 3. Upload file-file ini juga (jika belum):
+   - `footer.php` → overwrite yang lama
+   - `header.php` → overwrite yang lama
+   - `sidebar.php` → overwrite yang lama
+   - `pages/admin/pengumuman.php` → pastikan sudah ada!
+
+### 4. Clear Cache Browser
+   - Tekan Ctrl + Shift + Delete
+   - Pilih "Cached images and files"
+   - Klik Clear
+   - ATAU buka Incognito window
+
+### 5. Test
+   - Buka: https://sijurnal.sma1sumber.sch.id/test_pengumuman.php
+   - Harus muncul: "pages/admin/pengumuman.php exists: YES"
+   - Buka: https://sijurnal.sma1sumber.sch.id/home.php?page=pengumuman
+   - Halaman harus muncul tanpa error
+
+## Jika Masih Error:
+
+### Cek di cPanel File Manager:
+1. Login cPanel → File Manager
+2. Navigate ke folder: sijurnal.sma1sumber.sch.id
+3. Cek file-file ini:
+   - [ ] home.php (ukuran ~30-40 KB)
+   - [ ] footer.php (ukuran ~10-15 KB)
+   - [ ] header.php (ukuran ~3-5 KB)
+   - [ ] sidebar.php (ukuran ~8-12 KB)
+   - [ ] pages/admin/pengumuman.php (ukuran ~12-15 KB)
+
+4. Jika ada file index.js → HAPUS
+5. Jika ada folder vendor/ → biarkan saja (tidak dipakai lagi, semua dari CDN)
+
+## Upload Order (PENTING!):
+Upload file-file ini secara berurutan:
+
+1. header.php
+2. footer.php
+3. sidebar.php
+4. pages/admin/pengumuman.php (buat folder pages/admin/ dulu jika belum ada)
+5. home.php (terakhir!)
+
+Setelah semua terupload:
+- Clear browser cache
+- Test di Incognito window
+- Buka home.php?page=pengumuman
+
+## Cek Console (F12):
+Setelah upload, buka Console (F12) dan cek:
+
+**TIDAK BOLEH ADA error ini:**
+- ❌ "exports is not defined"
+- ❌ "Unexpected token }"
+- ❌ "Cannot read properties of null"
+
+**YANG BOLEH/NORMAL:**
+- ✅ "jQuery version: 3.6.0"
+- ✅ "Sidebar initialized"
+- ✅ "DataTables demo"
+- ⚠️ "Pengumuman form elements not found" (ini warning biasa, bukan error)
+
+## Jika Perlu Bantuan:
+Screenshot console error dan kirim ke saya!

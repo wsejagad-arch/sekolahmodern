@@ -1,0 +1,51 @@
+PANDUAN PERBAIKAN ERROR PHP 403
+=============================
+
+MASALAH: PHP diblokir (403) - file .php tidak berjalan
+PENYEBAB: PHP belum aktif di subdomain hosting
+SOLUSI: Konfigurasi di cPanel
+
+🚨 LANGKAH WAJIB DI CPANEL:
+
+1. **MultiPHP Manager**
+   - Domain: simanis.sman1sumber.sch.id
+   - Pilih: PHP 8.1 (atau 8.0)
+   - Save
+
+2. **Upload .htaccess**
+   - File: htaccess/.htaccess-litespeed
+   - Rename: .htaccess
+   - Upload ke root: /www.simanis.sman1sumber.sch.id/
+   - Permission: 644
+
+3. **Upload .user.ini**
+   - File: .user.ini (sudah ada di ZIP)
+   - Upload ke root
+   - Permission: 644
+
+4. **Permission Folder**
+   - uploads, logs, temp: 755
+   - File .php: 644
+
+🔍 FILE YANG PERLU DICEK:
+- .htaccess (harus ada)
+- .user.ini (harus ada)
+- config.hosting.php (sudah ada)
+- ping.php (harus bisa diakses)
+
+📋 VERIFIKASI:
+1. Uji: https://www.simanis.sman1sumber.sch.id/ping.php
+   Harus muncul: "PING OK PHP 8.x"
+2. Uji: https://www.simanis.sman1sumber.sch.id/splash.php
+   Harus muncul halaman login SIMANIS
+
+⚠️ CATATAN:
+- Jika ping.php masih 403, coba ganti SetHandler di .htaccess:
+  lsphp81 -> lsphp80 atau lsphp74
+- Hubungi hosting: "aktifkan PHP untuk subdomain simanis"
+- Cek cPanel > Select PHP Version
+
+🎯 TARGET AKHIR:
+- Aplikasi SIMANIS berjalan normal
+- Semua fitur PHP aktif
+- Database terkoneksi

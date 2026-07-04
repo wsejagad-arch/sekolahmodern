@@ -1,0 +1,39 @@
+🚀 Node.js WhatsApp Worker listening locally on http://127.0.0.1:9000
+Device 1 has no saved session. Waiting for user interaction.
+[Device 1] Status queried and socket not initialized. Connecting on-demand...
+🌐 Using WhatsApp Web v2.3000.1035194821, isLatest: true
+❌ [Device 1] Connection closed. Reason: Stream Errored (restart required)
+🔄 [Device 1] Reconnecting...
+🌐 Using WhatsApp Web v2.3000.1035194821, isLatest: true
+⚡ [Device 1] WhatsApp Connection successfully opened for +6287815873285!
+[Device 1] Querying number status on WhatsApp: 6287815873285
+[Device 1] Successfully resolved JID: 6287815873285@s.whatsapp.net
+[Device 1] Querying number status on WhatsApp: 628112704465
+[Device 1] Successfully resolved JID: 628112704465@s.whatsapp.net
+[Device 1] Querying number status on WhatsApp: 628112704465
+[Device 1] Successfully resolved JID: 628112704465@s.whatsapp.net
+[Device 1] Querying number status on WhatsApp: 628112704465
+[Device 1] Successfully resolved JID: 628112704465@s.whatsapp.net
+[Device 1] Querying number status on WhatsApp: 6287815873285
+[Device 1] Successfully resolved JID: 6287815873285@s.whatsapp.net
+❌ [Device 1] Connection closed. Reason: Connection Terminated
+🔄 [Device 1] Reconnecting...
+🌐 Using WhatsApp Web v2.3000.1035194821, isLatest: true
+⚡ [Device 1] WhatsApp Connection successfully opened for +6287815873285!
+❌ [Device 1] Connection closed. Reason: Connection Terminated
+🔄 [Device 1] Reconnecting...
+🌐 Using WhatsApp Web v2.3000.1035194821, isLatest: true
+⚡ [Device 1] WhatsApp Connection successfully opened for +6287815873285!
+❌ [Device 1] Connection closed. Reason: Connection Terminated
+🔄 [Device 1] Reconnecting...
+🌐 Using WhatsApp Web v2.3000.1035194821, isLatest: true
+⚡ [Device 1] WhatsApp Connection successfully opened for +6287815873285!
+❌ [Device 1] Connection closed. Reason: Stream Errored (unknown)
+🔄 [Device 1] Reconnecting...
+🌐 Using WhatsApp Web v2.3000.1035194821, isLatest: true
+⚡ [Device 1] WhatsApp Connection successfully opened for +6287815873285!
+📩 [Device 1] Incoming message from +273361833844958@lid (ibuk e arin): "pelayanan ne"
+📩 [Device 1] Incoming message from +273361833844958@lid (ibuk e arin): "nek yoyok ngakon nek juwono lah"
+📩 [Device 1] Incoming message from +273361833844958@lid (ibuk e arin): "coro nek mitra lah seng nangani podo dokter e"
+📩 [Device 1] Incoming message from +273361833844958@lid (ibuk e arin): "tp iseh nunggu sesok ,"
+📩 [Device 1] Incoming message from +273361833844958@lid (ibuk e arin): "sesok tgl 1. aku bayar bpjs neh"

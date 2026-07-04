@@ -1,0 +1,360 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) { session_start(); }
+if (!isset($_SESSION['no_induk']) || (int)($_SESSION['hak_akses'] ?? 0) !== 3) {
+    header('Location: ../../index.php?haruslogin');
+    exit;
+}
+
+require_once __DIR__ . '/../../koneksi.php';
+date_default_timezone_set('Asia/Jakarta');
+
+function kihs_h($value): string
+{
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
+
+function kihs_column_exists(mysqli $conn, string $table, string $column): bool
+{
+    $tableEsc = mysqli_real_escape_string($conn, $table);
+    $columnEsc = mysqli_real_escape_string($conn, $column);
+    $q = @mysqli_query($conn, "SHOW COLUMNS FROM `$tableEsc` LIKE '$columnEsc'");
+    return $q && mysqli_num_rows($q) > 0;
+}
+
+function kihs_create_table(mysqli $conn): void
+{
+    @mysqli_query($conn, "
+        CREATE TABLE IF NOT EXISTS tbl_7kih_jurnal (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            no_induk VARCHAR(50) NOT NULL,
+            nama_siswa VARCHAR(150) NOT NULL DEFAULT '',
+            kelas VARCHAR(60) NOT NULL DEFAULT '',
+            tanggal DATE NOT NULL,
+            habit_key VARCHAR(40) NOT NULL,
+            habit_label VARCHAR(120) NOT NULL,
+            prayer_key VARCHAR(30) NOT NULL DEFAULT '',
+            submitted_at DATETIME NOT NULL,
+            window_start TIME DEFAULT NULL,
+            window_end TIME DEFAULT NULL,
+            timeliness_status ENUM('sangat_tepat','tepat','terlambat','di_luar_waktu') NOT NULL DEFAULT 'tepat',
+            score DECIMAL(5,2) NOT NULL DEFAULT 0,
+            photo_path VARCHAR(255) DEFAULT NULL,
+            photo_size INT UNSIGNED NOT NULL DEFAULT 0,
+            photo_hash VARCHAR(80) DEFAULT NULL,
+            is_photo_stored TINYINT(1) NOT NULL DEFAULT 1,
+            user_agent VARCHAR(255) DEFAULT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY uniq_7kih_daily_slot (no_induk, tanggal, habit_key, prayer_key),
+            KEY idx_7kih_tanggal_kelas (tanggal, kelas),
+            KEY idx_7kih_siswa_bulan (no_induk, tanggal),
+            KEY idx_7kih_habit (habit_key, prayer_key)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+}
+
+function kihs_habits(): array
+{
+    return [
+        'bangun_pagi' => ['label' => 'Bangun Pagi', 'icon' => 'fa-sun', 'start' => '04:00', 'end' => '06:00', 'hint' => 'Mulai paling awal pukul 04.00.'],
+        'beribadah' => ['label' => 'Beribadah', 'icon' => 'fa-praying-hands', 'start' => '04:00', 'end' => '21:00', 'hint' => 'Lampirkan selfie setelah beribadah.'],
+        'berolahraga' => ['label' => 'Berolahraga', 'icon' => 'fa-running', 'start' => '05:00', 'end' => '07:30', 'hint' => 'Selfie saat atau setelah olahraga.'],
+        'makan_sehat' => ['label' => 'Makan Sehat', 'icon' => 'fa-apple-alt', 'start' => '06:00', 'end' => '20:00', 'hint' => 'Selfie bersama makanan sehat.'],
+        'gemar_belajar' => ['label' => 'Gemar Belajar', 'icon' => 'fa-book-reader', 'start' => '18:00', 'end' => '21:00', 'hint' => 'Selfie saat belajar mandiri.'],
+        'bermasyarakat' => ['label' => 'Bermasyarakat', 'icon' => 'fa-hands-helping', 'start' => '15:00', 'end' => '18:00', 'hint' => 'Selfie aktivitas sosial/keluarga/lingkungan.'],
+        'tidur_cepat' => ['label' => 'Tidur Cepat', 'icon' => 'fa-moon', 'start' => '20:00', 'end' => '22:00', 'hint' => 'Selfie persiapan tidur cepat.'],
+    ];
+}
+
+function kihs_prayers(): array
+{
+    return [
+        'subuh' => ['label' => 'Subuh', 'start' => '04:00', 'end' => '06:00'],
+        'dzuhur' => ['label' => 'Dzuhur', 'start' => '11:30', 'end' => '13:30'],
+        'ashar' => ['label' => 'Ashar', 'start' => '15:00', 'end' => '16:30'],
+        'maghrib' => ['label' => 'Maghrib', 'start' => '17:30', 'end' => '18:30'],
+        'isya' => ['label' => 'Isya', 'start' => '19:00', 'end' => '20:30'],
+    ];
+}
+
+kihs_create_table($conn);
+
+$nis = (string)$_SESSION['no_induk'];
+$nisEsc = mysqli_real_escape_string($conn, $nis);
+$agamaSelect = kihs_column_exists($conn, 'tbl_siswa', 'agama') ? 'agama' : "'' AS agama";
+$qSiswa = @mysqli_query($conn, "SELECT no_induk, nama_siswa, kelas, $agamaSelect FROM tbl_siswa WHERE no_induk='$nisEsc' LIMIT 1");
+$siswa = $qSiswa ? mysqli_fetch_assoc($qSiswa) : [];
+$namaSiswa = (string)($siswa['nama_siswa'] ?? ($_SESSION['nama_siswa'] ?? 'Siswa'));
+$kelas = (string)($siswa['kelas'] ?? ($_SESSION['kelas'] ?? ''));
+$agama = strtolower(trim((string)($siswa['agama'] ?? '')));
+$isIslam = strpos($agama, 'islam') !== false;
+
+$today = date('Y-m-d');
+$month = date('Y-m');
+$habits = kihs_habits();
+$prayers = kihs_prayers();
+$done = [];
+$qDone = @mysqli_query($conn, "SELECT habit_key, prayer_key, submitted_at, score, timeliness_status, photo_path FROM tbl_7kih_jurnal WHERE no_induk='$nisEsc' AND tanggal='$today'");
+while ($qDone && ($row = mysqli_fetch_assoc($qDone))) {
+    $done[$row['habit_key'] . '|' . (string)$row['prayer_key']] = $row;
+}
+
+$expectedToday = $isIslam ? 11 : 7;
+$doneToday = count($done);
+$todayPct = $expectedToday > 0 ? min(100, round(($doneToday / $expectedToday) * 100)) : 0;
+$avgScore = 0;
+if ($doneToday > 0) {
+    $avgScore = array_sum(array_map(static fn($r) => (float)$r['score'], $done)) / $doneToday;
+}
+
+$history = [];
+$monthEsc = mysqli_real_escape_string($conn, $month);
+$qHist = @mysqli_query($conn, "
+    SELECT tanggal, COUNT(*) AS total, AVG(score) AS avg_score
+    FROM tbl_7kih_jurnal
+    WHERE no_induk='$nisEsc' AND DATE_FORMAT(tanggal, '%Y-%m')='$monthEsc'
+    GROUP BY tanggal
+    ORDER BY tanggal DESC
+    LIMIT 14
+");
+while ($qHist && ($row = mysqli_fetch_assoc($qHist))) {
+    $history[] = $row;
+}
+?>
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Jurnal 7KIH - SIMANIS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background:linear-gradient(135deg,#e0f2fe,#f8fafc 46%,#dcfce7); min-height:100vh; padding-bottom:78px; }
+        .phone { max-width:480px; margin:0 auto; padding:16px; }
+        .card { background:rgba(255,255,255,.95); border:1px solid rgba(226,232,240,.9); border-radius:20px; box-shadow:0 12px 30px rgba(15,23,42,.08); }
+        .habit-btn.done { border-color:#16a34a; background:#f0fdf4; }
+        .camera-modal { position:fixed; inset:0; background:rgba(15,23,42,.72); display:none; place-items:center; z-index:50; padding:16px; }
+        .camera-modal.open { display:grid; }
+        video, canvas, #previewImg { transform:scaleX(-1); }
+        .bottom-nav { position:fixed; left:0; right:0; bottom:0; background:rgba(255,255,255,.96); border-top:1px solid #e2e8f0; display:flex; justify-content:center; gap:26px; padding:10px 12px; z-index:30; }
+        .bottom-nav a { color:#64748b; text-decoration:none; font-size:11px; font-weight:800; display:flex; flex-direction:column; align-items:center; gap:2px; }
+        .bottom-nav i { font-size:19px; }
+    </style>
+</head>
+<body>
+<main class="phone">
+    <section class="rounded-[24px] bg-gradient-to-br from-emerald-700 to-slate-900 text-white p-5 shadow-xl">
+        <a href="siswa.php" class="text-white/80 text-sm font-bold"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
+        <h1 class="text-2xl font-black mt-3">Jurnal 7KIH</h1>
+        <p class="text-white/70 text-sm mt-1">7 Kebiasaan Anak Indonesia Hebat. Ambil selfie sebagai bukti aktivitas, lalu kirim jurnal harian.</p>
+        <div class="grid grid-cols-3 gap-2 mt-4">
+            <div class="bg-white/12 rounded-2xl p-3">
+                <div class="text-xs text-white/65">Hari ini</div>
+                <div class="text-xl font-black"><?= (int)$doneToday; ?>/<?= (int)$expectedToday; ?></div>
+            </div>
+            <div class="bg-white/12 rounded-2xl p-3">
+                <div class="text-xs text-white/65">Progres</div>
+                <div class="text-xl font-black"><?= (int)$todayPct; ?>%</div>
+            </div>
+            <div class="bg-white/12 rounded-2xl p-3">
+                <div class="text-xs text-white/65">Skor</div>
+                <div class="text-xl font-black"><?= number_format($avgScore, 0); ?></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card p-4 mt-4">
+        <div class="flex items-center justify-between gap-3 mb-3">
+            <div>
+                <h2 class="font-black text-slate-900">Pilih Jurnal</h2>
+                <p class="text-xs text-slate-500"><?= kihs_h($namaSiswa); ?><?= $kelas !== '' ? ' - ' . kihs_h($kelas) : ''; ?></p>
+            </div>
+            <span class="text-[11px] font-bold rounded-full bg-emerald-100 text-emerald-700 px-3 py-1"><?= $isIslam ? 'Islam: 5 sholat' : 'Ibadah umum'; ?></span>
+        </div>
+
+        <div class="space-y-3">
+            <?php foreach ($habits as $key => $habit): ?>
+                <?php if ($key === 'beribadah' && $isIslam): ?>
+                    <div class="border border-slate-200 rounded-2xl p-3">
+                        <div class="flex gap-3 items-start mb-3">
+                            <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 grid place-items-center"><i class="fa-solid <?= kihs_h($habit['icon']); ?>"></i></div>
+                            <div class="flex-1">
+                                <div class="font-black text-slate-900"><?= kihs_h($habit['label']); ?></div>
+                                <div class="text-xs text-slate-500">Isi 5 kali absen sholat dengan selfie.</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <?php foreach ($prayers as $pKey => $prayer): ?>
+                                <?php $d = $done[$key . '|' . $pKey] ?? null; ?>
+                                <button type="button" class="habit-btn <?= $d ? 'done' : ''; ?> text-left border rounded-xl p-3" data-habit="<?= kihs_h($key); ?>" data-prayer="<?= kihs_h($pKey); ?>" data-title="Sholat <?= kihs_h($prayer['label']); ?>">
+                                    <div class="font-black text-sm"><?= kihs_h($prayer['label']); ?></div>
+                                    <div class="text-[11px] text-slate-500"><?= kihs_h($prayer['start']); ?>-<?= kihs_h($prayer['end']); ?></div>
+                                    <div class="text-[11px] mt-1 <?= $d ? 'text-emerald-700' : 'text-slate-400'; ?>"><?= $d ? 'Terkirim ' . date('H:i', strtotime($d['submitted_at'])) : 'Belum diisi'; ?></div>
+                                </button>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <?php $d = $done[$key . '|'] ?? null; ?>
+                    <button type="button" class="habit-btn <?= $d ? 'done' : ''; ?> w-full text-left border border-slate-200 rounded-2xl p-3 flex gap-3 items-start" data-habit="<?= kihs_h($key); ?>" data-prayer="" data-title="<?= kihs_h($habit['label']); ?>">
+                        <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 grid place-items-center"><i class="fa-solid <?= kihs_h($habit['icon']); ?>"></i></div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between gap-2">
+                                <div class="font-black text-slate-900"><?= kihs_h($habit['label']); ?></div>
+                                <span class="text-[11px] text-slate-500"><?= kihs_h($habit['start']); ?>-<?= kihs_h($habit['end']); ?></span>
+                            </div>
+                            <div class="text-xs text-slate-500"><?= kihs_h($habit['hint']); ?></div>
+                            <div class="text-[11px] mt-1 <?= $d ? 'text-emerald-700' : 'text-slate-400'; ?>"><?= $d ? 'Terkirim ' . date('H:i', strtotime($d['submitted_at'])) : 'Belum diisi'; ?></div>
+                        </div>
+                    </button>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
+    <section class="card p-4 mt-4">
+        <h2 class="font-black text-slate-900 mb-2">Riwayat Bulan Ini</h2>
+        <?php if (empty($history)): ?>
+            <p class="text-sm text-slate-500">Belum ada jurnal bulan ini.</p>
+        <?php else: ?>
+            <div class="space-y-2">
+                <?php foreach ($history as $row): ?>
+                    <div class="flex items-center justify-between border border-slate-100 rounded-xl px-3 py-2">
+                        <div>
+                            <div class="font-bold text-sm"><?= date('d M Y', strtotime($row['tanggal'])); ?></div>
+                            <div class="text-xs text-slate-500"><?= (int)$row['total']; ?> jurnal terkirim</div>
+                        </div>
+                        <div class="font-black text-emerald-700"><?= number_format((float)$row['avg_score'], 0); ?></div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </section>
+</main>
+
+<div id="cameraModal" class="camera-modal">
+    <div class="card p-4 w-full max-w-sm">
+        <div class="flex justify-between gap-3 items-start mb-3">
+            <div>
+                <h3 id="modalTitle" class="font-black text-slate-900">Ambil Selfie</h3>
+                <p class="text-xs text-slate-500">Foto dikompres otomatis sebelum dikirim.</p>
+            </div>
+            <button id="btnClose" class="w-9 h-9 rounded-full bg-slate-100 text-slate-600" type="button"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="rounded-2xl overflow-hidden bg-slate-900 aspect-square grid place-items-center">
+            <video id="video" autoplay playsinline class="w-full h-full object-cover"></video>
+            <img id="previewImg" class="w-full h-full object-cover hidden" alt="Preview selfie">
+            <canvas id="canvas" class="hidden"></canvas>
+        </div>
+        <div id="modalMsg" class="text-xs text-slate-500 mt-3 min-h-5">Buka kamera, posisikan wajah, lalu ambil foto.</div>
+        <div class="grid grid-cols-2 gap-2 mt-3">
+            <button id="btnCapture" class="rounded-xl bg-emerald-600 text-white font-black py-3" type="button"><i class="fa-solid fa-camera"></i> Ambil</button>
+            <button id="btnSend" class="rounded-xl bg-slate-900 text-white font-black py-3 disabled:opacity-40" type="button" disabled><i class="fa-solid fa-paper-plane"></i> Kirim</button>
+        </div>
+    </div>
+</div>
+
+<nav class="bottom-nav">
+    <a href="siswa.php"><i class="fas fa-home"></i><span>Beranda</span></a>
+    <a href="presensi.php"><i class="fas fa-fingerprint"></i><span>Presensi</span></a>
+    <a href="jurnal-7kih.php" style="color:#047857;"><i class="fas fa-star"></i><span>7KIH</span></a>
+    <a href="profil.php"><i class="fas fa-user-circle"></i><span>Profil</span></a>
+</nav>
+
+<script>
+let stream = null;
+let currentHabit = '';
+let currentPrayer = '';
+let photoData = '';
+const modal = document.getElementById('cameraModal');
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const previewImg = document.getElementById('previewImg');
+const modalTitle = document.getElementById('modalTitle');
+const modalMsg = document.getElementById('modalMsg');
+const btnSend = document.getElementById('btnSend');
+
+async function openCamera(btn) {
+    currentHabit = btn.dataset.habit || '';
+    currentPrayer = btn.dataset.prayer || '';
+    photoData = '';
+    modalTitle.textContent = btn.dataset.title || 'Ambil Selfie';
+    modalMsg.textContent = 'Mengaktifkan kamera...';
+    btnSend.disabled = true;
+    previewImg.classList.add('hidden');
+    video.classList.remove('hidden');
+    modal.classList.add('open');
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+        video.srcObject = stream;
+        modalMsg.textContent = 'Posisikan wajah dan aktivitas terlihat jelas.';
+    } catch (err) {
+        modalMsg.textContent = 'Kamera tidak dapat dibuka: ' + err.message;
+    }
+}
+
+function closeCamera() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    modal.classList.remove('open');
+}
+
+function capturePhoto() {
+    if (!video.videoWidth) {
+        modalMsg.textContent = 'Kamera belum siap.';
+        return;
+    }
+    const max = 420;
+    const ratio = Math.min(max / video.videoWidth, max / video.videoHeight, 1);
+    canvas.width = Math.round(video.videoWidth * ratio);
+    canvas.height = Math.round(video.videoHeight * ratio);
+    const ctx = canvas.getContext('2d');
+    ctx.translate(canvas.width, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    photoData = canvas.toDataURL('image/jpeg', 0.38);
+    previewImg.src = photoData;
+    previewImg.classList.remove('hidden');
+    video.classList.add('hidden');
+    btnSend.disabled = false;
+    modalMsg.textContent = 'Foto siap dikirim. Ukuran sudah diperkecil.';
+}
+
+async function sendJournal() {
+    if (!photoData) {
+        modalMsg.textContent = 'Ambil foto terlebih dahulu.';
+        return;
+    }
+    btnSend.disabled = true;
+    modalMsg.textContent = 'Mengirim jurnal...';
+    const form = new FormData();
+    form.append('habit_key', currentHabit);
+    form.append('prayer_key', currentPrayer);
+    form.append('photo_data', photoData);
+    try {
+        const res = await fetch('../../api/jurnal_7kih_save.php', { method: 'POST', body: form });
+        const json = await res.json();
+        if (!json.success) {
+            modalMsg.textContent = json.message || 'Gagal mengirim jurnal.';
+            btnSend.disabled = false;
+            return;
+        }
+        modalMsg.textContent = json.message;
+        setTimeout(() => window.location.reload(), 700);
+    } catch (err) {
+        modalMsg.textContent = 'Gagal mengirim: ' + err.message;
+        btnSend.disabled = false;
+    }
+}
+
+document.querySelectorAll('.habit-btn').forEach(btn => btn.addEventListener('click', () => openCamera(btn)));
+document.getElementById('btnClose').addEventListener('click', closeCamera);
+document.getElementById('btnCapture').addEventListener('click', capturePhoto);
+document.getElementById('btnSend').addEventListener('click', sendJournal);
+</script>
+</body>
+</html>

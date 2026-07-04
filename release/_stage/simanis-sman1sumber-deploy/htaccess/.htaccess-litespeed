@@ -1,0 +1,24 @@
+# LiteSpeed + cPanel — folder: public_html/simanis (document root subdomain)
+DirectoryIndex index.html index.php splash.php login.php
+Options -Indexes +FollowSymLinks
+
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php81___lsphp .php .php8 .phtml
+</IfModule>
+
+<FilesMatch "\.php$">
+  SetHandler application/x-lsphp81
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+RewriteRule ^masuk$ login.php [L,QSA]
+RewriteRule ^auth$ login_action.php [L,QSA]
+RewriteRule ^keluar$ logout.php [L,QSA]
+RewriteRule ^home/?$ home.php [L,QSA]
+RewriteRule ^pages/guru/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=guru&page=$1 [L,QSA]
+RewriteRule ^pages/siswa/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=siswa&page=$1 [L,QSA]
+RewriteRule ^pages/admin/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=admin&page=$1 [L,QSA]
+</IfModule>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - WA Notification Gateway</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            justify-content: center;
+            align-items: center;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 2.5rem;
+        }
+        .login-logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .login-logo svg {
+            width: 48px;
+            height: 48px;
+            fill: var(--color-accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-panel login-card">
+        <div class="login-logo">
+            <svg viewBox="0 0 24 24">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.488 1.449 5.407 1.451 5.485.002 9.951-4.461 9.954-9.953.001-2.661-1.034-5.163-2.914-7.045C17.216 1.77 14.715.735 12.01.735c-5.486 0-9.952 4.463-9.955 9.954-.001 1.924.501 3.8 1.452 5.402L2.52 19.86l4.127-1.066zM17.43 14.7c-.29-.145-1.72-.85-1.985-.945-.268-.098-.463-.145-.66.145-.197.29-.763.945-.935 1.14-.172.195-.344.22-.635.075-2.203-1.097-3.626-2.227-5.083-4.725-.384-.66.384-.613 1.103-2.046.12-.244.06-.46-.03-.605-.09-.145-.762-1.838-1.043-2.52-.275-.66-.554-.57-.762-.57-.197-.001-.424-.001-.65-.001-.225 0-.594.085-.904.425-.311.34-1.187 1.16-1.187 2.83 0 1.67 1.216 3.28 1.385 3.51.17.23 2.392 3.653 5.797 5.12 2.847 1.228 3.43 1.025 4.654.91.564-.053 1.72-.703 1.962-1.383.243-.68.243-1.265.17-1.383-.074-.118-.27-.213-.56-.358z"/>
+            </svg>
+        </div>
+        
+        <h2 style="text-align: center; margin-bottom: 1.5rem; font-weight: 600;">Sign In</h2>
+        
+        <div id="error-msg" style="display: none; background: rgba(244, 63, 94, 0.15); border: 1px solid var(--color-error); color: var(--color-error); padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1.25rem; text-align: center;">
+            Invalid username or password
+        </div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" class="form-control" placeholder="Enter username" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="btn btn-primary" id="login-btn">Sign In</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("login-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const u = document.getElementById("username").value;
+            const p = document.getElementById("password").value;
+            const errorMsg = document.getElementById("error-msg");
+            const btn = document.getElementById("login-btn");
+
+            btn.disabled = true;
+            btn.innerText = "Signing In...";
+            errorMsg.style.display = "none";
+
+            try {
+                const res = await fetch("/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams({ username: u, password: p })
+                });
+
+                if (res.ok) {
+                    window.location.href = "/";
+                } else {
+                    errorMsg.style.display = "block";
+                }
+            } catch (err) {
+                console.error(err);
+                alert("An error occurred during sign in");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Sign In";
+            }
+        });
+    </script>
+</body>
+</html>

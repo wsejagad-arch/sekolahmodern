@@ -1,0 +1,103 @@
+<?php
+echo "=== SOLUSI CEPAT: TAMBAH DATA SAMPLE ===\n\n";
+
+echo "Karena ada masalah koneksi database melalui PHP,\n";
+echo "berikut adalah query SQL yang perlu dijalankan di phpMyAdmin:\n\n";
+
+echo str_repeat("=", 60) . "\n";
+echo "STEP 1: BUKA PHPMYADMIN\n";
+echo str_repeat("=", 60) . "\n";
+echo "1. Buka browser: http://localhost/phpmyadmin\n";
+echo "2. Login dengan user: root, password: (kosong)\n";
+echo "3. Klik database 'jurnal' di sidebar kiri\n";
+echo "4. Klik tab 'SQL' di atas\n";
+echo "5. Copy-paste query di bawah ini\n";
+echo "6. Klik 'Go' untuk menjalankan\n\n";
+
+echo str_repeat("=", 60) . "\n";
+echo "QUERY UNTUK MENAMBAHKAN DATA GURU\n";
+echo str_repeat("=", 60) . "\n";
+echo "INSERT INTO tbl_guru (no_induk, nama_guru, status_kepegawaian, foto, status) VALUES\n";
+echo "('123456789', 'Ahmad Surya', 'PNS', '', 'Aktif');\n\n";
+echo "INSERT INTO tbl_guru (no_induk, nama_guru, status_kepegawaian, foto, status) VALUES\n";
+echo "('987654321', 'Siti Aminah', 'PNS', '', 'Aktif');\n\n";
+
+echo str_repeat("=", 60) . "\n";
+echo "QUERY UNTUK MENAMBAHKAN DATA JADWAL\n";
+echo str_repeat("=", 60) . "\n";
+echo "INSERT INTO tbl_mapel_ampu (no_induk, nama_mapel, kelas, hari, jam_mulai, jam_selesai) VALUES\n";
+echo "('123456789', 'Matematika', 'X-A', 'Senin', '07:00', '08:30');\n\n";
+
+echo "INSERT INTO tbl_mapel_ampu (no_induk, nama_mapel, kelas, hari, jam_mulai, jam_selesai) VALUES\n";
+echo "('123456789', 'Bahasa Indonesia', 'X-B', 'Selasa', '08:30', '10:00');\n\n";
+
+echo "INSERT INTO tbl_mapel_ampu (no_induk, nama_mapel, kelas, hari, jam_mulai, jam_selesai) VALUES\n";
+echo "('123456789', 'Fisika', 'XI-A', 'Rabu', '10:00', '11:30');\n\n";
+
+echo "INSERT INTO tbl_mapel_ampu (no_induk, nama_mapel, kelas, hari, jam_mulai, jam_selesai) VALUES\n";
+echo "('987654321', 'Kimia', 'XI-B', 'Kamis', '11:30', '13:00');\n\n";
+
+echo str_repeat("=", 60) . "\n";
+echo "STEP 2: VERIFIKASI DATA\n";
+echo str_repeat("=", 60) . "\n";
+echo "Setelah menjalankan query di atas:\n\n";
+
+echo "1. Klik tab 'Browse' pada tabel tbl_guru\n";
+echo "   - Harus ada data: Ahmad Surya (NIP: 123456789)\n\n";
+
+echo "2. Klik tab 'Browse' pada tabel tbl_mapel_ampu\n";
+echo "   - Harus ada jadwal untuk NIP 123456789\n\n";
+
+echo str_repeat("=", 60) . "\n";
+echo "STEP 3: TEST CETAK JURNAL\n";
+echo str_repeat("=", 60) . "\n";
+echo "1. Buka browser baru: http://localhost:8080\n";
+echo "2. Login sebagai guru:\n";
+echo "   - Hak Akses: Guru\n";
+echo "   - Username/NIP: 123456789\n";
+echo "   - Password: (kosong)\n";
+echo "3. Klik menu 'Cetak Jurnal'\n";
+echo "4. Sistem harus menampilkan jadwal dari 1 Juli 2025 - 16 September 2025\n\n";
+
+echo str_repeat("=", 60) . "\n";
+echo "DEBUG INFORMATION\n";
+echo str_repeat("=", 60) . "\n";
+echo "Jika masih bermasalah, lihat debug info di halaman cetak jurnal:\n";
+echo "- Klik kanan → Inspect Element → tab Console\n";
+echo "- Atau lihat komentar HTML yang dimulai dengan <!-- DEBUG:\n\n";
+
+echo "Debug info akan menampilkan:\n";
+echo "- NIP guru yang sedang login\n";
+echo "- Query yang dijalankan\n";
+echo "- Jumlah jadwal yang ditemukan\n";
+echo "- Detail jadwal per hari\n\n";
+
+echo str_repeat("=", 60) . "\n";
+echo "ALTERNATIF SOLUSI\n";
+echo str_repeat("=", 60) . "\n";
+echo "Jika phpMyAdmin tidak bisa diakses:\n\n";
+
+echo "1. Buka Command Prompt sebagai Administrator\n";
+echo "2. Jalankan:\n";
+echo "   cd C:\\xampp\\mysql\\bin\n";
+echo "   mysql -u root -p jurnal < C:\\xampp\\htdocs\\jurnal\\include\\db_appsiswa.sql\n\n";
+
+echo "3. Kemudian jalankan query INSERT di atas\n\n";
+
+echo str_repeat("=", 60) . "\n";
+echo "KONTAK ADMIN\n";
+echo str_repeat("=", 60) . "\n";
+echo "Jika masih ada masalah, hubungi administrator sistem untuk:\n";
+echo "- Setup database server\n";
+echo "- Konfigurasi akses database\n";
+echo "- Import data awal sistem\n\n";
+
+echo "🎯 HASIL YANG DIHARAPKAN:\n";
+echo "Setelah setup selesai, cetak jurnal akan menampilkan:\n";
+echo "- Semua jadwal dari 1 Juli 2025 sampai hari ini\n";
+echo "- Status 'Belum Mengisi Jurnal' untuk jadwal yang belum diisi\n";
+echo "- Data lengkap untuk jadwal yang sudah diisi\n";
+echo "- Filter kelas yang berfungsi\n\n";
+
+echo "🚀 SELAMAT MENCOBA!\n";
+?>

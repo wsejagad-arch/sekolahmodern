@@ -1,0 +1,171 @@
+===============================================
+CHECKLIST UPLOAD FILE KE HOSTING (FINAL)
+===============================================
+Tanggal: 16 Januari 2026
+
+⚠️ WAJIB UPLOAD 4 FILE INI (URUTAN PENTING) ⚠️
+
+FILES YANG HARUS DI-UPLOAD (URUT):
+----------------------------------
+1. ✅ deploy_prod/header.php 
+   → DataTables CSS dari CDN
+   
+2. ✅ deploy_prod/footer.php 
+   → jQuery, Bootstrap, DataTables JS dari CDN
+   → Script sidebar collapse initialization
+   
+3. ✅ deploy_prod/sidebar.php 
+   → Menu sidebar lengkap dengan Bootstrap 4 syntax
+   
+4. ✅ deploy_prod/home.php
+   → Fix chart script dengan null check
+
+CARA UPLOAD VIA cPanel (STEP BY STEP):
+--------------------------------------
+1. Login cPanel → File Manager
+2. Navigate ke folder public_html (root website)
+3. Upload header.php → Replace/Overwrite
+4. Upload footer.php → Replace/Overwrite  
+5. Upload sidebar.php → Replace/Overwrite
+6. Upload home.php → Replace/Overwrite
+
+SETELAH UPLOAD, CLEAR CACHE BROWSER:
+------------------------------------
+✅ Chrome: Ctrl+Shift+Delete → Clear cached images and files
+✅ Firefox: Ctrl+Shift+Delete → Cached Web Content
+✅ Atau: Buka Incognito/Private Window
+✅ Atau: Hard Refresh dengan Ctrl+F5
+
+TESTING LANGKAH DEMI LANGKAH:
+-----------------------------
+1. Buka https://sijurnal.sma1sumber.sch.id/home.php
+2. Login sebagai admin
+3. Buka Console Browser (tekan F12)
+4. Klik tab "Console"
+
+📋 CEK DI CONSOLE:
+-----------------
+✅ HARUS ADA PESAN INI:
+   - "Retry 1/10 - waiting for Bootstrap..."
+   - "✅ Sidebar initialized on attempt 2"
+   - "✅ Sidebar collapse initialized successfully"
+   - "✅ jQuery version: 3.6.0"
+
+❌ TIDAK BOLEH ADA ERROR:
+   - "Bootstrap collapse not available!"
+   - "Uncaught SyntaxError: Unexpected token '<'"
+   - "Uncaught ReferenceError: exports is not defined"
+
+5. Klik tab "Network" di F12
+6. Refresh halaman (F5)
+7. Filter "JS" → cari file berikut:
+
+📋 CEK FILE JS LOADED:
+---------------------
+✅ HARUS STATUS 200 (hijau):
+   ✓ jquery-3.6.0.min.js (dari code.jquery.com)
+   ✓ bootstrap.bundle.min.js (dari cdn.jsdelivr.net)
+   ✓ jquery.dataTables.min.js (dari cdn.datatables.net)
+   ✓ sb-admin-2.min.js (dari js/)
+
+❌ JIKA ADA STATUS 404 (merah):
+   - Berarti file tidak ditemukan
+   - Cek path di footer.php
+
+6. TEST SIDEBAR MENU:
+--------------------
+✅ Klik "Data Guru"
+   → Harus expand (muncul submenu)
+   → Console tidak ada error
+
+✅ Klik "Lihat Data Guru" 
+   → Harus navigasi ke halaman data-guru
+   → URL berubah: home.php?page=data-guru
+
+✅ Klik "Data Siswa"
+   → "Data Guru" harus collapse otomatis
+   → "Data Siswa" harus expand
+   
+✅ Klik submenu "Lihat Data Siswa"
+   → Harus navigasi ke halaman
+   → Tidak ada error
+
+✅ Test semua menu:
+   - Monitoring
+   - Admin
+   - Mata Pelajaran
+   - Tahun Ajaran
+   - Log Sistem
+   - Setting
+   - Laporan
+   - Pengumuman (khusus admin)
+
+TROUBLESHOOTING JIKA MASIH ERROR:
+---------------------------------
+
+🔴 JIKA SIDEBAR TIDAK EXPAND:
+   → Cek Console → ada error Bootstrap?
+   → Cek Network → Bootstrap ter-load?
+   → Clear cache browser (Ctrl+Shift+Delete)
+   → Coba Incognito/Private Window
+
+🔴 JIKA SUBMENU LINK TIDAK FUNGSI:
+   → Pastikan sidebar.php ter-upload
+   → Cek href="?page=data-guru" ada di code
+   → Clear browser cache
+
+🔴 JIKA CONSOLE ERROR "Bootstrap not available":
+   → footer.php belum ter-upload
+   → CDN Bootstrap diblokir firewall
+   → Cek koneksi internet hosting
+
+🔴 JIKA MASIH ERROR SETELAH UPLOAD:
+   1. Screenshot Console (F12 > Console tab)
+   2. Screenshot Network (F12 > Network tab, filter JS)
+   3. Screenshot error message lengkap
+   4. Kirim ke support
+
+VERIFIKASI UPLOAD BERHASIL:
+---------------------------
+✅ Cara cek file ter-upload dengan benar:
+   1. cPanel → File Manager
+   2. Klik kanan file → View
+   3. Cek isi file apakah benar
+
+   header.php → harus ada:
+   - https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css
+   
+   footer.php → harus ada:
+   - https://code.jquery.com/jquery-3.6.0.min.js
+   - https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js
+   - Script "Sidebar Collapse Fix Script"
+   
+   sidebar.php → harus ada:
+   - data-toggle="collapse" (BUKAN data-bs-toggle)
+   - aria-expanded="false" (BUKAN true)
+   - Semua menu: Data Guru, Data Siswa, Wali Kelas, dll
+
+CATATAN PENTING:
+----------------
+⚠️ Jangan upload file satu-satu dengan jeda lama
+   → Upload semua sekaligus
+   
+⚠️ Setelah upload, WAJIB clear cache browser
+   → Browser cache file lama
+   
+⚠️ Cek timestamp file di hosting
+   → Pastikan modified time = sekarang
+   
+⚠️ Jika pakai CloudFlare atau cache
+   → Purge cache di CloudFlare
+
+KONTAK SUPPORT:
+---------------
+Jika setelah mengikuti semua langkah masih error,
+kirim screenshot:
+1. Console (F12 > Console) - semua pesan
+2. Network (F12 > Network, filter JS) - status semua file
+3. File Manager cPanel - list file dengan timestamp
+4. Kode error lengkap
+
+===============================================

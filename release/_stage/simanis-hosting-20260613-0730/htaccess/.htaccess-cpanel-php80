@@ -1,0 +1,25 @@
+# cPanel + LiteSpeed — aktifkan PHP untuk simanis.sman1sumber.sch.id
+# Versi PHP 8.0 (lebih compatible)
+DirectoryIndex index.html index.php splash.php login.php
+Options -Indexes +FollowSymLinks
+
+# Handler PHP untuk cPanel / LiteSpeed
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php80___lsphp .php .php8 .phtml
+  AddHandler application/x-httpd-ea-php74___lsphp .php .php7 .phtml
+</IfModule>
+
+<IfModule lsapi_module>
+  AddHandler application/x-httpd-ea-php80___lsphp .php .php8 .phtml
+</IfModule>
+
+<FilesMatch "\\.php$">
+  SetHandler application/x-lsphp80
+</FilesMatch>
+
+# PHP Configuration
+php_flag display_errors off
+php_value upload_max_filesize 32M
+php_value post_max_size 32M
+php_value max_execution_time 300
+php_value max_input_time 300

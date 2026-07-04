@@ -1,0 +1,70 @@
+<?php
+if (!isset($_SESSION["username"])) {
+	header("location: index.php?haruslogin");
+	exit;
+} else if ($hakakses != 1) { ?>
+  <script>window.location='404.html';</script>
+<?php }
+
+include "koneksi.php";
+?>
+
+    <div class="container-fluid">
+    <div class="container">
+    <div class="alert alert-primary">
+        <h4>Cetak Laporan Kehadiran Guru</h4>
+    </div>
+
+<div class="container rounded" style="background-color: #d6eaf8; padding-top:30px;">
+<form method="POST" action="cetak-kehadiran.php" onsubmit="return validasiCetakLog()" target="_blank">
+
+<!-- Tgl Awal -->
+<div class="form-group col-sm-4">
+    <label for="tglawal">Dari Tanggal:</label>
+    <input type="date" class="form-control" id="tglAwal" name="tglAwal">
+  </div>
+<!-- End of Tgl Awal -->
+
+<!-- Tgl Akhir -->
+<div class="form-group col-sm-4">
+    <label for="tglakhir">Sampai Tanggal:</label>
+    <input type="date" class="form-control" id="tglAkhir" name="tglAkhir">
+  </div>
+<!-- End of Tgl Akhir -->
+
+<!-- Nama Guru -->
+<div class="form-group col-sm-4">
+    <label for="namaGuru">Nama Guru:</label>
+    <select class="form-control" id="namaGuru" name="namaguru" required>
+        <option value="" selected disabled>-- pilih --</option>
+		<?php
+			$stt = "Aktif";
+			$idSekolah = mt_current_school_id();
+			$sql = mysqli_query($conn, "SELECT no_induk, nama_guru FROM tbl_guru WHERE id_sekolah=$idSekolah AND status='$stt'");
+			while($data = mysqli_fetch_array($sql)) { ?>
+			<option value="<?= $data['no_induk']; ?>"><?= $data['nama_guru']; ?></option>
+		<?php
+			}
+		?>
+    </select>    
+    <div class="valid-feedback">Valid.</div>
+    <div class="invalid-feedback">Harap diisi kolom ini.</div>
+  </div>
+<!-- Nama Guru -->
+
+
+<!-- Tombol Submit dan cancel -->
+<div class="form-group col-sm-4 pb-4">
+<table style="border: none;">
+<tr>
+    <td><button type="submit" class="btn btn-success" id="submit" name="submit"><i class="fas fa-print"></i> Cetak Laporan</button></td>
+    <td><a class="btn btn-warning" href="?page=monitoring">Cancel</a></td>
+</tr>
+</table>
+  </div>
+<!-- end of submit dan cancel -->
+
+</form>
+</div>
+</div>
+</div>

@@ -1,0 +1,37 @@
+SIAP UPLOAD KE WEB HOSTING
+===========================
+
+📁 Lokasi File: c:\xampp\htdocs\jurnal\release\simanis-sman1sumber-deploy.zip
+📦 Ukuran: 34.37 MB
+🌐 Target: www.simanis.sman1sumber.sch.id
+
+🔧 KONFIGURASI DATABASE (SUDAH OTOMATIS):
+- User: smasumb1_simanis1
+- Password: W@hyu123!
+- Database: smasumb1_simanis
+- Host: localhost
+- Site URL: https://www.simanis.sman1sumber.sch.id
+
+🚀 LANGKAH UPLOAD:
+1. Download file: simanis-sman1sumber-deploy.zip
+2. Upload ke cPanel folder: www.simanis.sman1sumber.sch.id
+3. Ekstrak ZIP di root folder
+4. Set PHP versi 8.1/8.0 di cPanel
+5. Permission: folder 755, file 644
+6. Test: https://www.simanis.sman1sumber.sch.id/ping.php
+7. Akses: https://www.simanis.sman1sumber.sch.id/splash.php
+
+📋 FILE YANG ADA DI PAKET:
+- config.hosting.php (sudah terisi database)
+- .htaccess (untuk LiteSpeed/cPanel)
+- .user.ini
+- Semua file aplikasi SIMANIS
+- Folder _instalasi/sql untuk database setup
+
+⚠️ PERHATIAN:
+- Database credentials sudah otomatis terkonfigurasi
+- Tidak perlu edit manual file config
+- Jika ping.php error 403, aktifkan PHP di subdomain
+- File .htaccess sudah disesuaikan untuk hosting
+
+Paket siap upload! Tidak perlu konfigurasi tambahan.

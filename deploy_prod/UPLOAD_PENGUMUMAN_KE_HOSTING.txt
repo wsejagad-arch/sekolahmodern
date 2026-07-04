@@ -1,0 +1,87 @@
+================================================================================
+CARA UPLOAD FILE PENGUMUMAN KE HOSTING
+================================================================================
+
+MASALAH: File pages/admin/pengumuman.php tidak ditemukan di hosting
+
+SOLUSI: Upload manual via cPanel File Manager
+
+================================================================================
+LANGKAH-LANGKAH:
+================================================================================
+
+1. LOGIN ke cPanel
+   - Buka: https://sma1sumber.sch.id/cpanel atau sejenisnya
+   - Login dengan username/password hosting Anda
+
+2. BUKA File Manager
+   - Klik icon "File Manager" di cPanel
+   - Navigate ke folder: sijurnal.sma1sumber.sch.id
+
+3. BUAT FOLDER (jika belum ada)
+   a. Cek apakah folder "pages" sudah ada
+   b. Jika tidak ada, klik "New Folder" → buat folder bernama "pages"
+   c. Masuk ke folder "pages"
+   d. Klik "New Folder" → buat folder bernama "admin"
+
+4. UPLOAD FILE
+   a. Masuk ke folder sijurnal.sma1sumber.sch.id/pages/admin/
+   b. Klik tombol "Upload" (pojok kanan atas)
+   c. Pilih file dari komputer:
+      C:\xampp\htdocs\jurnal\deploy_prod\pages\admin\pengumuman.php
+   d. Tunggu sampai upload selesai
+   e. Klik "Go Back to ..."
+
+5. SET PERMISSIONS (opsional)
+   a. Klik kanan file pengumuman.php
+   b. Pilih "Change Permissions"
+   c. Set ke 644 (rw-r--r--)
+   d. Klik "Change Permissions"
+
+6. TEST
+   - Buka: https://sijurnal.sma1sumber.sch.id/test_pengumuman.php
+   - Refresh (Ctrl+F5)
+   - Cek "File Paths" → harus muncul "pages/admin/pengumuman.php exists: YES"
+   - Scroll ke bawah, harus muncul form pengumuman
+
+7. JIKA BERHASIL
+   - Clear browser cache (Ctrl+Shift+Delete)
+   - Buka: https://sijurnal.sma1sumber.sch.id/home.php?page=pengumuman
+   - Halaman pengumuman harus muncul dengan form
+
+================================================================================
+STRUKTUR FOLDER YANG BENAR DI HOSTING:
+================================================================================
+
+sijurnal.sma1sumber.sch.id/
+├── home.php
+├── koneksi.php
+├── test_pengumuman.php
+├── pages/
+│   └── admin/
+│       └── pengumuman.php  ← FILE INI YANG HARUS DIUPLOAD
+└── ... file lainnya
+
+================================================================================
+TROUBLESHOOTING:
+================================================================================
+
+Jika masih error setelah upload:
+
+1. Cek nama file: harus persis "pengumuman.php" (huruf kecil semua)
+2. Cek lokasi: harus di pages/admin/ bukan di root
+3. Cek permissions: harus 644
+4. Clear cache browser: Ctrl+Shift+Delete
+5. Test lagi: test_pengumuman.php harus show "File exists: YES"
+
+================================================================================
+ALTERNATIVE: Upload via FTP
+================================================================================
+
+Jika lebih suka pakai FTP:
+1. Buka FileZilla atau FTP client lainnya
+2. Connect ke: ftp.sma1sumber.sch.id (atau sesuai hosting)
+3. Navigate ke: /public_html/sijurnal.sma1sumber.sch.id/
+4. Upload file pengumuman.php ke: pages/admin/
+
+================================================================================

@@ -1,0 +1,37 @@
+SIMANIS — simanis.sman1sumber.sch.id
+====================================
+
+DIAGNOSA: index.html OK (200), file .php 403
+=> Folder upload BENAR. PHP belum aktif di LiteSpeed/cPanel.
+
+LANGKAH WAJIB (5 menit):
+------------------------
+1. cPanel > MultiPHP Manager
+   Domain: simanis.sman1sumber.sch.id
+   Pilih: PHP 8.1 (atau 8.0)
+
+2. File Manager > document root subdomain
+   Upload / pastikan ada:
+   - .htaccess  (salin dari htaccess/.htaccess-litespeed)
+   - .user.ini
+   - ping.php, config.hosting.php, dll.
+
+3. Permission: folder 755, file .php 644
+
+4. Uji:
+   https://simanis.sman1sumber.sch.id/ping.php
+   Harus: PING OK PHP 8.x
+
+5. Buka aplikasi:
+   https://simanis.sman1sumber.sch.id/splash.php
+
+Jika ping.php masih 403:
+- cPanel > Select PHP Version / PHP Selector untuk subdomain
+- Tanya hosting: "aktifkan PHP untuk subdomain simanis"
+- Coba ganti baris SetHandler di .htaccess:
+  lsphp81 -> lsphp80 atau lsphp74
+
+Beranda sementara (tanpa PHP):
+  https://simanis.sman1sumber.sch.id/index.html
+
+Database sudah di config.hosting.php
