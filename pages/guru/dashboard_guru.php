@@ -34,13 +34,17 @@ $hariini = ubah_nama_hari($tglskr);
 // Total Kelas Ampu
 $kelasAmpu = [];
 $qKelas = mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_mapel_ampu WHERE no_induk='$nipEsc' AND kelas <> ''");
-while ($row = mysqli_fetch_assoc($qKelas)) { $kelasAmpu[] = $row['kelas']; }
+while ($row = mysqli_fetch_assoc($qKelas)) {
+    $kelasAmpu[] = $row['kelas'];
+}
 $totalKelasAmpu = count($kelasAmpu);
 
 // Total Siswa (Dihitung per NIK/No Induk unik dari kelas-kelas yang diampu)
 $totalSiswa = 0;
 if ($totalKelasAmpu > 0) {
-    $kelasIn = "'" . implode("','", array_map(function($k) use ($conn) { return mysqli_real_escape_string($conn, (string)$k); }, $kelasAmpu)) . "'";
+    $kelasIn = "'" . implode("','", array_map(function ($k) use ($conn) {
+        return mysqli_real_escape_string($conn, (string)$k);
+    }, $kelasAmpu)) . "'";
     $qS = mysqli_query($conn, "SELECT COUNT(DISTINCT no_induk) as total FROM tbl_siswa WHERE kelas IN ($kelasIn) AND (status='Aktif' OR status='' OR status IS NULL OR UPPER(status)='AKTIF')");
     $rowS = mysqli_fetch_assoc($qS);
     $totalSiswa = (int)($rowS['total'] ?? 0);
@@ -49,7 +53,9 @@ if ($totalKelasAmpu > 0) {
 // Jadwal Hari Ini & Progres Jurnal
 $jadwalHariIni = [];
 $qJ = mysqli_query($conn, "SELECT * FROM tbl_mapel_ampu WHERE no_induk='$nipEsc' AND hari='$hariini' ORDER BY jam_mulai ASC");
-while ($row = mysqli_fetch_assoc($qJ)) { $jadwalHariIni[] = $row; }
+while ($row = mysqli_fetch_assoc($qJ)) {
+    $jadwalHariIni[] = $row;
+}
 $totalJadwalHari = count($jadwalHariIni);
 
 // Tentukan jadwal berlangsung atau berikutnya
@@ -144,11 +150,13 @@ if ($checkPelTable && mysqli_num_rows($checkPelTable) > 0) {
 // 1. Kelas yang menjadi wali kelas (sudah ada di $waliKelasList)
 // 2. Kelas yang diampu sebagai guru mapel ($kelasAmpu)
 $pendampinganKelasAll = array_unique(array_merge($waliKelasList, $kelasAmpu));
-$pendampinganKelasAll = array_filter($pendampinganKelasAll, function($k) { return $k !== ''; });
+$pendampinganKelasAll = array_filter($pendampinganKelasAll, function ($k) {
+    return $k !== '';
+});
 
 $problematicStudents = [];
 if (!empty($pendampinganKelasAll)) {
-    $pendampKelasIn = "'" . implode("','", array_map(static function($k) use ($conn) {
+    $pendampKelasIn = "'" . implode("','", array_map(static function ($k) use ($conn) {
         return mysqli_real_escape_string($conn, (string)$k);
     }, array_values($pendampinganKelasAll))) . "'";
 
@@ -316,7 +324,7 @@ if ($totalJadwalHari > 0 && $unfilledJurnalCount > 0) {
             'title' => 'Jurnal Kosong: ' . htmlspecialchars($j['nama_mapel']),
             'text' => 'Kelas ' . htmlspecialchars($j['kelas']) . ' belum diisi.',
             'link' => 'javascript:void(0)',
-            'action_onclick' => 'openInputJurnal('.$j['id_mapel'].')'
+            'action_onclick' => 'openInputJurnal(' . $j['id_mapel'] . ')'
         ];
     }
 }
@@ -388,7 +396,9 @@ if ($isWaliKelas && !empty($waliKelasList)) {
         WHERE s.kelas IN ($wkIn) AND i.validasi_wali_kelas = 'Menunggu'
         ORDER BY i.waktu_pengajuan ASC");
     if ($qPendingWK) {
-        while ($rp = mysqli_fetch_assoc($qPendingWK)) { $pendingIzinList[] = $rp; }
+        while ($rp = mysqli_fetch_assoc($qPendingWK)) {
+            $pendingIzinList[] = $rp;
+        }
     }
 }
 if ($isGuruBK) {
@@ -400,7 +410,12 @@ if ($isGuruBK) {
         while ($rp = mysqli_fetch_assoc($qPendingBK)) {
             // Hindari duplikat
             $exist = false;
-            foreach ($pendingIzinList as $pil) { if ($pil['id_izin'] == $rp['id_izin']) { $exist = true; break; } }
+            foreach ($pendingIzinList as $pil) {
+                if ($pil['id_izin'] == $rp['id_izin']) {
+                    $exist = true;
+                    break;
+                }
+            }
             if (!$exist) $pendingIzinList[] = $rp;
         }
     }
@@ -569,16 +584,17 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         <span>SIMANIS</span>
     </div>
     <nav class="desktop-nav">
-        <a href="../../home.php"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
-        <?php if($isWaliKelas || $isGuruBK): ?>
-        <a href="validasi-izin"><i class="bi bi-patch-check-fill"></i><span>Validasi Izin</span></a>
+        <a href="../../home.php" class="nav-item"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
+        <a href="setting-jadwal.php" class="nav-item"><i class="bi bi-calendar3"></i><span>Kelas Saya</span></a>
+        <a href="data-siswa.php" class="nav-item"><i class="bi bi-people"></i><span>Data Siswa</span></a>
+        <a href="nilai.php" class="nav-item"><i class="bi bi-journal-check"></i><span>Nilai & Tugas</span></a>
+        <a href="materi.php" class="nav-item"><i class="bi bi-book"></i><span>Materi</span></a>
+        <a href="laporan-kelas.php" class="nav-item"><i class="bi bi-cpu"></i><span>Laporan & AI</span></a>
+        <a href="ekinerja.php" class="nav-item"><i class="bi bi-speedometer2"></i><span>e-Kinerja</span></a>
+        <?php if ($isWaliKelas || $isGuruBK): ?>
+            <a href="validasi-izin.php" class="nav-item"><i class="bi bi-patch-check-fill"></i><span>Validasi Izin</span></a>
         <?php endif; ?>
-        <a href="data-siswa"><i class="bi bi-people"></i><span>Data Siswa</span></a>
-        <a href="nilai"><i class="bi bi-journal-check"></i><span>Nilai</span></a>
-        <a href="materi"><i class="bi bi-book"></i><span>Materi</span></a>
-        <a href="laporan-kelas"><i class="bi bi-cpu"></i><span>Laporan Kelas</span></a>
-        <a href="ekinerja"><i class="bi bi-speedometer2"></i><span>E-Kinerja</span></a>
-        <a href="../../pengaturan-layout.php"><i class="bi bi-gear"></i><span>Pengaturan</span></a>
+        <a href="profil-guru.php" class="nav-item"><i class="bi bi-gear"></i><span>Pengaturan</span></a>
     </nav>
     <div class="desktop-logout-wrap">
         <a href="../../logout.php" class="btn-desktop-logout" onclick="return confirm('Yakin mau logout?');">
@@ -600,17 +616,17 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             <div style="position:relative;">
                 <div class="topbar-icon-btn" onclick="toggleNotifications(event)" title="Notifikasi">
                     <i class="bi bi-bell"></i>
-                    <?php if($totalNotifCount > 0): ?><span style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:800;"><?= min($totalNotifCount,9) ?></span><?php endif; ?>
+                    <?php if ($totalNotifCount > 0): ?><span style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:800;"><?= min($totalNotifCount, 9) ?></span><?php endif; ?>
                 </div>
                 <div id="notifDropdownDesktop" class="topbar-dropdown" style="position:absolute;top:100%;right:0;width:320px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-height:400px;overflow-y:auto;z-index:1000;display:none;" onclick="event.stopPropagation()">
                     <div style="padding:12px;border-bottom:1px solid #e5e7eb;font-weight:600;font-size:0.9rem;color:#1f2937;">Notifikasi</div>
-                    <?php if($totalNotifCount > 0): ?>
-                        <?php foreach($guru_all_notifications as $notif): ?>
-                        <div style="padding:12px;border-bottom:1px solid #f3f4f6;font-size:0.85rem;color:#374151;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
-                            <div style="font-weight:500;margin-bottom:2px;"><?= htmlspecialchars($notif['title'] ?? 'Notifikasi') ?></div>
-                            <div style="font-size:0.8rem;color:#6b7280;margin-bottom:4px;"><?= htmlspecialchars(substr($notif['message'] ?? '', 0, 60)) ?>...</div>
-                            <div style="font-size:0.75rem;color:#9ca3af;"><?= date('d/m/Y H:i', strtotime($notif['created_at'] ?? 'now')) ?></div>
-                        </div>
+                    <?php if ($totalNotifCount > 0): ?>
+                        <?php foreach ($guru_all_notifications as $notif): ?>
+                            <div style="padding:12px;border-bottom:1px solid #f3f4f6;font-size:0.85rem;color:#374151;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+                                <div style="font-weight:500;margin-bottom:2px;"><?= htmlspecialchars($notif['title'] ?? 'Notifikasi') ?></div>
+                                <div style="font-size:0.8rem;color:#6b7280;margin-bottom:4px;"><?= htmlspecialchars(substr($notif['message'] ?? '', 0, 60)) ?>...</div>
+                                <div style="font-size:0.75rem;color:#9ca3af;"><?= date('d/m/Y H:i', strtotime($notif['created_at'] ?? 'now')) ?></div>
+                            </div>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <div style="padding:20px;text-align:center;color:#9ca3af;font-size:0.9rem;">Tidak ada notifikasi</div>
@@ -621,18 +637,18 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 <div class="topbar-profile-card" onclick="toggleProfileMenu()">
                     <div class="topbar-profile-avatar-wrap">
                         <?php if (!empty($dataGuru['foto'])): ?>
-                        <img src="../../foto/<?= htmlspecialchars($dataGuru['foto']) ?>" alt="Profile">
+                            <img src="../../foto/<?= htmlspecialchars($dataGuru['foto']) ?>" alt="Profile">
                         <?php else: ?>
-                        <div style="width:100%;height:100%;background:#3c58b9;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem;"><?= strtoupper(substr($dataGuru['nama_guru'],0,1)) ?></div>
+                            <div style="width:100%;height:100%;background:#3c58b9;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem;"><?= strtoupper(substr($dataGuru['nama_guru'], 0, 1)) ?></div>
                         <?php endif; ?>
                     </div>
                     <span><?= htmlspecialchars(explode(' ', $dataGuru['nama_guru'])[0]) ?></span>
                 </div>
                 <div id="profileMenuDesktop" class="topbar-dropdown" style="position:absolute;top:100%;right:0;width:200px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;display:none;" onclick="event.stopPropagation()">
-                    <a href="profil-guru" style="display:block;padding:12px 16px;color:#374151;text-decoration:none;font-size:0.9rem;border-bottom:1px solid #f3f4f6;transition:background 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+                    <a href="profil-guru.php" style="display:block;padding:12px 16px;color:#374151;text-decoration:none;font-size:0.9rem;border-bottom:1px solid #f3f4f6;transition:background 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
                         <i class="bi bi-person me-2"></i> Profil Saya
                     </a>
-                    <a href="../../pengaturan-layout.php" style="display:block;padding:12px 16px;color:#374151;text-decoration:none;font-size:0.9rem;border-bottom:1px solid #f3f4f6;transition:background 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
+                    <a href="profil-guru.php" style="display:block;padding:12px 16px;color:#374151;text-decoration:none;font-size:0.9rem;border-bottom:1px solid #f3f4f6;transition:background 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
                         <i class="bi bi-gear me-2"></i> Pengaturan
                     </a>
                     <a href="../../logout.php" style="display:block;padding:12px 16px;color:#dc2626;text-decoration:none;font-size:0.9rem;transition:background 0.2s;" onclick="return confirm('Yakin mau logout?')" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
@@ -654,20 +670,20 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 $jurnalPercentage = ($totalJadwalHari > 0) ? round(($filledJurnalCount / $totalJadwalHari) * 100) : 100;
                 ?>
                 <p style="font-size: 0.95rem; color: #64748b; margin-bottom: 12px;">Anda memiliki <?= $unfilledJurnalCount ?> jurnal yang belum diisi hari ini.</p>
-                
+
                 <?php if ($totalJadwalHari > 0): ?>
-                <div style="background: #f8fafc; border-radius: 12px; padding: 12px 16px; width: 100%; max-width: 320px; margin-bottom: 16px; border: 1px solid #e2e8f0;">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
-                        <span>Progress Jurnal Harian</span>
-                        <span><?= $jurnalPercentage ?>%</span>
+                    <div style="background: #f8fafc; border-radius: 12px; padding: 12px 16px; width: 100%; max-width: 320px; margin-bottom: 16px; border: 1px solid #e2e8f0;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
+                            <span>Progress Jurnal Harian</span>
+                            <span><?= $jurnalPercentage ?>%</span>
+                        </div>
+                        <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
+                            <div style="height: 100%; width: <?= $jurnalPercentage ?>%; background: #3c58b9; border-radius: 4px; transition: width 1s ease-in-out;"></div>
+                        </div>
+                        <div style="font-size: 0.75rem; font-weight: 600; color: #64748b;">
+                            <?= $filledJurnalCount ?> dari <?= $totalJadwalHari ?> kelas terselesaikan
+                        </div>
                     </div>
-                    <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
-                        <div style="height: 100%; width: <?= $jurnalPercentage ?>%; background: #3c58b9; border-radius: 4px; transition: width 1s ease-in-out;"></div>
-                    </div>
-                    <div style="font-size: 0.75rem; font-weight: 600; color: #64748b;">
-                        <?= $filledJurnalCount ?> dari <?= $totalJadwalHari ?> kelas terselesaikan
-                    </div>
-                </div>
                 <?php endif; ?>
 
                 <?php if ($unfilledJurnalCount > 0 && !empty($unfilledJadwal)): ?>
@@ -682,18 +698,18 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             </div>
             <!-- 3D style SVG graphic of teacher studying -->
             <svg class="welcome-banner-illustration" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="100" cy="100" r="80" fill="#e0e7ff"/>
-                <rect x="60" y="80" width="80" height="60" rx="10" fill="#3c58b9"/>
-                <rect x="70" y="90" width="60" height="40" rx="5" fill="#ffffff"/>
-                <rect x="90" y="140" width="20" height="30" fill="#64748b"/>
-                <rect x="80" y="170" width="40" height="5" fill="#334155"/>
+                <circle cx="100" cy="100" r="80" fill="#e0e7ff" />
+                <rect x="60" y="80" width="80" height="60" rx="10" fill="#3c58b9" />
+                <rect x="70" y="90" width="60" height="40" rx="5" fill="#ffffff" />
+                <rect x="90" y="140" width="20" height="30" fill="#64748b" />
+                <rect x="80" y="170" width="40" height="5" fill="#334155" />
                 <!-- Person avatar -->
-                <circle cx="100" cy="70" r="20" fill="#fed7aa"/>
-                <path d="M80 110 C80 90, 120 90, 120 110 Z" fill="#312e81"/>
-                <circle cx="93" cy="68" r="2" fill="#1e293b"/>
-                <circle cx="107" cy="68" r="2" fill="#1e293b"/>
-                <path d="M96 76 Q100 80 104 76" stroke="#1e293b" stroke-width="2" fill="none"/>
-                <path d="M90 58 Q100 48 110 58" stroke="#312e81" stroke-width="6" fill="none"/>
+                <circle cx="100" cy="70" r="20" fill="#fed7aa" />
+                <path d="M80 110 C80 90, 120 90, 120 110 Z" fill="#312e81" />
+                <circle cx="93" cy="68" r="2" fill="#1e293b" />
+                <circle cx="107" cy="68" r="2" fill="#1e293b" />
+                <path d="M96 76 Q100 80 104 76" stroke="#1e293b" stroke-width="2" fill="none" />
+                <path d="M90 58 Q100 48 110 58" stroke="#312e81" stroke-width="6" fill="none" />
             </svg>
         </div>
 
@@ -705,21 +721,21 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             <div class="smart-quick-actions-grid">
                 <!-- 1. Validasi Izin -->
                 <?php if ($isWaliKelas || $isGuruBK): ?>
-                <a href="pages/guru/validasi-izin" class="smart-quick-action-btn" style="position:relative;">
-                    <i class="bi bi-patch-check-fill text-danger"></i>
-                    <?php if ($pendingIzinCount > 0): ?>
-                    <span style="position:absolute; top:6px; right:6px; background:#dc2626; color:#fff; font-size:9px; font-weight:800; min-width:16px; height:16px; border-radius:999px; display:flex; align-items:center; justify-content:center; padding:0 3px;"><?= $pendingIzinCount ?></span>
-                    <?php endif; ?>
-                    <span>Validasi Izin</span>
-                </a>
+                    <a href="pages/guru/validasi-izin" class="smart-quick-action-btn" style="position:relative;">
+                        <i class="bi bi-patch-check-fill text-danger"></i>
+                        <?php if ($pendingIzinCount > 0): ?>
+                            <span style="position:absolute; top:6px; right:6px; background:#dc2626; color:#fff; font-size:9px; font-weight:800; min-width:16px; height:16px; border-radius:999px; display:flex; align-items:center; justify-content:center; padding:0 3px;"><?= $pendingIzinCount ?></span>
+                        <?php endif; ?>
+                        <span>Validasi Izin</span>
+                    </a>
                 <?php endif; ?>
 
                 <!-- 2. LENTERA Literasi -->
                 <?php if ($isPembinaLiterasi): ?>
-                <a href="pages/guru/literasi" class="smart-quick-action-btn">
-                    <i class="bi bi-book-half text-info"></i>
-                    <span>LENTERA Literasi</span>
-                </a>
+                    <a href="pages/guru/literasi" class="smart-quick-action-btn">
+                        <i class="bi bi-book-half text-info"></i>
+                        <span>LENTERA Literasi</span>
+                    </a>
                 <?php endif; ?>
 
                 <!-- 3. Data Kehadiran -->
@@ -754,10 +770,10 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
                 <!-- 8. Wali Kelas -->
                 <?php if ($isWaliKelas): ?>
-                <a href="pages/guru/walikelas" class="smart-quick-action-btn">
-                    <i class="bi bi-person-vcard-fill text-primary"></i>
-                    <span>Wali Kelas</span>
-                </a>
+                    <a href="pages/guru/walikelas" class="smart-quick-action-btn">
+                        <i class="bi bi-person-vcard-fill text-primary"></i>
+                        <span>Wali Kelas</span>
+                    </a>
                 <?php endif; ?>
 
                 <!-- 9. Guru Wali -->
@@ -827,15 +843,15 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     </div>
                     <div class="smart-bar-chart">
                         <?php
-                            $pBars = [
-                                ['label' => 'Sen', 'val' => 60, 'c' => ''],
-                                ['label' => 'Sel', 'val' => 85, 'c' => 'accent'],
-                                ['label' => 'Rab', 'val' => $hadirPct, 'c' => ''],
-                                ['label' => 'Kam', 'val' => 70, 'c' => 'accent'],
-                                ['label' => 'Jum', 'val' => 90, 'c' => ''],
-                            ];
-                            foreach($pBars as $b):
-                                $h = ($b['val'] ?: 10) . '%';
+                        $pBars = [
+                            ['label' => 'Sen', 'val' => 60, 'c' => ''],
+                            ['label' => 'Sel', 'val' => 85, 'c' => 'accent'],
+                            ['label' => 'Rab', 'val' => $hadirPct, 'c' => ''],
+                            ['label' => 'Kam', 'val' => 70, 'c' => 'accent'],
+                            ['label' => 'Jum', 'val' => 90, 'c' => ''],
+                        ];
+                        foreach ($pBars as $b):
+                            $h = ($b['val'] ?: 10) . '%';
                         ?>
                             <div class="smart-bar-col">
                                 <div class="smart-bar-track">
@@ -903,7 +919,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         </div>
                     </div>
                 <?php else: ?>
-                    <?php foreach(array_slice($problematicStudents, 0, 2) as $rowP): ?>
+                    <?php foreach (array_slice($problematicStudents, 0, 2) as $rowP): ?>
                         <div class="teacher-item-card">
                             <div class="teacher-profile-wrap">
                                 <div class="teacher-avatar-placeholder"><?= strtoupper(substr($rowP['nama_siswa'], 0, 2)) ?></div>
@@ -934,7 +950,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 </select>
             </div>
             <div class="timeline-list">
-                <?php if($totalJadwalHari == 0): ?>
+                <?php if ($totalJadwalHari == 0): ?>
                     <div class="timeline-item">
                         <span class="timeline-time">No Class</span>
                         <div class="timeline-card-block">
@@ -943,14 +959,14 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         </div>
                     </div>
                 <?php else: ?>
-                    <?php 
+                    <?php
                     $tIndex = 0;
-                    foreach($jadwalHariIni as $j): 
+                    foreach ($jadwalHariIni as $j):
                         $isCurrent = ($tIndex == 0); // Mark first class as active timeline
                         $tIndex++;
                     ?>
                         <div class="timeline-item <?= $isCurrent ? 'active' : '' ?>">
-                            <span class="timeline-time"><?= substr($j['jam_mulai'],0,5) ?> - <?= substr($j['jam_selesai'],0,5) ?></span>
+                            <span class="timeline-time"><?= substr($j['jam_mulai'], 0, 5) ?> - <?= substr($j['jam_selesai'], 0, 5) ?></span>
                             <div class="timeline-card-block">
                                 <strong><?= htmlspecialchars($j['nama_mapel']) ?></strong>
                                 <span>Kelas <?= htmlspecialchars($j['kelas']) ?></span>
@@ -967,12 +983,12 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 <h3 class="smart-card-title">Announcements</h3>
             </div>
             <div class="events-list">
-                <?php if($announcementCount == 0): ?>
+                <?php if ($announcementCount == 0): ?>
                     <p style="font-size:0.8rem; color:#94a3b8;">Belum ada pengumuman baru.</p>
                 <?php else: ?>
-                    <?php 
+                    <?php
                     $eIndex = 0;
-                    foreach(array_slice($announcements, 0, 2) as $ann): 
+                    foreach (array_slice($announcements, 0, 2) as $ann):
                         $eClass = ($eIndex == 0) ? '' : 'accent';
                         $eIndex++;
                     ?>
@@ -991,14 +1007,14 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 </div>
 
 <!-- End Desktop Grid (Redesigned) -->
-    
-    <!-- WRAP EXISTING MOBILE CONTENT IN A DIV SO WE CAN HIDE IT IN CSS LATER IF WE WANT -->
-    <!-- But actually our CSS `guru-desktop.css` already hides specific elements like `.summary-card`, `.quick-grid`, etc. using `display: none !important;`. -->
-    
-    <!-- MOBILE-ONLY LAYOUT WRAPPER -->
-    <div class="mobile-only-layout app-shell">
-        <!-- HEADER -->
-        <header class="hero-header">
+
+<!-- WRAP EXISTING MOBILE CONTENT IN A DIV SO WE CAN HIDE IT IN CSS LATER IF WE WANT -->
+<!-- But actually our CSS `guru-desktop.css` already hides specific elements like `.summary-card`, `.quick-grid`, etc. using `display: none !important;`. -->
+
+<!-- MOBILE-ONLY LAYOUT WRAPPER -->
+<div class="mobile-only-layout app-shell">
+    <!-- HEADER -->
+    <header class="hero-header">
         <a href="profil-guru" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 15px; width: calc(100% - 70px);">
             <div class="profile-section" style="margin-bottom: 0;">
                 <div class="profile-photo">
@@ -1018,21 +1034,21 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         <div style="display: flex; gap: 8px; align-items: center;">
             <div class="notif-bell" onclick="toggleNotif(event)">
                 <i class="bi bi-bell-fill"></i>
-                <?php if($totalNotifCount > 0): ?>
+                <?php if ($totalNotifCount > 0): ?>
                     <span class="notif-badge"><?= $totalNotifCount ?></span>
                 <?php endif; ?>
-                
+
                 <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
                     <div class="notif-header">
                         <span>Notifikasi Anda</span>
-                        <?php if($totalNotifCount > 0): ?>
+                        <?php if ($totalNotifCount > 0): ?>
                             <span class="notif-badge-inline"><?= $totalNotifCount ?> Baru</span>
                         <?php endif; ?>
                     </div>
                     <div class="notif-list">
-                        <?php if($totalNotifCount > 0): ?>
-                            <?php foreach($guru_all_notifications as $n): ?>
-                                <a href="<?= htmlspecialchars($n['link']) ?>" class="notif-item" <?= isset($n['action_onclick']) ? 'onclick="'.htmlspecialchars($n['action_onclick']).'"' : '' ?>>
+                        <?php if ($totalNotifCount > 0): ?>
+                            <?php foreach ($guru_all_notifications as $n): ?>
+                                <a href="<?= htmlspecialchars($n['link']) ?>" class="notif-item" <?= isset($n['action_onclick']) ? 'onclick="' . htmlspecialchars($n['action_onclick']) . '"' : '' ?>>
                                     <div class="notif-icon-wrap" style="color: <?= htmlspecialchars($n['color']) ?>; background: <?= htmlspecialchars($n['color']) ?>15;">
                                         <i class="<?= htmlspecialchars($n['icon']) ?>"></i>
                                     </div>
@@ -1060,17 +1076,17 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     <!-- COMBINED KBM & SUMMARY CARD -->
     <section class="summary-card" id="kbm-summary-card">
         <?php
-            $runningPanel = $ongoingJadwal ?? $nextJadwal;
-            $hasRunningSchedule = $ongoingJadwal !== null;
-            $runningStateIcon = $hasRunningSchedule ? 'bi-broadcast-pin' : ($runningPanel !== null ? 'bi-lightning-charge-fill' : 'bi-power');
-            $runningKickerLabel = $hasRunningSchedule ? 'KBM Sedang Berlangsung' : ($runningPanel !== null ? 'KBM Berikutnya Hari Ini' : 'Tidak ada jadwal berjalan');
-            $runningCountdownLabel = $hasRunningSchedule ? 'Sisa waktu mengajar:' : ($runningPanel !== null ? 'Mulai dalam:' : 'Status');
-            $runningTarget = '';
-            if ($ongoingJadwal !== null) {
-                $runningTarget = date('Y-m-d') . ' ' . $ongoingJadwal['jam_selesai'];
-            } elseif ($nextJadwal !== null) {
-                $runningTarget = date('Y-m-d') . ' ' . $nextJadwal['jam_mulai'];
-            }
+        $runningPanel = $ongoingJadwal ?? $nextJadwal;
+        $hasRunningSchedule = $ongoingJadwal !== null;
+        $runningStateIcon = $hasRunningSchedule ? 'bi-broadcast-pin' : ($runningPanel !== null ? 'bi-lightning-charge-fill' : 'bi-power');
+        $runningKickerLabel = $hasRunningSchedule ? 'KBM Sedang Berlangsung' : ($runningPanel !== null ? 'KBM Berikutnya Hari Ini' : 'Tidak ada jadwal berjalan');
+        $runningCountdownLabel = $hasRunningSchedule ? 'Sisa waktu mengajar:' : ($runningPanel !== null ? 'Mulai dalam:' : 'Status');
+        $runningTarget = '';
+        if ($ongoingJadwal !== null) {
+            $runningTarget = date('Y-m-d') . ' ' . $ongoingJadwal['jam_selesai'];
+        } elseif ($nextJadwal !== null) {
+            $runningTarget = date('Y-m-d') . ' ' . $nextJadwal['jam_mulai'];
+        }
         ?>
         <?php if ($runningPanel !== null): ?>
             <div id="kbm-box" class="running-schedule-3d <?= $hasRunningSchedule ? 'is-live' : 'is-idle'; ?>" <?= $runningTarget !== '' ? 'data-target="' . htmlspecialchars($runningTarget, ENT_QUOTES, 'UTF-8') . '"' : ''; ?>>
@@ -1184,51 +1200,71 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     </div>
 
     <?php if (($isWaliKelas || $isGuruBK) && $pendingIzinCount > 0): ?>
-    <!-- BANNER IZIN PENDING -->
-    <a href="validasi-izin" style="text-decoration:none; display:block; margin-bottom:14px;">
-        <div style="background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff; border-radius:16px; padding:14px 18px; display:flex; align-items:center; gap:14px; box-shadow:0 8px 24px rgba(220,38,38,.3); animation:pendingPulse 2s ease-in-out infinite;">
-            <div style="width:48px; height:48px; background:rgba(255,255,255,.2); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                <i class="bi bi-patch-exclamation-fill" style="font-size:26px;"></i>
-            </div>
-            <div style="flex:1; min-width:0;">
-                <div style="font-weight:800; font-size:14px;">⚠️ <?= $pendingIzinCount ?> Pengajuan Izin Menunggu Validasi Anda</div>
-                <div style="font-size:11px; opacity:.85; margin-top:2px;">
-                    <?php
+        <!-- BANNER IZIN PENDING -->
+        <a href="validasi-izin" style="text-decoration:none; display:block; margin-bottom:14px;">
+            <div style="background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff; border-radius:16px; padding:14px 18px; display:flex; align-items:center; gap:14px; box-shadow:0 8px 24px rgba(220,38,38,.3); animation:pendingPulse 2s ease-in-out infinite;">
+                <div style="width:48px; height:48px; background:rgba(255,255,255,.2); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <i class="bi bi-patch-exclamation-fill" style="font-size:26px;"></i>
+                </div>
+                <div style="flex:1; min-width:0;">
+                    <div style="font-weight:800; font-size:14px;">⚠️ <?= $pendingIzinCount ?> Pengajuan Izin Menunggu Validasi Anda</div>
+                    <div style="font-size:11px; opacity:.85; margin-top:2px;">
+                        <?php
                         $names = array_slice(array_column($pendingIzinList, 'nama_siswa'), 0, 2);
                         echo htmlspecialchars(implode(', ', $names));
                         if ($pendingIzinCount > 2) echo ' +' . ($pendingIzinCount - 2) . ' lainnya';
-                    ?>
+                        ?>
+                    </div>
                 </div>
+                <i class="bi bi-chevron-right" style="font-size:18px; flex-shrink:0;"></i>
             </div>
-            <i class="bi bi-chevron-right" style="font-size:18px; flex-shrink:0;"></i>
-        </div>
-    </a>
+        </a>
     <?php endif; ?>
     <style>
-    @keyframes pendingPulse {
-        0%,100% { box-shadow:0 8px 24px rgba(220,38,38,.3); }
-        50% { box-shadow:0 8px 36px rgba(220,38,38,.6); }
-    }
-            .notif-dropdown {
+        @keyframes pendingPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 8px 24px rgba(220, 38, 38, .3);
+            }
+
+            50% {
+                box-shadow: 0 8px 36px rgba(220, 38, 38, .6);
+            }
+        }
+
+        .notif-dropdown {
             position: absolute;
             top: 60px;
             right: 0;
             width: 320px;
             background: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             z-index: 9999;
             display: none;
             flex-direction: column;
             animation: notifSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             text-align: left;
         }
-        .notif-dropdown.show { display: flex; }
-        @keyframes notifSlideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        .notif-dropdown.show {
+            display: flex;
         }
+
+        @keyframes notifSlideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .notif-header {
             padding: 15px;
             border-bottom: 1px solid #f1f5f9;
@@ -1239,10 +1275,12 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             align-items: center;
             color: #1e293b;
         }
+
         .notif-list {
             max-height: 350px;
             overflow-y: auto;
         }
+
         .notif-item {
             display: flex;
             padding: 15px;
@@ -1251,8 +1289,15 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             color: #1e293b;
             transition: background 0.2s;
         }
-        .notif-item:hover { background: #f8fafc; }
-        .notif-item:last-child { border-bottom: none; }
+
+        .notif-item:hover {
+            background: #f8fafc;
+        }
+
+        .notif-item:last-child {
+            border-bottom: none;
+        }
+
         .notif-icon-wrap {
             width: 40px;
             height: 40px;
@@ -1264,14 +1309,62 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             flex-shrink: 0;
             font-size: 1.1rem;
         }
-        .notif-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-        .notif-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 3px; }
-        .notif-desc { font-size: 0.75rem; color: #64748b; line-height: 1.3; }
-        .notif-empty { padding: 30px 15px; text-align: center; color: #64748b; font-size: 0.85rem; }
-        .notif-empty i { font-size: 2rem; color: #cbd5e1; margin-bottom: 10px; display: block; }
-        
-        .notif-bell { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: rgba(255,255,255,0.2); border-radius: 50%; color: #fff; transition: all 0.3s; }
-        .notif-badge-inline { background: #ef4444; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 10px; }
+
+        .notif-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .notif-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .notif-desc {
+            font-size: 0.75rem;
+            color: #64748b;
+            line-height: 1.3;
+        }
+
+        .notif-empty {
+            padding: 30px 15px;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        .notif-empty i {
+            font-size: 2rem;
+            color: #cbd5e1;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .notif-bell {
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            color: #fff;
+            transition: all 0.3s;
+        }
+
+        .notif-badge-inline {
+            background: #ef4444;
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
     </style>
 
 
@@ -1280,21 +1373,21 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     <div class="quick-grid">
         <!-- 1. Validasi Izin -->
         <?php if ($isWaliKelas || $isGuruBK): ?>
-        <a href="validasi-izin" class="quick-item" style="position:relative;">
-            <i class="bi bi-patch-check-fill" style="color:#dc2626;"></i>
-            <?php if ($pendingIzinCount > 0): ?>
-            <span style="position:absolute; top:6px; right:6px; background:#dc2626; color:#fff; font-size:9px; font-weight:800; min-width:16px; height:16px; border-radius:999px; display:flex; align-items:center; justify-content:center; line-height:1; padding:0 3px;"><?= $pendingIzinCount ?></span>
-            <?php endif; ?>
-            <span>Validasi<br>Izin</span>
-        </a>
+            <a href="validasi-izin" class="quick-item" style="position:relative;">
+                <i class="bi bi-patch-check-fill" style="color:#dc2626;"></i>
+                <?php if ($pendingIzinCount > 0): ?>
+                    <span style="position:absolute; top:6px; right:6px; background:#dc2626; color:#fff; font-size:9px; font-weight:800; min-width:16px; height:16px; border-radius:999px; display:flex; align-items:center; justify-content:center; line-height:1; padding:0 3px;"><?= $pendingIzinCount ?></span>
+                <?php endif; ?>
+                <span>Validasi<br>Izin</span>
+            </a>
         <?php endif; ?>
 
         <!-- LENTERA Literasi -->
         <?php if ($isPembinaLiterasi): ?>
-        <a href="literasi.php" class="quick-item">
-            <i class="bi bi-book-half" style="color:#0ea5e9"></i>
-            <span>LENTERA<br>Literasi</span>
-        </a>
+            <a href="literasi.php" class="quick-item">
+                <i class="bi bi-book-half" style="color:#0ea5e9"></i>
+                <span>LENTERA<br>Literasi</span>
+            </a>
         <?php endif; ?>
 
         <!-- 2. Data Kehadiran -->
@@ -1329,10 +1422,10 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
         <!-- 7. Wali Kelas -->
         <?php if ($isWaliKelas): ?>
-        <a href="walikelas" class="quick-item">
-            <i class="bi bi-person-vcard-fill" style="color:var(--blue)"></i>
-            <span>Wali<br>Kelas</span>
-        </a>
+            <a href="walikelas" class="quick-item">
+                <i class="bi bi-person-vcard-fill" style="color:var(--blue)"></i>
+                <span>Wali<br>Kelas</span>
+            </a>
         <?php endif; ?>
 
         <!-- 8. Guru Wali -->
@@ -1400,23 +1493,23 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 <?php if (empty($jadwalHariIni)): ?>
                     <p style="font-size: 11px; color: var(--text-muted); text-align: center; padding: 20px;">Tidak ada jadwal hari ini.</p>
                 <?php else: ?>
-                    <?php foreach ($jadwalHariIni as $idx => $j): 
+                    <?php foreach ($jadwalHariIni as $idx => $j):
                         $colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
                         $color = $colors[$idx % count($colors)];
                     ?>
-                    <div class="timeline-item">
-                        <div class="timeline-dot" style="--dot-color: <?= $color ?>"></div>
-                        <div class="tm-time">
-                            <strong><?= substr($j['jam_mulai'], 0, 5) ?></strong>
-                            <span style="display:block; font-size:9px;"><?= substr($j['jam_selesai'], 0, 5) ?></span>
+                        <div class="timeline-item">
+                            <div class="timeline-dot" style="--dot-color: <?= $color ?>"></div>
+                            <div class="tm-time">
+                                <strong><?= substr($j['jam_mulai'], 0, 5) ?></strong>
+                                <span style="display:block; font-size:9px;"><?= substr($j['jam_selesai'], 0, 5) ?></span>
+                            </div>
+                            <div class="tm-info">
+                                <strong><?= $j['kelas'] ?></strong>
+                                <span><?= $j['nama_mapel'] ?></span>
+                            </div>
+                            <div class="tm-room"><?= $j['ruang'] ?? 'R. Kelas' ?></div>
+                            <i class="bi bi-chevron-right" style="font-size:10px; color:#cbd5e1;"></i>
                         </div>
-                        <div class="tm-info">
-                            <strong><?= $j['kelas'] ?></strong>
-                            <span><?= $j['nama_mapel'] ?></span>
-                        </div>
-                        <div class="tm-room"><?= $j['ruang'] ?? 'R. Kelas' ?></div>
-                        <i class="bi bi-chevron-right" style="font-size:10px; color:#cbd5e1;"></i>
-                    </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
@@ -1430,15 +1523,15 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             </div>
             <div class="task-list">
                 <?php foreach ($tugasTerbaru as $t): ?>
-                <div class="task-item">
-                    <div class="task-icon" style="background: <?= $t['color'] ?>15; color: <?= $t['color'] ?>;"><i class="bi <?= $t['icon'] ?>"></i></div>
-                    <div class="task-info">
-                        <strong><?= $t['judul'] ?></strong>
-                        <span><?= $t['kelas'] ?></span>
-                        <small class="task-status"><?= $t['status'] ?></small>
+                    <div class="task-item">
+                        <div class="task-icon" style="background: <?= $t['color'] ?>15; color: <?= $t['color'] ?>;"><i class="bi <?= $t['icon'] ?>"></i></div>
+                        <div class="task-info">
+                            <strong><?= $t['judul'] ?></strong>
+                            <span><?= $t['kelas'] ?></span>
+                            <small class="task-status"><?= $t['status'] ?></small>
+                        </div>
+                        <i class="bi bi-chevron-right" style="font-size:10px; color:#cbd5e1;"></i>
                     </div>
-                    <i class="bi bi-chevron-right" style="font-size:10px; color:#cbd5e1;"></i>
-                </div>
                 <?php endforeach; ?>
             </div>
         </section>
@@ -1470,542 +1563,542 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
     <!-- BOTTOM NAV -->
     <div class="bottom-nav-wrap">
-        
-</div>
 
-
-<!-- Modal Pilih Jadwal (Bootstrap) -->
-<div class="modal fade" id="schedulePickerModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header">
-                <div>
-                    <h5 class="modal-title mb-0 fw-bold" id="schedulePickerTitle">Pilih Jadwal</h5>
-                    <p class="text-muted mb-0 small">Jurnal akan diisi sesuai jadwal yang dipilih.</p>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body bg-light p-3">
-                <?php if (empty($jadwalHariIni)): ?>
-                    <div class="alert alert-warning text-center mb-0 border-0 shadow-sm"><i class="bi bi-exclamation-circle me-2"></i>Belum ada jadwal mengajar hari ini.</div>
-                <?php else: ?>
-                    <div class="list-group">
-                        <?php foreach ($jadwalHariIni as $j):
-                            $idMapel = (int)($j['id_mapel'] ?? 0);
-                            $kelasJadwal = (string)($j['kelas'] ?? '');
-                            $mapelJadwal = (string)($j['nama_mapel'] ?? '');
-                            $isJurnalTerisi = isset($jurnalStatusByMapel[$idMapel]);
-                        ?>
-                            <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2 rounded shadow-sm border-0" style="cursor: default;">
-                                <div class="mb-3 mb-md-0">
-                                    <h6 class="mb-1 text-primary" style="font-weight: 700;"><?= htmlspecialchars($kelasJadwal, ENT_QUOTES, 'UTF-8'); ?> <span class="text-dark">&bull; <?= htmlspecialchars($mapelJadwal, ENT_QUOTES, 'UTF-8'); ?></span></h6>
-                                    <div class="d-flex align-items-center mt-2 flex-wrap">
-                                        <span class="badge badge-secondary mr-2 mb-1 p-2"><i class="bi bi-clock"></i> <?= htmlspecialchars(substr((string)($j['jam_mulai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars(substr((string)($j['jam_selesai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?></span>
-                                        <?php if ($isJurnalTerisi): ?>
-                                            <span class="badge badge-success mb-1 p-2"><i class="bi bi-check2-circle"></i> Sudah terisi</span>
-                                        <?php else: ?>
-                                            <span class="badge badge-warning text-dark mb-1 p-2"><i class="bi bi-clock-history"></i> Belum terisi</span>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <button class="btn btn-sm btn-primary btn-open-schedule-journal mr-2 shadow-sm text-white" type="button" data-id="<?= $idMapel; ?>" style="white-space: nowrap; color: #fff !important;">
-                                        <i class="bi bi-journal-plus" style="color: #fff !important;"></i> <?= $isJurnalTerisi ? 'Lihat/Edit' : 'Input Jurnal'; ?>
-                                    </button>
-                                    <a class="btn btn-sm btn-outline-primary shadow-sm" href="inputnilai?getDetail=<?= $idMapel; ?>" style="white-space: nowrap;">
-                                        <i class="bi bi-clipboard2-check"></i> Nilai
-                                    </a>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
     </div>
-</div>
 
-<!-- Modal Isi Jurnal (Bootstrap) -->
-<div class="modal fade" id="show" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen-sm-down modal-lg" style="max-width: 950px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h6 class="modal-title">Isi Jurnal</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="modal-data" style="text-align: center; padding: 20px;">
-                    <div class="spinner-border spinner-border-sm text-primary me-2"></div>
-                    <span class="text-muted">Memuat...</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="journal-modal-backdrop" id="notifPanelModal" aria-hidden="true">
-    <div class="journal-modal" role="dialog" aria-modal="true" aria-labelledby="notifPanelTitle" style="max-height: 85vh; width: min(100%, 460px);">
-        <div class="journal-modal-head" style="background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: #fff; padding: 16px 20px;">
-            <div>
-                <h5 id="notifPanelTitle" style="color:#fff; font-size:16px; font-weight:600; margin:0;"><i class="bi bi-bell-fill me-2"></i> Notifikasi & Tindak Lanjut</h5>
-                <p style="color:rgba(255,255,255,0.8); font-size:11px; margin:4px 0 0 0;">Informasi penting hari ini.</p>
-            </div>
-            <button class="journal-modal-close" type="button" data-close-modal aria-label="Tutup" style="background:rgba(255,255,255,0.15); color:#fff; border:none; width:32px; height:32px; border-radius:10px;"><i class="bi bi-x-lg"></i></button>
-        </div>
-        <div class="journal-modal-body" style="padding: 16px; background: #f8fafc;">
-            <div class="notif-sections-list" style="display: flex; flex-direction: column; gap: 16px;">
-                
-                <!-- ADUAN SISWA: Hanya tampil untuk Tim Aduan yang ditugaskan admin -->
-                <?php if ($isTimAduan): ?>
-                <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(220, 38, 38, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <span style="font-size: 11.5px; font-weight: 700; color: #dc2626; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="bi bi-shield-fill-exclamation"></i> Aduan Siswa
-                            <span style="background: #fef2f2; color: #9f1239; font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 600; text-transform: none; letter-spacing: 0;"><i class="bi bi-incognito"></i> Anonim</span>
-                        </span>
-                        <span style="background: #fee2e2; color: #dc2626; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
-                            <?= $aduanGuruCount ?> Aktif
-                        </span>
+    <!-- Modal Pilih Jadwal (Bootstrap) -->
+    <div class="modal fade" id="schedulePickerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title mb-0 fw-bold" id="schedulePickerTitle">Pilih Jadwal</h5>
+                        <p class="text-muted mb-0 small">Jurnal akan diisi sesuai jadwal yang dipilih.</p>
                     </div>
-                    <?php if ($aduanGuruCount === 0): ?>
-                        <p style="font-size: 11px; color: #64748b; margin: 0; text-align: left;">Tidak ada aduan siswa yang masuk saat ini.</p>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body bg-light p-3">
+                    <?php if (empty($jadwalHariIni)): ?>
+                        <div class="alert alert-warning text-center mb-0 border-0 shadow-sm"><i class="bi bi-exclamation-circle me-2"></i>Belum ada jadwal mengajar hari ini.</div>
                     <?php else: ?>
-                        <p style="font-size: 10px; color: #9f1239; background: #fef2f2; border-radius: 8px; padding: 6px 10px; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px;">
-                            <i class="bi bi-eye-slash-fill"></i> <strong>Aduan bersifat anonim.</strong> Identitas pelapor dirahasiakan. Tim aduan bertanggung jawab mencari fakta.
-                        </p>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <?php foreach ($aduanGuruRows as $ad): ?>
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #fff1f2; border-radius: 10px; border: 1px dashed rgba(220, 38, 38, 0.15);">
-                                    <div style="text-align: left;">
-                                        <strong style="font-size: 12px; color: #1e293b; display: block; text-align: left;"><?= htmlspecialchars($ad['judul']) ?></strong>
-                                        <span style="font-size: 10px; color: #64748b; display: block; text-align: left; margin-top: 2px;">
-                                            <?= htmlspecialchars($ad['kode_aduan']) ?> &bull; <?= htmlspecialchars($ad['kategori']) ?>
-                                        </span>
-                                        <div style="margin-top: 4px;">
-                                            <span style="background: #fee2e2; color: #dc2626; font-size: 8.5px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Prioritas: <?= htmlspecialchars($ad['prioritas']) ?></span>
-                                            <span style="background: #fef3c7; color: #92400e; font-size: 8.5px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Masuk: <?= date('d M', strtotime($ad['created_at'])) ?></span>
+                        <div class="list-group">
+                            <?php foreach ($jadwalHariIni as $j):
+                                $idMapel = (int)($j['id_mapel'] ?? 0);
+                                $kelasJadwal = (string)($j['kelas'] ?? '');
+                                $mapelJadwal = (string)($j['nama_mapel'] ?? '');
+                                $isJurnalTerisi = isset($jurnalStatusByMapel[$idMapel]);
+                            ?>
+                                <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2 rounded shadow-sm border-0" style="cursor: default;">
+                                    <div class="mb-3 mb-md-0">
+                                        <h6 class="mb-1 text-primary" style="font-weight: 700;"><?= htmlspecialchars($kelasJadwal, ENT_QUOTES, 'UTF-8'); ?> <span class="text-dark">&bull; <?= htmlspecialchars($mapelJadwal, ENT_QUOTES, 'UTF-8'); ?></span></h6>
+                                        <div class="d-flex align-items-center mt-2 flex-wrap">
+                                            <span class="badge badge-secondary mr-2 mb-1 p-2"><i class="bi bi-clock"></i> <?= htmlspecialchars(substr((string)($j['jam_mulai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars(substr((string)($j['jam_selesai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?></span>
+                                            <?php if ($isJurnalTerisi): ?>
+                                                <span class="badge badge-success mb-1 p-2"><i class="bi bi-check2-circle"></i> Sudah terisi</span>
+                                            <?php else: ?>
+                                                <span class="badge badge-warning text-dark mb-1 p-2"><i class="bi bi-clock-history"></i> Belum terisi</span>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
-                                    <a href="../../home.php?page=aduan-siswa" style="background: #dc2626; color: #fff; font-size: 10px; padding: 5px 10px; border-radius: 8px; text-decoration: none; font-weight: 600; flex-shrink: 0; margin-left: 8px;">Tindak Lanjut</a>
+                                    <div class="d-flex align-items-center">
+                                        <button class="btn btn-sm btn-primary btn-open-schedule-journal mr-2 shadow-sm text-white" type="button" data-id="<?= $idMapel; ?>" style="white-space: nowrap; color: #fff !important;">
+                                            <i class="bi bi-journal-plus" style="color: #fff !important;"></i> <?= $isJurnalTerisi ? 'Lihat/Edit' : 'Input Jurnal'; ?>
+                                        </button>
+                                        <a class="btn btn-sm btn-outline-primary shadow-sm" href="inputnilai?getDetail=<?= $idMapel; ?>" style="white-space: nowrap;">
+                                            <i class="bi bi-clipboard2-check"></i> Nilai
+                                        </a>
+                                    </div>
                                 </div>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
                 </div>
-                <?php endif; /* end isTimAduan */ ?>
-                
-                <!-- 1. SISWA BUTUH PENDAMPINGAN (wali kelas + guru mapel) -->
-                <?php if (!empty($pendampinganKelasAll)): ?>
-                <div class="notif-card" id="notifPendampinganCard" style="background: #fff; border-radius: 16px; border: 1px solid rgba(239, 68, 68, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <span style="font-size: 11.5px; font-weight: 700; color: #ef4444; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="bi bi-heart-pulse-fill"></i> Siswa Butuh Pendampingan
-                        </span>
-                        <span style="background: #fee2e2; color: #ef4444; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
-                            <?= $problematicCount ?> Siswa
-                        </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Isi Jurnal (Bootstrap) -->
+    <div class="modal fade" id="show" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen-sm-down modal-lg" style="max-width: 950px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Isi Jurnal</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-data" style="text-align: center; padding: 20px;">
+                        <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                        <span class="text-muted">Memuat...</span>
                     </div>
-                    <?php if ($problematicCount === 0): ?>
-                        <p style="font-size: 11px; color: #64748b; margin: 0; text-align: left;">Alhamdulillah, tidak ada siswa yang membutuhkan pendampingan khusus saat ini.</p>
-                    <?php else: ?>
-                        <!-- MENU SPLIT PER KELAS: klik kelas untuk expand/collapse daftar siswa -->
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <?php foreach ($pendampinganByKelas as $kelasGrp => $siswaGrp): ?>
-                                <?php $grpId = 'pendamp-grp-' . preg_replace('/[^a-zA-Z0-9]/', '_', $kelasGrp); ?>
-                                <!-- Header Kelas - bisa diklik -->
-                                <div class="pendamp-kelas-header" data-target="<?= $grpId ?>" 
-                                     style="display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; background: linear-gradient(135deg, #fef2f2, #fff5f5); border-radius: 10px; border: 1px solid rgba(239,68,68,0.18); cursor: pointer; user-select: none;">
-                                    <span style="font-size: 12px; font-weight: 700; color: #dc2626; display: inline-flex; align-items: center; gap: 7px;">
-                                        <i class="bi bi-people-fill"></i>
-                                        Kelas <?= htmlspecialchars($kelasGrp) ?>
-                                    </span>
-                                    <span style="display: flex; align-items: center; gap: 6px;">
-                                        <span style="background: #fee2e2; color: #dc2626; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 99px;"><?= count($siswaGrp) ?> siswa</span>
-                                        <i class="bi bi-chevron-down pendamp-chevron" style="font-size: 11px; color: #ef4444; transition: transform 0.25s;"></i>
-                                    </span>
-                                </div>
-                                <!-- Daftar Siswa per Kelas - collapsed by default -->
-                                <div id="<?= $grpId ?>" style="display: none; flex-direction: column; gap: 6px; padding: 0 2px;">
-                                    <?php foreach ($siswaGrp as $s): ?>
-                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #fff5f5; border-radius: 10px; border: 1px dashed rgba(239, 68, 68, 0.1);">
-                                            <div style="text-align: left; min-width: 0;">
-                                                <strong style="font-size: 12px; color: #1e293b; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($s['nama_siswa']) ?></strong>
-                                                <div style="margin-top: 4px; display: flex; gap: 5px; flex-wrap: wrap;">
-                                                    <?php if ($s['alpha_count'] > 0): ?>
-                                                        <span style="background: #fee2e2; color: #ef4444; font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Alpha: <?= $s['alpha_count'] ?>x</span>
-                                                    <?php endif; ?>
-                                                    <?php if ($s['telat_count'] > 0): ?>
-                                                        <span style="background: #fef3c7; color: #d97706; font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Telat: <?= $s['telat_count'] ?>x</span>
-                                                    <?php endif; ?>
-                                                    <?php if ($s['pelanggaran_count'] > 0): ?>
-                                                        <span style="background: #f3e8ff; color: #7c3aed; font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Pelanggaran: <?= $s['pelanggaran_count'] ?>x</span>
-                                                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="journal-modal-backdrop" id="notifPanelModal" aria-hidden="true">
+        <div class="journal-modal" role="dialog" aria-modal="true" aria-labelledby="notifPanelTitle" style="max-height: 85vh; width: min(100%, 460px);">
+            <div class="journal-modal-head" style="background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: #fff; padding: 16px 20px;">
+                <div>
+                    <h5 id="notifPanelTitle" style="color:#fff; font-size:16px; font-weight:600; margin:0;"><i class="bi bi-bell-fill me-2"></i> Notifikasi & Tindak Lanjut</h5>
+                    <p style="color:rgba(255,255,255,0.8); font-size:11px; margin:4px 0 0 0;">Informasi penting hari ini.</p>
+                </div>
+                <button class="journal-modal-close" type="button" data-close-modal aria-label="Tutup" style="background:rgba(255,255,255,0.15); color:#fff; border:none; width:32px; height:32px; border-radius:10px;"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="journal-modal-body" style="padding: 16px; background: #f8fafc;">
+                <div class="notif-sections-list" style="display: flex; flex-direction: column; gap: 16px;">
+
+                    <!-- ADUAN SISWA: Hanya tampil untuk Tim Aduan yang ditugaskan admin -->
+                    <?php if ($isTimAduan): ?>
+                        <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(220, 38, 38, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="font-size: 11.5px; font-weight: 700; color: #dc2626; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="bi bi-shield-fill-exclamation"></i> Aduan Siswa
+                                    <span style="background: #fef2f2; color: #9f1239; font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 600; text-transform: none; letter-spacing: 0;"><i class="bi bi-incognito"></i> Anonim</span>
+                                </span>
+                                <span style="background: #fee2e2; color: #dc2626; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
+                                    <?= $aduanGuruCount ?> Aktif
+                                </span>
+                            </div>
+                            <?php if ($aduanGuruCount === 0): ?>
+                                <p style="font-size: 11px; color: #64748b; margin: 0; text-align: left;">Tidak ada aduan siswa yang masuk saat ini.</p>
+                            <?php else: ?>
+                                <p style="font-size: 10px; color: #9f1239; background: #fef2f2; border-radius: 8px; padding: 6px 10px; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px;">
+                                    <i class="bi bi-eye-slash-fill"></i> <strong>Aduan bersifat anonim.</strong> Identitas pelapor dirahasiakan. Tim aduan bertanggung jawab mencari fakta.
+                                </p>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <?php foreach ($aduanGuruRows as $ad): ?>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #fff1f2; border-radius: 10px; border: 1px dashed rgba(220, 38, 38, 0.15);">
+                                            <div style="text-align: left;">
+                                                <strong style="font-size: 12px; color: #1e293b; display: block; text-align: left;"><?= htmlspecialchars($ad['judul']) ?></strong>
+                                                <span style="font-size: 10px; color: #64748b; display: block; text-align: left; margin-top: 2px;">
+                                                    <?= htmlspecialchars($ad['kode_aduan']) ?> &bull; <?= htmlspecialchars($ad['kategori']) ?>
+                                                </span>
+                                                <div style="margin-top: 4px;">
+                                                    <span style="background: #fee2e2; color: #dc2626; font-size: 8.5px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Prioritas: <?= htmlspecialchars($ad['prioritas']) ?></span>
+                                                    <span style="background: #fef3c7; color: #92400e; font-size: 8.5px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Masuk: <?= date('d M', strtotime($ad['created_at'])) ?></span>
                                                 </div>
                                             </div>
-                                            <a href="laporan-kelas?kelas=<?= urlencode($s['kelas']) ?>" style="background: #ef4444; color: #fff; font-size: 10px; padding: 5px 10px; border-radius: 8px; text-decoration: none; font-weight: 600; flex-shrink: 0; margin-left: 8px; white-space: nowrap;">Lihat</a>
+                                            <a href="../../home.php?page=aduan-siswa" style="background: #dc2626; color: #fff; font-size: 10px; padding: 5px 10px; border-radius: 8px; text-decoration: none; font-weight: 600; flex-shrink: 0; margin-left: 8px;">Tindak Lanjut</a>
                                         </div>
                                     <?php endforeach; ?>
-                                    <div style="text-align: right; margin-top: 2px;">
-                                        <a href="laporan-kelas?kelas=<?= urlencode($kelasGrp) ?>" style="font-size: 10px; color: #ef4444; text-decoration: none; font-weight: 600;"><i class="bi bi-arrow-right"></i> Tindak Lanjut Kelas <?= htmlspecialchars($kelasGrp) ?></a>
-                                    </div>
                                 </div>
-                            <?php endforeach; ?>
+                            <?php endif; ?>
                         </div>
-                    <?php endif; ?>
-                </div>
-                <?php endif; /* end pendampinganKelasAll */ ?>
+                    <?php endif; /* end isTimAduan */ ?>
 
-                <!-- 2. JURNAL BELUM TERISI: hidden jika tidak ada jadwal hari ini -->
-                <?php if ($totalJadwalHari > 0): ?>
-                <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(245, 158, 11, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <span style="font-size: 11.5px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="bi bi-journal-x"></i> Jurnal Belum Terisi
-                        </span>
-                        <span style="background: #fef3c7; color: #d97706; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
-                            <?= $unfilledJurnalCount ?> Jadwal
-                        </span>
-                    </div>
-                    <?php if ($unfilledJurnalCount === 0): ?>
-                        <p style="font-size: 11px; color: #64748b; margin: 0; text-align: left;">Hebat! Semua jurnal mengajar Anda hari ini sudah terisi dengan lengkap.</p>
-                    <?php else: ?>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <?php foreach ($unfilledJadwal as $j): ?>
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #fffbeb; border-radius: 10px; border: 1px dashed rgba(245, 158, 11, 0.15);">
-                                    <div style="text-align: left;">
-                                        <strong style="font-size: 12px; color: #1e293b; display: block; text-align: left;"><?= htmlspecialchars($j['nama_mapel']) ?></strong>
-                                        <span style="font-size: 10px; color: #64748b; display: block; text-align: left; margin-top: 2px;">Kelas: <?= htmlspecialchars($j['kelas']) ?> (<?= substr($j['jam_mulai'],0,5) ?> - <?= substr($j['jam_selesai'],0,5) ?>)</span>
-                                    </div>
-                                    <button class="btn-open-jurnal-from-notif" data-id="<?= $j['id_mapel'] ?>" style="background: #f59e0b; color: #fff; border: none; font-size: 10px; padding: 5px 10px; border-radius: 8px; font-weight: 600; cursor: pointer; flex-shrink: 0; margin-left: 8px;">Isi Sekarang</button>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-                <?php endif; /* end totalJadwalHari */ ?>
-
-                <?php if ($nextJadwal !== null): ?>
-                <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(59, 130, 246, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
-                    <div style="margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-                        <span style="font-size: 11.5px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="bi bi-calendar-event"></i> Jadwal Berikutnya
-                        </span>
-                        <span style="background: #eff6ff; color: #3b82f6; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;"><?= substr($nextJadwal['jam_mulai'],0,5) ?></span>
-                    </div>
-                    <div style="padding: 10px; background: #eff6ff; border-radius: 10px; border: 1px solid rgba(59, 130, 246, 0.1); text-align: left;">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <strong style="font-size: 13px; color: #1e293b; display: block; text-align: left;"><?= htmlspecialchars($nextJadwal['nama_mapel']) ?></strong>
-                        </div>
-                        <span style="font-size: 11px; color: #64748b; display:block; margin-top:4px; text-align: left;">Kelas: <?= htmlspecialchars($nextJadwal['kelas']) ?></span>
-                        <span style="font-size: 11px; color: #64748b; display:block; text-align: left;">Ruang: <?= htmlspecialchars($nextJadwal['ruang'] ?? 'R. Kelas') ?></span>
-                    </div>
-                </div>
-                <?php endif; /* end nextJadwal */ ?>
-
-                <!-- 4. PENGUMUMAN ADMIN: hidden jika tidak ada pengumuman -->
-                <?php if ($announcementCount > 0): ?>
-                <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(124, 58, 237, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); margin-bottom: 8px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <span style="font-size: 11.5px; font-weight: 700; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="bi bi-megaphone-fill"></i> Pengumuman dari Admin
-                        </span>
-                        <span style="background: #f3e8ff; color: #7c3aed; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
-                            <?= $announcementCount ?> Baru
-                        </span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <?php foreach ($announcements as $ann): ?>
-                            <div style="padding: 10px; background: #faf5ff; border-radius: 10px; border: 1px solid rgba(124, 58, 237, 0.1); text-align: left;">
-                                <strong style="font-size: 12px; color: #1e293b; display: block; text-align: left;"><?= htmlspecialchars($ann['judul']) ?></strong>
-                                <p style="font-size: 10.5px; color: #475569; margin: 4px 0 0 0; line-height: 1.4; text-align: left;"><?= nl2br(htmlspecialchars($ann['isi'])) ?></p>
-                                <small style="font-size: 9px; color: #94a3b8; display: block; margin-top: 6px; text-align: left;"><i class="bi bi-clock"></i> <?= date('d M Y, H:i', strtotime($ann['created_at'])) ?></small>
+                    <!-- 1. SISWA BUTUH PENDAMPINGAN (wali kelas + guru mapel) -->
+                    <?php if (!empty($pendampinganKelasAll)): ?>
+                        <div class="notif-card" id="notifPendampinganCard" style="background: #fff; border-radius: 16px; border: 1px solid rgba(239, 68, 68, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="font-size: 11.5px; font-weight: 700; color: #ef4444; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="bi bi-heart-pulse-fill"></i> Siswa Butuh Pendampingan
+                                </span>
+                                <span style="background: #fee2e2; color: #ef4444; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
+                                    <?= $problematicCount ?> Siswa
+                                </span>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-                <?php endif; /* end announcementCount */ ?>
+                            <?php if ($problematicCount === 0): ?>
+                                <p style="font-size: 11px; color: #64748b; margin: 0; text-align: left;">Alhamdulillah, tidak ada siswa yang membutuhkan pendampingan khusus saat ini.</p>
+                            <?php else: ?>
+                                <!-- MENU SPLIT PER KELAS: klik kelas untuk expand/collapse daftar siswa -->
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <?php foreach ($pendampinganByKelas as $kelasGrp => $siswaGrp): ?>
+                                        <?php $grpId = 'pendamp-grp-' . preg_replace('/[^a-zA-Z0-9]/', '_', $kelasGrp); ?>
+                                        <!-- Header Kelas - bisa diklik -->
+                                        <div class="pendamp-kelas-header" data-target="<?= $grpId ?>"
+                                            style="display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; background: linear-gradient(135deg, #fef2f2, #fff5f5); border-radius: 10px; border: 1px solid rgba(239,68,68,0.18); cursor: pointer; user-select: none;">
+                                            <span style="font-size: 12px; font-weight: 700; color: #dc2626; display: inline-flex; align-items: center; gap: 7px;">
+                                                <i class="bi bi-people-fill"></i>
+                                                Kelas <?= htmlspecialchars($kelasGrp) ?>
+                                            </span>
+                                            <span style="display: flex; align-items: center; gap: 6px;">
+                                                <span style="background: #fee2e2; color: #dc2626; font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 99px;"><?= count($siswaGrp) ?> siswa</span>
+                                                <i class="bi bi-chevron-down pendamp-chevron" style="font-size: 11px; color: #ef4444; transition: transform 0.25s;"></i>
+                                            </span>
+                                        </div>
+                                        <!-- Daftar Siswa per Kelas - collapsed by default -->
+                                        <div id="<?= $grpId ?>" style="display: none; flex-direction: column; gap: 6px; padding: 0 2px;">
+                                            <?php foreach ($siswaGrp as $s): ?>
+                                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: #fff5f5; border-radius: 10px; border: 1px dashed rgba(239, 68, 68, 0.1);">
+                                                    <div style="text-align: left; min-width: 0;">
+                                                        <strong style="font-size: 12px; color: #1e293b; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($s['nama_siswa']) ?></strong>
+                                                        <div style="margin-top: 4px; display: flex; gap: 5px; flex-wrap: wrap;">
+                                                            <?php if ($s['alpha_count'] > 0): ?>
+                                                                <span style="background: #fee2e2; color: #ef4444; font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Alpha: <?= $s['alpha_count'] ?>x</span>
+                                                            <?php endif; ?>
+                                                            <?php if ($s['telat_count'] > 0): ?>
+                                                                <span style="background: #fef3c7; color: #d97706; font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Telat: <?= $s['telat_count'] ?>x</span>
+                                                            <?php endif; ?>
+                                                            <?php if ($s['pelanggaran_count'] > 0): ?>
+                                                                <span style="background: #f3e8ff; color: #7c3aed; font-size: 8px; padding: 1px 5px; border-radius: 4px; font-weight: 600;">Pelanggaran: <?= $s['pelanggaran_count'] ?>x</span>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                    <a href="laporan-kelas?kelas=<?= urlencode($s['kelas']) ?>" style="background: #ef4444; color: #fff; font-size: 10px; padding: 5px 10px; border-radius: 8px; text-decoration: none; font-weight: 600; flex-shrink: 0; margin-left: 8px; white-space: nowrap;">Lihat</a>
+                                                </div>
+                                            <?php endforeach; ?>
+                                            <div style="text-align: right; margin-top: 2px;">
+                                                <a href="laporan-kelas?kelas=<?= urlencode($kelasGrp) ?>" style="font-size: 10px; color: #ef4444; text-decoration: none; font-weight: 600;"><i class="bi bi-arrow-right"></i> Tindak Lanjut Kelas <?= htmlspecialchars($kelasGrp) ?></a>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; /* end pendampinganKelasAll */ ?>
 
+                    <!-- 2. JURNAL BELUM TERISI: hidden jika tidak ada jadwal hari ini -->
+                    <?php if ($totalJadwalHari > 0): ?>
+                        <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(245, 158, 11, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="font-size: 11.5px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="bi bi-journal-x"></i> Jurnal Belum Terisi
+                                </span>
+                                <span style="background: #fef3c7; color: #d97706; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
+                                    <?= $unfilledJurnalCount ?> Jadwal
+                                </span>
+                            </div>
+                            <?php if ($unfilledJurnalCount === 0): ?>
+                                <p style="font-size: 11px; color: #64748b; margin: 0; text-align: left;">Hebat! Semua jurnal mengajar Anda hari ini sudah terisi dengan lengkap.</p>
+                            <?php else: ?>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <?php foreach ($unfilledJadwal as $j): ?>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #fffbeb; border-radius: 10px; border: 1px dashed rgba(245, 158, 11, 0.15);">
+                                            <div style="text-align: left;">
+                                                <strong style="font-size: 12px; color: #1e293b; display: block; text-align: left;"><?= htmlspecialchars($j['nama_mapel']) ?></strong>
+                                                <span style="font-size: 10px; color: #64748b; display: block; text-align: left; margin-top: 2px;">Kelas: <?= htmlspecialchars($j['kelas']) ?> (<?= substr($j['jam_mulai'], 0, 5) ?> - <?= substr($j['jam_selesai'], 0, 5) ?>)</span>
+                                            </div>
+                                            <button class="btn-open-jurnal-from-notif" data-id="<?= $j['id_mapel'] ?>" style="background: #f59e0b; color: #fff; border: none; font-size: 10px; padding: 5px 10px; border-radius: 8px; font-weight: 600; cursor: pointer; flex-shrink: 0; margin-left: 8px;">Isi Sekarang</button>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; /* end totalJadwalHari */ ?>
+
+                    <?php if ($nextJadwal !== null): ?>
+                        <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(59, 130, 246, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                            <div style="margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                                <span style="font-size: 11.5px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="bi bi-calendar-event"></i> Jadwal Berikutnya
+                                </span>
+                                <span style="background: #eff6ff; color: #3b82f6; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;"><?= substr($nextJadwal['jam_mulai'], 0, 5) ?></span>
+                            </div>
+                            <div style="padding: 10px; background: #eff6ff; border-radius: 10px; border: 1px solid rgba(59, 130, 246, 0.1); text-align: left;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <strong style="font-size: 13px; color: #1e293b; display: block; text-align: left;"><?= htmlspecialchars($nextJadwal['nama_mapel']) ?></strong>
+                                </div>
+                                <span style="font-size: 11px; color: #64748b; display:block; margin-top:4px; text-align: left;">Kelas: <?= htmlspecialchars($nextJadwal['kelas']) ?></span>
+                                <span style="font-size: 11px; color: #64748b; display:block; text-align: left;">Ruang: <?= htmlspecialchars($nextJadwal['ruang'] ?? 'R. Kelas') ?></span>
+                            </div>
+                        </div>
+                    <?php endif; /* end nextJadwal */ ?>
+
+                    <!-- 4. PENGUMUMAN ADMIN: hidden jika tidak ada pengumuman -->
+                    <?php if ($announcementCount > 0): ?>
+                        <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(124, 58, 237, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="font-size: 11.5px; font-weight: 700; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="bi bi-megaphone-fill"></i> Pengumuman dari Admin
+                                </span>
+                                <span style="background: #f3e8ff; color: #7c3aed; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 99px;">
+                                    <?= $announcementCount ?> Baru
+                                </span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <?php foreach ($announcements as $ann): ?>
+                                    <div style="padding: 10px; background: #faf5ff; border-radius: 10px; border: 1px solid rgba(124, 58, 237, 0.1); text-align: left;">
+                                        <strong style="font-size: 12px; color: #1e293b; display: block; text-align: left;"><?= htmlspecialchars($ann['judul']) ?></strong>
+                                        <p style="font-size: 10.5px; color: #475569; margin: 4px 0 0 0; line-height: 1.4; text-align: left;"><?= nl2br(htmlspecialchars($ann['isi'])) ?></p>
+                                        <small style="font-size: 9px; color: #94a3b8; display: block; margin-top: 6px; text-align: left;"><i class="bi bi-clock"></i> <?= date('d M Y, H:i', strtotime($ann['created_at'])) ?></small>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; /* end announcementCount */ ?>
+
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="journal-modal-backdrop" id="guruWaliModal" aria-hidden="true">
-    <div class="journal-modal" role="dialog" aria-modal="true" aria-labelledby="guruWaliTitle" style="max-height: 88vh; width: min(100%, 520px);">
-        <div class="journal-modal-head" style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); color: #fff; padding: 16px 20px;">
-            <div>
-                <h5 id="guruWaliTitle" style="color:#fff; font-size:16px; font-weight:700; margin:0;"><i class="bi bi-person-workspace me-2"></i>Guru Wali</h5>
-                <p style="color:rgba(255,255,255,0.85); font-size:11px; margin:4px 0 0 0;">Tambahkan siswa yang menjadi binaan pribadi Anda.</p>
+    <div class="journal-modal-backdrop" id="guruWaliModal" aria-hidden="true">
+        <div class="journal-modal" role="dialog" aria-modal="true" aria-labelledby="guruWaliTitle" style="max-height: 88vh; width: min(100%, 520px);">
+            <div class="journal-modal-head" style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); color: #fff; padding: 16px 20px;">
+                <div>
+                    <h5 id="guruWaliTitle" style="color:#fff; font-size:16px; font-weight:700; margin:0;"><i class="bi bi-person-workspace me-2"></i>Guru Wali</h5>
+                    <p style="color:rgba(255,255,255,0.85); font-size:11px; margin:4px 0 0 0;">Tambahkan siswa yang menjadi binaan pribadi Anda.</p>
+                </div>
+                <button class="journal-modal-close" type="button" data-close-modal aria-label="Tutup" style="background:rgba(255,255,255,0.15); color:#fff; border:none; width:32px; height:32px; border-radius:10px;"><i class="bi bi-x-lg"></i></button>
             </div>
-            <button class="journal-modal-close" type="button" data-close-modal aria-label="Tutup" style="background:rgba(255,255,255,0.15); color:#fff; border:none; width:32px; height:32px; border-radius:10px;"><i class="bi bi-x-lg"></i></button>
-        </div>
-        <div class="journal-modal-body" style="padding: 16px; background: #f8fafc;">
-            <div style="display:grid; grid-template-columns:1fr; gap:12px;">
-                <a href="guru-wali-siswa" style="display:flex; align-items:center; gap:14px; padding:16px; background:#fff; border:1px solid rgba(20,184,166,.18); border-radius:18px; text-decoration:none; box-shadow:0 10px 24px rgba(15,23,42,.06);">
-                    <span style="width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:#ccfbf1; color:#0f766e; font-size:25px; flex:0 0 auto;"><i class="bi bi-person-plus-fill"></i></span>
-                    <span style="min-width:0;">
-                        <strong style="display:block; color:#0f172a; font-size:15px;">Tambah Siswa</strong>
-                        <small style="display:block; color:#64748b; margin-top:3px; line-height:1.35;">Pilih kelas dan siswa untuk menambahkan daftar binaan guru wali.</small>
-                    </span>
-                    <i class="bi bi-chevron-right" style="margin-left:auto; color:#94a3b8;"></i>
-                </a>
-                <a href="guru-wali-jurnal" style="display:flex; align-items:center; gap:14px; padding:16px; background:#fff; border:1px solid rgba(67,56,202,.18); border-radius:18px; text-decoration:none; box-shadow:0 10px 24px rgba(15,23,42,.06);">
-                    <span style="width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:#e0e7ff; color:#4338ca; font-size:25px; flex:0 0 auto;"><i class="bi bi-journal-text"></i></span>
-                    <span style="min-width:0;">
-                        <strong style="display:block; color:#0f172a; font-size:15px;">Jurnal Pendampingan</strong>
-                        <small style="display:block; color:#64748b; margin-top:3px; line-height:1.35;">Catat pendampingan, tindak lanjut, dan status siswa binaan.</small>
-                    </span>
-                    <i class="bi bi-chevron-right" style="margin-left:auto; color:#94a3b8;"></i>
-                </a>
-            </div>
-            <div style="display:none;">
-            <?php if ($guruWaliFlash !== ''): ?>
-                <div class="alert alert-<?= htmlspecialchars($guruWaliFlashType, ENT_QUOTES, 'UTF-8'); ?> py-2 mb-3" style="font-size:12px; border-radius:12px;">
-                    <?= htmlspecialchars($guruWaliFlash, ENT_QUOTES, 'UTF-8'); ?>
+            <div class="journal-modal-body" style="padding: 16px; background: #f8fafc;">
+                <div style="display:grid; grid-template-columns:1fr; gap:12px;">
+                    <a href="guru-wali-siswa" style="display:flex; align-items:center; gap:14px; padding:16px; background:#fff; border:1px solid rgba(20,184,166,.18); border-radius:18px; text-decoration:none; box-shadow:0 10px 24px rgba(15,23,42,.06);">
+                        <span style="width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:#ccfbf1; color:#0f766e; font-size:25px; flex:0 0 auto;"><i class="bi bi-person-plus-fill"></i></span>
+                        <span style="min-width:0;">
+                            <strong style="display:block; color:#0f172a; font-size:15px;">Tambah Siswa</strong>
+                            <small style="display:block; color:#64748b; margin-top:3px; line-height:1.35;">Pilih kelas dan siswa untuk menambahkan daftar binaan guru wali.</small>
+                        </span>
+                        <i class="bi bi-chevron-right" style="margin-left:auto; color:#94a3b8;"></i>
+                    </a>
+                    <a href="guru-wali-jurnal" style="display:flex; align-items:center; gap:14px; padding:16px; background:#fff; border:1px solid rgba(67,56,202,.18); border-radius:18px; text-decoration:none; box-shadow:0 10px 24px rgba(15,23,42,.06);">
+                        <span style="width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:#e0e7ff; color:#4338ca; font-size:25px; flex:0 0 auto;"><i class="bi bi-journal-text"></i></span>
+                        <span style="min-width:0;">
+                            <strong style="display:block; color:#0f172a; font-size:15px;">Jurnal Pendampingan</strong>
+                            <small style="display:block; color:#64748b; margin-top:3px; line-height:1.35;">Catat pendampingan, tindak lanjut, dan status siswa binaan.</small>
+                        </span>
+                        <i class="bi bi-chevron-right" style="margin-left:auto; color:#94a3b8;"></i>
+                    </a>
                 </div>
-            <?php endif; ?>
+                <div style="display:none;">
+                    <?php if ($guruWaliFlash !== ''): ?>
+                        <div class="alert alert-<?= htmlspecialchars($guruWaliFlashType, ENT_QUOTES, 'UTF-8'); ?> py-2 mb-3" style="font-size:12px; border-radius:12px;">
+                            <?= htmlspecialchars($guruWaliFlash, ENT_QUOTES, 'UTF-8'); ?>
+                        </div>
+                    <?php endif; ?>
 
-            <form method="post" id="guruWaliForm" style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:14px; box-shadow:0 8px 20px rgba(15,23,42,.05);">
-                <input type="hidden" name="guru_wali_action" value="add">
-                <div class="mb-3">
-                    <label class="form-label" for="kelasBinaan" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Pilih Kelas</label>
-                    <select class="form-select" id="kelasBinaan" name="kelas_binaan" required style="border-radius:12px; font-size:13px;">
-                        <option value="">Pilih kelas</option>
-                        <?php foreach ($guruWaliKelasOptions as $kelasOption): ?>
-                            <option value="<?= htmlspecialchars($kelasOption, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($kelasOption, ENT_QUOTES, 'UTF-8'); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="siswaBinaan" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Pilih Siswa</label>
-                    <select class="form-select" id="siswaBinaan" name="siswa_binaan" required disabled style="border-radius:12px; font-size:13px;">
-                        <option value="">Pilih kelas terlebih dahulu</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn w-100" style="background:#0f766e; color:#fff; border-radius:12px; font-weight:800; font-size:13px;">
-                    <i class="bi bi-plus-circle me-1"></i> Tambah Siswa Binaan
-                </button>
-            </form>
-
-            <div style="margin-top:16px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-                    <strong style="font-size:13px; color:#0f172a;">Daftar Siswa Binaan</strong>
-                    <span style="background:#ccfbf1; color:#0f766e; font-size:10px; font-weight:800; padding:3px 8px; border-radius:999px;"><?= count($guruWaliBinaan); ?> siswa</span>
-                </div>
-                <?php if (empty($guruWaliBinaan)): ?>
-                    <div style="background:#fff; border:1px dashed #cbd5e1; border-radius:14px; padding:16px; color:#64748b; font-size:12px; text-align:center;">
-                        Belum ada siswa binaan. Pilih kelas dan siswa untuk mulai menambahkan.
-                    </div>
-                <?php else: ?>
-                    <div style="display:flex; flex-direction:column; gap:8px; max-height:260px; overflow:auto;">
-                        <?php foreach ($guruWaliBinaan as $binaan): ?>
-                            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:10px 12px;">
-                                <div style="min-width:0;">
-                                    <strong style="display:block; font-size:12.5px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                                        <?= htmlspecialchars((string)($binaan['nama_siswa'] ?: $binaan['no_induk_siswa']), ENT_QUOTES, 'UTF-8'); ?>
-                                    </strong>
-                                    <span style="display:block; font-size:10.5px; color:#64748b; margin-top:2px;">
-                                        Kelas <?= htmlspecialchars((string)$binaan['kelas'], ENT_QUOTES, 'UTF-8'); ?> · NIS <?= htmlspecialchars((string)$binaan['no_induk_siswa'], ENT_QUOTES, 'UTF-8'); ?>
-                                    </span>
-                                </div>
-                                <form method="post" onsubmit="return confirm('Hapus siswa dari daftar binaan?');" style="margin:0;">
-                                    <input type="hidden" name="guru_wali_action" value="delete">
-                                    <input type="hidden" name="id_binaan" value="<?= (int)$binaan['id']; ?>">
-                                    <button type="submit" title="Hapus" style="width:32px; height:32px; border:0; border-radius:10px; background:#fee2e2; color:#dc2626; display:grid; place-items:center;">
-                                        <i class="bi bi-trash3"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-
-            <div style="margin-top:18px; border-top:1px solid #e2e8f0; padding-top:16px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-                    <strong style="font-size:13px; color:#0f172a;"><i class="bi bi-journal-text me-1"></i>Jurnal Pendampingan Guru Wali</strong>
-                    <span style="background:#e0e7ff; color:#4338ca; font-size:10px; font-weight:800; padding:3px 8px; border-radius:999px;"><?= count($guruWaliJurnal); ?> catatan</span>
-                </div>
-
-                <form method="post" style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:14px; box-shadow:0 8px 20px rgba(15,23,42,.05);">
-                    <input type="hidden" name="guru_wali_action" value="journal_add">
-                    <div class="row g-2">
-                        <div class="col-12 col-md-7">
-                            <label class="form-label" for="jurnalSiswaBinaan" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Siswa Binaan</label>
-                            <select class="form-select" id="jurnalSiswaBinaan" name="jurnal_siswa_binaan" required style="border-radius:12px; font-size:13px;">
-                                <option value="">Pilih siswa binaan</option>
-                                <?php foreach ($guruWaliBinaan as $binaan): ?>
-                                    <option value="<?= htmlspecialchars((string)$binaan['no_induk_siswa'], ENT_QUOTES, 'UTF-8'); ?>">
-                                        <?= htmlspecialchars((string)($binaan['nama_siswa'] ?: $binaan['no_induk_siswa']), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars((string)$binaan['kelas'], ENT_QUOTES, 'UTF-8'); ?>
-                                    </option>
+                    <form method="post" id="guruWaliForm" style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:14px; box-shadow:0 8px 20px rgba(15,23,42,.05);">
+                        <input type="hidden" name="guru_wali_action" value="add">
+                        <div class="mb-3">
+                            <label class="form-label" for="kelasBinaan" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Pilih Kelas</label>
+                            <select class="form-select" id="kelasBinaan" name="kelas_binaan" required style="border-radius:12px; font-size:13px;">
+                                <option value="">Pilih kelas</option>
+                                <?php foreach ($guruWaliKelasOptions as $kelasOption): ?>
+                                    <option value="<?= htmlspecialchars($kelasOption, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($kelasOption, ENT_QUOTES, 'UTF-8'); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="col-12 col-md-5">
-                            <label class="form-label" for="jurnalTanggal" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Tanggal</label>
-                            <input class="form-control" type="date" id="jurnalTanggal" name="jurnal_tanggal" value="<?= date('Y-m-d'); ?>" required style="border-radius:12px; font-size:13px;">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label" for="jurnalCatatan" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Catatan Pendampingan</label>
-                            <textarea class="form-control" id="jurnalCatatan" name="jurnal_catatan" rows="3" required placeholder="Contoh: Siswa perlu pendampingan terkait kedisiplinan, motivasi belajar, atau komunikasi dengan orang tua." style="border-radius:12px; font-size:13px;"></textarea>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label" for="jurnalTindakLanjut" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Tindak Lanjut</label>
-                            <textarea class="form-control" id="jurnalTindakLanjut" name="jurnal_tindak_lanjut" rows="2" placeholder="Rencana tindak lanjut atau hasil komunikasi." style="border-radius:12px; font-size:13px;"></textarea>
-                        </div>
-                        <div class="col-12 col-md-5">
-                            <label class="form-label" for="jurnalStatus" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Status</label>
-                            <select class="form-select" id="jurnalStatus" name="jurnal_status" style="border-radius:12px; font-size:13px;">
-                                <option value="Dipantau">Dipantau</option>
-                                <option value="Perlu Tindak Lanjut">Perlu Tindak Lanjut</option>
-                                <option value="Selesai">Selesai</option>
+                        <div class="mb-3">
+                            <label class="form-label" for="siswaBinaan" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Pilih Siswa</label>
+                            <select class="form-select" id="siswaBinaan" name="siswa_binaan" required disabled style="border-radius:12px; font-size:13px;">
+                                <option value="">Pilih kelas terlebih dahulu</option>
                             </select>
                         </div>
-                        <div class="col-12 col-md-7 d-flex align-items-end">
-                            <button type="submit" class="btn w-100" style="background:#4338ca; color:#fff; border-radius:12px; font-weight:800; font-size:13px;" <?= empty($guruWaliBinaan) ? 'disabled title="Tambahkan siswa binaan terlebih dahulu"' : ''; ?>>
-                                <i class="bi bi-journal-plus me-1"></i> Simpan Jurnal Pendampingan
-                            </button>
-                        </div>
-                    </div>
-                </form>
+                        <button type="submit" class="btn w-100" style="background:#0f766e; color:#fff; border-radius:12px; font-weight:800; font-size:13px;">
+                            <i class="bi bi-plus-circle me-1"></i> Tambah Siswa Binaan
+                        </button>
+                    </form>
 
-                <div style="margin-top:12px;">
-                    <?php if (empty($guruWaliJurnal)): ?>
-                        <div style="background:#fff; border:1px dashed #cbd5e1; border-radius:14px; padding:16px; color:#64748b; font-size:12px; text-align:center;">
-                            Belum ada jurnal pendampingan guru wali.
+                    <div style="margin-top:16px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                            <strong style="font-size:13px; color:#0f172a;">Daftar Siswa Binaan</strong>
+                            <span style="background:#ccfbf1; color:#0f766e; font-size:10px; font-weight:800; padding:3px 8px; border-radius:999px;"><?= count($guruWaliBinaan); ?> siswa</span>
                         </div>
-                    <?php else: ?>
-                        <div style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow:auto;">
-                            <?php foreach ($guruWaliJurnal as $jurnalWali): ?>
-                                <?php
-                                    $statusWali = (string)($jurnalWali['status'] ?? 'Dipantau');
-                                    $statusColor = $statusWali === 'Selesai' ? '#16a34a' : ($statusWali === 'Perlu Tindak Lanjut' ? '#dc2626' : '#4338ca');
-                                ?>
-                                <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:11px 12px;">
-                                    <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
+                        <?php if (empty($guruWaliBinaan)): ?>
+                            <div style="background:#fff; border:1px dashed #cbd5e1; border-radius:14px; padding:16px; color:#64748b; font-size:12px; text-align:center;">
+                                Belum ada siswa binaan. Pilih kelas dan siswa untuk mulai menambahkan.
+                            </div>
+                        <?php else: ?>
+                            <div style="display:flex; flex-direction:column; gap:8px; max-height:260px; overflow:auto;">
+                                <?php foreach ($guruWaliBinaan as $binaan): ?>
+                                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:10px 12px;">
                                         <div style="min-width:0;">
-                                            <strong style="display:block; font-size:12.5px; color:#0f172a;"><?= htmlspecialchars((string)($jurnalWali['nama_siswa'] ?: $jurnalWali['no_induk_siswa']), ENT_QUOTES, 'UTF-8'); ?></strong>
+                                            <strong style="display:block; font-size:12.5px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                                <?= htmlspecialchars((string)($binaan['nama_siswa'] ?: $binaan['no_induk_siswa']), ENT_QUOTES, 'UTF-8'); ?>
+                                            </strong>
                                             <span style="display:block; font-size:10.5px; color:#64748b; margin-top:2px;">
-                                                <?= date('d M Y', strtotime((string)$jurnalWali['tanggal'])); ?> · Kelas <?= htmlspecialchars((string)$jurnalWali['kelas'], ENT_QUOTES, 'UTF-8'); ?>
+                                                Kelas <?= htmlspecialchars((string)$binaan['kelas'], ENT_QUOTES, 'UTF-8'); ?> · NIS <?= htmlspecialchars((string)$binaan['no_induk_siswa'], ENT_QUOTES, 'UTF-8'); ?>
                                             </span>
                                         </div>
-                                        <span style="background:<?= $statusColor; ?>18; color:<?= $statusColor; ?>; font-size:9.5px; font-weight:800; padding:3px 7px; border-radius:999px; white-space:nowrap;">
-                                            <?= htmlspecialchars($statusWali, ENT_QUOTES, 'UTF-8'); ?>
-                                        </span>
+                                        <form method="post" onsubmit="return confirm('Hapus siswa dari daftar binaan?');" style="margin:0;">
+                                            <input type="hidden" name="guru_wali_action" value="delete">
+                                            <input type="hidden" name="id_binaan" value="<?= (int)$binaan['id']; ?>">
+                                            <button type="submit" title="Hapus" style="width:32px; height:32px; border:0; border-radius:10px; background:#fee2e2; color:#dc2626; display:grid; place-items:center;">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
                                     </div>
-                                    <div style="font-size:11.5px; color:#334155; margin-top:8px; line-height:1.45;"><?= nl2br(htmlspecialchars((string)$jurnalWali['catatan'], ENT_QUOTES, 'UTF-8')); ?></div>
-                                    <?php if (!empty($jurnalWali['tindak_lanjut'])): ?>
-                                        <div style="font-size:11px; color:#64748b; margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0;">
-                                            <strong>Tindak lanjut:</strong> <?= nl2br(htmlspecialchars((string)$jurnalWali['tindak_lanjut'], ENT_QUOTES, 'UTF-8')); ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-            </div>
-        </div>
-    </div>
-</div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
 
-<div class="journal-modal-backdrop" id="pelanggaranModal" aria-hidden="true">
-    <div class="journal-modal" style="max-width:620px;">
-        <div class="journal-modal-head" style="background:linear-gradient(135deg,#dc2626,#991b1b); color:#fff;">
-            <div>
-                <h3 style="margin:0; color:#fff;"><i class="bi bi-exclamation-triangle-fill me-2"></i>Catat Pelanggaran Siswa</h3>
-                <p style="margin:4px 0 0; color:rgba(255,255,255,.78); font-size:12px;">Pilih siswa, kategori, jenis pelanggaran, dan tindak lanjut.</p>
+                    <div style="margin-top:18px; border-top:1px solid #e2e8f0; padding-top:16px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                            <strong style="font-size:13px; color:#0f172a;"><i class="bi bi-journal-text me-1"></i>Jurnal Pendampingan Guru Wali</strong>
+                            <span style="background:#e0e7ff; color:#4338ca; font-size:10px; font-weight:800; padding:3px 8px; border-radius:999px;"><?= count($guruWaliJurnal); ?> catatan</span>
+                        </div>
+
+                        <form method="post" style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:14px; box-shadow:0 8px 20px rgba(15,23,42,.05);">
+                            <input type="hidden" name="guru_wali_action" value="journal_add">
+                            <div class="row g-2">
+                                <div class="col-12 col-md-7">
+                                    <label class="form-label" for="jurnalSiswaBinaan" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Siswa Binaan</label>
+                                    <select class="form-select" id="jurnalSiswaBinaan" name="jurnal_siswa_binaan" required style="border-radius:12px; font-size:13px;">
+                                        <option value="">Pilih siswa binaan</option>
+                                        <?php foreach ($guruWaliBinaan as $binaan): ?>
+                                            <option value="<?= htmlspecialchars((string)$binaan['no_induk_siswa'], ENT_QUOTES, 'UTF-8'); ?>">
+                                                <?= htmlspecialchars((string)($binaan['nama_siswa'] ?: $binaan['no_induk_siswa']), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars((string)$binaan['kelas'], ENT_QUOTES, 'UTF-8'); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-5">
+                                    <label class="form-label" for="jurnalTanggal" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Tanggal</label>
+                                    <input class="form-control" type="date" id="jurnalTanggal" name="jurnal_tanggal" value="<?= date('Y-m-d'); ?>" required style="border-radius:12px; font-size:13px;">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="jurnalCatatan" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Catatan Pendampingan</label>
+                                    <textarea class="form-control" id="jurnalCatatan" name="jurnal_catatan" rows="3" required placeholder="Contoh: Siswa perlu pendampingan terkait kedisiplinan, motivasi belajar, atau komunikasi dengan orang tua." style="border-radius:12px; font-size:13px;"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="jurnalTindakLanjut" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Tindak Lanjut</label>
+                                    <textarea class="form-control" id="jurnalTindakLanjut" name="jurnal_tindak_lanjut" rows="2" placeholder="Rencana tindak lanjut atau hasil komunikasi." style="border-radius:12px; font-size:13px;"></textarea>
+                                </div>
+                                <div class="col-12 col-md-5">
+                                    <label class="form-label" for="jurnalStatus" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Status</label>
+                                    <select class="form-select" id="jurnalStatus" name="jurnal_status" style="border-radius:12px; font-size:13px;">
+                                        <option value="Dipantau">Dipantau</option>
+                                        <option value="Perlu Tindak Lanjut">Perlu Tindak Lanjut</option>
+                                        <option value="Selesai">Selesai</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-7 d-flex align-items-end">
+                                    <button type="submit" class="btn w-100" style="background:#4338ca; color:#fff; border-radius:12px; font-weight:800; font-size:13px;" <?= empty($guruWaliBinaan) ? 'disabled title="Tambahkan siswa binaan terlebih dahulu"' : ''; ?>>
+                                        <i class="bi bi-journal-plus me-1"></i> Simpan Jurnal Pendampingan
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div style="margin-top:12px;">
+                            <?php if (empty($guruWaliJurnal)): ?>
+                                <div style="background:#fff; border:1px dashed #cbd5e1; border-radius:14px; padding:16px; color:#64748b; font-size:12px; text-align:center;">
+                                    Belum ada jurnal pendampingan guru wali.
+                                </div>
+                            <?php else: ?>
+                                <div style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow:auto;">
+                                    <?php foreach ($guruWaliJurnal as $jurnalWali): ?>
+                                        <?php
+                                        $statusWali = (string)($jurnalWali['status'] ?? 'Dipantau');
+                                        $statusColor = $statusWali === 'Selesai' ? '#16a34a' : ($statusWali === 'Perlu Tindak Lanjut' ? '#dc2626' : '#4338ca');
+                                        ?>
+                                        <div style="background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:11px 12px;">
+                                            <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
+                                                <div style="min-width:0;">
+                                                    <strong style="display:block; font-size:12.5px; color:#0f172a;"><?= htmlspecialchars((string)($jurnalWali['nama_siswa'] ?: $jurnalWali['no_induk_siswa']), ENT_QUOTES, 'UTF-8'); ?></strong>
+                                                    <span style="display:block; font-size:10.5px; color:#64748b; margin-top:2px;">
+                                                        <?= date('d M Y', strtotime((string)$jurnalWali['tanggal'])); ?> · Kelas <?= htmlspecialchars((string)$jurnalWali['kelas'], ENT_QUOTES, 'UTF-8'); ?>
+                                                    </span>
+                                                </div>
+                                                <span style="background:<?= $statusColor; ?>18; color:<?= $statusColor; ?>; font-size:9.5px; font-weight:800; padding:3px 7px; border-radius:999px; white-space:nowrap;">
+                                                    <?= htmlspecialchars($statusWali, ENT_QUOTES, 'UTF-8'); ?>
+                                                </span>
+                                            </div>
+                                            <div style="font-size:11.5px; color:#334155; margin-top:8px; line-height:1.45;"><?= nl2br(htmlspecialchars((string)$jurnalWali['catatan'], ENT_QUOTES, 'UTF-8')); ?></div>
+                                            <?php if (!empty($jurnalWali['tindak_lanjut'])): ?>
+                                                <div style="font-size:11px; color:#64748b; margin-top:6px; padding-top:6px; border-top:1px dashed #e2e8f0;">
+                                                    <strong>Tindak lanjut:</strong> <?= nl2br(htmlspecialchars((string)$jurnalWali['tindak_lanjut'], ENT_QUOTES, 'UTF-8')); ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button type="button" data-close-modal aria-label="Tutup" style="width:36px; height:36px; border:0; border-radius:12px; background:rgba(255,255,255,.16); color:#fff;">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-        <div class="journal-modal-body">
-            <form id="formPelanggaran" style="display:grid; gap:12px;">
-                <div class="row g-2">
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="selectKelasP" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Kelas</label>
-                        <select class="form-select" id="selectKelasP" name="kelas" required style="border-radius:12px; font-size:13px;">
-                            <option value="">Pilih kelas</option>
-                            <?php foreach ($guruWaliKelasOptions as $kelasOption): ?>
-                                <option value="<?= htmlspecialchars($kelasOption, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($kelasOption, ENT_QUOTES, 'UTF-8'); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="selectSiswaP" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Siswa</label>
-                        <select class="form-select" id="selectSiswaP" name="no_induk" required disabled style="border-radius:12px; font-size:13px;">
-                            <option value="">Pilih kelas terlebih dahulu</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row g-2">
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="kategoriPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Kategori</label>
-                        <select class="form-select" id="kategoriPelanggaran" name="kategori_pelanggaran" required style="border-radius:12px; font-size:13px;">
-                            <option value="">Pilih kategori</option>
-                            <option value="Ringan">Ringan</option>
-                            <option value="Sedang">Sedang</option>
-                            <option value="Berat">Berat</option>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="jenisPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Jenis Pelanggaran</label>
-                        <select class="form-select" id="jenisPelanggaran" name="jenis_pelanggaran" required disabled style="border-radius:12px; font-size:13px;">
-                            <option value="">Pilih kategori terlebih dahulu</option>
-                        </select>
-                    </div>
-                    <div class="col-12" id="jenisPelanggaranKustomWrapper" style="display:none; margin-top:8px;">
-                        <label class="form-label" for="jenisPelanggaranKustom" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Jenis Pelanggaran Lainnya</label>
-                        <input class="form-control" type="text" id="jenisPelanggaranKustom" name="jenis_pelanggaran_kustom" placeholder="Sebutkan jenis pelanggaran..." style="border-radius:12px; font-size:13px;">
-                    </div>
-                </div>
-                <div>
-                    <label class="form-label" for="deskripsiPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Deskripsi</label>
-                    <textarea class="form-control" id="deskripsiPelanggaran" name="deskripsi_pelanggaran" rows="3" placeholder="Jelaskan detail pelanggaran yang dilakukan." style="border-radius:12px; font-size:13px;"></textarea>
-                </div>
-                <div>
-                    <label class="form-label" for="tindakanGuru" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Tindakan yang Diambil</label>
-                    <textarea class="form-control" id="tindakanGuru" name="tindakan_guru" rows="2" placeholder="Teguran, pembinaan, komunikasi wali, atau tindak lanjut lain." style="border-radius:12px; font-size:13px;"></textarea>
-                </div>
-                <div class="row g-2">
-                    <div class="col-12">
-                        <label class="form-label" for="statusPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Status</label>
-                        <select class="form-select" id="statusPelanggaran" name="status_pelanggaran" style="border-radius:12px; font-size:13px;">
-                            <option value="Aktif">Aktif</option>
-                            <option value="Diselesaikan">Diselesaikan</option>
-                            <option value="Follow Up">Perlu Follow Up</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="pelanggaranStatus" style="display:none; font-size:12px; border-radius:12px; padding:10px 12px;"></div>
-                <div style="display:flex; gap:10px; justify-content:flex-end; padding-top:4px;">
-                    <button type="button" data-close-modal class="btn btn-light" style="border-radius:12px; font-weight:800;">Batal</button>
-                    <button type="submit" id="btnSimpanPelanggaran" class="btn" style="background:#dc2626; color:#fff; border-radius:12px; font-weight:800;">
-                        <i class="bi bi-check-lg me-1"></i>Simpan Catatan
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
+
+    <div class="journal-modal-backdrop" id="pelanggaranModal" aria-hidden="true">
+        <div class="journal-modal" style="max-width:620px;">
+            <div class="journal-modal-head" style="background:linear-gradient(135deg,#dc2626,#991b1b); color:#fff;">
+                <div>
+                    <h3 style="margin:0; color:#fff;"><i class="bi bi-exclamation-triangle-fill me-2"></i>Catat Pelanggaran Siswa</h3>
+                    <p style="margin:4px 0 0; color:rgba(255,255,255,.78); font-size:12px;">Pilih siswa, kategori, jenis pelanggaran, dan tindak lanjut.</p>
+                </div>
+                <button type="button" data-close-modal aria-label="Tutup" style="width:36px; height:36px; border:0; border-radius:12px; background:rgba(255,255,255,.16); color:#fff;">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="journal-modal-body">
+                <form id="formPelanggaran" style="display:grid; gap:12px;">
+                    <div class="row g-2">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="selectKelasP" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Kelas</label>
+                            <select class="form-select" id="selectKelasP" name="kelas" required style="border-radius:12px; font-size:13px;">
+                                <option value="">Pilih kelas</option>
+                                <?php foreach ($guruWaliKelasOptions as $kelasOption): ?>
+                                    <option value="<?= htmlspecialchars($kelasOption, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($kelasOption, ENT_QUOTES, 'UTF-8'); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="selectSiswaP" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Siswa</label>
+                            <select class="form-select" id="selectSiswaP" name="no_induk" required disabled style="border-radius:12px; font-size:13px;">
+                                <option value="">Pilih kelas terlebih dahulu</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="kategoriPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Kategori</label>
+                            <select class="form-select" id="kategoriPelanggaran" name="kategori_pelanggaran" required style="border-radius:12px; font-size:13px;">
+                                <option value="">Pilih kategori</option>
+                                <option value="Ringan">Ringan</option>
+                                <option value="Sedang">Sedang</option>
+                                <option value="Berat">Berat</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label" for="jenisPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Jenis Pelanggaran</label>
+                            <select class="form-select" id="jenisPelanggaran" name="jenis_pelanggaran" required disabled style="border-radius:12px; font-size:13px;">
+                                <option value="">Pilih kategori terlebih dahulu</option>
+                            </select>
+                        </div>
+                        <div class="col-12" id="jenisPelanggaranKustomWrapper" style="display:none; margin-top:8px;">
+                            <label class="form-label" for="jenisPelanggaranKustom" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Jenis Pelanggaran Lainnya</label>
+                            <input class="form-control" type="text" id="jenisPelanggaranKustom" name="jenis_pelanggaran_kustom" placeholder="Sebutkan jenis pelanggaran..." style="border-radius:12px; font-size:13px;">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label" for="deskripsiPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Deskripsi</label>
+                        <textarea class="form-control" id="deskripsiPelanggaran" name="deskripsi_pelanggaran" rows="3" placeholder="Jelaskan detail pelanggaran yang dilakukan." style="border-radius:12px; font-size:13px;"></textarea>
+                    </div>
+                    <div>
+                        <label class="form-label" for="tindakanGuru" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Tindakan yang Diambil</label>
+                        <textarea class="form-control" id="tindakanGuru" name="tindakan_guru" rows="2" placeholder="Teguran, pembinaan, komunikasi wali, atau tindak lanjut lain." style="border-radius:12px; font-size:13px;"></textarea>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <label class="form-label" for="statusPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Status</label>
+                            <select class="form-select" id="statusPelanggaran" name="status_pelanggaran" style="border-radius:12px; font-size:13px;">
+                                <option value="Aktif">Aktif</option>
+                                <option value="Diselesaikan">Diselesaikan</option>
+                                <option value="Follow Up">Perlu Follow Up</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="pelanggaranStatus" style="display:none; font-size:12px; border-radius:12px; padding:10px 12px;"></div>
+                    <div style="display:flex; gap:10px; justify-content:flex-end; padding-top:4px;">
+                        <button type="button" data-close-modal class="btn btn-light" style="border-radius:12px; font-weight:800;">Batal</button>
+                        <button type="submit" id="btnSimpanPelanggaran" class="btn" style="background:#dc2626; color:#fff; border-radius:12px; font-weight:800;">
+                            <i class="bi bi-check-lg me-1"></i>Simpan Catatan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- SCRIPTS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(function() {
             var jadwalToday = <?= json_encode(array_map(static function ($j) use ($jurnalStatusByMapel) {
-                $idMapel = (int)($j['id_mapel'] ?? 0);
-                return [
-                    'id_mapel' => $idMapel,
-                    'kelas' => (string)($j['kelas'] ?? ''),
-                    'nama_mapel' => (string)($j['nama_mapel'] ?? ''),
-                    'jam_mulai' => (string)($j['jam_mulai'] ?? ''),
-                    'jam_selesai' => (string)($j['jam_selesai'] ?? ''),
-                    'jurnal_terisi' => isset($jurnalStatusByMapel[$idMapel])
-                ];
-            }, $jadwalHariIni), JSON_UNESCAPED_SLASHES); ?>;
+                                    $idMapel = (int)($j['id_mapel'] ?? 0);
+                                    return [
+                                        'id_mapel' => $idMapel,
+                                        'kelas' => (string)($j['kelas'] ?? ''),
+                                        'nama_mapel' => (string)($j['nama_mapel'] ?? ''),
+                                        'jam_mulai' => (string)($j['jam_mulai'] ?? ''),
+                                        'jam_selesai' => (string)($j['jam_selesai'] ?? ''),
+                                        'jurnal_terisi' => isset($jurnalStatusByMapel[$idMapel])
+                                    ];
+                                }, $jadwalHariIni), JSON_UNESCAPED_SLASHES); ?>;
             var guruWaliStudentsByClass = <?= json_encode($guruWaliStudentsByClass, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
 
             window.showToast = window.showToast || function(message) {
@@ -2032,7 +2125,9 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 var $modalData = $('.modal-data').removeClass('journal-loading');
                 $modalData.html('<div style="text-align: center; padding: 20px;"><div class="spinner-border spinner-border-sm text-primary me-2"></div><span class="text-muted">Memuat form jurnal...</span></div>');
                 $('#show').modal('show');
-                $.post('pages/guru/detailmateri.php', { getDetail: idMapel }, function(data) {
+                $.post('pages/guru/detailmateri.php', {
+                    getDetail: idMapel
+                }, function(data) {
                     $modalData.html(data);
                 }).fail(function() {
                     $modalData.html('<div class="alert alert-danger mb-0">Gagal memuat form jurnal.</div>');
@@ -2099,7 +2194,9 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 var originalHtml = $btn.html();
                 $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Reset...');
 
-                $.post('pages/guru/reset-jurnal.php', { idmapel: idMapel }, function(response) {
+                $.post('pages/guru/reset-jurnal.php', {
+                    idmapel: idMapel
+                }, function(response) {
                     var payload = response;
                     if (typeof response === 'string') {
                         try {
@@ -2151,7 +2248,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 $(this).addClass('active');
             });
 
-                                    // Notifikasi Toggle
+            // Notifikasi Toggle
             window.toggleNotif = function(e) {
                 e.stopPropagation();
                 $('#notifDropdown').toggleClass('show');
@@ -2183,7 +2280,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             });
 
             <?php if ($guruWaliFlash !== ''): ?>
-            openDashboardModal('#guruWaliModal');
+                openDashboardModal('#guruWaliModal');
             <?php endif; ?>
 
             $('#kelasBinaan').on('change', function() {
@@ -2374,23 +2471,23 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         // KBM Countdown Timer
         (function() {
             var timerInterval = null;
-            
+
             function initTimer() {
                 if (timerInterval) clearInterval(timerInterval);
-                
+
                 var timerVal = document.getElementById("kbm-timer");
                 if (!timerVal) return;
-                
+
                 var kbmBox = document.getElementById("kbm-box");
                 var targetStr = kbmBox.getAttribute("data-target");
                 if (!targetStr) return;
-                
+
                 var targetDate = new Date(targetStr).getTime();
-                
+
                 function updateTimer() {
                     var now = new Date().getTime();
                     var diff = targetDate - now;
-                    
+
                     if (diff <= 0) {
                         timerVal.textContent = "00m 00s";
                         clearInterval(timerInterval);
@@ -2399,18 +2496,18 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         }, 2000);
                         return;
                     }
-                    
+
                     var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                     var seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                    
+
                     var display = "";
                     if (hours > 0) display += String(hours).padStart(2, '0') + "j ";
                     display += String(minutes).padStart(2, '0') + "m " + String(seconds).padStart(2, '0') + "s";
-                    
+
                     timerVal.textContent = display;
                 }
-                
+
                 updateTimer();
                 timerInterval = setInterval(updateTimer, 1000);
             }
