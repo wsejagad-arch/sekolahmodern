@@ -9,6 +9,24 @@ $sqlGuru = mysqli_query($conn, "SELECT * FROM tbl_guru WHERE no_induk='$nipEsc'"
 $dataGuru = mysqli_fetch_array($sqlGuru);
 $lembaga = data_lembaga();
 
+// Check if guru is wali kelas or guru BK
+$isWaliKelas = false;
+$isGuruBK = false;
+$qWkCheck = mysqli_query($conn, "SELECT id_kelas FROM tbl_kelas WHERE nip_wali='$nipEsc' LIMIT 1");
+if ($qWkCheck && mysqli_num_rows($qWkCheck) > 0) {
+    $isWaliKelas = true;
+}
+if (!$isWaliKelas) {
+    $qWk2Check = mysqli_query($conn, "SELECT id FROM tbl_wali_kelas WHERE nip_wali='$nipEsc' LIMIT 1");
+    if ($qWk2Check && mysqli_num_rows($qWk2Check) > 0) {
+        $isWaliKelas = true;
+    }
+}
+$qBkCheck = mysqli_query($conn, "SELECT id_guru FROM tbl_guru WHERE no_induk='$nipEsc' AND (jabatan LIKE '%BK%' OR is_guru_bk=1) LIMIT 1");
+if ($qBkCheck && mysqli_num_rows($qBkCheck) > 0) {
+    $isGuruBK = true;
+}
+
 // Date Setup
 $tglskr = date('Y-m-d');
 $hariini = ubah_nama_hari($tglskr);
