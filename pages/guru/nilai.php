@@ -303,6 +303,8 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
   </style>
 </head>
 <body>
+<?php include 'guru_sidebar_shared.php'; ?>
+
 <div class="page-header">
   <div class="container d-flex align-items-center justify-content-between">
     <div class="d-flex align-items-center">

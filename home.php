@@ -20,9 +20,7 @@ $hakakses = current_role();
 $lembaga = data_lembaga();
 
 include "header.php";
-if ((int)($_SESSION['hak_akses'] ?? 0) !== 2) {
-  include "sidebar.php";
-}
+include "sidebar.php";
 ?>
 
 
@@ -34,9 +32,7 @@ if ((int)($_SESSION['hak_akses'] ?? 0) !== 2) {
 
     <?php
     // Ini bagian top bar (judul dan navigasi user)
-    if ((int)($_SESSION['hak_akses'] ?? 0) !== 2) {
-      include "topbar.php";
-    }
+    include "topbar.php";
     ?>
 
 

@@ -1,53 +1,10 @@
 <?php
-header("Location: login.php");
-exit();
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SIMANIS</title>
-    <link rel="icon" href="img/<?= htmlspecialchars($lembaga['logo']); ?>" type="image/x-icon">
-
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --bg-overlay: linear-gradient(135deg, rgba(13, 110, 253, .35), rgba(102, 16, 242, .25));
-            --card-bg: rgba(255, 255, 255, .22);
-            --card-border: rgba(255, 255, 255, .35);
-        }
-
-        body {
-            font-family: 'Nunito', sans-serif;
-            background: url('img/foto.jpg') no-repeat center center fixed;
-            background-size: cover;
-            margin: 0;
-            min-height: 100vh;
-            /* Centering handled by .login-wrap for better mobile behavior */
-            display: block;
-            position: relative;
-        }
-
-        body:before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: var(--bg-overlay);
-            z-index: 0;
-        }
-
-        .login-wrap {
-            position: relative;
-            z-index: 1;
+/**
+ * index.php - Entry point for SIMANIS application
+ * Redirect all root requests to login.php for fast authentication flow
+ */
+header("Location: login.php", true, 301);
+exit;
             width: 100%;
             /* Use dynamic viewport heights for mobile browsers */
             min-height: 100dvh;

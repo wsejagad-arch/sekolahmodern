@@ -413,6 +413,8 @@ if ($hasKelasFilter && !empty($kelasOptions)) {
     </style>
 </head>
 <body>
+<?php include 'guru_sidebar_shared.php'; ?>
+
 
   <div class="background">
     <div class="shape one"></div>

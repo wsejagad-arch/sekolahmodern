@@ -1,4 +1,5 @@
 <!-- Topbar -->
+<?php if ((int)($_SESSION['hak_akses'] ?? 0) !== 2): ?>
 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
   <!-- Sidebar Toggle (Topbar) -->
@@ -95,6 +96,71 @@
 
 </nav>
 <!-- End of Topbar -->
+<?php else: ?>
+<!-- DESKTOP TOPBAR FOR GURU -->
+<div class="desktop-topbar-wrapper">
+    <div class="topbar-search-wrap">
+        <i class="bi bi-search"></i>
+        <input type="text" placeholder="Search students, classes...">
+    </div>
+    <div class="desktop-topbar-actions">
+        <span class="topbar-lang">ENG <i class="bi bi-chevron-down"></i></span>
+        <div class="topbar-icon-btn" role="button"><i class="bi bi-envelope"></i></div>
+        
+        <div class="topbar-icon-btn" role="button" onclick="toggleNotif(event)">
+            <i class="bi bi-bell"></i>
+            <?php $notifCount = $totalNotifCount ?? 0; if($notifCount > 0): ?>
+                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width: 8px; height: 8px;"></span>
+            <?php endif; ?>
+            
+            <div class="notif-dropdown" id="notifDropdownDesktop" onclick="event.stopPropagation()">
+                <div class="notif-header">
+                    <span>Notifikasi Anda</span>
+                    <?php if($notifCount > 0): ?>
+                        <span class="notif-badge-inline"><?= $notifCount ?> Baru</span>
+                    <?php endif; ?>
+                </div>
+                <div class="notif-list">
+                    <?php if($notifCount > 0): ?>
+                        <?php foreach(($guru_all_notifications ?? []) as $n): ?>
+                            <a href="<?= htmlspecialchars($n['link']) ?>" class="notif-item" <?= isset($n['action_onclick']) ? 'onclick="'.htmlspecialchars($n['action_onclick']).'"' : '' ?>>
+                                <div class="notif-icon-wrap" style="color: <?= htmlspecialchars($n['color']) ?>; background: <?= htmlspecialchars($n['color']) ?>15;">
+                                    <i class="<?= htmlspecialchars($n['icon']) ?>"></i>
+                                </div>
+                                <div class="notif-content">
+                                    <div class="notif-title"><?= htmlspecialchars($n['title']) ?></div>
+                                    <div class="notif-desc"><?= htmlspecialchars($n['text']) ?></div>
+                                </div>
+                            </a>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="notif-empty">
+                            <i class="bi bi-bell-slash"></i>
+                            Tidak ada notifikasi baru
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        
+        <div class="topbar-profile-card" onclick="window.location='home.php?page=profil-guru'">
+            <div class="topbar-profile-avatar-wrap">
+                <?php 
+                $fotoGuru = $_SESSION['foto'] ?? '';
+                $namaGuru = $_SESSION['nama'] ?? 'Guru';
+                if (!empty($fotoGuru) && file_exists('foto/' . $fotoGuru)): ?>
+                    <img src="foto/<?= htmlspecialchars($fotoGuru) ?>" alt="Profile">
+                <?php else: ?>
+                    <div style="background:var(--primary); color:#fff; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:16px;">
+                        <?= substr($namaGuru, 0, 1) ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <span><?= htmlspecialchars(explode(' ', $namaGuru)[0]) ?></span>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <script>
   (function() {

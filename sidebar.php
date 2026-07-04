@@ -1,4 +1,5 @@
 <!-- Sidebar -->
+<?php if ((int)($_SESSION['hak_akses'] ?? 0) !== 2): ?>
 <ul class="navbar-nav backgroundna sidebar sidebar-dark accordion" id="accordionSidebar">
 
   <!-- Sidebar - Brand -->
@@ -354,13 +355,19 @@
   <!-- Divider -->
   <hr class="sidebar-divider d-none d-md-block">
 
-  <!-- Sidebar Toggler (Sidebar) -->
-  <div class="text-center d-none d-md-inline">
-    <button class="rounded-circle border-0" id="sidebarToggle"></button>
-  </div>
+      <!-- Sidebar Toggler (Sidebar) -->
+      <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+      </div>
 
-</ul>
-<!-- End of Sidebar -->
+    </ul>
+    <!-- End of Sidebar -->
+<?php else: ?>
+    <!-- DESKTOP SIDEBAR FOR GURU -->
+    <link rel='stylesheet' href='pages/guru/css/guru-2026-scoped.css?v=<?= time() ?>'>
+    <link rel='stylesheet' href='pages/guru/css/guru-desktop.css?v=<?= time() ?>'>
+    <?php include 'pages/guru/guru_sidebar_shared.php'; ?>
+<?php endif; ?>
 
 <!-- Mobile overlay — dipakai untuk menutup sidebar ketika klik di luar -->
 <div class="sb-overlay" id="sbOverlay"></div>

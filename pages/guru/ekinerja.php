@@ -853,6 +853,8 @@ while ($qDocs && ($d = mysqli_fetch_assoc($qDocs))) {
     </style>
 </head>
 <body>
+<?php include 'guru_sidebar_shared.php'; ?>
+
 
 <div class="ekinerja-container">
     

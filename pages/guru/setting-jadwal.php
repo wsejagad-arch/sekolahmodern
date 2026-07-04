@@ -262,11 +262,8 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
 <body>
 
 <!-- DESKTOP SIDEBAR -->
-<div class="desktop-sidebar">
-    <div class="desktop-logo">
-        <i class="bi bi-book-half"></i> SIMANIS
-    </div>
-    <div class="desktop-nav">
+<?php include 'guru_sidebar_shared.php'; ?>
+<div class="desktop-nav">
         <a href="../../home.php"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
         <a href="setting-jadwal" class="active"><i class="bi bi-calendar3"></i> Kelas Saya</a>
         <a href="data-siswa"><i class="bi bi-people"></i> Data Siswa</a>

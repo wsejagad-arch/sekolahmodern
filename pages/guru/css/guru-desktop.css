@@ -7,24 +7,15 @@
         padding: 0;
     }
 
-    /* Hide the original SB Admin 2 sidebar and topbar */
-    #accordionSidebar, 
-    #content > .topbar {
-        display: none !important;
-    }
+    /* Hide original SB Admin elements */
+    #accordionSidebar, #content > .topbar { display: none !important; }
     
-    /* Remove padding/margin from original wrappers */
     #content-wrapper {
-        margin-left: 0 !important;
-        padding-left: 0 !important;
+        margin-left: 260px !important;
         background: transparent !important;
     }
-    .container-fluid {
-        padding: 0 !important;
-    }
-    #wrapper {
-        background: transparent !important;
-    }
+    .container-fluid { padding: 0 !important; }
+    #wrapper { background: transparent !important; }
     
     /* Hide Mobile UI Elements */
     .bottom-nav-wrap,
@@ -37,7 +28,6 @@
     .app-shell {
         max-width: 100%;
         margin: 0;
-        margin-left: 260px; /* Width of sidebar */
         padding: 24px 32px 40px 32px;
         min-height: 100vh;
         border-radius: 0;
