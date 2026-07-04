@@ -543,7 +543,58 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 ?>
 <link rel='stylesheet' href='pages/guru/css/guru-2026-scoped.css?v=1782641374'>
 <link rel='stylesheet' href='pages/guru/css/guru-desktop.css?v=<?= time() ?>'>
+
+<!-- DESKTOP SIDEBAR -->
+<aside class="desktop-sidebar">
+    <div class="desktop-logo">
+        <img src="../../img/<?= htmlspecialchars($lembaga['logo']) ?>" alt="Logo">
+        <span>SIMANIS</span>
+    </div>
+    <nav class="desktop-nav">
+        <a href="../../home.php"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
+        <?php if($isWaliKelas || $isGuruBK): ?>
+        <a href="validasi-izin"><i class="bi bi-patch-check-fill"></i><span>Validasi Izin</span></a>
+        <?php endif; ?>
+        <a href="data-siswa"><i class="bi bi-people"></i><span>Data Siswa</span></a>
+        <a href="nilai"><i class="bi bi-journal-check"></i><span>Nilai</span></a>
+        <a href="materi"><i class="bi bi-book"></i><span>Materi</span></a>
+        <a href="laporan-kelas"><i class="bi bi-cpu"></i><span>Laporan Kelas</span></a>
+        <a href="ekinerja"><i class="bi bi-speedometer2"></i><span>E-Kinerja</span></a>
+        <a href="../../pengaturan-layout.php"><i class="bi bi-gear"></i><span>Pengaturan</span></a>
+    </nav>
+    <div class="desktop-logout-wrap">
+        <a href="../../logout.php" class="btn-desktop-logout" onclick="return confirm('Yakin mau logout?');">
+            <i class="bi bi-box-arrow-left"></i> Logout
+        </a>
+    </div>
+</aside>
+
 <div class="app-shell">
+
+    <!-- DESKTOP TOPBAR -->
+    <div class="desktop-topbar-wrapper">
+        <div class="topbar-search-wrap">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Cari menu atau fitur..." id="dashboardSearch">
+        </div>
+        <div class="desktop-topbar-actions">
+            <span class="topbar-lang"><i class="bi bi-globe"></i> ID</span>
+            <div class="topbar-icon-btn" onclick="toggleNotifications(event)" title="Notifikasi">
+                <i class="bi bi-bell"></i>
+                <?php if($totalNotifCount > 0): ?><span style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:800;"><?= min($totalNotifCount,9) ?></span><?php endif; ?>
+            </div>
+            <div class="topbar-profile-card" onclick="toggleProfileMenu()">
+                <div class="topbar-profile-avatar-wrap">
+                    <?php if (!empty($dataGuru['foto'])): ?>
+                    <img src="../../foto/<?= htmlspecialchars($dataGuru['foto']) ?>" alt="Profile">
+                    <?php else: ?>
+                    <div style="width:100%;height:100%;background:#3c58b9;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem;"><?= strtoupper(substr($dataGuru['nama_guru'],0,1)) ?></div>
+                    <?php endif; ?>
+                </div>
+                <span><?= htmlspecialchars(explode(' ', $dataGuru['nama_guru'])[0]) ?></span>
+            </div>
+        </div>
+    </div>
 
     <!-- MAIN CENTER COLUMN -->
     <div class="desktop-center-column">
