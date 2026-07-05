@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -205,202 +205,171 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/guru-desktop.css?v=<?= time() ?>">
     <style>
-        :root { --line:#e2e8f0; --ink:#0f172a; --muted:#64748b; --brand:#2563eb; }
-        body { margin:0; font-family:"Plus Jakarta Sans", system-ui, sans-serif; background:linear-gradient(135deg,#eff6ff,#f8fafc 48%,#ecfeff); color:var(--ink); padding-bottom:72px; }
-        .shell { max-width:1220px; margin:0 auto; padding:24px; }
-        .hero { background:linear-gradient(135deg,#1d4ed8,#0f172a); color:#fff; border-radius:22px; padding:26px; box-shadow:0 18px 44px rgba(15,23,42,.16); }
-        .hero a { color:rgba(255,255,255,.82); text-decoration:none; font-weight:800; }
-        .panel { background:rgba(255,255,255,.94); border:1px solid rgba(226,232,240,.9); border-radius:18px; box-shadow:0 12px 32px rgba(15,23,42,.07); }
-        .panel-pad { padding:18px; }
-        .form-control, .form-select { border-radius:12px; border-color:#dbe3ee; }
-        .table th { font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:#64748b; white-space:nowrap; background:#f8fafc; }
-        .table td { vertical-align:middle; font-size:13px; }
-        .day-badge { display:inline-flex; min-width:78px; justify-content:center; border-radius:999px; background:#dbeafe; color:#1d4ed8; font-weight:900; font-size:12px; padding:5px 9px; }
-        .mini { color:var(--muted); font-size:12px; }
-        .mobile-nav { position:fixed; left:0; right:0; bottom:0; background:rgba(255,255,255,.94); border-top:1px solid var(--line); backdrop-filter:blur(16px); padding:10px 16px; display:flex; justify-content:center; gap:22px; z-index:20; }
+        body { margin:0; font-family:"Plus Jakarta Sans", system-ui, sans-serif; background:#ebf1f6; color:#0f172a; }
+        .mobile-nav { position:fixed; left:0; right:0; bottom:0; background:rgba(255,255,255,.94); border-top:1px solid #e2e8f0; backdrop-filter:blur(16px); padding:10px 16px; display:flex; justify-content:center; gap:22px; z-index:20; }
         .mobile-nav a { color:#64748b; text-decoration:none; font-size:12px; font-weight:800; display:flex; flex-direction:column; align-items:center; }
         .mobile-nav i { font-size:20px; }
-        @media (max-width:640px) { .shell { padding:16px; } .hero { padding:20px; } }
-        
-        /* Desktop specific styling overrides */
         @media (min-width: 768px) {
-            .mobile-nav, 
-            .guru-common-footer-wrap {
-                display: none !important;
-                padding-bottom: 0 !important;
-            }
-            body {
-                padding-bottom: 0 !important;
-                background: #ebf1f6 !important;
-            }
-            /* Shift main content container */
-            .shell {
-                margin-left: 260px !important;
-                max-width: calc(100% - 260px) !important;
-                padding: 32px !important;
-            }
-            .hero {
-                background: #ffffff !important;
-                color: #1e293b !important;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.02) !important;
-                border: 1px solid rgba(226,232,240,.9) !important;
-            }
-            .hero h1 {
-                color: #1e293b !important;
-                font-weight: 800 !important;
-            }
-            .hero p {
-                color: #64748b !important;
-            }
-            .hero a {
-                color: #3c58b9 !important;
-                font-weight: 700 !important;
-            }
+            .mobile-nav, .guru-common-footer-wrap { display: none !important; padding-bottom: 0 !important; }
+            body { padding-bottom: 0 !important; }
         }
+        .form-control, .form-select { border-radius: 12px; border: 1px solid #e2e8f0; padding: 10px 14px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .form-label { font-weight: 700; color: #1e293b; font-size: 0.9rem; }
+        .day-badge { display:inline-flex; min-width:78px; justify-content:center; border-radius:999px; background:#dbeafe; color:#1d4ed8; font-weight:900; font-size:12px; padding:5px 9px; }
+        .table-modern th { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; background: #f8fafc; padding: 12px 16px; border-bottom: 2px solid #e2e8f0; }
+        .table-modern td { vertical-align: middle; padding: 16px; border-bottom: 1px solid #f1f5f9; }
+        .table-modern tbody tr { transition: all 0.2s; }
+        .table-modern tbody tr:hover { background: #f8fafc; }
     </style>
 </head>
 <body>
 
 <!-- DESKTOP SIDEBAR -->
 <?php include 'guru_sidebar_shared.php'; ?>
-<div class="desktop-nav">
-        <a href="../../home.php"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
-        <a href="setting-jadwal" class="active"><i class="bi bi-calendar3"></i> Kelas Saya</a>
-        <a href="data-siswa"><i class="bi bi-people"></i> Data Siswa</a>
-        <a href="nilai"><i class="bi bi-journal-check"></i> Nilai & Tugas</a>
-        <a href="materi"><i class="bi bi-book"></i> Materi</a>
-        <a href="laporan-kelas"><i class="bi bi-cpu"></i> Laporan & AI</a>
-        <a href="ekinerja"><i class="bi bi-speedometer2"></i> e-Kinerja</a>
-        <a href="profil-guru"><i class="bi bi-gear"></i> Pengaturan</a>
-    </div>
-    <div class="desktop-logout-wrap">
-        <a href="../../logout.php" onclick="return confirm('Apakah Anda yakin ingin keluar?');" class="btn-desktop-logout">
-            <i class="bi bi-box-arrow-right"></i> Log Out
-        </a>
+
+<div class="app-shell">
+    <div class="desktop-center-column" style="max-width: 1000px;">
+        
+        <!-- Welcome Banner -->
+        <div class="welcome-banner-premium">
+            <div class="banner-content">
+                <div class="banner-text">
+                    <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Setting Jadwal ðŸ—“ï¸</h2>
+                    <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Kelola jadwal mengajar Anda. Jadwal ini akan terhubung langsung ke dashboard, jurnal, dan presensi siswa.</p>
+                </div>
+                <div class="banner-actions">
+                    <a href="../../home.php" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali ke Dashboard</a>
+                </div>
+            </div>
+            <div class="banner-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
+        </div>
+
+        <?php if ($flash !== ''): ?>
+            <div class="alert alert-<?= sj_h($flashType); ?> fw-bold" style="border-radius:12px; border:none; box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+                <i class="bi <?= $flashType === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'; ?> me-2"></i> <?= sj_h($flash); ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Form Card -->
+        <div class="premium-card">
+            <div class="card-header-flex">
+                <h3 class="card-title-modern"><i class="bi bi-calendar2-plus-fill text-primary me-2"></i> <?= $editData ? 'Edit Jadwal' : 'Tambah Jadwal'; ?></h3>
+                <?php if ($editData): ?>
+                    <a href="setting-jadwal" class="btn btn-sm btn-outline-secondary fw-bold" style="border-radius:8px;"><i class="bi bi-plus-circle"></i> Batal / Tambah Baru</a>
+                <?php endif; ?>
+            </div>
+            
+            <form method="post" class="row g-3">
+                <input type="hidden" name="action" value="<?= $editData ? 'update' : 'create'; ?>">
+                <input type="hidden" name="id_mapel" value="<?= (int)($editData['id_mapel'] ?? 0); ?>">
+                
+                <div class="col-md-4">
+                    <label class="form-label">Mata Pelajaran</label>
+                    <input class="form-control" name="nama_mapel" list="mapelOptions" value="<?= sj_h($selectedMapel); ?>" required placeholder="Contoh: MATEMATIKA">
+                    <datalist id="mapelOptions">
+                        <?php foreach ($mapelOptions as $mapel): ?>
+                            <option value="<?= sj_h($mapel); ?>"></option>
+                        <?php endforeach; ?>
+                    </datalist>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Kelas</label>
+                    <input class="form-control" name="kelas" list="kelasOptions" value="<?= sj_h($selectedKelas); ?>" required placeholder="Contoh: X E 1">
+                    <datalist id="kelasOptions">
+                        <?php foreach ($kelasOptions as $kelas): ?>
+                            <option value="<?= sj_h($kelas); ?>"></option>
+                        <?php endforeach; ?>
+                    </datalist>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Hari</label>
+                    <select class="form-select" name="hari" required>
+                        <?php foreach ($hariList as $hari): ?>
+                            <option value="<?= sj_h($hari); ?>" <?= $selectedHari === $hari ? 'selected' : ''; ?>><?= sj_h($hari); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Ruang (Opsional)</label>
+                    <input class="form-control" name="ruang" value="<?= sj_h($selectedRuang); ?>" placeholder="Misal: R. Lab Komputer">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Jam Mulai</label>
+                    <input class="form-control" type="time" name="jam_mulai" value="<?= sj_h($selectedMulai); ?>" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Jam Selesai</label>
+                    <input class="form-control" type="time" name="jam_selesai" value="<?= sj_h($selectedSelesai); ?>" required>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button class="btn btn-primary w-100 fw-bold" style="padding:10px; border-radius:12px; box-shadow:0 4px 12px rgba(13,110,253,0.2);" type="submit">
+                        <i class="bi bi-save me-1"></i> <?= $editData ? 'Simpan Perubahan' : 'Simpan Jadwal Baru'; ?>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Schedule List Card -->
+        <div class="premium-card">
+            <div class="card-header-flex">
+                <h3 class="card-title-modern"><i class="bi bi-calendar-week text-primary me-2"></i> Jadwal Mengajar Saya</h3>
+                <span class="badge-subtle"><?= count($jadwal); ?> Kelas</span>
+            </div>
+            
+            <div class="table-responsive" style="border-radius:12px; border:1px solid #f1f5f9;">
+                <table class="table table-modern mb-0">
+                    <thead>
+                        <tr>
+                            <th>Hari</th>
+                            <th>Waktu</th>
+                            <th>Mata Pelajaran</th>
+                            <th>Kelas</th>
+                            <th>Ruang</th>
+                            <th class="text-end">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php if (empty($jadwal)): ?>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-5">
+                                <i class="bi bi-calendar-x" style="font-size:2.5rem; color:#cbd5e1; margin-bottom:10px; display:block;"></i>
+                                Belum ada jadwal yang ditambahkan.
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php foreach ($jadwal as $row): ?>
+                        <tr>
+                            <td><span class="day-badge"><?= sj_h($row['hari']); ?></span></td>
+                            <td>
+                                <div class="fw-bold text-dark"><?= sj_h(substr((string)$row['jam_mulai'], 0, 5)); ?> - <?= sj_h(substr((string)$row['jam_selesai'], 0, 5)); ?></div>
+                            </td>
+                            <td>
+                                <div class="fw-bold" style="color:#0f172a;"><?= sj_h($row['nama_mapel']); ?></div>
+                                <div style="font-size:0.75rem; color:#94a3b8;">ID: <?= (int)$row['id_mapel']; ?></div>
+                            </td>
+                            <td><div class="badge bg-light text-dark border fw-bold px-3 py-2" style="border-radius:8px; font-size:0.85rem;"><?= sj_h($row['kelas']); ?></div></td>
+                            <td><span class="text-muted"><i class="bi bi-door-open me-1"></i> <?= sj_h($row['ruang'] ?: '-'); ?></span></td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-outline-primary fw-bold mb-1" style="border-radius:8px;" href="setting-jadwal?edit=<?= (int)$row['id_mapel']; ?>"><i class="bi bi-pencil-square"></i></a>
+                                <form method="post" class="d-inline" onsubmit="return confirm('Hapus jadwal ini?');">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id_mapel" value="<?= (int)$row['id_mapel']; ?>">
+                                    <button class="btn btn-sm btn-outline-danger fw-bold mb-1" style="border-radius:8px;" type="submit"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>
-
-<main class="shell">
-    <section class="hero">
-        <a href="../../home.php"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
-        <h1 class="mt-3 mb-2">Setting Jadwal</h1>
-        <p class="mb-0 text-white-50">Kelola jadwal mengajar milik Anda sendiri. Jadwal yang diubah di sini langsung dipakai oleh dashboard, jurnal mengajar, dan presensi siswa.</p>
-    </section>
-
-    <?php if ($flash !== ''): ?>
-        <div class="alert alert-<?= sj_h($flashType); ?> mt-3 mb-0"><?= sj_h($flash); ?></div>
-    <?php endif; ?>
-
-    <section class="panel panel-pad mt-3">
-        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
-            <div>
-                <h5 class="fw-bold mb-1"><i class="bi bi-calendar2-plus-fill text-primary"></i> <?= $editData ? 'Edit Jadwal' : 'Tambah Jadwal'; ?></h5>
-                <div class="mini"><?= sj_h($namaGuru); ?> - <?= sj_h($nip); ?></div>
-            </div>
-            <?php if ($editData): ?>
-                <a href="setting-jadwal" class="btn btn-outline-secondary btn-sm fw-bold"><i class="bi bi-plus-circle"></i> Tambah Baru</a>
-            <?php endif; ?>
-        </div>
-        <form method="post" class="row g-3">
-            <input type="hidden" name="action" value="<?= $editData ? 'update' : 'create'; ?>">
-            <input type="hidden" name="id_mapel" value="<?= (int)($editData['id_mapel'] ?? 0); ?>">
-            <div class="col-md-4">
-                <label class="form-label fw-bold">Mata Pelajaran</label>
-                <input class="form-control" name="nama_mapel" list="mapelOptions" value="<?= sj_h($selectedMapel); ?>" required placeholder="Contoh: MATEMATIKA">
-                <datalist id="mapelOptions">
-                    <?php foreach ($mapelOptions as $mapel): ?>
-                        <option value="<?= sj_h($mapel); ?>"></option>
-                    <?php endforeach; ?>
-                </datalist>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label fw-bold">Kelas</label>
-                <input class="form-control" name="kelas" list="kelasOptions" value="<?= sj_h($selectedKelas); ?>" required placeholder="Contoh: X E 1">
-                <datalist id="kelasOptions">
-                    <?php foreach ($kelasOptions as $kelas): ?>
-                        <option value="<?= sj_h($kelas); ?>"></option>
-                    <?php endforeach; ?>
-                </datalist>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label fw-bold">Hari</label>
-                <select class="form-select" name="hari" required>
-                    <?php foreach ($hariList as $hari): ?>
-                        <option value="<?= sj_h($hari); ?>" <?= $selectedHari === $hari ? 'selected' : ''; ?>><?= sj_h($hari); ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label fw-bold">Ruang</label>
-                <input class="form-control" name="ruang" value="<?= sj_h($selectedRuang); ?>" placeholder="Opsional">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label fw-bold">Jam Mulai</label>
-                <input class="form-control" type="time" name="jam_mulai" value="<?= sj_h($selectedMulai); ?>" required>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label fw-bold">Jam Selesai</label>
-                <input class="form-control" type="time" name="jam_selesai" value="<?= sj_h($selectedSelesai); ?>" required>
-            </div>
-            <div class="col-md-6 d-flex align-items-end gap-2">
-                <button class="btn btn-primary fw-bold px-4" type="submit"><i class="bi bi-save"></i> <?= $editData ? 'Simpan Perubahan' : 'Tambah Jadwal'; ?></button>
-                <?php if ($editData): ?>
-                    <a class="btn btn-outline-secondary fw-bold" href="setting-jadwal">Batal Edit</a>
-                <?php endif; ?>
-            </div>
-        </form>
-    </section>
-
-    <section class="panel mt-3">
-        <div class="panel-pad border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <div>
-                <h5 class="fw-bold mb-1"><i class="bi bi-calendar-week text-primary"></i> Jadwal Mengajar Saya</h5>
-                <div class="mini"><?= count($jadwal); ?> jadwal tersimpan.</div>
-            </div>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th>Hari</th>
-                        <th>Jam</th>
-                        <th>Mata Pelajaran</th>
-                        <th>Kelas</th>
-                        <th>Ruang</th>
-                        <th class="text-end">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php if (empty($jadwal)): ?>
-                    <tr>
-                        <td colspan="6" class="text-center text-muted py-4">Belum ada jadwal. Tambahkan jadwal pertama Anda dari form di atas.</td>
-                    </tr>
-                <?php endif; ?>
-                <?php foreach ($jadwal as $row): ?>
-                    <tr>
-                        <td><span class="day-badge"><?= sj_h($row['hari']); ?></span></td>
-                        <td><strong><?= sj_h(substr((string)$row['jam_mulai'], 0, 5)); ?> - <?= sj_h(substr((string)$row['jam_selesai'], 0, 5)); ?></strong></td>
-                        <td>
-                            <div class="fw-bold"><?= sj_h($row['nama_mapel']); ?></div>
-                            <div class="mini">ID Jadwal: <?= (int)$row['id_mapel']; ?></div>
-                        </td>
-                        <td><?= sj_h($row['kelas']); ?></td>
-                        <td><?= sj_h($row['ruang'] ?: 'R. Kelas'); ?></td>
-                        <td class="text-end">
-                            <a class="btn btn-sm btn-outline-primary fw-bold" href="setting-jadwal?edit=<?= (int)$row['id_mapel']; ?>"><i class="bi bi-pencil-square"></i> Edit</a>
-                            <form method="post" class="d-inline" onsubmit="return confirm('Hapus jadwal ini?');">
-                                <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="id_mapel" value="<?= (int)$row['id_mapel']; ?>">
-                                <button class="btn btn-sm btn-outline-danger fw-bold" type="submit"><i class="bi bi-trash"></i> Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    </section>
-</main>
 
 <nav class="mobile-nav">
     <a href="../../home.php"><i class="bi bi-house-door"></i><span>Beranda</span></a>
@@ -411,3 +380,4 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
 <?php include __DIR__ . '/guru_common_footer.php'; ?>
 </body>
 </html>
+
