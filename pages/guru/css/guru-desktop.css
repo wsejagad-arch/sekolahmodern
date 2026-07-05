@@ -12,6 +12,7 @@
     
     #content-wrapper {
         margin-left: 300px !important;
+        width: calc(100% - 300px) !important;
         background: transparent !important;
     }
     .container-fluid { padding: 0 !important; }
@@ -820,6 +821,7 @@
 @media (min-width: 768px) and (max-width: 1024px) {
     #content-wrapper {
         margin-left: 280px !important;
+        width: calc(100% - 280px) !important;
     }
     .desktop-sidebar {
         width: 280px !important;
@@ -842,6 +844,7 @@
 @media (min-width: 1400px) {
     #content-wrapper {
         margin-left: 320px !important;
+        width: calc(100% - 320px) !important;
     }
     .desktop-sidebar {
         width: 320px !important;
