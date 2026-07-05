@@ -11,8 +11,6 @@
     #accordionSidebar, #content > .topbar { display: none !important; }
     
     #content-wrapper {
-        margin-left: 260px !important;
-        width: calc(100% - 260px) !important;
         background: transparent !important;
     }
     .container-fluid { padding: 0 !important; }
@@ -28,8 +26,8 @@
     /* Redefine App Shell */
     .app-shell {
         max-width: 100%;
-        margin: 0;
-        padding: 20px 24px 32px 0; /* Changed left padding to 0 for maximum closeness */
+        margin: 0 0 0 260px; /* Add margin-left to make space for fixed sidebar */
+        padding: 20px 24px 32px 0; /* Ensure 0 left padding so content touches sidebar */
         min-height: 100vh;
         border-radius: 0;
         background: transparent;
@@ -821,13 +819,13 @@
 /* Responsive for medium screens (1024px and below) */
 @media (min-width: 768px) and (max-width: 1024px) {
     #content-wrapper {
-        margin-left: 280px !important;
-        width: calc(100% - 280px) !important;
+        background: transparent !important;
     }
     .desktop-sidebar {
         width: 280px !important;
     }
     .app-shell {
+        margin-left: 280px !important;
         padding: 16px 16px 24px 0 !important;
         grid-template-columns: 1fr 260px !important;
         gap: 14px !important;
@@ -845,13 +843,13 @@
 /* Large screens (1400px+) - expand content more */
 @media (min-width: 1400px) {
     #content-wrapper {
-        margin-left: 320px !important;
-        width: calc(100% - 320px) !important;
+        background: transparent !important;
     }
     .desktop-sidebar {
         width: 320px !important;
     }
     .app-shell {
+        margin-left: 320px !important;
         padding: 24px 32px 40px 0 !important;
         grid-template-columns: 1.2fr 360px !important;
         gap: 28px !important;
