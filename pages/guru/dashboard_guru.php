@@ -1064,32 +1064,38 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         }
         ?>
         <?php if ($runningPanel !== null): ?>
-            <div id="kbm-box" class="running-schedule-3d <?= $hasRunningSchedule ? 'is-live' : 'is-idle'; ?>" <?= $runningTarget !== '' ? 'data-target="' . htmlspecialchars($runningTarget, ENT_QUOTES, 'UTF-8') . '"' : ''; ?>>
-                <div class="running-live-orb">
-                    <i class="bi <?= $hasRunningSchedule ? 'bi-broadcast-pin' : 'bi-calendar2-week'; ?>"></i>
+            <div id="kbm-box" class="kbm-mobile-card <?= $hasRunningSchedule ? 'is-live' : 'is-idle'; ?>" <?= $runningTarget !== '' ? 'data-target="' . htmlspecialchars($runningTarget, ENT_QUOTES, 'UTF-8') . '"' : ''; ?> style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.2);">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                    <i class="bi <?= $hasRunningSchedule ? 'bi-broadcast-pin text-warning' : 'bi-calendar2-week text-white'; ?>" style="font-size: 24px;"></i>
                 </div>
-                <div class="running-copy">
-                    <div class="running-kicker">
-                        <span class="running-kicker-dot"></span>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; color: <?= $hasRunningSchedule ? '#fcd34d' : 'rgba(255,255,255,0.9)'; ?>;">
+                        <?php if($hasRunningSchedule): ?>
+                           <span style="width:6px; height:6px; border-radius:50%; background:#fcd34d; animation: pulse-live 1.5s infinite;"></span>
+                        <?php endif; ?>
                         <?= htmlspecialchars($runningKickerLabel, ENT_QUOTES, 'UTF-8'); ?>
                     </div>
-                    <h3 class="running-title">
+                    <h3 style="font-size: 15px; font-weight: 700; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">
                         <?= htmlspecialchars($runningPanel['nama_mapel']); ?>
                     </h3>
-                    <div class="running-meta">
-                        <span><i class="bi bi-door-open-fill"></i> Kelas <?= htmlspecialchars($runningPanel['kelas']); ?></span>
-                        <span style="opacity:.65;">|</span>
+                    <div style="font-size: 12px; opacity: 0.9; display: flex; align-items: center; gap: 8px; color: #fff;">
+                        <span><i class="bi bi-door-open-fill"></i> <?= htmlspecialchars($runningPanel['kelas']); ?></span>
+                        <span style="opacity:0.5;">|</span>
                         <span><i class="bi bi-clock-fill"></i> <?= substr($runningPanel['jam_mulai'], 0, 5); ?> - <?= substr($runningPanel['jam_selesai'], 0, 5); ?></span>
                     </div>
                 </div>
-                <div class="running-time-pill">
-                    <span class="running-state-label">
-                        <i class="bi <?= $runningStateIcon; ?>"></i>
-                        <?= htmlspecialchars($runningCountdownLabel, ENT_QUOTES, 'UTF-8'); ?>
-                    </span>
-                    <strong id="kbm-timer">Calculating...</strong>
+                <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center;">
+                    <div style="font-size: 10px; opacity: 0.8; margin-bottom: 4px; color:#fff; text-align: center;"><i class="bi <?= $runningStateIcon; ?>"></i> <br> <?= htmlspecialchars($runningCountdownLabel, ENT_QUOTES, 'UTF-8'); ?></div>
+                    <strong id="kbm-timer" style="font-size: 12px; background: rgba(255,255,255,0.15); padding: 4px 8px; border-radius: 6px; color: #fff; text-align: center;">--:--:--</strong>
                 </div>
             </div>
+            <style>
+            @keyframes pulse-live {
+                0% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.5); opacity: 0.5; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            </style>
         <?php endif; ?>
 
         <!-- Bottom Section: Metrics Grid -->
