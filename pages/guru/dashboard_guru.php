@@ -605,126 +605,94 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
 <div class="app-shell">
 
-    <!-- DESKTOP TOPBAR -->
-    <div class="desktop-topbar-wrapper">
-        <div class="topbar-search-wrap">
-            <i class="bi bi-search"></i>
-            <input type="text" placeholder="Cari menu atau fitur..." id="dashboardSearch">
-        </div>
-        <div class="desktop-topbar-actions">
-            <span class="topbar-lang"><i class="bi bi-globe"></i> ID</span>
-            <div style="position:relative;">
-                <div class="topbar-icon-btn" onclick="toggleNotifications(event)" title="Notifikasi">
+    <!-- MAIN CENTER COLUMN -->
+    <div class="desktop-center-column">
+        <!-- Welcome Banner (Redesigned) -->
+        <div class="welcome-banner-premium" style="position:relative; z-index: 10;">
+            <!-- Integrated Topbar Actions -->
+            <div style="position:absolute; top: 20px; right: 24px; display:flex; gap:16px; z-index: 20;">
+                <div class="topbar-icon-btn" onclick="toggleNotifications(event)" title="Notifikasi" style="background: rgba(255,255,255,0.2); color:#fff; cursor:pointer;">
                     <i class="bi bi-bell"></i>
-                    <?php if ($totalNotifCount > 0): ?><span style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#dc2626;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:800;"><?= min($totalNotifCount, 9) ?></span><?php endif; ?>
+                    <?php if ($totalNotifCount > 0): ?><span style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#ef4444;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:800;"><?= min($totalNotifCount, 9) ?></span><?php endif; ?>
                 </div>
-                <div id="notifDropdownDesktop" class="topbar-dropdown" style="position:absolute;top:100%;right:0;width:320px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-height:400px;overflow-y:auto;z-index:1000;display:none;" onclick="event.stopPropagation()">
-                    <div style="padding:12px;border-bottom:1px solid #e5e7eb;font-weight:600;font-size:0.9rem;color:#1f2937;">Notifikasi</div>
+                <!-- Notif Dropdown -->
+                <div id="notifDropdownDesktop" class="topbar-dropdown" style="position:absolute;top:50px;right:0;width:320px;background:#fff;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.2);max-height:400px;overflow-y:auto;z-index:1000;display:none;" onclick="event.stopPropagation()">
+                    <div style="padding:14px;border-bottom:1px solid #f1f5f9;font-weight:700;font-size:0.95rem;color:#1e293b;">Notifikasi</div>
                     <?php if ($totalNotifCount > 0): ?>
                         <?php foreach ($guru_all_notifications as $notif): ?>
-                            <div style="padding:12px;border-bottom:1px solid #f3f4f6;font-size:0.85rem;color:#374151;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
-                                <div style="font-weight:500;margin-bottom:2px;"><?= htmlspecialchars($notif['title'] ?? 'Notifikasi') ?></div>
-                                <div style="font-size:0.8rem;color:#6b7280;margin-bottom:4px;"><?= htmlspecialchars(substr($notif['message'] ?? '', 0, 60)) ?>...</div>
-                                <div style="font-size:0.75rem;color:#9ca3af;"><?= date('d/m/Y H:i', strtotime($notif['created_at'] ?? 'now')) ?></div>
+                            <div style="padding:12px 14px;border-bottom:1px solid #f8fafc;font-size:0.85rem;color:#475569;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                                <div style="font-weight:600;margin-bottom:4px;color:#0f172a;"><?= htmlspecialchars($notif['title'] ?? 'Notifikasi') ?></div>
+                                <div style="font-size:0.8rem;color:#64748b;margin-bottom:6px;line-height:1.4;"><?= htmlspecialchars(substr($notif['message'] ?? '', 0, 70)) ?>...</div>
+                                <div style="font-size:0.75rem;color:#94a3b8;font-weight:500;"><i class="bi bi-clock me-1"></i><?= date('d M Y, H:i', strtotime($notif['created_at'] ?? 'now')) ?></div>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <div style="padding:20px;text-align:center;color:#9ca3af;font-size:0.9rem;">Tidak ada notifikasi</div>
+                        <div style="padding:24px;text-align:center;color:#94a3b8;font-size:0.9rem;">
+                            <i class="bi bi-bell-slash" style="font-size:2rem;margin-bottom:8px;display:block;"></i>
+                            Tidak ada notifikasi
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
-            <div style="position:relative;">
-                <div class="topbar-profile-card" onclick="toggleProfileMenu()">
-                    <div class="topbar-profile-avatar-wrap">
-                        <?php if (!empty($dataGuru['foto'])): ?>
-                            <img src="../../foto/<?= htmlspecialchars($dataGuru['foto']) ?>" alt="Profile">
-                        <?php else: ?>
-                            <div style="width:100%;height:100%;background:#3c58b9;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1rem;"><?= strtoupper(substr($dataGuru['nama_guru'], 0, 1)) ?></div>
-                        <?php endif; ?>
-                    </div>
-                    <span><?= htmlspecialchars(explode(' ', $dataGuru['nama_guru'])[0]) ?></span>
-                </div>
-                <div id="profileMenuDesktop" class="topbar-dropdown" style="position:absolute;top:100%;right:0;width:200px;background:#fff;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1000;display:none;" onclick="event.stopPropagation()">
-                    <a href="profil-guru.php" style="display:block;padding:12px 16px;color:#374151;text-decoration:none;font-size:0.9rem;border-bottom:1px solid #f3f4f6;transition:background 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
-                        <i class="bi bi-person me-2"></i> Profil Saya
-                    </a>
-                    <a href="profil-guru.php" style="display:block;padding:12px 16px;color:#374151;text-decoration:none;font-size:0.9rem;border-bottom:1px solid #f3f4f6;transition:background 0.2s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
-                        <i class="bi bi-gear me-2"></i> Pengaturan
-                    </a>
-                    <a href="../../logout.php" style="display:block;padding:12px 16px;color:#dc2626;text-decoration:none;font-size:0.9rem;transition:background 0.2s;" onclick="return confirm('Yakin mau logout?')" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
-                        <i class="bi bi-box-arrow-left me-2"></i> Logout
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- MAIN CENTER COLUMN -->
-    <div class="desktop-center-column">
-        <!-- Welcome Banner -->
-        <div class="welcome-banner-card">
-            <div class="welcome-banner-info">
-                <h2>Hello <?= htmlspecialchars(explode(' ', $dataGuru['nama_guru'])[0]) ?>!</h2>
-                <?php
-                $filledJurnalCount = max(0, $totalJadwalHari - $unfilledJurnalCount);
-                $jurnalPercentage = ($totalJadwalHari > 0) ? round(($filledJurnalCount / $totalJadwalHari) * 100) : 100;
-                ?>
-                <p style="font-size: 0.95rem; color: #64748b; margin-bottom: 12px;">Anda memiliki <?= $unfilledJurnalCount ?> jurnal yang belum diisi hari ini.</p>
-
+            <div class="banner-content">
+                <div class="banner-text">
+                    <p class="banner-greeting" style="color:rgba(255,255,255,0.8);font-size:0.9rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">
+                        <?= (date('H') < 12) ? 'Selamat Pagi' : ((date('H') < 15) ? 'Selamat Siang' : ((date('H') < 18) ? 'Selamat Sore' : 'Selamat Malam')) ?>
+                    </p>
+                    <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Hello, <?= htmlspecialchars(explode(' ', $dataGuru['nama_guru'])[0]) ?>! ✨</h2>
+                    <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Anda memiliki <strong><?= $unfilledJurnalCount ?></strong> jurnal yang belum diisi hari ini.</p>
+                </div>
+                
                 <?php if ($totalJadwalHari > 0): ?>
-                    <div style="background: #f8fafc; border-radius: 12px; padding: 12px 16px; width: 100%; max-width: 320px; margin-bottom: 16px; border: 1px solid #e2e8f0;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">
+                    <div class="banner-progress-glass">
+                        <div class="progress-header">
                             <span>Progress Jurnal Harian</span>
-                            <span><?= $jurnalPercentage ?>%</span>
+                            <span class="progress-pct"><?= $jurnalPercentage ?>%</span>
                         </div>
-                        <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
-                            <div style="height: 100%; width: <?= $jurnalPercentage ?>%; background: #3c58b9; border-radius: 4px; transition: width 1s ease-in-out;"></div>
+                        <div class="progress-track-glass">
+                            <div class="progress-fill-glow" style="width: <?= $jurnalPercentage ?>%;"></div>
                         </div>
-                        <div style="font-size: 0.75rem; font-weight: 600; color: #64748b;">
+                        <div class="progress-footer">
                             <?= $filledJurnalCount ?> dari <?= $totalJadwalHari ?> kelas terselesaikan
                         </div>
                     </div>
                 <?php endif; ?>
 
-                <?php if ($unfilledJurnalCount > 0 && !empty($unfilledJadwal)): ?>
-                    <a href="javascript:void(0)" onclick="openInputJurnal(<?= $unfilledJadwal[0]['id_mapel'] ?>)" style="display: inline-flex; align-items: center; gap: 8px; background: #3c58b9; color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(60,88,185,0.2); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.background='#2c4499';" onmouseout="this.style.transform='translateY(0)'; this.style.background='#3c58b9';">
-                        <i class="bi bi-pencil-square"></i> Input Jurnal Sekarang
-                    </a>
-                <?php else: ?>
-                    <a href="javascript:void(0)" onclick="startInputJurnal()" style="display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; color: #475569; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; border: 1px solid #e2e8f0; font-size: 0.9rem; transition: all 0.2s;" onmouseover="this.style.background='#e2e8f0';" onmouseout="this.style.background='#f1f5f9';">
-                        <i class="bi bi-journal-check"></i> Lihat Jurnal
-                    </a>
-                <?php endif; ?>
+                <div class="banner-actions">
+                    <?php if ($unfilledJurnalCount > 0 && !empty($unfilledJadwal)): ?>
+                        <a href="javascript:void(0)" onclick="openInputJurnal(<?= $unfilledJadwal[0]['id_mapel'] ?>)" class="btn-premium-primary">
+                            <i class="bi bi-pencil-square"></i> Input Jurnal Sekarang
+                        </a>
+                    <?php else: ?>
+                        <a href="javascript:void(0)" onclick="startInputJurnal()" class="btn-premium-secondary">
+                            <i class="bi bi-journal-check"></i> Lihat Jurnal
+                        </a>
+                    <?php endif; ?>
+                </div>
             </div>
-            <!-- 3D style SVG graphic of teacher studying -->
-            <svg class="welcome-banner-illustration" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="100" cy="100" r="80" fill="#e0e7ff" />
-                <rect x="60" y="80" width="80" height="60" rx="10" fill="#3c58b9" />
-                <rect x="70" y="90" width="60" height="40" rx="5" fill="#ffffff" />
-                <rect x="90" y="140" width="20" height="30" fill="#64748b" />
-                <rect x="80" y="170" width="40" height="5" fill="#334155" />
-                <!-- Person avatar -->
-                <circle cx="100" cy="70" r="20" fill="#fed7aa" />
-                <path d="M80 110 C80 90, 120 90, 120 110 Z" fill="#312e81" />
-                <circle cx="93" cy="68" r="2" fill="#1e293b" />
-                <circle cx="107" cy="68" r="2" fill="#1e293b" />
-                <path d="M96 76 Q100 80 104 76" stroke="#1e293b" stroke-width="2" fill="none" />
-                <path d="M90 58 Q100 48 110 58" stroke="#312e81" stroke-width="6" fill="none" />
-            </svg>
+            
+            <!-- Modern Abstract Background Shapes -->
+            <div class="banner-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
         </div>
 
-        <!-- Quick Actions Card (All 16 Actions) -->
-        <div class="smart-card">
-            <div class="smart-card-title-wrap">
-                <h3 class="smart-card-title">Aksi Cepat</h3>
+        <!-- Quick Actions (Redesigned) -->
+        <div class="premium-card">
+            <div class="card-header-flex">
+                <h3 class="card-title-modern">Aksi Cepat</h3>
+                <span class="badge-subtle">Menu Pintasan</span>
             </div>
-            <div class="smart-quick-actions-grid">
+            <div class="quick-actions-modern-grid">
                 <!-- 1. Validasi Izin -->
                 <?php if ($isWaliKelas || $isGuruBK): ?>
-                    <a href="pages/guru/validasi-izin" class="smart-quick-action-btn" style="position:relative;">
-                        <i class="bi bi-patch-check-fill text-danger"></i>
+                    <a href="pages/guru/validasi-izin" class="action-btn-modern danger-hover">
+                        <div class="icon-wrap"><i class="bi bi-patch-check-fill"></i></div>
                         <?php if ($pendingIzinCount > 0): ?>
-                            <span style="position:absolute; top:6px; right:6px; background:#dc2626; color:#fff; font-size:9px; font-weight:800; min-width:16px; height:16px; border-radius:999px; display:flex; align-items:center; justify-content:center; padding:0 3px;"><?= $pendingIzinCount ?></span>
+                            <span class="action-badge"><?= $pendingIzinCount ?></span>
                         <?php endif; ?>
                         <span>Validasi Izin</span>
                     </a>
@@ -732,116 +700,114 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
                 <!-- 2. LENTERA Literasi -->
                 <?php if ($isPembinaLiterasi): ?>
-                    <a href="pages/guru/literasi" class="smart-quick-action-btn">
-                        <i class="bi bi-book-half text-info"></i>
+                    <a href="pages/guru/literasi" class="action-btn-modern info-hover">
+                        <div class="icon-wrap"><i class="bi bi-book-half"></i></div>
                         <span>LENTERA Literasi</span>
                     </a>
                 <?php endif; ?>
 
                 <!-- 3. Data Kehadiran -->
-                <a href="pages/guru/rekap-kehadiran" class="smart-quick-action-btn">
-                    <i class="bi bi-clipboard2-data-fill text-success"></i>
+                <a href="pages/guru/rekap-kehadiran" class="action-btn-modern success-hover">
+                    <div class="icon-wrap"><i class="bi bi-clipboard2-data-fill"></i></div>
                     <span>Data Kehadiran</span>
                 </a>
 
                 <!-- 4. Catat Pelanggaran -->
-                <a href="#" class="smart-quick-action-btn btn-open-pelanggaran">
-                    <i class="bi bi-exclamation-triangle-fill text-danger"></i>
-                    <span>Catat Pelanggaran</span>
+                <a href="#" class="action-btn-modern danger-hover btn-open-pelanggaran">
+                    <div class="icon-wrap"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                    <span>Pelanggaran</span>
                 </a>
 
                 <!-- 5. Setting Jadwal -->
-                <a href="pages/guru/setting-jadwal" class="smart-quick-action-btn">
-                    <i class="bi bi-calendar-week-fill text-primary"></i>
-                    <span>Setting Jadwal</span>
+                <a href="pages/guru/setting-jadwal" class="action-btn-modern primary-hover">
+                    <div class="icon-wrap"><i class="bi bi-calendar-week-fill"></i></div>
+                    <span>Jadwal</span>
                 </a>
 
                 <!-- 6. Materi Pembelajaran -->
-                <a href="pages/guru/materi" class="smart-quick-action-btn">
-                    <i class="bi bi-book-half text-purple"></i>
+                <a href="pages/guru/materi" class="action-btn-modern purple-hover">
+                    <div class="icon-wrap"><i class="bi bi-journal-bookmark-fill"></i></div>
                     <span>Materi</span>
                 </a>
 
                 <!-- 7. Nilai Siswa -->
-                <a href="pages/guru/nilai" class="smart-quick-action-btn">
-                    <i class="bi bi-table text-warning"></i>
+                <a href="pages/guru/nilai" class="action-btn-modern warning-hover">
+                    <div class="icon-wrap"><i class="bi bi-table"></i></div>
                     <span>Nilai Siswa</span>
                 </a>
 
                 <!-- 8. Wali Kelas -->
                 <?php if ($isWaliKelas): ?>
-                    <a href="pages/guru/walikelas" class="smart-quick-action-btn">
-                        <i class="bi bi-person-vcard-fill text-primary"></i>
+                    <a href="pages/guru/walikelas" class="action-btn-modern primary-hover">
+                        <div class="icon-wrap"><i class="bi bi-person-vcard-fill"></i></div>
                         <span>Wali Kelas</span>
                     </a>
                 <?php endif; ?>
 
                 <!-- 9. Guru Wali -->
-                <a href="#" class="smart-quick-action-btn btn-open-guru-wali">
-                    <i class="bi bi-person-workspace text-info"></i>
+                <a href="#" class="action-btn-modern info-hover btn-open-guru-wali">
+                    <div class="icon-wrap"><i class="bi bi-person-workspace"></i></div>
                     <span>Guru Wali</span>
                 </a>
 
                 <!-- 10. Monitoring Kelas -->
-                <a href="pages/guru/laporan-kelas" class="smart-quick-action-btn">
-                    <i class="bi bi-bar-chart-fill text-warning"></i>
-                    <span>Monitoring Kelas</span>
+                <a href="pages/guru/laporan-kelas" class="action-btn-modern warning-hover">
+                    <div class="icon-wrap"><i class="bi bi-bar-chart-fill"></i></div>
+                    <span>Monitoring</span>
                 </a>
 
                 <!-- 11. Ekstra kurikuler -->
-                <a href="pages/guru/ekskul" class="smart-quick-action-btn">
-                    <i class="bi bi-dribbble text-danger"></i>
+                <a href="pages/guru/ekskul" class="action-btn-modern danger-hover">
+                    <div class="icon-wrap"><i class="bi bi-dribbble"></i></div>
                     <span>Ekskul</span>
                 </a>
 
                 <!-- 12. Leger Nilai -->
-                <a href="pages/guru/leger" class="smart-quick-action-btn">
-                    <i class="bi bi-file-earmark-spreadsheet-fill text-success"></i>
+                <a href="pages/guru/leger" class="action-btn-modern success-hover">
+                    <div class="icon-wrap"><i class="bi bi-file-earmark-spreadsheet-fill"></i></div>
                     <span>Leger Nilai</span>
                 </a>
 
                 <!-- 13. File Ekin -->
-                <a href="pages/guru/ekinerja" class="smart-quick-action-btn">
-                    <i class="bi bi-file-earmark-bar-graph-fill text-primary"></i>
+                <a href="pages/guru/ekinerja" class="action-btn-modern primary-hover">
+                    <div class="icon-wrap"><i class="bi bi-file-earmark-bar-graph-fill"></i></div>
                     <span>File Ekin</span>
                 </a>
 
                 <!-- 14. Apresiasi Guru -->
-                <a href="pages/guru/apresiasi-guru" class="smart-quick-action-btn">
-                    <i class="bi bi-award-fill text-warning"></i>
-                    <span>Apresiasi Guru</span>
+                <a href="pages/guru/apresiasi-guru" class="action-btn-modern warning-hover">
+                    <div class="icon-wrap"><i class="bi bi-award-fill"></i></div>
+                    <span>Apresiasi</span>
                 </a>
 
                 <!-- 15. Piagam 7 KAIH -->
-                <a href="pages/guru/piagam-7kih" class="smart-quick-action-btn">
-                    <i class="bi bi-patch-check-fill text-success"></i>
-                    <span>Piagam 7 KAIH</span>
+                <a href="pages/guru/piagam-7kih" class="action-btn-modern success-hover">
+                    <div class="icon-wrap"><i class="bi bi-patch-check-fill"></i></div>
+                    <span>Piagam KAIH</span>
                 </a>
 
                 <!-- 16. INFO WKS -->
-                <a href="pages/guru/wks" class="smart-quick-action-btn">
-                    <i class="bi bi-diagram-3-fill text-info"></i>
+                <a href="pages/guru/wks" class="action-btn-modern info-hover">
+                    <div class="icon-wrap"><i class="bi bi-diagram-3-fill"></i></div>
                     <span>INFO WKS</span>
                 </a>
             </div>
         </div>
 
         <!-- Performance & Visits Grid -->
-        <div class="stats-row-grid">
+        <div class="stats-row-grid-modern">
             <!-- Performance: Classes Progress -->
-            <div class="smart-card">
-                <div class="smart-card-title-wrap">
-                    <h3 class="smart-card-title">Performance</h3>
-                    <select class="smart-filter-select">
-                        <option>Today</option>
-                    </select>
+            <div class="premium-card">
+                <div class="card-header-flex">
+                    <h3 class="card-title-modern">Performa Jurnal</h3>
+                    <div class="badge-subtle">Minggu Ini</div>
                 </div>
-                <div class="performance-chart-container">
-                    <div class="performance-summary">
+                <div class="performance-chart-modern">
+                    <div class="performance-summary-modern">
                         <h2><?= $jurnalProgress ?>%</h2>
                         <span>Total journals filled</span>
                     </div>
-                    <div class="smart-bar-chart">
+                    <div class="modern-bar-chart">
                         <?php
                         $pBars = [
                             ['label' => 'Sen', 'val' => 60, 'c' => ''],
@@ -853,11 +819,11 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         foreach ($pBars as $b):
                             $h = ($b['val'] ?: 10) . '%';
                         ?>
-                            <div class="smart-bar-col">
-                                <div class="smart-bar-track">
-                                    <div class="smart-bar-fill <?= $b['c'] ?>" style="height: <?= $h ?>;"></div>
+                            <div class="modern-bar-col">
+                                <div class="modern-bar-track">
+                                    <div class="modern-bar-fill <?= $b['c'] ?>" style="height: <?= $h ?>;"></div>
                                 </div>
-                                <span class="smart-bar-label"><?= $b['label'] ?></span>
+                                <span class="modern-bar-label"><?= $b['label'] ?></span>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -865,72 +831,64 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             </div>
 
             <!-- My Visit: Radial Donut indicators -->
-            <div class="smart-card">
-                <div class="smart-card-title-wrap">
-                    <h3 class="smart-card-title">Attendance Stats</h3>
+            <div class="premium-card">
+                <div class="card-header-flex">
+                    <h3 class="card-title-modern">Statistik Kehadiran</h3>
                 </div>
-                <div class="radial-grid">
+                <div class="radial-grid-modern">
                     <!-- Stat 1: Present -->
-                    <div class="radial-item">
-                        <div class="radial-circle-wrap">
-                            <svg class="radial-circle-svg" viewBox="0 0 36 36">
-                                <path class="radial-circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                <path class="radial-circle-indicator" stroke-dasharray="<?= $hadirPct ?>, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <div class="radial-item-modern">
+                        <div class="radial-circle-modern">
+                            <svg class="radial-svg" viewBox="0 0 36 36">
+                                <path class="radial-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="radial-indicator" stroke-dasharray="<?= $hadirPct ?>, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             </svg>
-                            <div class="radial-circle-text"><?= $hadirPct ?>%</div>
+                            <div class="radial-text">
+                                <span class="val"><?= $hadirPct ?>%</span>
+                            </div>
                         </div>
-                        <span class="radial-label">Hadir Today</span>
+                        <span class="radial-label-modern">Hadir Today</span>
                     </div>
 
                     <!-- Stat 2: Jurnal Filled -->
-                    <div class="radial-item">
-                        <div class="radial-circle-wrap">
-                            <svg class="radial-circle-svg" viewBox="0 0 36 36">
-                                <path class="radial-circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                <path class="radial-circle-indicator accent" stroke-dasharray="<?= $jurnalProgress ?>, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <div class="radial-item-modern">
+                        <div class="radial-circle-modern">
+                            <svg class="radial-svg" viewBox="0 0 36 36">
+                                <path class="radial-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="radial-indicator accent" stroke-dasharray="<?= $jurnalProgress ?>, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             </svg>
-                            <div class="radial-circle-text"><?= $jurnalProgress ?>%</div>
+                            <div class="radial-text">
+                                <span class="val"><?= $jurnalProgress ?>%</span>
+                            </div>
                         </div>
-                        <span class="radial-label">Jurnal Progress</span>
+                        <span class="radial-label-modern">Jurnal Progress</span>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Linked Teachers / Guru Wali -->
-        <div class="smart-card">
-            <div class="smart-card-title-wrap">
-                <h3 class="smart-card-title">Guru Wali & Rekan</h3>
-                <a href="pages/guru/validasi-izin" style="font-size: 0.85rem; font-weight: 700; color: #3c58b9; text-decoration: none;">See all</a>
+        <div class="premium-card">
+            <div class="card-header-flex">
+                <h3 class="card-title-modern">Siswa Binaan</h3>
+                <a href="pages/guru/data-siswa" class="link-view-all">Lihat Semua</a>
             </div>
-            <div class="teachers-list">
+            <div class="modern-list">
                 <?php if (empty($problematicStudents)): ?>
-                    <div class="teacher-item-card">
-                        <div class="teacher-profile-wrap">
-                            <div class="teacher-avatar-placeholder"><i class="bi bi-person"></i></div>
-                            <div class="teacher-profile-info">
-                                <strong>Mary Johnson (Counselor)</strong>
-                                <span>Guidance & Counseling</span>
-                            </div>
-                        </div>
-                        <div class="teacher-action-btns">
-                            <a href="#" class="teacher-action-btn"><i class="bi bi-envelope"></i></a>
-                            <a href="#" class="teacher-action-btn"><i class="bi bi-telephone"></i></a>
-                        </div>
+                    <div class="modern-list-empty">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size:2rem;margin-bottom:8px;"></i>
+                        <span>Semua siswa binaan aman.</span>
                     </div>
                 <?php else: ?>
-                    <?php foreach (array_slice($problematicStudents, 0, 2) as $rowP): ?>
-                        <div class="teacher-item-card">
-                            <div class="teacher-profile-wrap">
-                                <div class="teacher-avatar-placeholder"><?= strtoupper(substr($rowP['nama_siswa'], 0, 2)) ?></div>
-                                <div class="teacher-profile-info">
-                                    <strong><?= htmlspecialchars($rowP['nama_siswa']) ?> (Siswa Binaan)</strong>
-                                    <span>Kelas <?= htmlspecialchars($rowP['kelas']) ?></span>
-                                </div>
+                    <?php foreach (array_slice($problematicStudents, 0, 3) as $rowP): ?>
+                        <div class="modern-list-item">
+                            <div class="avatar-modern"><?= strtoupper(substr($rowP['nama_siswa'], 0, 2)) ?></div>
+                            <div class="item-info">
+                                <strong><?= htmlspecialchars($rowP['nama_siswa']) ?></strong>
+                                <span>Kelas <?= htmlspecialchars($rowP['kelas']) ?></span>
                             </div>
-                            <div class="teacher-action-btns">
-                                <a href="pages/guru/data-siswa" class="teacher-action-btn" title="Detail Siswa"><i class="bi bi-person-badge"></i></a>
-                                <a href="#" class="teacher-action-btn btn-open-pelanggaran" title="Catat Pelanggaran"><i class="bi bi-exclamation-triangle"></i></a>
+                            <div class="item-actions">
+                                <a href="pages/guru/data-siswa" class="btn-icon-soft" title="Detail"><i class="bi bi-person-badge"></i></a>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -942,21 +900,17 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     <!-- RIGHT COLUMN: CALENDAR & TIMELINE -->
     <div class="desktop-right-column">
         <!-- Calendar Schedule Timeline -->
-        <div class="smart-card calendar-timeline-card">
-            <div class="timeline-title-wrap">
-                <h3 class="smart-card-title">Schedule</h3>
-                <select class="smart-filter-select">
-                    <option>Today</option>
-                </select>
+        <div class="premium-card sticky-card">
+            <div class="card-header-flex">
+                <h3 class="card-title-modern">Jadwal Mengajar</h3>
+                <div class="badge-date"><?= date('d M') ?></div>
             </div>
-            <div class="timeline-list">
+            <div class="timeline-modern">
                 <?php if ($totalJadwalHari == 0): ?>
-                    <div class="timeline-item">
-                        <span class="timeline-time">No Class</span>
-                        <div class="timeline-card-block">
-                            <strong>Hari Ini Bebas KBM</strong>
-                            <span>Tidak ada jadwal mengajar hari ini.</span>
-                        </div>
+                    <div class="timeline-empty">
+                        <i class="bi bi-cup-hot" style="font-size:2rem;color:#cbd5e1;margin-bottom:10px;display:block;"></i>
+                        <strong>Hari Ini Bebas KBM</strong>
+                        <span>Tidak ada jadwal mengajar.</span>
                     </div>
                 <?php else: ?>
                     <?php
@@ -965,9 +919,13 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         $isCurrent = ($tIndex == 0); // Mark first class as active timeline
                         $tIndex++;
                     ?>
-                        <div class="timeline-item <?= $isCurrent ? 'active' : '' ?>">
-                            <span class="timeline-time"><?= substr($j['jam_mulai'], 0, 5) ?> - <?= substr($j['jam_selesai'], 0, 5) ?></span>
-                            <div class="timeline-card-block">
+                        <div class="timeline-item-modern <?= $isCurrent ? 'active' : '' ?>">
+                            <div class="time-col">
+                                <span class="time-start"><?= substr($j['jam_mulai'], 0, 5) ?></span>
+                                <span class="time-end"><?= substr($j['jam_selesai'], 0, 5) ?></span>
+                            </div>
+                            <div class="timeline-dot"></div>
+                            <div class="content-col">
                                 <strong><?= htmlspecialchars($j['nama_mapel']) ?></strong>
                                 <span>Kelas <?= htmlspecialchars($j['kelas']) ?></span>
                             </div>
@@ -978,23 +936,26 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         </div>
 
         <!-- Upcoming Events / Announcements -->
-        <div class="smart-card">
-            <div class="smart-card-title-wrap">
-                <h3 class="smart-card-title">Announcements</h3>
+        <div class="premium-card">
+            <div class="card-header-flex">
+                <h3 class="card-title-modern">Pengumuman</h3>
             </div>
-            <div class="events-list">
+            <div class="events-modern">
                 <?php if ($announcementCount == 0): ?>
-                    <p style="font-size:0.8rem; color:#94a3b8;">Belum ada pengumuman baru.</p>
+                    <div class="timeline-empty">
+                        <i class="bi bi-inbox" style="font-size:2rem;color:#cbd5e1;margin-bottom:10px;display:block;"></i>
+                        <span>Belum ada pengumuman baru.</span>
+                    </div>
                 <?php else: ?>
                     <?php
                     $eIndex = 0;
                     foreach (array_slice($announcements, 0, 2) as $ann):
-                        $eClass = ($eIndex == 0) ? '' : 'accent';
+                        $eClass = ($eIndex == 0) ? 'primary' : 'secondary';
                         $eIndex++;
                     ?>
-                        <div class="event-item-card">
-                            <div class="event-icon-circle <?= $eClass ?>"><i class="bi bi-megaphone"></i></div>
-                            <div class="event-item-info">
+                        <div class="event-card-modern <?= $eClass ?>">
+                            <div class="event-icon"><i class="bi bi-megaphone"></i></div>
+                            <div class="event-details">
                                 <strong><?= htmlspecialchars($ann['judul']) ?></strong>
                                 <span><?= date('d M Y', strtotime($ann['created_at'] ?? 'now')) ?></span>
                             </div>
