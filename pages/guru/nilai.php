@@ -186,8 +186,9 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/guru-desktop.css?v=<?= time() ?>">
   <style>
-    body { background: #f8fafc; font-family: 'Inter', 'Segoe UI', Roboto, sans-serif; }
+    body { background: #ebf1f6; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
     .page-header {
       background: linear-gradient(135deg, #4f46e5, #7c3aed);
       color: #fff;
@@ -305,19 +306,27 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
 <body>
 <?php include 'guru_sidebar_shared.php'; ?>
 
-<div class="page-header">
-  <div class="container d-flex align-items-center justify-content-between">
-    <div class="d-flex align-items-center">
-      <i class="bi bi-bar-chart-steps fs-4 me-2"></i>
-      <div>
-        <h5 class="mb-0 fw-semibold">Nilai Siswa</h5>
-        <small><?= $scope === 'wali' ? 'Pantau nilai lintas mapel kelas wali' : 'Rekap penilaian mapel yang Anda ampu'; ?></small>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="app-shell" style="grid-template-columns: 1fr; padding-right: 24px;">
+  <div class="desktop-center-column">
 
-<div class="container pb-4">
+    <div class="welcome-banner-premium mb-4">
+        <div class="banner-content">
+            <div class="banner-text">
+                <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Nilai Siswa 📊</h2>
+                <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;"><?= $scope === 'wali' ? 'Pantau nilai lintas mapel kelas wali Anda.' : 'Rekap dan kelola penilaian mata pelajaran yang Anda ampu.'; ?></p>
+            </div>
+            <div class="banner-actions">
+                <a href="../../home.php" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali ke Dashboard</a>
+            </div>
+        </div>
+        <div class="banner-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+    </div>
+
+<div class="pb-4">
   <div class="card filter-card mb-3">
     <div class="card-body">
       <form class="row g-3 align-items-end" method="get">
@@ -733,7 +742,9 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
     });
   })();
 </script>
+  </div> <!-- end desktop-center-column -->
+</div> <!-- end app-shell -->
+
 <?php include __DIR__ . '/guru_common_footer.php'; ?>
 </body>
 </html>
-

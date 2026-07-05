@@ -245,9 +245,10 @@ sort($classes);
     <title>Materi Pembelajaran - Padlet Board</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="css/guru-2026.css?v=<?= time(); ?>">
+    <link rel="stylesheet" href="css/guru-desktop.css?v=<?= time(); ?>">
     <style>
         /* Modern masonry board */
+        body { background: #ebf1f6; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
         .padlet-board {
             column-count: 2;
             column-gap: 12px;
@@ -589,30 +590,26 @@ sort($classes);
 <?php include 'guru_sidebar_shared.php'; ?>
 
 
-  <div class="background">
-    <div class="shape one"></div>
-    <div class="shape two"></div>
-    <div class="shape three"></div>
-    <div class="shape four"></div>
-    <div class="wave"></div>
-    <div class="dots"></div>
-  </div>
-
-<div class="app-shell">
-    <!-- HEADER -->
-    <header class="hero-header">
-        <a href="../../home.php" class="notif-btn" style="text-decoration: none; display: grid; place-items: center;" title="Kembali ke Beranda">
-            <i class="bi bi-chevron-left"></i>
-        </a>
-        <div class="greet-block">
-            <p class="greet-small">Bahan Ajar & Dokumen</p>
-            <h1>Materi Pembelajaran</h1>
-            <p class="greet-school">Dikelola oleh <?= htmlspecialchars($namaGuru) ?></p>
+<div class="app-shell" style="grid-template-columns: 1fr; padding-right: 24px;">
+    <div class="desktop-center-column">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner-premium mb-4">
+            <div class="banner-content">
+                <div class="banner-text">
+                    <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Materi Pembelajaran 📚</h2>
+                    <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Bahan ajar dan dokumen untuk kelas yang dikelola oleh <?= htmlspecialchars($namaGuru) ?></p>
+                </div>
+                <div class="banner-actions">
+                    <button class="btn-premium-primary btn-open-create-modal"><i class="bi bi-plus-lg"></i> Tambah Materi</button>
+                    <a href="../../home.php" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+                </div>
+            </div>
+            <div class="banner-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
         </div>
-        <button class="notif-btn btn-open-create-modal" style="color: var(--primary); border-color: rgba(79,70,229,0.2);" title="Tambah Materi">
-            <i class="bi bi-plus-lg"></i>
-        </button>
-    </header>
 
     <!-- TOAST ALERT -->
     <?php if (!empty($alertMessage)): ?>
@@ -726,6 +723,7 @@ sort($classes);
                 <span>Profil</span>
             </a>
         </nav>
+    </div>
     </div>
 </div>
 
