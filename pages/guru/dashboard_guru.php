@@ -602,16 +602,6 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         </a>
     </div>
 </aside>
-
-<style>
-@media (min-width: 768px) {
-    #desktopAppShell {
-        margin-left: 310px !important;
-        padding: 40px !important;
-        max-width: calc(100% - 310px) !important;
-    }
-}
-</style>
 <div class="app-shell" id="desktopAppShell">
 
     <!-- MAIN CENTER COLUMN -->
