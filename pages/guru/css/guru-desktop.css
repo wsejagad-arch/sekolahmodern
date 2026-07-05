@@ -370,7 +370,33 @@
         position: relative;
         z-index: 2;
         width: 100%;
-        max-width: 600px;
+        max-width: 550px;
+    }
+    .banner-notifications-glass {
+        z-index: 2;
+        width: 320px;
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 16px;
+        display: flex;
+        flex-direction: column;
+        max-height: 200px;
+        color: #fff;
+    }
+    .banner-notifications-glass::-webkit-scrollbar {
+        width: 6px;
+    }
+    .banner-notifications-glass::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+    }
+    .banner-notifications-glass::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+    }
+    .banner-notifications-glass::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
     }
     .animate-fade-in {
         animation: fadeIn 0.8s ease-out forwards;

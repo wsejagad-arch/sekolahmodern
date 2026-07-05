@@ -605,38 +605,11 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     </div>
 </aside>
 <div class="app-shell" id="desktopAppShell">
-
-    <!-- MAIN CENTER COLUMN -->
+<!-- MAIN CENTER COLUMN -->
     <div class="desktop-center-column">
         <!-- Welcome Banner (Redesigned) -->
         <div class="welcome-banner-premium" style="position:relative; z-index: 10;">
-            <!-- Integrated Topbar Actions -->
-            <div style="position:absolute; top: 20px; right: 24px; display:flex; gap:16px; z-index: 20;">
-                <div class="topbar-icon-btn" onclick="toggleNotifications(event)" title="Notifikasi" style="background: rgba(255,255,255,0.2); color:#fff; cursor:pointer;">
-                    <i class="bi bi-bell"></i>
-                    <?php if ($totalNotifCount > 0): ?><span style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#ef4444;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:800;"><?= min($totalNotifCount, 9) ?></span><?php endif; ?>
-                </div>
-                <!-- Notif Dropdown -->
-                <div id="notifDropdownDesktop" class="topbar-dropdown" style="position:absolute;top:50px;right:0;width:320px;background:#fff;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.2);max-height:400px;overflow-y:auto;z-index:1000;display:none;" onclick="event.stopPropagation()">
-                    <div style="padding:14px;border-bottom:1px solid #f1f5f9;font-weight:700;font-size:0.95rem;color:#1e293b;">Notifikasi</div>
-                    <?php if ($totalNotifCount > 0): ?>
-                        <?php foreach ($guru_all_notifications as $notif): ?>
-                            <a href="<?= htmlspecialchars($notif['link'] ?? '#') ?>" <?= isset($notif['action_onclick']) ? 'onclick="' . htmlspecialchars($notif['action_onclick']) . '"' : '' ?> style="display:block; text-decoration:none; padding:12px 14px;border-bottom:1px solid #f8fafc;font-size:0.85rem;color:#475569;transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
-                                <div style="font-weight:600;margin-bottom:4px;color:#0f172a;"><?= htmlspecialchars($notif['title'] ?? 'Notifikasi') ?></div>
-                                <div style="font-size:0.8rem;color:#64748b;margin-bottom:6px;line-height:1.4;"><?= htmlspecialchars(substr($notif['text'] ?? '', 0, 70)) ?>...</div>
-                                <div style="font-size:0.75rem;color:#94a3b8;font-weight:500;"><i class="bi bi-clock me-1"></i><?= date('d M Y, H:i') ?></div>
-                            </a>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div style="padding:24px;text-align:center;color:#94a3b8;font-size:0.9rem;">
-                            <i class="bi bi-bell-slash" style="font-size:2rem;margin-bottom:8px;display:block;"></i>
-                            Tidak ada notifikasi
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <div class="banner-content">
+            <div class="banner-content" style="display:flex; flex-direction:column; gap:16px;">
                 <div class="banner-text">
                     <p class="banner-greeting" style="color:rgba(255,255,255,0.8);font-size:0.9rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">
                         <?= (date('H') < 12) ? 'Selamat Pagi' : ((date('H') < 15) ? 'Selamat Siang' : ((date('H') < 18) ? 'Selamat Sore' : 'Selamat Malam')) ?>
@@ -669,6 +642,37 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         <a href="javascript:void(0)" onclick="startInputJurnal()" class="btn-premium-secondary">
                             <i class="bi bi-journal-check"></i> Lihat Jurnal
                         </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Integrated Notifications Box -->
+            <div class="banner-notifications-glass">
+                <div style="padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.15); font-weight: 700; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span>Notifikasi</span>
+                    <?php if ($totalNotifCount > 0): ?>
+                        <span style="background: #ef4444; color: #fff; font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; font-weight: 800;"><?= $totalNotifCount ?> Baru</span>
+                    <?php endif; ?>
+                </div>
+                <div style="padding: 8px; overflow-y: auto; flex: 1;" class="custom-scrollbar-glass">
+                    <?php if ($totalNotifCount > 0): ?>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <?php foreach ($guru_all_notifications as $notif): ?>
+                            <a href="<?= htmlspecialchars($notif['link'] ?? '#') ?>" <?= isset($notif['action_onclick']) ? 'onclick="' . htmlspecialchars($notif['action_onclick']) . '"' : '' ?> style="display:block; text-decoration:none; padding:10px 12px; border-radius: 8px; background: rgba(255,255,255,0.05); color: #fff; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                                <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px;display:flex;align-items:center;gap:6px;color:#fff;">
+                                    <?php if(isset($notif['icon'])): ?><i class="<?= $notif['icon'] ?>" style="color: <?= $notif['color'] ?? '#fff' ?>;"></i><?php endif; ?>
+                                    <?= htmlspecialchars($notif['title'] ?? 'Notifikasi') ?>
+                                </div>
+                                <div style="font-size:0.75rem;opacity:0.8;margin-bottom:6px;line-height:1.3;"><?= htmlspecialchars(substr($notif['text'] ?? '', 0, 70)) ?>...</div>
+                                <div style="font-size:0.7rem;opacity:0.6;font-weight:500;"><i class="bi bi-clock me-1"></i><?= date('d M Y, H:i') ?></div>
+                            </a>
+                        <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div style="text-align:center; padding: 30px 10px; opacity: 0.7;">
+                            <i class="bi bi-bell-slash" style="font-size:1.8rem;margin-bottom:8px;display:block;"></i>
+                            <div style="font-size:0.85rem;">Tidak ada notifikasi</div>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
