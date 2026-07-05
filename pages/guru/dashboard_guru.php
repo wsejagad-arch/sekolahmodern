@@ -117,6 +117,8 @@ foreach ($jadwalHariIni as $j) {
     }
 }
 $unfilledJurnalCount = count($unfilledJadwal);
+$filledJurnalCount = $totalJadwalHari - $unfilledJurnalCount;
+$jurnalPercentage = ($totalJadwalHari > 0) ? round(($filledJurnalCount / $totalJadwalHari) * 100) : 0;
 
 $waliKelasList = [];
 $qWaliKelasMain = @mysqli_query($conn, "SELECT kelas FROM tbl_kelas WHERE nip_wali='$nipEsc' AND kelas <> ''");
