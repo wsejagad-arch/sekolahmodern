@@ -976,10 +976,10 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 <!-- MOBILE-ONLY LAYOUT WRAPPER -->
 <div class="mobile-only-layout app-shell" style="padding-top: 0; background-color: #f8fafc; background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px); background-size: 16px 16px; min-height: 100vh;">
     <!-- HEADER -->
-    <header class="hero-header">
-        <a href="profil-guru" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 15px; width: calc(100% - 70px);">
+    <header class="hero-header" style="justify-content: space-between; align-items: center;">
+        <a href="profil-guru" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; flex: 1;">
             <div class="profile-section" style="margin-bottom: 0;">
-                <div class="profile-photo">
+                <div class="profile-photo" style="width: 56px; height: 56px;">
                     <?php if ($dataGuru['foto']): ?>
                         <img src="../../foto/<?= $dataGuru['foto'] ?>" alt="Profile">
                     <?php else: ?>
@@ -987,10 +987,10 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     <?php endif; ?>
                 </div>
             </div>
-            <div class="greet-block" style="margin-top: 0; padding-top: 0; text-align: left;">
-                <p class="greet-small">Selamat pagi,</p>
-                <h1 style="font-size: 1.35rem; margin-bottom: 2px; color: #0f172a; font-weight: 700;"><?= $dataGuru['nama_guru'] ?: 'Bu Amanda' ?></h1>
-                <p class="greet-school" style="margin: 0;"><?= htmlspecialchars($lembaga['nmsekolah']); ?></p>
+            <div class="greet-block" style="margin-top: 0; padding-top: 0; text-align: left; flex: 1;">
+                <p class="greet-small" style="color: #64748b; font-weight: 500; font-size: 0.75rem;">Selamat pagi,</p>
+                <h1 style="font-size: 1rem; margin-bottom: 2px; color: #0f172a; font-weight: 800; line-height: 1.2; letter-spacing: -0.3px;"><?= $dataGuru['nama_guru'] ?: 'Bu Amanda' ?></h1>
+                <p class="greet-school" style="margin: 0; font-size: 0.75rem; color: #94a3b8;"><?= htmlspecialchars($lembaga['nmsekolah']); ?></p>
             </div>
         </a>
         <div style="display: flex; gap: 8px; align-items: center;">
@@ -1311,11 +1311,11 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 38px;
-            height: 38px;
-            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            background: #e2e8f0;
             border-radius: 50%;
-            color: #fff;
+            color: #334155;
             transition: all 0.3s;
         }
 
