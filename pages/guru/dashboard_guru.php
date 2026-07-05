@@ -976,14 +976,20 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 <!-- MOBILE-ONLY LAYOUT WRAPPER -->
 <style>
     @media (max-width: 767px) {
+        body, html { margin-top: 0 !important; padding-top: 0 !important; }
         #content, #content-wrapper { padding-top: 0 !important; margin-top: 0 !important; }
         .mobile-only-layout.app-shell { padding-top: 0 !important; margin-top: 0 !important; }
-        .hero-header { padding-top: 8px !important; margin-top: 0 !important; }
+        .hero-header { padding-top: 10px !important; margin-top: 0 !important; }
+        
+        /* HIDDEN ON MOBILE TO PREVENT PUSHING CONTENT DOWN */
+        .desktop-sidebar, .desktop-topbar-wrapper, .desktop-center-column, .desktop-right-column, .desktop-logout-wrap {
+            display: none !important;
+        }
     }
 </style>
-<div class="mobile-only-layout app-shell" style="background-color: #f8fafc; background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px); background-size: 16px 16px; min-height: 100vh;">
+<div class="mobile-only-layout app-shell" style="padding-top: 0 !important; margin-top: 0 !important; background-color: #f8fafc; background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px); background-size: 16px 16px; min-height: 100vh;">
     <!-- HEADER -->
-    <header class="hero-header" style="justify-content: space-between; align-items: center;">
+    <header class="hero-header" style="padding-top: 10px !important; margin-top: 0 !important; justify-content: space-between; align-items: center;">
         <a href="profil-guru" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; flex: 1;">
             <div class="profile-section" style="margin-bottom: 0;">
                 <div class="profile-photo" style="width: 56px; height: 56px;">
