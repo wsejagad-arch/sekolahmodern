@@ -619,11 +619,11 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     <div style="padding:14px;border-bottom:1px solid #f1f5f9;font-weight:700;font-size:0.95rem;color:#1e293b;">Notifikasi</div>
                     <?php if ($totalNotifCount > 0): ?>
                         <?php foreach ($guru_all_notifications as $notif): ?>
-                            <div style="padding:12px 14px;border-bottom:1px solid #f8fafc;font-size:0.85rem;color:#475569;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                            <a href="<?= htmlspecialchars($notif['link'] ?? '#') ?>" style="display:block; text-decoration:none; padding:12px 14px;border-bottom:1px solid #f8fafc;font-size:0.85rem;color:#475569;transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
                                 <div style="font-weight:600;margin-bottom:4px;color:#0f172a;"><?= htmlspecialchars($notif['title'] ?? 'Notifikasi') ?></div>
-                                <div style="font-size:0.8rem;color:#64748b;margin-bottom:6px;line-height:1.4;"><?= htmlspecialchars(substr($notif['message'] ?? '', 0, 70)) ?>...</div>
-                                <div style="font-size:0.75rem;color:#94a3b8;font-weight:500;"><i class="bi bi-clock me-1"></i><?= date('d M Y, H:i', strtotime($notif['created_at'] ?? 'now')) ?></div>
-                            </div>
+                                <div style="font-size:0.8rem;color:#64748b;margin-bottom:6px;line-height:1.4;"><?= htmlspecialchars(substr($notif['text'] ?? '', 0, 70)) ?>...</div>
+                                <div style="font-size:0.75rem;color:#94a3b8;font-weight:500;"><i class="bi bi-clock me-1"></i><?= date('d M Y, H:i') ?></div>
+                            </a>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <div style="padding:24px;text-align:center;color:#94a3b8;font-size:0.9rem;">
@@ -2404,7 +2404,11 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             e.stopPropagation();
             var dropdown = document.getElementById('notifDropdownDesktop');
             if (dropdown) {
-                dropdown.classList.toggle('show');
+                if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+                    dropdown.style.display = 'block';
+                } else {
+                    dropdown.style.display = 'none';
+                }
             }
         }
 
@@ -2412,7 +2416,11 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         function toggleProfileMenu() {
             var menu = document.getElementById('profileMenuDesktop');
             if (menu) {
-                menu.classList.toggle('show');
+                if (menu.style.display === 'none' || menu.style.display === '') {
+                    menu.style.display = 'block';
+                } else {
+                    menu.style.display = 'none';
+                }
             }
         }
 
@@ -2420,11 +2428,13 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         document.addEventListener('click', function(e) {
             var notifDropdown = document.getElementById('notifDropdownDesktop');
             var profileMenu = document.getElementById('profileMenuDesktop');
+            
             if (notifDropdown && !notifDropdown.contains(e.target) && !e.target.closest('.topbar-icon-btn')) {
-                notifDropdown.classList.remove('show');
+                notifDropdown.style.display = 'none';
             }
-            if (profileMenu && !profileMenu.contains(e.target) && !e.target.closest('.topbar-profile-card')) {
-                profileMenu.classList.remove('show');
+            
+            if (profileMenu && !profileMenu.contains(e.target) && !e.target.closest('.profile-btn')) {
+                profileMenu.style.display = 'none';
             }
         });
 
