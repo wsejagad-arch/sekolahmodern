@@ -668,16 +668,17 @@ while ($qDocs && ($d = mysqli_fetch_assoc($qDocs))) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
+    <link rel="stylesheet" href="css/guru-desktop.css?v=<?= time() ?>">
     <style>
         :root {
-            --bg: #f8fafc;
+            --bg: #ebf1f6;
             --primary: #0f766e;
             --primary-light: #14b8a6;
             --text-dark: #0f172a;
             --border: #e2e8f0;
         }
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
             background-color: var(--bg);
             color: var(--text-dark);
         }
@@ -856,20 +857,26 @@ while ($qDocs && ($d = mysqli_fetch_assoc($qDocs))) {
 <?php include 'guru_sidebar_shared.php'; ?>
 
 
-<div class="ekinerja-container">
-    
-    <!-- Header Card -->
-    <div class="header-card no-print">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="fw-extrabold mb-1">E-Kinerja Guru</h1>
-                <p class="mb-0 text-white-50">Kelola berkas perangkat pembelajaran, rekapitulasi, sertifikat pelatihan, dan administrasi kinerja AI.</p>
+<div class="app-shell" style="grid-template-columns: 1fr; padding-right: 24px;">
+    <div class="desktop-center-column ekinerja-container">
+        
+        <!-- Welcome Banner -->
+        <div class="welcome-banner-premium mb-4 no-print">
+            <div class="banner-content">
+                <div class="banner-text">
+                    <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">E-Kinerja Guru 📑</h2>
+                    <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Kelola berkas perangkat pembelajaran, rekapitulasi, sertifikat pelatihan, dan administrasi kinerja AI.</p>
+                </div>
+                <div class="banner-actions">
+                    <a href="../../home.php" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+                </div>
             </div>
-            <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                <span class="badge bg-light text-dark fs-6 px-3 py-2 rounded-pill shadow-sm border"><i class="bi bi-person-circle me-1"></i> <?= htmlspecialchars($namaGuru) ?></span>
+            <div class="banner-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
             </div>
         </div>
-    </div>
     
     <?php if (!empty($msg)): ?>
         <div class="alert alert-<?= $msgType ?> alert-dismissible fade show no-print" role="alert">
@@ -2457,5 +2464,7 @@ $('#ctxDelete').on('click', function(e) {
     }
 });
 </script>
+    </div> <!-- End desktop-center-column -->
+</div> <!-- End app-shell -->
 </body>
 </html>

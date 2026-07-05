@@ -404,6 +404,7 @@ try {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/guru-desktop.css?v=<?= time() ?>">
     <style>
         :root {
             --primary: #4f46e5;
@@ -418,21 +419,16 @@ try {
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            font-family: "Poppins", sans-serif;
+            font-family: "Plus Jakarta Sans", system-ui, sans-serif;
             font-weight: 400;
-            background:
-                radial-gradient(circle at top right,
-                    rgba(223,255,154,0.35) 0%,
-                    transparent 35%),
-                radial-gradient(circle at bottom left,
-                    rgba(0,107,47,0.35) 0%,
-                    transparent 35%),
-                linear-gradient(
-                    135deg,
-                    rgba(11,122,50,0.75),
-                    rgba(126,217,87,0.55),
-                    rgba(217,255,159,0.45)
-                );
+            background: #ebf1f6;
+            color: var(--text);
+        }
+        .page-shell { padding: 0; }
+        .hero { display: none; }
+        .background { display: none; }
+        
+        body {
             background-attachment: fixed;
             color: var(--text);
             padding-bottom: 112px;
@@ -893,25 +889,25 @@ try {
 <?php include 'guru_sidebar_shared.php'; ?>
 
 
-  <div class="background">
-    <div class="shape one"></div>
-    <div class="shape two"></div>
-    <div class="shape three"></div>
-    <div class="shape four"></div>
-    <div class="wave"></div>
-    <div class="dots"></div>
-  </div>
-<main class="page-shell">
-    <section class="hero">
-        <a href="<?= htmlspecialchars($backHomeUrl, ENT_QUOTES, 'UTF-8'); ?>" class="text-white-50 text-decoration-none d-inline-flex align-items-center mb-3">
-            <i class="bi bi-arrow-left me-1"></i> Kembali ke Beranda
-        </a>
-        <h1 class="mb-2">Laporan Analisis Kelas AI</h1>
-        <p class="mb-0 text-white-50">Analisis kondisi kelas dan identifikasi siswa yang membutuhkan pendampingan segera.</p>
-        <div class="mt-3 small text-white-50">
-            Periode data: <strong class="text-white"><?= htmlspecialchars($periodLabel); ?></strong>
+<div class="app-shell" style="grid-template-columns: 1fr; padding-right: 24px;">
+    <div class="desktop-center-column">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner-premium mb-4">
+            <div class="banner-content">
+                <div class="banner-text">
+                    <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Laporan Analisis Kelas AI 🤖</h2>
+                    <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Analisis kondisi kelas dan identifikasi siswa yang membutuhkan pendampingan segera. Periode data: <strong class="text-white"><?= htmlspecialchars($periodLabel); ?></strong>.</p>
+                </div>
+                <div class="banner-actions">
+                    <a href="<?= htmlspecialchars($backHomeUrl, ENT_QUOTES, 'UTF-8'); ?>" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali ke Dashboard</a>
+                </div>
+            </div>
+            <div class="banner-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
         </div>
-    </section>
 
     <!-- Filters -->
     <section class="panel panel-pad">
@@ -1389,7 +1385,8 @@ try {
             <?php endif; ?>
         </section>
     <?php endif; ?>
-</main>
+    </div> <!-- End desktop-center-column -->
+</div> <!-- End app-shell -->
 
 <!-- Tindak Lanjut Modal -->
 <div class="modal fade" id="tindakLanjutModal" tabindex="-1" aria-labelledby="tindakLanjutModalLabel" aria-hidden="true">

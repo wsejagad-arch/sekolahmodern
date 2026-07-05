@@ -455,18 +455,31 @@ textarea.form-control-profile {
     }
 }
 </style>
+<link rel="stylesheet" href="css/guru-desktop.css?v=<?= time() ?>">
+</head>
+<body style="background: #ebf1f6;">
+<?php include 'guru_sidebar_shared.php'; ?>
 
-<div class="profile-wrapper">
-    <div class="profile-header">
-        <div class="profile-title">
-            <h1>Profil Saya</h1>
-            <p>Kelola identitas dan foto profil Anda.</p>
+<div class="app-shell" style="grid-template-columns: 1fr; padding-right: 24px;">
+    <div class="desktop-center-column">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner-premium mb-4">
+            <div class="banner-content">
+                <div class="banner-text">
+                    <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Profil Saya 👤</h2>
+                    <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Kelola identitas dan foto profil Anda.</p>
+                </div>
+                <div class="banner-actions">
+                    <a href="../../home.php" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Dashboard</a>
+                </div>
+            </div>
+            <div class="banner-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
         </div>
-
-        <a href="../../home.php" class="btn-profile btn-light-profile">
-            <i class="bi bi-arrow-left"></i> Dashboard
-        </a>
-    </div>
+        <div class="profile-wrapper" style="padding-top:0;">
 
     <?php if ($pesan !== ''): ?>
         <div class="alert-profile <?= htmlspecialchars($tipePesan); ?>">
@@ -607,7 +620,9 @@ document.getElementById('fotoInput').addEventListener('change', function () {
     reader.readAsDataURL(file);
 });
 </script>
-
+    </div>
+    </div>
+</div>
 <?php include __DIR__ . '/guru_common_footer.php'; ?>
 </body>
 </html>
