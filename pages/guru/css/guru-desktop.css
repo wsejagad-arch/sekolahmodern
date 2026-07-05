@@ -28,8 +28,8 @@
     /* Redefine App Shell */
     .app-shell {
         max-width: 100%;
-        margin: 0 0 0 260px; /* Width of the sidebar */
-        padding: 24px; /* Give some breathing room inside */
+        margin: 0 0 0 240px; /* Width of the sidebar */
+        padding: 16px 24px 24px 0; /* Reduced top padding, 0 left padding to touch sidebar */
         min-height: 100vh;
         border-radius: 0;
         background: transparent;
@@ -45,7 +45,7 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 260px;
+        width: 240px;
         height: 100vh;
         background: #3c58b9; /* Deep blue from mockup */
         display: flex !important;
