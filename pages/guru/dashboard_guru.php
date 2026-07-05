@@ -1080,7 +1080,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     </h3>
                     <div style="font-size: 12px; opacity: 0.9; display: flex; align-items: center; gap: 8px; color: #fff;">
                         <span><i class="bi bi-door-open-fill"></i> <?= htmlspecialchars($runningPanel['kelas']); ?></span>
-                        <span style="opacity:0.5;">|</span>
+                        <span style="opacity:0.5;">&bull;</span>
                         <span><i class="bi bi-clock-fill"></i> <?= substr($runningPanel['jam_mulai'], 0, 5); ?> - <?= substr($runningPanel['jam_selesai'], 0, 5); ?></span>
                     </div>
                 </div>
