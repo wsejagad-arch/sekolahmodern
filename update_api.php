@@ -51,7 +51,7 @@ $new_kih_score = "function kih_score(string \$date, string \$nowTime, string \$s
     }
     
     // If they submit within 15 minutes late, maybe tolerate a bit, but user asked to be strict.
-    // The user said: "Jika anak ini nanti absennya di luar rentang waktu yang agama tentukan atau melebihi batas waktu salat tertentu, berarti tidak sah atau ditolak."
+    // The user said: \"Jika anak ini nanti absennya di luar rentang waktu yang agama tentukan atau melebihi batas waktu salat tertentu, berarti tidak sah atau ditolak.\"
     // So if not in range, reject it completely.
     return ['ditolak', 0];
 }";

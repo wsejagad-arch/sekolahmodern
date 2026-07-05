@@ -1,7 +1,7 @@
 <?php
 $file = 'c:\xampp\htdocs\jurnal\pages\guru\validasi-izin.php';
 
-$content = <<<HTML
+$content = <<<'HTML'
 <?php
 if (session_status() === PHP_SESSION_NONE) { session_start(); }
 if (!isset($_SESSION['no_induk']) || (int)($_SESSION['hak_akses'] ?? 0) !== 2) {
