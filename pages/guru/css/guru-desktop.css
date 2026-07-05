@@ -682,8 +682,9 @@
         width: 280px !important;
     }
     .app-shell {
-        margin-left: 280px !important;
-        padding: 16px 16px 24px 0 !important;
+        margin-left: 350px !important; /* 280px sidebar + 70px gap */
+        padding: 40px !important;
+        max-width: calc(100% - 350px) !important;
         grid-template-columns: 1fr 260px !important;
         gap: 14px !important;
     }
@@ -705,8 +706,9 @@
         width: 320px !important;
     }
     .app-shell {
-        margin-left: 320px !important;
-        padding: 24px 32px 40px 0 !important;
+        margin-left: 390px !important; /* 320px sidebar + 70px gap */
+        padding: 40px !important;
+        max-width: calc(100% - 390px) !important;
         grid-template-columns: 1.2fr 360px !important;
         gap: 28px !important;
     }
