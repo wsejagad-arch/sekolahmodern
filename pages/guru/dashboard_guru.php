@@ -974,7 +974,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 <!-- But actually our CSS `guru-desktop.css` already hides specific elements like `.summary-card`, `.quick-grid`, etc. using `display: none !important;`. -->
 
 <!-- MOBILE-ONLY LAYOUT WRAPPER -->
-<div class="mobile-only-layout app-shell">
+<div class="mobile-only-layout app-shell" style="padding-top: 12px; background-color: #f8fafc; background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px); background-size: 16px 16px; min-height: 100vh;">
     <!-- HEADER -->
     <header class="hero-header">
         <a href="profil-guru" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 15px; width: calc(100% - 70px);">
@@ -989,7 +989,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             </div>
             <div class="greet-block" style="margin-top: 0; padding-top: 0; text-align: left;">
                 <p class="greet-small">Selamat pagi,</p>
-                <h1 style="font-size: 1.35rem; margin-bottom: 2px; color: #fff; font-weight: 700;"><?= $dataGuru['nama_guru'] ?: 'Bu Amanda' ?></h1>
+                <h1 style="font-size: 1.35rem; margin-bottom: 2px; color: #0f172a; font-weight: 700;"><?= $dataGuru['nama_guru'] ?: 'Bu Amanda' ?></h1>
                 <p class="greet-school" style="margin: 0;"><?= htmlspecialchars($lembaga['nmsekolah']); ?></p>
             </div>
         </a>
