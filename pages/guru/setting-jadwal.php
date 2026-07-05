@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -227,8 +227,8 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
 <!-- DESKTOP SIDEBAR -->
 <?php include 'guru_sidebar_shared.php'; ?>
 
-<div class="app-shell">
-    <div class="desktop-center-column" style="max-width: 1000px;">
+<div class="app-shell" style="grid-template-columns: 1fr; padding-right: 24px;">
+    <div class="desktop-center-column">
         
         <!-- Welcome Banner -->
         <div class="welcome-banner-premium">
