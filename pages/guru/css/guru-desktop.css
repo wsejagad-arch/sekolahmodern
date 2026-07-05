@@ -27,9 +27,9 @@
 
     /* Redefine App Shell */
     .app-shell {
-        margin-left: 310px !important;
+        margin-left: 270px !important; /* 240px sidebar + 30px gap */
         padding: 40px !important;
-        max-width: calc(100% - 310px) !important;
+        max-width: calc(100% - 270px) !important;
         min-height: 100vh;
         border-radius: 0;
         background: transparent;
@@ -682,9 +682,9 @@
         width: 280px !important;
     }
     .app-shell {
-        margin-left: 350px !important; /* 280px sidebar + 70px gap */
+        margin-left: 310px !important; /* 280px sidebar + 30px gap */
         padding: 40px !important;
-        max-width: calc(100% - 350px) !important;
+        max-width: calc(100% - 310px) !important;
         grid-template-columns: 1fr 260px !important;
         gap: 14px !important;
     }
@@ -706,9 +706,9 @@
         width: 320px !important;
     }
     .app-shell {
-        margin-left: 390px !important; /* 320px sidebar + 70px gap */
+        margin-left: 350px !important; /* 320px sidebar + 30px gap */
         padding: 40px !important;
-        max-width: calc(100% - 390px) !important;
+        max-width: calc(100% - 350px) !important;
         grid-template-columns: 1.2fr 360px !important;
         gap: 28px !important;
     }
