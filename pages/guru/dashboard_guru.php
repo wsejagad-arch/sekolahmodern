@@ -619,7 +619,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     <div style="padding:14px;border-bottom:1px solid #f1f5f9;font-weight:700;font-size:0.95rem;color:#1e293b;">Notifikasi</div>
                     <?php if ($totalNotifCount > 0): ?>
                         <?php foreach ($guru_all_notifications as $notif): ?>
-                            <a href="<?= htmlspecialchars($notif['link'] ?? '#') ?>" style="display:block; text-decoration:none; padding:12px 14px;border-bottom:1px solid #f8fafc;font-size:0.85rem;color:#475569;transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
+                            <a href="<?= htmlspecialchars($notif['link'] ?? '#') ?>" <?= isset($notif['action_onclick']) ? 'onclick="' . htmlspecialchars($notif['action_onclick']) . '"' : '' ?> style="display:block; text-decoration:none; padding:12px 14px;border-bottom:1px solid #f8fafc;font-size:0.85rem;color:#475569;transition:background 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='transparent'">
                                 <div style="font-weight:600;margin-bottom:4px;color:#0f172a;"><?= htmlspecialchars($notif['title'] ?? 'Notifikasi') ?></div>
                                 <div style="font-size:0.8rem;color:#64748b;margin-bottom:6px;line-height:1.4;"><?= htmlspecialchars(substr($notif['text'] ?? '', 0, 70)) ?>...</div>
                                 <div style="font-size:0.75rem;color:#94a3b8;font-weight:500;"><i class="bi bi-clock me-1"></i><?= date('d M Y, H:i') ?></div>
@@ -2429,11 +2429,13 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             var notifDropdown = document.getElementById('notifDropdownDesktop');
             var profileMenu = document.getElementById('profileMenuDesktop');
             
-            if (notifDropdown && !notifDropdown.contains(e.target) && !e.target.closest('.topbar-icon-btn')) {
+            var isNotifBtn = (typeof e.target.closest === 'function') ? e.target.closest('.topbar-icon-btn') : false;
+            if (notifDropdown && !notifDropdown.contains(e.target) && !isNotifBtn) {
                 notifDropdown.style.display = 'none';
             }
             
-            if (profileMenu && !profileMenu.contains(e.target) && !e.target.closest('.profile-btn')) {
+            var isProfileBtn = (typeof e.target.closest === 'function') ? e.target.closest('.profile-btn') : false;
+            if (profileMenu && !profileMenu.contains(e.target) && !isProfileBtn) {
                 profileMenu.style.display = 'none';
             }
         });
