@@ -640,7 +640,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     <p class="banner-greeting" style="color:rgba(255,255,255,0.8);font-size:0.9rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">
                         <?= (date('H') < 12) ? 'Selamat Pagi' : ((date('H') < 15) ? 'Selamat Siang' : ((date('H') < 18) ? 'Selamat Sore' : 'Selamat Malam')) ?>
                     </p>
-                    <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Hello, <?= htmlspecialchars(explode(' ', $dataGuru['nama_guru'])[0]) ?>! ✨</h2>
+                    <h2 class="animate-fade-in hello-text-desktop" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Hello, <?= htmlspecialchars(explode(' ', $dataGuru['nama_guru'])[0]) ?>! ✨</h2>
                     <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Anda memiliki <strong><?= $unfilledJurnalCount ?></strong> jurnal yang belum diisi hari ini.</p>
                 </div>
                 
