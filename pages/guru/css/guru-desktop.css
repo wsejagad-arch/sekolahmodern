@@ -29,7 +29,7 @@
     .app-shell {
         max-width: 100%;
         margin: 0 0 0 240px; /* Width of the sidebar */
-        padding: 16px 24px 24px 0; /* Reduced top padding, 0 left padding to touch sidebar */
+        padding: 24px; /* Add padding on all sides, including left */
         min-height: 100vh;
         border-radius: 0;
         background: transparent;
