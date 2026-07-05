@@ -982,7 +982,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         .hero-header { padding-top: 10px !important; margin-top: 0 !important; }
         
         /* HIDDEN ON MOBILE TO PREVENT PUSHING CONTENT DOWN */
-        .desktop-sidebar, .desktop-topbar-wrapper, .desktop-center-column, .desktop-right-column, .desktop-logout-wrap {
+        #desktopAppShell, .desktop-sidebar, .desktop-topbar-wrapper, .desktop-center-column, .desktop-right-column, .desktop-logout-wrap {
             display: none !important;
         }
     }
