@@ -974,7 +974,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 <!-- But actually our CSS `guru-desktop.css` already hides specific elements like `.summary-card`, `.quick-grid`, etc. using `display: none !important;`. -->
 
 <!-- MOBILE-ONLY LAYOUT WRAPPER -->
-<div class="mobile-only-layout app-shell" style="padding-top: 12px; background-color: #f8fafc; background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px); background-size: 16px 16px; min-height: 100vh;">
+<div class="mobile-only-layout app-shell" style="padding-top: 0; background-color: #f8fafc; background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px); background-size: 16px 16px; min-height: 100vh;">
     <!-- HEADER -->
     <header class="hero-header">
         <a href="profil-guru" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 15px; width: calc(100% - 70px);">
@@ -1524,9 +1524,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     </div>
 
     <!-- BOTTOM NAV -->
-    <div class="bottom-nav-wrap">
-
-    </div>
+    <?php include 'guru_common_footer.php'; ?>
 
 
     <!-- Modal Pilih Jadwal (Bootstrap) -->
