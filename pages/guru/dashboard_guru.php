@@ -2020,7 +2020,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
-            <div class="journal-modal-body" style="padding: 20px 24px;">
+            <div class="journal-modal-body">
                 <form id="formPelanggaran" style="display:grid; gap:16px;">
                     <div class="row g-2 m-0">
                         <div class="col-12 col-md-6 px-1">
