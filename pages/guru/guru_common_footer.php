@@ -2,10 +2,11 @@
 if (!function_exists('guru_common_footer_url')) {
     function guru_common_footer_url(string $page, array $params = []): string
     {
-        $safe = strtolower(preg_replace('/[^a-z0-9_-]/i', '', $page));
-        $url = php_sapi_name() === 'cli-server' ? $safe . '.php' : $safe;
+        // Allow slashes and dots for correct path routing
+        $safe = preg_replace('/[^a-z0-9_\-\.\/]/i', '', $page);
+        $url = php_sapi_name() === 'cli-server' && !preg_match('/\.php$/', $safe) && strpos($safe, '?') === false ? $safe . '.php' : $safe;
         if (!empty($params)) {
-            $url .= '?' . http_build_query($params);
+            $url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($params);
         }
         return $url;
     }
@@ -58,11 +59,14 @@ $isActiveFooterItem = static function (array $item) use ($currentGuruFooterPage)
         grid-template-columns: 1fr 1fr 78px 1fr 1fr;
         align-items: center;
         gap: 4px;
-        background: rgba(255, 255, 255, 0.94);
-        border: 1px solid rgba(226, 232, 240, 0.9);
+        background: #f8fafc;
+        border: 2px solid #ffffff;
         border-radius: 35px;
-        box-shadow: 0 -10px 40px rgba(15, 23, 42, 0.12);
-        backdrop-filter: blur(20px);
+        box-shadow: 
+            6px 6px 16px rgba(148, 163, 184, 0.3), 
+            -6px -6px 16px rgba(255, 255, 255, 0.8),
+            inset 2px 2px 4px rgba(255, 255, 255, 0.8);
+        backdrop-filter: none;
         pointer-events: auto;
         font-family: "Poppins", sans-serif !important;
     }
@@ -105,10 +109,20 @@ $isActiveFooterItem = static function (array $item) use ($currentGuruFooterPage)
         place-items: center;
         color: #fff;
         text-decoration: none;
-        font-size: 32px;
-        background: linear-gradient(135deg, #10b981, #047857);
-        border: 5px solid #f8fafc;
-        box-shadow: 0 10px 25px rgba(5, 150, 105, 0.35);
+        background: #10b981;
+        box-shadow: 
+            4px 4px 10px rgba(16, 185, 129, 0.4),
+            -4px -4px 10px rgba(255, 255, 255, 0.9),
+            inset 2px 2px 5px rgba(255, 255, 255, 0.3),
+            inset -2px -2px 5px rgba(4, 120, 87, 0.3);
+        border: 4px solid #f8fafc;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .guru-common-footer-center:active {
+        transform: scale(0.95);
+        box-shadow: 
+            inset 4px 4px 10px rgba(4, 120, 87, 0.4),
+            inset -4px -4px 10px rgba(255, 255, 255, 0.3);
     }
     .guru-common-footer-center:hover,
     .guru-common-footer-item:hover {
