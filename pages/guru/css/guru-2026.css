@@ -492,6 +492,7 @@ body {
     padding: 18px;
     overflow-y: auto;
     min-height: 0;
+    flex: 1 1 auto;
 }
 
 .journal-picker-list {
