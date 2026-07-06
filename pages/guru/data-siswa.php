@@ -164,6 +164,7 @@ if ($hasKelasFilter && !empty($kelasOptions)) {
         @media (min-width: 768px) {
             .mobile-nav, .guru-common-footer-wrap, .bottom-nav-wrap { display: none !important; padding-bottom: 0 !important; }
             body { padding-bottom: 0 !important; }
+            .data-siswa-shell { grid-template-columns: 1fr !important; padding-right: 24px !important; }
         }
     </style>
 </head>
@@ -171,17 +172,17 @@ if ($hasKelasFilter && !empty($kelasOptions)) {
 
 <?php include 'guru_sidebar_shared.php'; ?>
 
-<div class="app-shell" style="grid-template-columns: 1fr; padding-right: 24px;">
+<div class="app-shell data-siswa-shell">
     <div class="desktop-center-column">
         
         <!-- Welcome Banner -->
         <div class="welcome-banner-premium mb-4">
             <div class="banner-content">
                 <div class="banner-text">
-                    <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Data Siswa ðŸ§‘â€ðŸŽ“</h2>
+                    <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Data Siswa 🧑‍🎓</h2>
                     <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Pilih kelas yang diampu oleh <?= guru_ds_h($namaGuru); ?> untuk melihat daftar siswa atau mencetak nilai.</p>
                 </div>
-                <div class="banner-actions">
+                <div class="banner-actions d-none d-md-block">
                     <a href="../../home.php" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali ke Dashboard</a>
                 </div>
             </div>
