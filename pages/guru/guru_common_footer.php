@@ -109,6 +109,7 @@ $isActiveFooterItem = static function (array $item) use ($currentGuruFooterPage)
         place-items: center;
         color: #fff;
         text-decoration: none;
+        font-size: 38px;
         background: #10b981;
         box-shadow: 
             4px 4px 10px rgba(16, 185, 129, 0.4),
