@@ -31,14 +31,8 @@ if ($qBkCheck && mysqli_num_rows($qBkCheck) > 0) {
 $tglskr = date('Y-m-d');
 $hariini = ubah_nama_hari($tglskr);
 ?>
-<script>
-    // Redirect to the dedicated mobile dashboard 'guru_2026.php' on mobile devices
-    if (window.innerWidth <= 767) {
-        window.location.replace('pages/guru/guru_2026.php');
-    }
-</script>
-<?php
 
+<?php
 // Total Kelas Ampu
 $kelasAmpu = [];
 $qKelas = mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_mapel_ampu WHERE no_induk='$nipEsc' AND kelas <> ''");
