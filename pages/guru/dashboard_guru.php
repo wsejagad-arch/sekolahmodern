@@ -30,6 +30,14 @@ if ($qBkCheck && mysqli_num_rows($qBkCheck) > 0) {
 // Date Setup
 $tglskr = date('Y-m-d');
 $hariini = ubah_nama_hari($tglskr);
+?>
+<script>
+    // Redirect to the dedicated mobile dashboard 'guru_2026.php' on mobile devices
+    if (window.innerWidth <= 767) {
+        window.location.replace('pages/guru/guru_2026.php');
+    }
+</script>
+<?php
 
 // Total Kelas Ampu
 $kelasAmpu = [];
