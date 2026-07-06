@@ -491,10 +491,7 @@ $googleErrorMessages = [
         <!-- Panel Kanan: Form Login -->
         <section class="form-panel">
             <div class="form-card">
-                <div class="form-heading">
-                    <h2>Selamat Datang</h2>
-                    <p>Masukkan username dan password Anda untuk mengakses sistem.</p>
-                </div>
+
 
                 <?php if (isset($_GET['haruslogin'])): ?>
                     <div class="alert alert-danger">Silakan login terlebih dahulu untuk melanjutkan.</div>
