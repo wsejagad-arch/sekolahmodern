@@ -1,10 +1,10 @@
-<?php include_once __DIR__ . '/components/shared_footer.php'; ?>
-
 </div>
 <!-- End of Content Wrapper -->
 
 </div>
 <!-- End of Page Wrapper -->
+
+<?php include_once __DIR__ . '/components/shared_footer.php'; ?>
 
 <!-- Scroll to Top Button-->
 <a class="scroll-to-top rounded" href="#page-top">
