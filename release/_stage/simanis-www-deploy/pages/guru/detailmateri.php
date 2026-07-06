@@ -106,12 +106,12 @@ if(isset($_POST['getDetail'])) {
                 }
             }
             
-            $hapusUrl = 'delete-materi?id=' . $idMateri . ($file ? ('&file=' . rawurlencode($file)) : '');
+            $hapusUrl = 'pages/guru/delete-materi.php?id=' . $idMateri . ($file ? ('&file=' . rawurlencode($file)) : '');
             echo '<div id="ringkasanJurnal" class="card mb-3">'
               .'<div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">'
               .'<span class="fw-semibold">Ringkasan Jurnal Hari Ini</span>'
               .'<div class="d-flex gap-2">'
-              .'<button type="button" id="btnEditJurnal" class="btn btn-sm btn-primary">Edit Jurnal</button>'
+              .'<button type="button" id="btnEditJurnal" class="btn btn-sm btn-primary text-white" style="color: #fff !important;">Edit Jurnal</button>'
               .'<a class="btn btn-sm btn-outline-danger" href="'.$hapusUrl.'" onclick="return confirm(\'Yakin mau menghapus isian jurnal ini?\');">Hapus Jurnal</a>'
               .'</div>'
               .'</div><div class="card-body">';
@@ -188,9 +188,9 @@ $existingKeterangan = $existingKeterangan ?? '';
             </div>
 
             <style>
-                .absen-radio { appearance:none; width:28px; height:28px; border:2px solid #dee2e6; border-radius:50%; position:relative; cursor:pointer; background:#fff; transition:.2s; display:inline-block; }
+                .absen-radio { appearance:none; width:24px; height:24px; border:1px solid #dee2e6; border-radius:50%; position:relative; cursor:pointer; background:#fff; transition:.2s; display:inline-block; margin: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
                 .absen-radio::after { content: attr(data-letter); position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:11px; font-weight:bold; color:#adb5bd; text-transform:uppercase; }
-                .absen-radio:checked { transform: scale(1.1); }
+                .absen-radio:checked { transform: scale(1.15); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
                 .absen-radio[value="Hadir"]:checked { background-color:#198754; border-color:#198754; } 
                 .absen-radio[value="Ijin"]:checked { background-color:#0dcaf0; border-color:#0dcaf0; }
                 .absen-radio[value="Sakit"]:checked { background-color:#ffc107; border-color:#ffc107; }
@@ -198,8 +198,21 @@ $existingKeterangan = $existingKeterangan ?? '';
                 .absen-radio[value="Dispen"]:checked { background-color:#6f42c1; border-color:#6f42c1; }
                 .absen-radio[value="Telat"]:checked { background-color:#fd7e14; border-color:#fd7e14; }
                 .absen-radio:checked::after { color:#fff; }
-                .blink { display:inline-block; animation: blink 1s steps(1,start) infinite; }
-                @keyframes blink { 50% { opacity: 0; } }
+                
+                /* Base (Mobile) Compact table styling */
+                .table-absen { table-layout: fixed; width: 100%; word-wrap: break-word; }
+                .table-absen th, .table-absen td { padding: 6px 2px !important; vertical-align: middle; border-bottom: 1px solid #f1f5f9; }
+                .table-absen th.col-radio, .table-absen td.col-radio { width: 32px; text-align: center; overflow: hidden; }
+                .table-absen th.col-nama, .table-absen td.col-nama { width: auto; font-size: 12px; padding-left: 8px !important; line-height: 1.3; word-break: break-word; }
+                
+                /* Desktop Larger Columns */
+                @media (min-width: 768px) {
+                    .table-absen th, .table-absen td { padding: 10px 4px !important; }
+                    .table-absen th.col-radio, .table-absen td.col-radio { width: 85px; }
+                    .table-absen th.col-nama, .table-absen td.col-nama { font-size: 14px; padding-left: 16px !important; font-weight: 500; }
+                    .absen-radio { width: 28px; height: 28px; }
+                    .absen-radio::after { font-size: 12px; }
+                }
             </style>
 
             <?php
@@ -210,14 +223,14 @@ $existingKeterangan = $existingKeterangan ?? '';
                 $siswaQuery = mysqli_query($conn, $queryS);
 
                 if($siswaQuery && mysqli_num_rows($siswaQuery) > 0) {
-                    echo "<div class='table-responsive border rounded' style='max-height: 400px; overflow-y:auto;'>
-                          <table class='table table-striped table-hover align-middle table-sm mb-0' style='font-size:0.9rem'>
+                    echo "<div class='border rounded' style='max-height: 400px; overflow-y:auto; overflow-x:hidden;'>
+                          <table class='table table-striped table-hover align-middle mb-0 table-absen'>
                           <thead class='table-light sticky-top'>
                             <tr>
-                              <th>Nama Siswa</th>
-                              <th class='text-center'>H</th><th class='text-center'>I</th>
-                              <th class='text-center'>S</th><th class='text-center'>D</th>
-                              <th class='text-center'>A</th><th class='text-center'>T</th>
+                              <th class='col-nama'>Nama Siswa</th>
+                              <th class='col-radio'>H</th><th class='col-radio'>I</th>
+                              <th class='col-radio'>S</th><th class='col-radio'>D</th>
+                              <th class='col-radio'>A</th><th class='col-radio'>T</th>
                             </tr>
                           </thead>
                           <tbody>";
@@ -234,13 +247,13 @@ $existingKeterangan = $existingKeterangan ?? '';
                         $checkedAlpha = $statusSiswa === 'alpha' ? ' checked' : '';
                         $checkedTelat = $statusSiswa === 'telat' ? ' checked' : '';
                         echo "<tr>
-                                <td>" . htmlspecialchars($s['nama_siswa']) . "</td>
-                                <td class='text-center'><input class='absen-radio' type='radio' data-letter='h' name='absen[".$nis."]' value='Hadir'".$checkedHadir."></td>
-                                <td class='text-center'><input class='absen-radio' type='radio' data-letter='i' name='absen[".$nis."]' value='Ijin'".$checkedIjin."></td>
-                                <td class='text-center'><input class='absen-radio' type='radio' data-letter='s' name='absen[".$nis."]' value='Sakit'".$checkedSakit."></td>
-                                <td class='text-center'><input class='absen-radio' type='radio' data-letter='d' name='absen[".$nis."]' value='Dispen'".$checkedDispen."></td>
-                                <td class='text-center'><input class='absen-radio' type='radio' data-letter='a' name='absen[".$nis."]' value='Alpha'".$checkedAlpha."></td>
-                                <td class='text-center'><input class='absen-radio' type='radio' data-letter='t' name='absen[".$nis."]' value='Telat'".$checkedTelat."></td>
+                                <td class='col-nama'>" . htmlspecialchars($s['nama_siswa']) . "</td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='h' name='absen[".$nis."]' value='Hadir'".$checkedHadir."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='i' name='absen[".$nis."]' value='Ijin'".$checkedIjin."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='s' name='absen[".$nis."]' value='Sakit'".$checkedSakit."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='d' name='absen[".$nis."]' value='Dispen'".$checkedDispen."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='a' name='absen[".$nis."]' value='Alpha'".$checkedAlpha."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='t' name='absen[".$nis."]' value='Telat'".$checkedTelat."></td>
                               </tr>";
                     }
                     echo "</tbody></table></div>";
@@ -258,8 +271,8 @@ $existingKeterangan = $existingKeterangan ?? '';
 
         <div id="msgBox"></div>
 
-        <button type="submit" id="btnSimpan" class="btn btn-primary w-100 py-2">
-            <i class="bi bi-save me-2"></i> Simpan Jurnal
+        <button type="submit" id="btnSimpan" class="btn btn-primary w-100 py-2 text-white" style="color: #fff !important;">
+            <i class="bi bi-save me-2" style="color: #fff !important;"></i> Simpan Jurnal
         </button>
     </form>
 </div>
@@ -269,6 +282,17 @@ $existingKeterangan = $existingKeterangan ?? '';
 
 <script>
 (function() {
+    // 0. Logic Tombol Edit Jurnal
+    var btnEdit = document.getElementById('btnEditJurnal');
+    if (btnEdit) {
+        btnEdit.onclick = function() {
+            var ringkasan = document.getElementById('ringkasanJurnal');
+            var formEdit = document.getElementById('formEditJurnal');
+            if (ringkasan) ringkasan.style.display = 'none';
+            if (formEdit) formEdit.style.display = 'block';
+        };
+    }
+
     // 1. Logic Tombol "Semua Hadir"
     var btnAll = document.getElementById('btnAllHadir');
     if(btnAll) {
@@ -317,7 +341,7 @@ $existingKeterangan = $existingKeterangan ?? '';
 
             // Kirim Data
             var formData = new FormData(form);
-            fetch('simpanmateri', {
+            fetch('pages/guru/simpanmateri.php', {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -355,7 +379,7 @@ $existingKeterangan = $existingKeterangan ?? '';
                             modal.setAttribute('aria-hidden', 'true');
                         }
                         document.body.classList.remove('modal-open-dashboard');
-                        window.location.href = 'guru_legacy?sukses=jurnal';
+                        window.location.href = 'home.php?sukses=jurnal';
                     }, 900);
                 } else {
                     btn.innerHTML = 'Coba Lagi';

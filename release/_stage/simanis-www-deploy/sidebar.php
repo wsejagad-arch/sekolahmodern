@@ -1,4 +1,5 @@
 <!-- Sidebar -->
+<?php if ((int)($_SESSION['hak_akses'] ?? 0) !== 2): ?>
 <ul class="navbar-nav backgroundna sidebar sidebar-dark accordion" id="accordionSidebar">
 
   <!-- Sidebar - Brand -->
@@ -28,6 +29,29 @@
       <span>Dashboard</span></a>
   </li>
 
+  <?php if (isset($_SESSION['hak_akses']) && $_SESSION['hak_akses'] == 2): ?>
+  <!-- Nav Item - Lentera Guru (hanya untuk pembina literasi) -->
+  <?php
+    $sidebarNip = $_SESSION['no_induk'] ?? '';
+    $sidebarNipEsc = mysqli_real_escape_string($conn, $sidebarNip);
+    $sidebarIdSekolah = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
+    $qSidebarLiterasi = @mysqli_query($conn, "SELECT COUNT(*) as total FROM tbl_literasi_ampuh WHERE no_induk_guru='$sidebarNipEsc' AND id_sekolah=$sidebarIdSekolah");
+    $isSidebarPembina = false;
+    if ($qSidebarLiterasi) {
+        $rowSidebar = mysqli_fetch_assoc($qSidebarLiterasi);
+        $isSidebarPembina = (int)($rowSidebar['total'] ?? 0) > 0;
+    }
+    if ($isSidebarPembina):
+  ?>
+  <li class="nav-item">
+    <a class="nav-link" href="pages/guru/literasi.php">
+      <i class="fas fa-fw fa-book-reader"></i>
+      <span>LENTERA Literasi</span>
+    </a>
+  </li>
+  <?php endif; ?>
+  <?php endif; ?>
+
   <!-- Divider -->
   <hr class="sidebar-divider">
 
@@ -45,9 +69,9 @@
     <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
       <div class="bg-white py-2 collapse-inner rounded">
         <h6 class="collapse-header">Rincian:</h6>
-        <a class="collapse-item" href="home.php?page=data-guru">Lihat Data Guru</a>
-        <a class="collapse-item" href="home.php?page=tambah-guru">Tambah Data Guru</a>
-        <a class="collapse-item" href="home.php?page=import-guru"><i class="fas fa-file-excel text-success"></i> Import dari Excel</a>
+        <a class="collapse-item" href="home.php?page=data-guru"><i class="fas fa-list text-info mr-1" style="font-size:11px"></i>Lihat Data Guru</a>
+        <a class="collapse-item" href="home.php?page=tambah-guru"><i class="fas fa-user-plus text-primary mr-1" style="font-size:11px"></i>Tambah Data Guru</a>
+        <a class="collapse-item" href="home.php?page=import-guru"><i class="fas fa-file-excel text-success mr-1" style="font-size:11px"></i>Import dari Excel</a>
       </div>
     </div>
   </li>
@@ -61,10 +85,11 @@
     <div id="collapseSiswa" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
       <div class="bg-white py-2 collapse-inner rounded">
         <h6 class="collapse-header">Rincian:</h6>
-        <a class="collapse-item" href="home.php?page=data-siswa">Lihat Data Siswa</a>
-        <a class="collapse-item" href="home.php?page=tambah-siswa">Tambah Siswa</a>
-        <a class="collapse-item" href="home.php?page=input-kelas">Input Kelas</a>
+        <a class="collapse-item" href="home.php?page=data-siswa"><i class="fas fa-list text-info mr-1" style="font-size:11px"></i>Lihat Data Siswa</a>
+        <a class="collapse-item" href="home.php?page=tambah-siswa"><i class="fas fa-user-plus text-primary mr-1" style="font-size:11px"></i>Tambah Siswa</a>
+        <a class="collapse-item" href="home.php?page=input-kelas"><i class="fas fa-chalkboard text-secondary mr-1" style="font-size:11px"></i>Input Kelas</a>
         <a class="collapse-item" href="home.php?page=kenaikan-kelas"><i class="fas fa-level-up-alt text-primary mr-1" style="font-size:11px"></i>Naik Kelas</a>
+        <a class="collapse-item" href="home.php?page=data-alumni"><i class="fas fa-user-graduate text-success mr-1" style="font-size:11px"></i>Data Alumni</a>
         <a class="collapse-item" href="home.php?page=ketua-kelas"><i class="fas fa-crown text-warning mr-1" style="font-size:11px"></i>Setting Ketua Kelas</a>
       </div>
     </div>
@@ -79,8 +104,8 @@
       <div id="collapseWaliKelas" class="collapse" aria-labelledby="headingWaliKelas" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">Kelola:</h6>
-          <a class="collapse-item" href="home.php?page=kelola-wali-kelas">Kelola Wali Kelas</a>
-          <a class="collapse-item" href="home.php?page=data-wali-kelas">Data Wali Kelas</a>
+          <a class="collapse-item" href="home.php?page=kelola-wali-kelas"><i class="fas fa-users-cog text-primary mr-1" style="font-size:11px"></i>Kelola Wali Kelas</a>
+          <a class="collapse-item" href="home.php?page=data-wali-kelas"><i class="fas fa-address-book text-info mr-1" style="font-size:11px"></i>Data Wali Kelas</a>
         </div>
       </div>
     </li>
@@ -94,17 +119,33 @@
     <div id="collapseMonitoring" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
       <div class="bg-white py-2 collapse-inner rounded">
         <h6 class="collapse-header">Cek:</h6>
-        <a class="collapse-item" href="home.php?page=jurnal">Jurnal Guru</a>
-        <a class="collapse-item" href="home.php?page=kelas">Jurnal Kelas</a>
-        <a class="collapse-item" href="home.php?page=monitoring-guru">Monitoring Guru</a>
-        <a class="collapse-item" href="home.php?page=lacak-siswa">Lacak Siswa</a>
-        <a class="collapse-item" href="home.php?page=monitoring">Kehadiran Guru</a>
-        <a class="collapse-item" href="home.php?page=cek-nilai">Cek Nilai</a>
-        <a class="collapse-item" href="home.php?page=nilai-perkembangan">Nilai & Grafik Perkembangan</a>
-        <a class="collapse-item" href="home.php?page=cetak-kehadiran-guru">Cetak Laporan</a>
-        <a class="collapse-item" href="home.php?page=cetak-kehadiran-siswa&tab=kelas">Kehadiran Siswa</a>
-        <a class="collapse-item" href="home.php?page=monitoring-izin">Monitoring Izin</a>
+        <a class="collapse-item" href="home.php?page=jurnal"><i class="fas fa-book text-primary mr-1" style="font-size:11px"></i>Jurnal Guru</a>
+        <a class="collapse-item" href="home.php?page=kelas"><i class="fas fa-chalkboard text-info mr-1" style="font-size:11px"></i>Jurnal Kelas</a>
+        <a class="collapse-item" href="home.php?page=monitoring-guru"><i class="fas fa-eye text-warning mr-1" style="font-size:11px"></i>Monitoring Guru</a>
+        <a class="collapse-item" href="home.php?page=lacak-siswa"><i class="fas fa-search-location text-success mr-1" style="font-size:11px"></i>Lacak Siswa</a>
+        <a class="collapse-item" href="home.php?page=monitoring"><i class="fas fa-user-check text-secondary mr-1" style="font-size:11px"></i>Kehadiran Guru</a>
+        <a class="collapse-item" href="home.php?page=cek-nilai"><i class="fas fa-star text-warning mr-1" style="font-size:11px"></i>Cek Nilai</a>
+        <a class="collapse-item" href="home.php?page=nilai-perkembangan"><i class="fas fa-chart-line text-info mr-1" style="font-size:11px"></i>Nilai & Grafik Perkembangan</a>
+        <a class="collapse-item" href="home.php?page=cetak-kehadiran-siswa&tab=kelas"><i class="fas fa-users text-primary mr-1" style="font-size:11px"></i>Kehadiran Siswa</a>
+        <a class="collapse-item" href="home.php?page=monitoring-izin"><i class="fas fa-file-signature text-warning mr-1" style="font-size:11px"></i>Monitoring Izin</a>
+        <?php
+        $showAduanMenu = false;
+        if (isset($_SESSION['hak_akses'])) {
+            if ((int)$_SESSION['hak_akses'] === 1) {
+                $showAduanMenu = true;
+            } elseif ((int)$_SESSION['hak_akses'] === 2 && isset($_SESSION['no_induk']) && isset($conn)) {
+                $sidebarNip = $_SESSION['no_induk'];
+                $sidebarNipEsc = mysqli_real_escape_string($conn, $sidebarNip);
+                $qTimAduan = @mysqli_query($conn, "SELECT is_tim_aduan FROM tbl_guru WHERE no_induk='$sidebarNipEsc' LIMIT 1");
+                if ($qTimAduan && $rowTim = mysqli_fetch_assoc($qTimAduan)) {
+                    $showAduanMenu = !empty($rowTim['is_tim_aduan']) && (int)$rowTim['is_tim_aduan'] === 1;
+                }
+            }
+        }
+        if ($showAduanMenu):
+        ?>
         <a class="collapse-item" href="home.php?page=aduan-siswa"><i class="fas fa-shield-heart text-danger mr-1" style="font-size:11px"></i>Aduan Siswa</a>
+        <?php endif; ?>
       </div>
     </div>
   </li>
@@ -136,8 +177,10 @@
     <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
       <div class="bg-white py-2 collapse-inner rounded">
         <h6 class="collapse-header">Data Admin:</h6>
-        <a class="collapse-item" href="home.php?page=lihatuser">Tampilkan Admin</a>
-        <a class="collapse-item" href="home.php?page=tambahuser">Tambah Admin</a>
+        <a class="collapse-item" href="home.php?page=lihatuser"><i class="fas fa-users-cog text-info mr-1" style="font-size:11px"></i>Tampilkan Admin</a>
+        <a class="collapse-item" href="home.php?page=tambahuser"><i class="fas fa-user-plus text-primary mr-1" style="font-size:11px"></i>Tambah Admin</a>
+        <h6 class="collapse-header mt-2">LENTERA:</h6>
+        <a class="collapse-item" href="home.php?page=literasi-admin"><i class="fas fa-book-reader text-warning mr-1" style="font-size:11px"></i>Mapping Guru Literasi</a>
       </div>
     </div>
   </li>
@@ -153,7 +196,7 @@
     <div id="collapsePagesMapel" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
       <div class="bg-white py-2 collapse-inner rounded">
         <h6 class="collapse-header">Mapel:</h6>
-        <a class="collapse-item" href="home.php?page=tambah-data-mapel">Tambah Mapel</a>
+        <a class="collapse-item" href="home.php?page=tambah-data-mapel"><i class="fas fa-plus-circle text-primary mr-1" style="font-size:11px"></i>Tambah Mapel</a>
       </div>
     </div>
   </li>
@@ -183,6 +226,8 @@
         <h6 class="collapse-header">Data Log Sistem:</h6>
         <a class="collapse-item" href="home.php?page=lihat-log">Lihat Log Sistem</a>
         <a class="collapse-item" href="home.php?page=cetak-log">Cetak Laporan Log</a>
+        <h6 class="collapse-header mt-2">Pemeliharaan:</h6>
+        <a class="collapse-item" href="home.php?page=clear-cache"><i class="fas fa-broom text-warning mr-1" style="font-size:11px"></i>Bersihkan Log &amp; Cache</a>
       </div>
     </div>
   </li>
@@ -196,29 +241,21 @@
     <div id="collapseSetting" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
       <div class="bg-white py-2 collapse-inner rounded">
         <h6 class="collapse-header">Setting</h6>
-        <a class="collapse-item" href="home.php?page=setting">Data Sekolah</a>
-        <a class="collapse-item" href="home.php?page=setting#geminiApiKey">Setting API Key</a>
-        <a class="collapse-item" href="home.php?page=presensi-settings">Pengaturan Presensi</a>
-        <a class="collapse-item" href="google-oauth-settings.php">Login Gmail</a>
+        <a class="collapse-item" href="home.php?page=setting"><i class="fas fa-school text-info mr-1" style="font-size:11px"></i>Data Sekolah</a>
+        <a class="collapse-item" href="home.php?page=setting#geminiApiKey"><i class="fas fa-key text-warning mr-1" style="font-size:11px"></i>Setting API Key</a>
+        <a class="collapse-item" href="home.php?page=presensi-settings"><i class="fas fa-user-clock text-secondary mr-1" style="font-size:11px"></i>Pengaturan Presensi</a>
+        <a class="collapse-item" href="google-oauth-settings.php"><i class="fab fa-google text-danger mr-1" style="font-size:11px"></i>Login Gmail</a>
+        <a class="collapse-item" href="pengaturan-wa.php"><i class="fab fa-whatsapp text-success mr-1" style="font-size:11px"></i>Notifikasi WhatsApp</a>
+        <a class="collapse-item" href="home.php?page=broadcast-wa"><i class="fas fa-bullhorn text-primary mr-1" style="font-size:11px"></i>Broadcast WA</a>
+        <?php if (isset($_SESSION['hak_akses']) && $_SESSION['hak_akses'] == 1): ?>
+        <h6 class="collapse-header mt-2">Data Management:</h6>
+        <a class="collapse-item" href="home.php?page=reset-semester"><i class="fas fa-trash-restore-alt text-danger mr-1" style="font-size:11px"></i>Reset Semester Baru</a>
+        <?php endif; ?>
       </div>
     </div>
   </li>
 
-  <!-- Nav Item - Laporan -->
-  <li class="nav-item">
-    <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseLaporan" aria-expanded="false" aria-controls="collapseLaporan">
-      <i class="fas fa-fw fa-file-alt"></i>
-      <span>Laporan</span>
-    </a>
-    <div id="collapseLaporan" class="collapse" aria-labelledby="headingLaporan" data-parent="#accordionSidebar">
-      <div class="bg-white py-2 collapse-inner rounded">
-        <h6 class="collapse-header">Laporan:</h6>
-        <a class="collapse-item" href="home.php?page=buat-laporan">Input Laporan</a>
-        <a class="collapse-item" href="home.php?page=cetak-jurnal-guru">📊 Cetak Jurnal Guru</a>
-        <a class="collapse-item" href="pages/guru/laporan-kelas">Laporan Kelas</a>
-      </div>
-    </div>
-  </li>
+  
 
   <?php if (isset($_SESSION['hak_akses']) && $_SESSION['hak_akses'] == 1): ?>
 
@@ -318,13 +355,19 @@
   <!-- Divider -->
   <hr class="sidebar-divider d-none d-md-block">
 
-  <!-- Sidebar Toggler (Sidebar) -->
-  <div class="text-center d-none d-md-inline">
-    <button class="rounded-circle border-0" id="sidebarToggle"></button>
-  </div>
+      <!-- Sidebar Toggler (Sidebar) -->
+      <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+      </div>
 
-</ul>
-<!-- End of Sidebar -->
+    </ul>
+    <!-- End of Sidebar -->
+<?php else: ?>
+    <!-- DESKTOP SIDEBAR FOR GURU -->
+    <link rel='stylesheet' href='pages/guru/css/guru-2026-scoped.css?v=<?= time() ?>'>
+    <link rel='stylesheet' href='pages/guru/css/guru-desktop.css?v=<?= time() ?>'>
+    <?php include 'pages/guru/guru_sidebar_shared.php'; ?>
+<?php endif; ?>
 
 <!-- Mobile overlay — dipakai untuk menutup sidebar ketika klik di luar -->
 <div class="sb-overlay" id="sbOverlay"></div>
@@ -344,6 +387,8 @@
       'data-siswa': 'collapseSiswa',
       'tambah-siswa': 'collapseSiswa',
       'input-kelas': 'collapseSiswa',
+      'kenaikan-kelas': 'collapseSiswa',
+      'data-alumni': 'collapseSiswa',
       'ketua-kelas': 'collapseSiswa',
       'kelola-wali-kelas': 'collapseWaliKelas',
       'data-wali-kelas': 'collapseWaliKelas',
@@ -360,14 +405,18 @@
       'aduan-siswa': 'collapseMonitoring',
       'lihatuser': 'collapsePages',
       'tambahuser': 'collapsePages',
+      'literasi-admin': 'collapsePages',
       'ekskul': 'collapsePages',
       'sync-eraport-ekskul': 'collapseSetting',
       'tambah-data-mapel': 'collapsePagesMapel',
       'tambah-tahun-ajaran': 'collapsePagesTA',
       'lihat-log': 'collapseLog',
       'cetak-log': 'collapseLog',
+      'clear-cache': 'collapseLog',
       'setting': 'collapseSetting',
       'presensi-settings': 'collapseSetting',
+      'broadcast-wa': 'collapseSetting',
+      'reset-semester': 'collapseSetting',
       'buat-laporan': 'collapseLaporan',
       'cetak-jurnal-guru': 'collapseLaporan'
     };

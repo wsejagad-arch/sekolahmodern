@@ -672,7 +672,7 @@ if (isset($_POST['getDetail']) || isset($_GET['getDetail'])) {
     <section class="nilai-hero mb-4">
         <div class="nilai-hero-top">
             <?php if ($standalone) { ?>
-                <a href="guru_legacy" class="nilai-back-link"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+                <a href="../../home.php" class="nilai-back-link"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
             <?php } else { ?>
                 <span class="nilai-eyebrow"><i class="fas fa-chart-line"></i> Penilaian Harian</span>
             <?php } ?>
@@ -1055,9 +1055,9 @@ if (isset($_POST['getDetail']) || isset($_GET['getDetail'])) {
     </main>
     <div class="bottom-nav-wrap">
         <nav class="bottom-nav" aria-label="Navigasi guru">
-            <a href="guru_legacy" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
+            <a href="../../home.php" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
             <a href="<?= htmlspecialchars($kelasDetailUrl, ENT_QUOTES, 'UTF-8'); ?>" class="nav-link"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
-            <a href="guru_legacy?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
+            <a href="../../home.php?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
             <a href="inputtugas" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Tugas</span></a>
             <a href="profil-guru" class="nav-link"><i class="bi bi-person-fill"></i><span>Profil</span></a>
         </nav>

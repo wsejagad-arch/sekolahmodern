@@ -211,11 +211,7 @@ while ($qRiwayat && ($row = mysqli_fetch_assoc($qRiwayat))) {
         <?php endif; ?>
     </section>
 </main>
-<nav class="bottom-nav">
-    <a href="siswa.php"><i class="fas fa-home"></i><span>Beranda</span></a>
-    <a href="presensi.php"><i class="fas fa-fingerprint"></i><span>Presensi</span></a>
-    <a href="aduan.php" style="color:#be123c;"><i class="fas fa-shield-heart"></i><span>Aduan</span></a>
-    <a href="profil.php"><i class="fas fa-user-circle"></i><span>Profil</span></a>
-</nav>
+<?php include 'siswa_footer.php'; ?>
+
 </body>
 </html>

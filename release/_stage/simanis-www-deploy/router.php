@@ -26,13 +26,13 @@ if (!$type || !$page) {
 }
 
 // Map type to directory
-$typeDir = match ($type) {
+$dirMap = [
     'guru' => 'pages/guru',
     'siswa' => 'pages/siswa',
     'admin' => 'pages/admin',
-    'public' => 'pages',
-    default => null
-};
+    'public' => 'pages'
+];
+$typeDir = $dirMap[$type] ?? null;
 
 if (!$typeDir) {
     http_response_code(400);

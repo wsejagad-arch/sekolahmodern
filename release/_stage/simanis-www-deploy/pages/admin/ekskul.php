@@ -31,6 +31,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action'])) {
         $id = (int)$_POST['id_pembina'];
         mysqli_query($conn, "DELETE FROM tbl_pembina_ekskul WHERE id_pembina=$id");
         echo "<script>window.location.href='home.php?page=ekskul';</script>"; exit;
+    } elseif ($_POST['action'] == 'clear_ekskul_data') {
+        if (trim($_POST['confirm_text'] ?? '') === 'BERSIHKAN') {
+            $clear_type = $_POST['clear_type'] ?? 'riwayat_anggota';
+            
+            $tables = ['tbl_anggota_ekskul', 'tbl_presensi_ekskul', 'tbl_jurnal_ekskul', 'tbl_tugas_ekskul'];
+            if ($clear_type === 'semua') {
+                $tables = array_merge($tables, ['tbl_ekskul', 'tbl_pembina_ekskul', 'tbl_jadwal_ekskul', 'tbl_ekskul_eraport', 'tbl_ekskul_siswa_eraport']);
+            }
+            
+            foreach($tables as $tbl) {
+                @mysqli_query($conn, "TRUNCATE TABLE $tbl");
+            }
+            
+            echo "<script>alert('Data Ekstrakurikuler berhasil dibersihkan!'); window.location.href='home.php?page=ekskul';</script>"; exit;
+        } else {
+            echo "<script>alert('Konfirmasi teks tidak cocok! Pembatalan dilakukan.'); window.location.href='home.php?page=ekskul';</script>"; exit;
+        }
     }
 }
 
@@ -47,7 +64,10 @@ while($rg = mysqli_fetch_assoc($qg)) {
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
             <h6 class="m-0 font-weight-bold text-primary">Daftar Ekstrakurikuler</h6>
-            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddEkskul"><i class="fas fa-plus"></i> Tambah Ekskul</button>
+            <div>
+                <button class="btn btn-sm btn-danger me-1" data-bs-toggle="modal" data-bs-target="#modalClearData"><i class="fas fa-trash-alt"></i> Bersihkan Data</button>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddEkskul"><i class="fas fa-plus"></i> Tambah Ekskul</button>
+            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -170,6 +190,48 @@ while($rg = mysqli_fetch_assoc($qg)) {
 // Store all modals into a global variable so they can be outputted outside wrapper in footer.php
 ob_start();
 ?>
+<!-- Modal Clear Data -->
+<div class="modal fade" id="modalClearData" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form method="post" action="home.php?page=ekskul">
+        <div class="modal-header">
+        <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle"></i> Bersihkan Data Ekstrakurikuler</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="action" value="clear_ekskul_data">
+        <p>Pilih cakupan pembersihan data. <strong>Aksi ini permanen!</strong></p>
+        
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="radio" name="clear_type" id="clearType1" value="riwayat_anggota" checked>
+            <label class="form-check-label" for="clearType1">
+                <strong>Kosongkan Anggota & Riwayat</strong><br>
+                <small class="text-muted">Menghapus data anggota ekskul, presensi, jurnal, dan tugas. (Data Master Ekskul & Pembina tetap dipertahankan)</small>
+            </label>
+        </div>
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="radio" name="clear_type" id="clearType2" value="semua">
+            <label class="form-check-label text-danger" for="clearType2">
+                <strong>Hapus Seluruh Data (Reset Total)</strong><br>
+                <small class="text-muted">Menghapus SELURUH Master Ekskul, Pembina, Anggota, Presensi, dan Relasi e-Raport. Sistem kembali seperti baru.</small>
+            </label>
+        </div>
+        
+        <div class="form-group mt-3">
+            <label class="fw-bold">Ketik "BERSIHKAN" untuk konfirmasi:</label>
+            <input type="text" name="confirm_text" class="form-control text-center text-danger fw-bold" required autocomplete="off" pattern="BERSIHKAN" placeholder="BERSIHKAN" title="Ketik BERSIHKAN dengan huruf besar">
+        </div>
+      </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Ya, Bersihkan Data</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Modal Add -->
 <div class="modal fade" id="modalAddEkskul" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog" role="document">

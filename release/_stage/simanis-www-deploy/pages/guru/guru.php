@@ -1,5 +1,5 @@
 <?php
-$target = 'guru_legacy.php';
+$target = '../../home.php';
 if (!empty($_SERVER['QUERY_STRING'])) {
     $target .= '?' . $_SERVER['QUERY_STRING'];
 }

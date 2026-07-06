@@ -236,7 +236,7 @@ if ($kelas !== '') {
 <body>
 <main class="page-shell">
     <section class="hero mb-3">
-        <a href="<?= htmlspecialchars(leger_page_route('guru_legacy'), ENT_QUOTES, 'UTF-8'); ?>" class="text-white-50 text-decoration-none"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+        <a href="<?= htmlspecialchars(leger_page_route('../../home.php'), ENT_QUOTES, 'UTF-8'); ?>" class="text-white-50 text-decoration-none"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
         <h1 class="mt-3 mb-1">Leger Nilai Siswa</h1>
         <p class="mb-0 text-white-50">Upload leger Excel, simpan historis nilai, dan pantau grafik perkembangan semua mata pelajaran dari semester 1 sampai semester terakhir.</p>
     </section>

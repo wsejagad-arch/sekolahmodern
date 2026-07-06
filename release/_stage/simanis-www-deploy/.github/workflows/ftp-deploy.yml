@@ -1,0 +1,79 @@
+name: Deploy to Web Hosting
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  ftp-deploy:
+    name: FTP Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare production .htaccess
+        run: cp htaccess/.htaccess-root .htaccess
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./
+          server-dir: ./
+          exclude: |
+            **/.git/**
+            **/.git*
+            **/.github/**
+            **/.vscode/**
+            **/.qwen/**
+            **/node_modules/**
+            release/**
+            scratch/**
+            deploy/**
+            deploy_prod/**
+            temp/**
+            **/*.zip
+            **/*.md
+            **/*.txt
+            **/*.ps1
+            **/*.bat
+            **/*.bak
+            **/*.log
+            **/*.sql
+            **/test_*.php
+            **/check_*.php
+            **/debug_*.php
+            **/tmp_*.php
+            **/dump*.php
+            **/setup_*.php
+            config.hosting.php
+            config.local.php
+            koneksi_local.php
+            .user.ini
+            package.json
+            package-lock.json
+            gulpfile.js
+            composer.json
+            composer.lock
+            *.ps1
+            *.bat
+            home5/**
+            backup/**
+            .continue/**
+            Microsoft/**
+            **/vendor/**/svgs*/**
+            **/vendor/**/*.svg
+            **/vendor/**/src/**
+            **/vendor/**/scss/**
+            **/vendor/**/less/**
+            **/vendor/**/*.md
+            **/vendor/**/*.json
+            phpqrcode/cache/**

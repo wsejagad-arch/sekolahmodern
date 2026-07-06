@@ -31,15 +31,47 @@ function kih_habits(): array
     ];
 }
 
-function kih_prayers(): array
+function kih_prayers(string $agama): array
 {
+    $agama = strtolower(trim($agama));
+    if (strpos($agama, 'islam') !== false) {
+        $p = [
+            'subuh' => ['label' => 'Subuh', 'start' => '04:00:00', 'end' => '06:00:00'],
+            'dzuhur' => ['label' => 'Dzuhur', 'start' => '11:30:00', 'end' => '13:30:00'],
+            'ashar' => ['label' => 'Ashar', 'start' => '15:00:00', 'end' => '16:30:00'],
+            'maghrib' => ['label' => 'Maghrib', 'start' => '17:30:00', 'end' => '18:30:00'],
+            'isya' => ['label' => 'Isya', 'start' => '19:00:00', 'end' => '20:30:00'],
+        ];
+        if (date('N') == 5) {
+            $p['jumat'] = ['label' => 'Jumat', 'start' => '11:30:00', 'end' => '13:30:00'];
+        }
+        return $p;
+    }
+    if (strpos($agama, 'katolik') !== false) {
+        return [
+            'pagi' => ['label' => 'Ibadah Pagi (06:00)', 'start' => '05:00:00', 'end' => '08:00:00'],
+            'siang' => ['label' => 'Ibadah Siang (12:00)', 'start' => '11:00:00', 'end' => '14:00:00'],
+            'sore' => ['label' => 'Ibadah Sore (18:00)', 'start' => '17:00:00', 'end' => '20:00:00'],
+            'malaikat_tuhan' => ['label' => 'Malaikat Tuhan', 'start' => '00:00:00', 'end' => '23:59:59'],
+            'rosario' => ['label' => 'Doa Rosario', 'start' => '00:00:00', 'end' => '23:59:59'],
+            'bapa_kami' => ['label' => 'Bapa Kami', 'start' => '00:00:00', 'end' => '23:59:59'],
+            'salam_maria' => ['label' => 'Salam Maria', 'start' => '00:00:00', 'end' => '23:59:59'],
+            'doa_umum' => ['label' => 'Doa Umum', 'start' => '00:00:00', 'end' => '23:59:59'],
+            'novena' => ['label' => 'Doa Novena', 'start' => '00:00:00', 'end' => '23:59:59'],
+        ];
+    }
     return [
-        'subuh' => ['label' => 'Subuh', 'start' => '04:00:00', 'end' => '06:00:00'],
-        'dzuhur' => ['label' => 'Dzuhur', 'start' => '11:30:00', 'end' => '13:30:00'],
-        'ashar' => ['label' => 'Ashar', 'start' => '15:00:00', 'end' => '16:30:00'],
-        'maghrib' => ['label' => 'Maghrib', 'start' => '17:30:00', 'end' => '18:30:00'],
-        'isya' => ['label' => 'Isya', 'start' => '19:00:00', 'end' => '20:30:00'],
+        'umum' => ['label' => 'Ibadah Umum', 'start' => '00:00:00', 'end' => '23:59:59']
     ];
+}
+
+function kih_haversine(float $lat1, float $lon1, float $lat2, float $lon2): float {
+    $earthRadius = 6371000;
+    $latDelta = deg2rad($lat2 - $lat1);
+    $lonDelta = deg2rad($lon2 - $lon1);
+    $a = sin($latDelta / 2) * sin($latDelta / 2) + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($lonDelta / 2) * sin($lonDelta / 2);
+    $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+    return $earthRadius * $c;
 }
 
 function kih_create_table(mysqli $conn): void
@@ -88,18 +120,29 @@ function kih_score(string $date, string $nowTime, string $start, string $end): a
     $now = strtotime($date . ' ' . $nowTime);
     $s = strtotime($date . ' ' . $start);
     $e = strtotime($date . ' ' . $end);
-    if ($now === false || $s === false || $e === false) {
-        return ['di_luar_waktu', 55];
+    
+    // Handle cross midnight (e.g. Isya 19:00 - 03:59)
+    if ($e < $s) {
+        // If current time is early morning (e.g. 02:00), we consider the start time was yesterday
+        if (date('H', $now) < 12) {
+            $s = strtotime('-1 day', $s);
+        } else {
+            // Current time is evening, end time is tomorrow
+            $e = strtotime('+1 day', $e);
+        }
     }
+    
+    if ($now === false || $s === false || $e === false) {
+        return ['ditolak', 0];
+    }
+    
     if ($now >= $s && $now <= $e) {
         $span = max(1, $e - $s);
         $progress = ($now - $s) / $span;
         return $progress <= 0.35 ? ['sangat_tepat', 100] : ['tepat', 90];
     }
-    if ($now > $e && $now <= strtotime('+2 hours', $e)) {
-        return ['terlambat', 70];
-    }
-    return ['di_luar_waktu', 45];
+    
+    return ['ditolak', 0];
 }
 
 function kih_save_photo(string $dataUrl, string $nis, string $habit, ?string $prayer): array
@@ -153,16 +196,18 @@ function kih_cleanup_storage(mysqli $conn, int $quotaBytes = 104857600): void
 kih_create_table($conn);
 
 $habits = kih_habits();
-$prayers = kih_prayers();
 $habit = strtolower(trim((string)($_POST['habit_key'] ?? '')));
 $prayer = strtolower(trim((string)($_POST['prayer_key'] ?? '')));
+$keterangan = isset($_POST['keterangan']) ? trim((string)$_POST['keterangan']) : null;
+$lat = isset($_POST['lat']) ? trim((string)$_POST['lat']) : null;
+$lng = isset($_POST['lng']) ? trim((string)$_POST['lng']) : null;
 $photoData = (string)($_POST['photo_data'] ?? '');
 $today = date('Y-m-d');
 $nowTime = date('H:i:s');
 $submittedAt = date('Y-m-d H:i:s');
 
 if (!isset($habits[$habit])) {
-    kih_json(['success' => false, 'message' => 'Jenis jurnal 7KIH tidak valid.'], 400);
+    kih_json(['success' => false, 'message' => 'Jenis jurnal 7 KAIH tidak valid.'], 400);
 }
 
 $nis = (string)$_SESSION['no_induk'];
@@ -173,15 +218,38 @@ $siswa = $qSiswa ? mysqli_fetch_assoc($qSiswa) : [];
 $agama = strtolower(trim((string)($siswa['agama'] ?? '')));
 $isIslam = strpos($agama, 'islam') !== false;
 
+$prayers = kih_prayers($agama);
+
 if ($habit === 'beribadah') {
-    if ($isIslam) {
-        if (!isset($prayers[$prayer])) {
-            kih_json(['success' => false, 'message' => 'Pilih waktu sholat yang valid.'], 400);
+    if (!isset($prayers[$prayer])) {
+        kih_json(['success' => false, 'message' => 'Pilih waktu ibadah yang valid.'], 400);
+    }
+    $window = $prayers[$prayer];
+    
+    // GPS check for Dzuhur & Jumat
+    if ($isIslam && ($prayer === 'dzuhur' || $prayer === 'jumat')) {
+        if (!$lat || !$lng) {
+            kih_json(['success' => false, 'message' => 'Akses lokasi diperlukan untuk memverifikasi posisi sholat di mushola.'], 400);
         }
-        $window = $prayers[$prayer];
-    } else {
-        $prayer = '';
-        $window = $habits[$habit];
+        $qMushola = @mysqli_query($conn, "SELECT nilai FROM tbl_app_config WHERE kunci='7kih_mushola_locations'");
+        $musholas = [];
+        if ($qMushola && ($mRow = mysqli_fetch_assoc($qMushola))) {
+            $musholas = json_decode($mRow['nilai'], true) ?: [];
+        }
+        if (!empty($musholas)) {
+            $isValidLocation = false;
+            foreach ($musholas as $m) {
+                if (!isset($m['lat'], $m['lng'])) continue;
+                $dist = kih_haversine((float)$lat, (float)$lng, (float)$m['lat'], (float)$m['lng']);
+                if ($dist <= (float)($m['radius'] ?? 50)) {
+                    $isValidLocation = true;
+                    break;
+                }
+            }
+            if (!$isValidLocation) {
+                kih_json(['success' => false, 'message' => 'Gagal dikirim. Posisi Anda berada di luar area mushola/masjid yang diizinkan.'], 400);
+            }
+        }
     }
 } else {
     $prayer = '';
@@ -205,6 +273,13 @@ if ($qOld && ($old = mysqli_fetch_assoc($qOld)) && !empty($old['photo_path'])) {
 }
 
 [$timeliness, $score] = kih_score($today, $nowTime, $window['start'], $window['end']);
+if ($timeliness === 'ditolak' && $habit === 'beribadah') {
+    if ($photo['absolute']) @unlink($photo['absolute']);
+    kih_json([
+        'success' => false, 
+        'message' => "Waktu absen ditolak! Pengisian untuk ibadah ini di luar rentang waktu yang sah ({$window['start']} - {$window['end']})."
+    ]);
+}
 $nama = (string)($siswa['nama_siswa'] ?? ($_SESSION['nama_siswa'] ?? ''));
 $kelas = (string)($siswa['kelas'] ?? ($_SESSION['kelas'] ?? ''));
 
@@ -221,6 +296,9 @@ $values = [
     'habit_key' => $habit,
     'habit_label' => $habitLabel,
     'prayer_key' => $prayer,
+    'keterangan' => $keterangan,
+    'lat' => $lat,
+    'lng' => $lng,
     'submitted_at' => $submittedAt,
     'window_start' => $window['start'],
     'window_end' => $window['end'],
@@ -239,13 +317,16 @@ foreach ($values as $key => $value) {
 
 $sql = "
     INSERT INTO tbl_7kih_jurnal
-        (no_induk, nama_siswa, kelas, tanggal, habit_key, habit_label, prayer_key, submitted_at, window_start, window_end, timeliness_status, score, photo_path, photo_size, photo_hash, is_photo_stored, user_agent)
+        (no_induk, nama_siswa, kelas, tanggal, habit_key, habit_label, prayer_key, keterangan, lat, lng, submitted_at, window_start, window_end, timeliness_status, score, photo_path, photo_size, photo_hash, is_photo_stored, user_agent)
     VALUES
-        ({$esc['no_induk']}, {$esc['nama_siswa']}, {$esc['kelas']}, {$esc['tanggal']}, {$esc['habit_key']}, {$esc['habit_label']}, {$esc['prayer_key']}, {$esc['submitted_at']}, {$esc['window_start']}, {$esc['window_end']}, {$esc['timeliness_status']}, {$score}, {$esc['photo_path']}, " . (int)$photo['size'] . ", {$esc['photo_hash']}, 1, {$esc['user_agent']})
+        ({$esc['no_induk']}, {$esc['nama_siswa']}, {$esc['kelas']}, {$esc['tanggal']}, {$esc['habit_key']}, {$esc['habit_label']}, {$esc['prayer_key']}, {$esc['keterangan']}, {$esc['lat']}, {$esc['lng']}, {$esc['submitted_at']}, {$esc['window_start']}, {$esc['window_end']}, {$esc['timeliness_status']}, {$score}, {$esc['photo_path']}, " . (int)$photo['size'] . ", {$esc['photo_hash']}, 1, {$esc['user_agent']})
     ON DUPLICATE KEY UPDATE
         nama_siswa=VALUES(nama_siswa),
         kelas=VALUES(kelas),
         habit_label=VALUES(habit_label),
+        keterangan=VALUES(keterangan),
+        lat=VALUES(lat),
+        lng=VALUES(lng),
         submitted_at=VALUES(submitted_at),
         window_start=VALUES(window_start),
         window_end=VALUES(window_end),
@@ -267,7 +348,7 @@ if (!$ok) {
 
 kih_json([
     'success' => true,
-    'message' => 'Jurnal 7KIH berhasil dikirim.',
+    'message' => 'Jurnal 7 KAIH (Tujuh Kebiasaan Anak Indonesia Hebat) berhasil dikirim.',
     'habit' => $habitLabel,
     'score' => $score,
     'timeliness' => $timeliness,

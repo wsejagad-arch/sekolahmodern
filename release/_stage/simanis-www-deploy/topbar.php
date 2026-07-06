@@ -1,4 +1,5 @@
 <!-- Topbar -->
+<?php if ((int)($_SESSION['hak_akses'] ?? 0) !== 2): ?>
 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
   <!-- Sidebar Toggle (Topbar) -->
@@ -7,7 +8,7 @@
   </button>
 
   <!-- School Name & Logo (Topbar Left) -->
-  <div class="d-none d-sm-flex align-items-center mr-auto ml-md-3 my-2 my-md-0">
+  <div class="d-none d-sm-flex align-items-center flex-grow-1 ml-md-3 ms-md-3 my-2 my-md-0">
     <?php if (isset($lembaga) && is_array($lembaga) && !empty($lembaga['logo'])): ?>
       <img src="img/<?= htmlspecialchars($lembaga['logo']); ?>" width="38" height="38" class="mr-2" style="border-radius:8px; object-fit:contain; border:2px solid rgba(26,60,110,0.12);">
     <?php endif; ?>
@@ -23,7 +24,7 @@
   </div>
 
   <!-- Topbar Navbar (Right) -->
-  <ul class="navbar-nav ml-auto align-items-center">
+  <ul class="navbar-nav ml-auto ms-auto align-items-center justify-content-end" style="flex: 0 0 auto;">
 
     <!-- Current Date/Time Info -->
     <li class="nav-item d-none d-lg-flex align-items-center mr-2">
@@ -95,6 +96,7 @@
 
 </nav>
 <!-- End of Topbar -->
+<?php endif; ?>
 
 <script>
   (function() {

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -143,418 +143,194 @@ if ($hasKelasFilter && !empty($kelasOptions)) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Data Siswa - SIMANIS</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/guru-desktop.css?v=<?= time() ?>">
     <style>
-        :root {
-            --primary:#4f46e5;
-            --primary-light:#6366f1;
-            --bg:#f8fafc;
-            --text:#0f172a;
-            --muted:#64748b;
-            --border:#e2e8f0;
-            --shadow:0 18px 42px rgba(15,23,42,.08);
-        }
-        * { box-sizing:border-box; }
-        body {
-            margin:0;
-            font-family:"Poppins", sans-serif;
-            font-weight:400;
-            background:
-                radial-gradient(circle at top right,
-                    rgba(223,255,154,0.35) 0%,
-                    transparent 35%),
-                radial-gradient(circle at bottom left,
-                    rgba(0,107,47,0.35) 0%,
-                    transparent 35%),
-                linear-gradient(
-                    135deg,
-                    rgba(11,122,50,0.75),
-                    rgba(126,217,87,0.55),
-                    rgba(217,255,159,0.45)
-                );
-            background-attachment: fixed;
-            color:var(--text);
-            padding-bottom:112px;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Beautiful Green App Background Overlays */
-        .background {
-            position: fixed;
-            inset: 0;
-            overflow: hidden;
-            z-index: -10;
-            pointer-events: none;
-            backdrop-filter: blur(4px);
-        }
-
-        .shape {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(10px);
-        }
-
-        .shape.one {
-            width: 420px;
-            height: 420px;
-            background: rgba(47,168,79,0.35);
-            top: -120px;
-            left: -130px;
-        }
-
-        .shape.two {
-            width: 520px;
-            height: 520px;
-            background: rgba(184,240,106,0.28);
-            top: -180px;
-            right: -160px;
-        }
-
-        .shape.three {
-            width: 620px;
-            height: 620px;
-            background: rgba(13,111,45,0.38);
-            bottom: -230px;
-            right: -190px;
-        }
-
-        .shape.four {
-            width: 460px;
-            height: 460px;
-            background: rgba(105,201,74,0.25);
-            bottom: -120px;
-            left: -160px;
-        }
-
-        .wave {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background:
-                repeating-radial-gradient(
-                    ellipse at bottom right,
-                    transparent 0 12px,
-                    rgba(255,255,255,0.08) 13px 14px
-                );
-            opacity: 0.2;
-        }
-
-        .dots {
-            position: absolute;
-            width: 220px;
-            height: 300px;
-            background-image:
-                radial-gradient(
-                    rgba(255,255,255,0.18) 3px,
-                    transparent 3px
-                );
-            background-size: 22px 22px;
-            right: 30px;
-            top: 90px;
-        }
-        .page-shell { max-width:1180px; margin:0 auto; padding:24px; }
-        .topbar {
-            display:flex;
-            justify-content:space-between;
-            gap:16px;
-            align-items:flex-end;
-            margin-bottom:18px;
-        }
-        .page-title {
-            font-size:1.75rem;
-            font-weight:600;
-            letter-spacing:0;
-        }
-        .page-eyebrow {
-            color:var(--muted);
-            font-size:.86rem;
-            font-weight:400;
-        }
-        .summary-chip {
-            background:#fff;
-            border:1px solid var(--border);
-            border-radius:16px;
-            padding:12px 16px;
-            min-width:150px;
-            box-shadow:0 10px 24px rgba(15,23,42,.05);
-        }
-        .summary-count { font-weight:600; }
-        .panel {
-            background:rgba(255,255,255,.94);
-            border:1px solid var(--border);
-            border-radius:18px;
-            box-shadow:var(--shadow);
-            overflow:hidden;
-        }
-        .panel-pad { padding:18px; }
-        .filter-panel { margin-bottom:16px; }
-        .nilai-action-panel { margin-bottom:16px; }
-        .nilai-action-grid {
-            display:grid;
-            grid-template-columns:minmax(0, 1fr) auto auto;
-            gap:12px;
-            align-items:end;
-        }
-        .nilai-action-title {
-            font-weight:600;
-            color:var(--text);
-        }
-        .form-label { color:#334155; font-size:.86rem; font-weight:500; }
-        .form-select,
-        .form-control {
-            border-radius:12px;
-            border-color:var(--border);
-            min-height:44px;
-        }
-        .btn {
-            border-radius:12px;
-            min-height:44px;
-            font-weight:500;
-        }
-        .btn-primary {
-            background:var(--primary);
-            border-color:var(--primary);
-        }
-        .table { --bs-table-hover-bg:#f8fafc; }
-        .table th {
-            white-space:nowrap;
-            color:var(--muted);
-            font-size:.74rem;
-            text-transform:uppercase;
-            letter-spacing:.04em;
-            background:#f8fafc;
-            border-bottom:1px solid var(--border);
-            font-weight:500;
-        }
-        .table td { vertical-align:middle; padding:14px 12px; }
-        .student-name { font-weight:500; color:#172033; }
-        .kelas-badge {
-            background:#eef2ff;
-            color:#4338ca;
-            border:1px solid #c7d2fe;
-            border-radius:999px;
-            padding:5px 10px;
-            font-weight:500;
-            font-size:.76rem;
-        }
-        .empty-state {
-            padding:52px 18px;
-            text-align:center;
-            color:var(--muted);
-        }
-        .empty-icon {
-            width:54px;
-            height:54px;
-            border-radius:18px;
-            display:grid;
-            place-items:center;
-            margin:0 auto 14px;
-            background:#eef2ff;
-            color:var(--primary);
-            font-size:1.45rem;
-        }
-        .empty-title { font-weight:600; color:#334155; }
-        .bottom-nav-wrap { position:fixed; bottom:0; left:0; right:0; z-index:1000; padding:12px 16px 20px; }
-        .bottom-nav {
-            max-width:440px;
-            margin:0 auto;
-            background:rgba(255,255,255,.92);
-            backdrop-filter:blur(20px);
-            border-radius:35px;
-            padding:10px 12px;
-            display:flex;
-            justify-content:space-around;
-            align-items:center;
-            box-shadow:0 -10px 40px rgba(0,0,0,.08);
-            border:1px solid rgba(255,255,255,.55);
-            font-family:"Poppins", sans-serif;
-        }
-        .nav-link {
-            text-decoration:none;
-            color:#94a3b8;
-            font-size:10px;
-            font-weight:500;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            gap:4px;
-            font-family:"Poppins", sans-serif;
-        }
-        .nav-link i { font-size:20px; }
-        .nav-link.active { color:var(--primary); }
-        .nav-center {
-            width:68px;
-            height:68px;
-            border-radius:50%;
-            background:linear-gradient(135deg, var(--primary-light), var(--primary));
-            margin-top:-45px;
-            display:grid;
-            place-items:center;
-            color:#fff;
-            font-size:34px;
-            box-shadow:0 10px 25px rgba(79,70,229,.4);
-            border:5px solid #f8fafc;
-            text-decoration:none;
-        }
-        @media (max-width: 767px) {
-            .page-shell { padding:16px; }
-            .topbar { align-items:flex-start; flex-direction:column; }
-            .summary-chip { width:100%; display:flex; justify-content:space-between; align-items:center; }
-            .panel-pad { padding:14px; }
-            .nilai-action-grid { grid-template-columns:1fr; }
-            .table td { padding:12px 10px; }
+        body { margin:0; font-family:"Plus Jakarta Sans", system-ui, sans-serif; background:#ebf1f6; color:#0f172a; }
+        .form-control, .form-select { border-radius: 12px; border: 1px solid #e2e8f0; padding: 10px 14px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .form-label { font-weight: 700; color: #1e293b; font-size: 0.9rem; }
+        .table-modern th { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; background: #f8fafc; padding: 12px 16px; border-bottom: 2px solid #e2e8f0; }
+        .table-modern td { vertical-align: middle; padding: 16px; border-bottom: 1px solid #f1f5f9; }
+        .table-modern tbody tr { transition: all 0.2s; }
+        .table-modern tbody tr:hover { background: #f8fafc; }
+        .kelas-badge { background:#eef2ff; color:#4338ca; border:1px solid #c7d2fe; border-radius:999px; padding:5px 10px; font-weight:700; font-size:0.76rem; }
+        .empty-state { padding:52px 18px; text-align:center; color:#64748b; }
+        .empty-icon { width:54px; height:54px; border-radius:18px; display:grid; place-items:center; margin:0 auto 14px; background:#eef2ff; color:#3c58b9; font-size:1.45rem; }
+        .empty-title { font-weight:700; color:#1e293b; }
+        .mobile-nav { position:fixed; left:0; right:0; bottom:0; background:rgba(255,255,255,.94); border-top:1px solid #e2e8f0; backdrop-filter:blur(16px); padding:10px 16px; display:flex; justify-content:center; gap:22px; z-index:20; }
+        .mobile-nav a { color:#64748b; text-decoration:none; font-size:12px; font-weight:800; display:flex; flex-direction:column; align-items:center; }
+        .mobile-nav i { font-size:20px; }
+        @media (min-width: 768px) {
+            .mobile-nav, .guru-common-footer-wrap, .bottom-nav-wrap { display: none !important; padding-bottom: 0 !important; }
+            body { padding-bottom: 0 !important; }
         }
     </style>
 </head>
 <body>
 
-  <div class="background">
-    <div class="shape one"></div>
-    <div class="shape two"></div>
-    <div class="shape three"></div>
-    <div class="shape four"></div>
-    <div class="wave"></div>
-    <div class="dots"></div>
-  </div>
-<main class="page-shell">
-    <div class="topbar">
-        <div>
-            <a href="guru_legacy" class="btn btn-sm btn-outline-secondary mb-3"><i class="bi bi-arrow-left"></i> Kembali</a>
-            <h1 class="page-title mb-1">Data Siswa</h1>
-            <div class="page-eyebrow">Pilih kelas yang diampu oleh <?= guru_ds_h($namaGuru); ?></div>
-        </div>
-        <div class="summary-chip text-md-end">
-            <div class="summary-count"><?= $hasKelasFilter ? count($students) : 0; ?> siswa</div>
-            <div class="small text-muted"><?= count($kelasOptions); ?> kelas tersedia</div>
-        </div>
-    </div>
+<?php include 'guru_sidebar_shared.php'; ?>
 
-    <section class="panel panel-pad filter-panel">
-        <form method="get" class="row g-2 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label" for="kelas">Kelas</label>
-                <select class="form-select" name="kelas" id="kelas">
-                    <option value="">Pilih kelas terlebih dahulu</option>
-                    <?php foreach ($kelasOptions as $kelas): ?>
-                        <option value="<?= guru_ds_h($kelas); ?>" <?= $kelasFilter === $kelas ? 'selected' : ''; ?>>
-                            <?= guru_ds_h($kelas); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+<div class="app-shell" style="grid-template-columns: 1fr; padding-right: 24px;">
+    <div class="desktop-center-column">
+        
+        <!-- Welcome Banner -->
+        <div class="welcome-banner-premium mb-4">
+            <div class="banner-content">
+                <div class="banner-text">
+                    <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Data Siswa ðŸ§‘â€ðŸŽ“</h2>
+                    <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Pilih kelas yang diampu oleh <?= guru_ds_h($namaGuru); ?> untuk melihat daftar siswa atau mencetak nilai.</p>
+                </div>
+                <div class="banner-actions">
+                    <a href="../../home.php" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali ke Dashboard</a>
+                </div>
             </div>
-            <div class="col-md-5">
-                <label class="form-label" for="nama">Cari siswa</label>
-                <input class="form-control" type="search" name="nama" id="nama" value="<?= guru_ds_h($namaFilter); ?>" placeholder="Nama, NIS, atau NISN">
+            <div class="banner-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
             </div>
-            <div class="col-md-3 d-flex gap-2">
-                <button class="btn btn-primary flex-fill" type="submit"><i class="bi bi-search"></i> Cari</button>
-                <a class="btn btn-outline-secondary" href="data-siswa" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></a>
-            </div>
-        </form>
-    </section>
+        </div>
 
-    <?php if ($hasKelasFilter): ?>
-        <section class="panel panel-pad nilai-action-panel">
-            <form method="get" class="nilai-action-grid">
-                <input type="hidden" name="kelas" value="<?= guru_ds_h($kelasFilter); ?>">
-                <?php if ($namaFilter !== ''): ?>
-                    <input type="hidden" name="nama" value="<?= guru_ds_h($namaFilter); ?>">
-                <?php endif; ?>
-                <div>
-                    <div class="nilai-action-title mb-1"><i class="bi bi-clipboard-data me-1"></i> Nilai Siswa Kelas <?= guru_ds_h($kelasFilter); ?></div>
-                    <label class="form-label" for="idmapel">Mata Pelajaran</label>
-                    <select class="form-select" name="idmapel" id="idmapel" onchange="this.form.submit()" <?= empty($mapelActions) ? 'disabled' : ''; ?>>
-                        <?php if (empty($mapelActions)): ?>
-                            <option value="">Belum ada mapel yang Anda ampu di kelas ini</option>
-                        <?php else: ?>
-                            <?php foreach ($mapelActions as $mapelAction): ?>
-                                <option value="<?= (int) $mapelAction['id_mapel']; ?>" <?= $selectedMapelAction === (int) $mapelAction['id_mapel'] ? 'selected' : ''; ?>>
-                                    <?= guru_ds_h($mapelAction['nama_mapel']); ?><?= !empty($mapelAction['thn_ajaran']) ? ' - ' . guru_ds_h($mapelAction['thn_ajaran']) : ''; ?>
-                                </option>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+        <div class="premium-card mb-4">
+            <div class="card-header-flex">
+                <h3 class="card-title-modern"><i class="bi bi-funnel text-primary me-2"></i> Filter Pencarian</h3>
+                <span class="badge-subtle"><?= $hasKelasFilter ? count($students) : 0; ?> Siswa, <?= count($kelasOptions); ?> Kelas Tersedia</span>
+            </div>
+            
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" for="kelas">Kelas</label>
+                    <select class="form-select" name="kelas" id="kelas">
+                        <option value="">Pilih kelas terlebih dahulu</option>
+                        <?php foreach ($kelasOptions as $kelas): ?>
+                            <option value="<?= guru_ds_h($kelas); ?>" <?= $kelasFilter === $kelas ? 'selected' : ''; ?>>
+                                <?= guru_ds_h($kelas); ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
-                <?php if ($selectedMapelAction > 0): ?>
-                    <a class="btn btn-success" href="inputnilai?getDetail=<?= (int) $selectedMapelAction; ?>">
-                        <i class="bi bi-pencil-square"></i> Input Nilai
-                    </a>
-                    <a class="btn btn-outline-primary" target="_blank" href="cetak-nilai-kelas?kelas=<?= rawurlencode($kelasFilter); ?>&idmapel=<?= (int) $selectedMapelAction; ?>">
-                        <i class="bi bi-printer"></i> Cetak
-                    </a>
-                <?php else: ?>
-                    <button class="btn btn-success" type="button" disabled><i class="bi bi-pencil-square"></i> Input Nilai</button>
-                    <button class="btn btn-outline-primary" type="button" disabled><i class="bi bi-printer"></i> Cetak</button>
-                <?php endif; ?>
+                <div class="col-md-5">
+                    <label class="form-label" for="nama">Cari siswa</label>
+                    <input class="form-control" type="search" name="nama" id="nama" value="<?= guru_ds_h($namaFilter); ?>" placeholder="Nama, NIS, atau NISN">
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button class="btn btn-primary flex-fill fw-bold" style="padding:10px; border-radius:12px;" type="submit"><i class="bi bi-search"></i> Cari</button>
+                    <a class="btn btn-outline-secondary fw-bold" style="padding:10px; border-radius:12px;" href="data-siswa" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></a>
+                </div>
             </form>
-        </section>
-    <?php endif; ?>
+        </div>
 
-    <section class="panel">
-        <?php if (empty($kelasOptions)): ?>
-            <div class="empty-state">
-                <div class="empty-icon"><i class="bi bi-journal-x"></i></div>
-                <div class="empty-title mb-1">Belum ada kelas terkait</div>
-                <div>Guru ini belum memiliki kelas mengajar atau wali kelas di database.</div>
-            </div>
-        <?php elseif (!$hasKelasFilter): ?>
-            <div class="empty-state">
-                <div class="empty-icon"><i class="bi bi-funnel"></i></div>
-                <div class="empty-title mb-1">Belum ada kelas dipilih</div>
-                <div>Pilih salah satu kelas di filter untuk melihat daftar siswa.</div>
-            </div>
-        <?php elseif (empty($students)): ?>
-            <div class="empty-state">
-                <div class="empty-icon"><i class="bi bi-search"></i></div>
-                <div class="empty-title mb-1">Data siswa tidak ditemukan</div>
-                <div>Coba ubah filter kelas atau kata kunci pencarian.</div>
-            </div>
-        <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
-                    <tr>
-                        <th style="width:64px;">No</th>
-                        <th>Nama</th>
-                        <th>No Induk</th>
-                        <th>NISN</th>
-                        <th>Kelas</th>
-                        <th>No WA</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach ($students as $index => $student): ?>
-                        <tr>
-                            <td><?= $index + 1; ?></td>
-                            <td class="student-name"><?= guru_ds_h($student['nama_siswa'] ?? ''); ?></td>
-                            <td><?= guru_ds_h($student['no_induk'] ?? ''); ?></td>
-                            <td><?= guru_ds_h($student['nisn'] ?? ''); ?></td>
-                            <td><span class="kelas-badge"><?= guru_ds_h($student['kelas'] ?? ''); ?></span></td>
-                            <td><?= guru_ds_h($student['no_wa'] ?? ''); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    </tbody>
-                </table>
+        <?php if ($hasKelasFilter): ?>
+            <div class="premium-card mb-4">
+                <div class="card-header-flex">
+                    <h3 class="card-title-modern"><i class="bi bi-clipboard-data text-primary me-2"></i> Nilai Kelas <?= guru_ds_h($kelasFilter); ?></h3>
+                </div>
+                <form method="get" class="row g-3 align-items-end">
+                    <input type="hidden" name="kelas" value="<?= guru_ds_h($kelasFilter); ?>">
+                    <?php if ($namaFilter !== ''): ?>
+                        <input type="hidden" name="nama" value="<?= guru_ds_h($namaFilter); ?>">
+                    <?php endif; ?>
+                    
+                    <div class="col-md-8">
+                        <label class="form-label" for="idmapel">Mata Pelajaran yang Diampu</label>
+                        <select class="form-select" name="idmapel" id="idmapel" onchange="this.form.submit()" <?= empty($mapelActions) ? 'disabled' : ''; ?>>
+                            <?php if (empty($mapelActions)): ?>
+                                <option value="">Belum ada mapel yang Anda ampu di kelas ini</option>
+                            <?php else: ?>
+                                <?php foreach ($mapelActions as $mapelAction): ?>
+                                    <option value="<?= (int) $mapelAction['id_mapel']; ?>" <?= $selectedMapelAction === (int) $mapelAction['id_mapel'] ? 'selected' : ''; ?>>
+                                        <?= guru_ds_h($mapelAction['nama_mapel']); ?><?= !empty($mapelAction['thn_ajaran']) ? ' - ' . guru_ds_h($mapelAction['thn_ajaran']) : ''; ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4 d-flex gap-2">
+                        <?php if ($selectedMapelAction > 0): ?>
+                            <a class="btn btn-success flex-fill fw-bold" style="padding:10px; border-radius:12px;" href="inputnilai?getDetail=<?= (int) $selectedMapelAction; ?>">
+                                <i class="bi bi-pencil-square"></i> Input Nilai
+                            </a>
+                            <a class="btn btn-outline-primary fw-bold" style="padding:10px; border-radius:12px;" target="_blank" href="cetak-nilai-kelas?kelas=<?= rawurlencode($kelasFilter); ?>&idmapel=<?= (int) $selectedMapelAction; ?>">
+                                <i class="bi bi-printer"></i>
+                            </a>
+                        <?php else: ?>
+                            <button class="btn btn-secondary flex-fill fw-bold" type="button" disabled style="padding:10px; border-radius:12px;"><i class="bi bi-pencil-square"></i> Input Nilai</button>
+                        <?php endif; ?>
+                    </div>
+                </form>
             </div>
         <?php endif; ?>
-    </section>
-</main>
+
+        <div class="premium-card">
+            <div class="card-header-flex">
+                <h3 class="card-title-modern"><i class="bi bi-person-lines-fill text-primary me-2"></i> Daftar Siswa</h3>
+            </div>
+            
+            <?php if (empty($kelasOptions)): ?>
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="bi bi-journal-x"></i></div>
+                    <div class="empty-title mb-1">Belum ada kelas terkait</div>
+                    <div>Anda belum memiliki kelas mengajar atau wali kelas di database.</div>
+                </div>
+            <?php elseif (!$hasKelasFilter): ?>
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="bi bi-funnel"></i></div>
+                    <div class="empty-title mb-1">Pilih Kelas</div>
+                    <div>Gunakan filter di atas untuk melihat daftar siswa di kelas tertentu.</div>
+                </div>
+            <?php elseif (empty($students)): ?>
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="bi bi-search"></i></div>
+                    <div class="empty-title mb-1">Siswa tidak ditemukan</div>
+                    <div>Tidak ada data siswa yang cocok dengan kriteria pencarian Anda.</div>
+                </div>
+            <?php else: ?>
+                <div class="table-responsive" style="border-radius:12px; border:1px solid #f1f5f9;">
+                    <table class="table table-modern mb-0">
+                        <thead>
+                        <tr>
+                            <th style="width:64px;">No</th>
+                            <th>Nama Siswa</th>
+                            <th>No Induk / NISN</th>
+                            <th>Kelas</th>
+                            <th>No WA</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($students as $index => $student): ?>
+                            <tr>
+                                <td class="fw-bold text-muted"><?= $index + 1; ?></td>
+                                <td>
+                                    <div class="fw-bold" style="color:#0f172a;"><?= guru_ds_h($student['nama_siswa'] ?? ''); ?></div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold"><?= guru_ds_h($student['no_induk'] ?? ''); ?></div>
+                                    <div style="font-size:0.75rem; color:#94a3b8;"><?= guru_ds_h($student['nisn'] ?? '-'); ?></div>
+                                </td>
+                                <td><span class="kelas-badge"><?= guru_ds_h($student['kelas'] ?? ''); ?></span></td>
+                                <td><span class="text-muted"><i class="bi bi-telephone me-1"></i> <?= guru_ds_h($student['no_wa'] ?: '-'); ?></span></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </div>
+
+    </div>
+</div>
 
 <div class="bottom-nav-wrap">
-    <nav class="bottom-nav" aria-label="Navigasi guru">
-        <a href="guru_legacy" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
-        <a href="data-siswa" class="nav-link active"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
-        <a href="guru_legacy?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
-        <a href="inputtugas" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Tugas</span></a>
+    <nav class="bottom-nav mobile-nav" aria-label="Navigasi guru">
+        <a href="../../home.php" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
+        <a href="data-siswa" class="nav-link active" style="color:#2563eb;"><i class="bi bi-people"></i><span>Data Siswa</span></a>
+        <a href="materi" class="nav-link"><i class="bi bi-journal-text"></i><span>Jurnal</span></a>
         <a href="profil-guru" class="nav-link"><i class="bi bi-person-fill"></i><span>Profil</span></a>
     </nav>
 </div>
 <?php include __DIR__ . '/guru_common_footer.php'; ?>
 </body>
 </html>
+

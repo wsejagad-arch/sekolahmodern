@@ -125,7 +125,7 @@ $tanggal = trim((string)($_POST['tanggal'] ?? date('Y-m-d')));
 $judul = trim((string)($_POST['judul_tugas'] ?? ''));
 $deskripsi = trim((string)($_POST['deskripsi'] ?? ''));
 $link = trim((string)($_POST['link_tugas'] ?? ''));
-$deadline = trim((string)($_POST['tanggal_pengumpulan'] ?? ''));
+$deadline = trim((string)($_POST['batas_waktu'] ?? ''));
 
 if ($idMapel <= 0 || $kelas === '' || $mapel === '' || $judul === '' || $deskripsi === '') {
     tugas_json(false, 'Mapel, kelas, judul, dan deskripsi wajib diisi.');
@@ -150,7 +150,7 @@ if (!$qMapel || mysqli_num_rows($qMapel) === 0) {
 $filePath = isset($_FILES['file_tugas']) ? tugas_store_file($_FILES['file_tugas']) : null;
 
 $stmt = mysqli_prepare($conn, "INSERT INTO tbl_tugas
-    (tanggal, id_mapel, kelas, mapel, no_induk_guru, judul_tugas, deskripsi, link_tugas, file_tugas, tanggal_pengumpulan, status)
+    (tanggal, id_mapel, kelas, mapel, no_induk_guru, judul_tugas, deskripsi, link_tugas, file_tugas, batas_waktu, status)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULLIF(?, ''), 'aktif')");
 if (!$stmt) {
     tugas_json(false, 'Gagal menyiapkan query: ' . mysqli_error($conn));

@@ -1,10 +1,10 @@
-<?php include_once __DIR__ . '/components/shared_footer.php'; ?>
-
 </div>
 <!-- End of Content Wrapper -->
 
 </div>
 <!-- End of Page Wrapper -->
+
+<?php include_once __DIR__ . '/components/shared_footer.php'; ?>
 
 <!-- Scroll to Top Button-->
 <a class="scroll-to-top rounded" href="#page-top">
@@ -13,15 +13,15 @@
 
 <!-- Logout Modal-->
 <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="logoutModalLabel">Yakin mau keluar?</h5>
+        <h5 class="modal-title" id="logoutModalLabel">Konfirmasi Keluar</h5>
         <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">Dengan menekan tombol "Keluar", akan mengakhiri sesi anda.</div>
+      <div class="modal-body">Apakah Anda yakin ingin keluar?</div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Batal</button>
+        <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Batal</button>
         <a class="btn btn-primary" href="keluar">Keluar</a>
       </div>
     </div>

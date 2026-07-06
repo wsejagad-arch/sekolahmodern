@@ -244,6 +244,7 @@ foreach ($pengumumanList as $p) if ($p['penting']) $totalPenting++;
 
   </div>
 
+<?php if (($hakAkses ?? 0) == 3) include 'pages/siswa/siswa_footer.php'; ?>
 </body>
 
 </html>

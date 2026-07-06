@@ -82,6 +82,12 @@ $pertemuan = mysqli_query($conn, "SELECT tanggal, id_mapel, kelas, mapel FROM tb
     </div>
   </div>
 
+  <?php 
+  $isFiltered = ($tanggal !== '' || $kelas !== '' || $idmapel > 0);
+  if (!$isFiltered) {
+?>
+  <div class="alert alert-secondary">Silakan pilih filter (Tanggal, Kelas, atau Mapel) terlebih dahulu untuk menampilkan data nilai.</div>
+<?php } else { ?>
   <?php if (mysqli_num_rows($pertemuan) === 0) { ?>
     <div class="alert alert-info">Belum ada data penilaian untuk filter tersebut.</div>
   <?php } ?>
@@ -171,5 +177,6 @@ $pertemuan = mysqli_query($conn, "SELECT tanggal, id_mapel, kelas, mapel FROM tb
     </div>
   </div>
   <?php } // end while ?>
+<?php } // end if isFiltered ?>
 </div>
 

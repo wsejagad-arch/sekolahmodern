@@ -54,7 +54,7 @@ $statTotal     = count($izinHistori);
 $statDisetujui = 0; $statDitolak = 0; $statProses = 0;
 $statSakit     = 0; $statIzin    = 0; $statDispen = 0;
 foreach ($izinHistori as $iz) {
-    if ($iz['status_izin'] === 'Disetujui Penuh') $statDisetujui++;
+    if ($iz['status_izin'] === 'Disetujui Penuh' || $iz['status_izin'] === 'Disetujui') $statDisetujui++;
     elseif ($iz['status_izin'] === 'Ditolak')     $statDitolak++;
     else                                           $statProses++;
 
@@ -74,9 +74,24 @@ function getNamaGuruByNip($conn, $nip) {
 }
 
 // ── Helper: warna + ikon status ───────────────────────────────────────
-function statusMeta($s) {
+function statusMeta($izin) {
+    $s  = $izin['status_izin'];
+    $wk = $izin['validasi_wali_kelas'] ?? 'Menunggu';
+    $bk = $izin['validasi_guru_bk'] ?? 'Menunggu';
+
+    if ($s !== 'Ditolak' && $s !== 'Disetujui Penuh' && $s !== 'Disetujui') {
+        if ($wk === 'Disetujui' && $bk === 'Menunggu') {
+            return ['bg-purple-100 text-purple-800', 'fa-hourglass-half', 'Menunggu Guru BK'];
+        }
+        if ($bk === 'Disetujui' && $wk === 'Menunggu') {
+            return ['bg-blue-100 text-blue-800', 'fa-hourglass-half', 'Menunggu Wali Kelas'];
+        }
+    }
+
     switch ($s) {
-        case 'Disetujui Penuh':    return ['bg-green-100 text-green-800',   'fa-check-circle',   'Disetujui Penuh'];
+        case 'Disetujui Penuh':
+        case 'Disetujui':
+            return ['bg-green-100 text-green-800',   'fa-check-circle',   'Disetujui Penuh'];
         case 'Ditolak':            return ['bg-red-100 text-red-800',       'fa-times-circle',   'Ditolak'];
         case 'Menunggu Guru BK':   return ['bg-purple-100 text-purple-800', 'fa-hourglass-half', 'Menunggu Guru BK'];
         case 'Menunggu Wali Kelas':
@@ -87,8 +102,8 @@ function statusMeta($s) {
 
 // ── Helper: step aktif (2 = WK, 3 = BK, 4 = selesai, -1 = ditolak) ──
 function getStep($izin) {
-    if ($izin['status_izin'] === 'Ditolak') return -1;
-    if ($izin['status_izin'] === 'Disetujui Penuh') return 4;
+    if ($izin['status_izin'] === 'Ditolak' || $izin['validasi_wali_kelas'] === 'Ditolak' || $izin['validasi_guru_bk'] === 'Ditolak') return -1;
+    if ($izin['status_izin'] === 'Disetujui Penuh' || $izin['status_izin'] === 'Disetujui') return 4;
     if ($izin['validasi_wali_kelas'] === 'Disetujui') return 3;
     return 2;
 }
@@ -234,7 +249,7 @@ function getStep($izin) {
         <?php foreach ($izinAktif as $izin):
             $step = getStep($izin);
             $rejected = ($step === -1);
-            list($stColor, $stIcon, $stLabel) = statusMeta($izin['status_izin']);
+            list($stColor, $stIcon, $stLabel) = statusMeta($izin);
             $jenisColor = 'bg-blue-100 text-blue-700';
             if ($izin['jenis_izin'] === 'Sakit')          $jenisColor = 'bg-orange-100 text-orange-700';
             elseif ($izin['jenis_izin'] === 'Dispensasi') $jenisColor = 'bg-purple-100 text-purple-700';
@@ -251,7 +266,7 @@ function getStep($izin) {
                       'active'=> ($izin['validasi_wali_kelas']==='Disetujui' && $izin['validasi_guru_bk']==='Menunggu' && !$rejected),
                       'reject'=> ($izin['validasi_guru_bk']==='Ditolak')],
                 4 => ['label'=>'Selesai',    'icon'=>'fa-check-double',
-                      'done'  => ($izin['status_izin']==='Disetujui Penuh'),
+                      'done'  => ($izin['status_izin']==='Disetujui Penuh' || $izin['status_izin']==='Disetujui'),
                       'active'=> false, 'reject'=>false],
             ];
         ?>
@@ -466,7 +481,7 @@ function getStep($izin) {
         <?php
         $prevBulan = '';
         foreach ($izinHistori as $iz):
-            list($stColor, $stIcon, $stLabel) = statusMeta($iz['status_izin']);
+            list($stColor, $stIcon, $stLabel) = statusMeta($iz);
             $jenisColor = 'text-blue-600';
             if ($iz['jenis_izin'] === 'Sakit')          $jenisColor = 'text-orange-500';
             elseif ($iz['jenis_izin'] === 'Dispensasi') $jenisColor = 'text-purple-600';
@@ -524,7 +539,7 @@ function getStep($izin) {
                         ['label'=>'Ajukan', 'done'=>true,  'reject'=>false],
                         ['label'=>'WK',     'done'=>($iz['validasi_wali_kelas']==='Disetujui'), 'reject'=>($iz['validasi_wali_kelas']==='Ditolak')],
                         ['label'=>'BK',     'done'=>($iz['validasi_guru_bk']==='Disetujui'),    'reject'=>($iz['validasi_guru_bk']==='Ditolak')],
-                        ['label'=>'Selesai','done'=>($iz['status_izin']==='Disetujui Penuh'),   'reject'=>false],
+                        ['label'=>'Selesai','done'=>($iz['status_izin']==='Disetujui Penuh' || $iz['status_izin']==='Disetujui'),   'reject'=>($iz['status_izin']==='Ditolak')],
                     ];
                     foreach ($miniSteps as $msIdx => $ms):
                         $mc = $ms['reject'] ? 'bg-red-400' : ($ms['done'] ? 'bg-green-500' : 'bg-gray-200');

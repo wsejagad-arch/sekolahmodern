@@ -131,7 +131,7 @@ $qGuru = mysqli_query($conn, "SELECT * FROM tbl_guru WHERE no_induk='$noIndukEsc
 $guru = $qGuru ? mysqli_fetch_assoc($qGuru) : null;
 
 if (!$guru) {
-    echo "<script>alert('Data guru tidak ditemukan'); window.location='guru_legacy';</script>";
+    echo "<script>alert('Data guru tidak ditemukan'); window.location='../../home.php';</script>";
     exit;
 }
 
@@ -455,18 +455,31 @@ textarea.form-control-profile {
     }
 }
 </style>
+<link rel="stylesheet" href="css/guru-desktop.css?v=<?= time() ?>">
+</head>
+<body style="background: #ebf1f6;">
+<?php include 'guru_sidebar_shared.php'; ?>
 
-<div class="profile-wrapper">
-    <div class="profile-header">
-        <div class="profile-title">
-            <h1>Profil Saya</h1>
-            <p>Kelola identitas dan foto profil Anda.</p>
+<div class="app-shell" style="grid-template-columns: 1fr; padding-right: 24px;">
+    <div class="desktop-center-column">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner-premium mb-4">
+            <div class="banner-content">
+                <div class="banner-text">
+                    <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Profil Saya 👤</h2>
+                    <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Kelola identitas dan foto profil Anda.</p>
+                </div>
+                <div class="banner-actions">
+                    <a href="../../home.php" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Dashboard</a>
+                </div>
+            </div>
+            <div class="banner-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
         </div>
-
-        <a href="guru_legacy" class="btn-profile btn-light-profile">
-            <i class="bi bi-arrow-left"></i> Dashboard
-        </a>
-    </div>
+        <div class="profile-wrapper" style="padding-top:0;">
 
     <?php if ($pesan !== ''): ?>
         <div class="alert-profile <?= htmlspecialchars($tipePesan); ?>">
@@ -523,7 +536,24 @@ textarea.form-control-profile {
 
                 <div class="form-group">
                     <label class="form-label">Jabatan</label>
-                    <input type="text" name="jabatan" class="form-control-profile" value="<?= htmlspecialchars($guru['jabatan'] ?? ''); ?>" placeholder="Contoh: Guru Mapel" <?= !$izinEditProfilGuru ? 'readonly' : '' ?>>
+                    <?php if (!$izinEditProfilGuru): ?>
+                        <input type="text" name="jabatan" class="form-control-profile" value="<?= htmlspecialchars($guru['jabatan'] ?? ''); ?>" readonly>
+                    <?php else: ?>
+                        <select name="jabatan" class="form-control-profile">
+                            <?php $currJabatan = $guru['jabatan'] ?? ''; ?>
+                            <option value="" <?= $currJabatan === '' ? 'selected' : '' ?>>-- Guru Biasa --</option>
+                            <option value="WKS Kurikulum" <?= $currJabatan === 'WKS Kurikulum' ? 'selected' : '' ?>>WKS Kurikulum</option>
+                            <option value="Tim WKS Kurikulum" <?= $currJabatan === 'Tim WKS Kurikulum' ? 'selected' : '' ?>>Tim WKS Kurikulum</option>
+                            <option value="WKS Kesiswaan" <?= $currJabatan === 'WKS Kesiswaan' ? 'selected' : '' ?>>WKS Kesiswaan</option>
+                            <option value="Tim WKS Kesiswaan" <?= $currJabatan === 'Tim WKS Kesiswaan' ? 'selected' : '' ?>>Tim WKS Kesiswaan</option>
+                            <option value="WKS Humas" <?= $currJabatan === 'WKS Humas' ? 'selected' : '' ?>>WKS Humas</option>
+                            <option value="Tim WKS Humas" <?= $currJabatan === 'Tim WKS Humas' ? 'selected' : '' ?>>Tim WKS Humas</option>
+                            <option value="WKS Sarpras" <?= $currJabatan === 'WKS Sarpras' ? 'selected' : '' ?>>WKS Sarpras</option>
+                            <option value="Tim WKS Sarpras" <?= $currJabatan === 'Tim WKS Sarpras' ? 'selected' : '' ?>>Tim WKS Sarpras</option>
+                            <option value="Kepala Sekolah" <?= $currJabatan === 'Kepala Sekolah' ? 'selected' : '' ?>>Kepala Sekolah</option>
+                            <option value="STPKS" <?= $currJabatan === 'STPKS' ? 'selected' : '' ?>>STPKS</option>
+                        </select>
+                    <?php endif; ?>
                 </div>
 
                 <div class="form-group full">
@@ -548,7 +578,7 @@ textarea.form-control-profile {
             </div>
 
             <div class="action-row">
-                <a href="guru_legacy" class="btn-profile btn-light-profile">
+                <a href="../../home.php" class="btn-profile btn-light-profile">
                     <i class="bi bi-x-lg"></i> Batal
                 </a>
                 <button type="submit" class="btn-profile btn-primary-profile" <?= !$izinEditProfilGuru ? 'disabled style="opacity:.55;cursor:not-allowed;"' : '' ?>>
@@ -590,7 +620,9 @@ document.getElementById('fotoInput').addEventListener('change', function () {
     reader.readAsDataURL(file);
 });
 </script>
-
+    </div>
+    </div>
+</div>
 <?php include __DIR__ . '/guru_common_footer.php'; ?>
 </body>
 </html>

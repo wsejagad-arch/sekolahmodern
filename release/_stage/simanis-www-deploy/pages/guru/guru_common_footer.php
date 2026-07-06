@@ -2,10 +2,24 @@
 if (!function_exists('guru_common_footer_url')) {
     function guru_common_footer_url(string $page, array $params = []): string
     {
-        $safe = strtolower(preg_replace('/[^a-z0-9_-]/i', '', $page));
-        $url = php_sapi_name() === 'cli-server' ? $safe . '.php' : $safe;
+        // Allow slashes and dots for correct path routing
+        $safe = preg_replace('/[^a-z0-9_\-\.\/]/i', '', $page);
+        
+        // If it looks like a direct file path (contains / or .php), use as is
+        // Otherwise, prepend ?page= for the main router
+        if (strpos($safe, '/') !== false || preg_match('/\.php$/', $safe)) {
+            $url = $safe;
+        } else {
+            $url = '?page=' . $safe;
+        }
+        
+        // CLI server fallback
+        if (php_sapi_name() === 'cli-server' && !preg_match('/\.php$/', $url) && strpos($url, '?') !== 0) {
+            $url .= '.php';
+        }
+
         if (!empty($params)) {
-            $url .= '?' . http_build_query($params);
+            $url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($params);
         }
         return $url;
     }
@@ -14,7 +28,7 @@ if (!function_exists('guru_common_footer_url')) {
 $currentGuruFooterPage = strtolower((string)($_GET['page'] ?? basename($_SERVER['PHP_SELF'] ?? '')));
 $currentGuruFooterPage = preg_replace('/\.php$/', '', $currentGuruFooterPage);
 $footerItems = [
-    'home' => ['page' => 'guru_legacy', 'label' => 'Beranda', 'icon' => 'bi-house-door-fill', 'aliases' => ['guru', 'guru_2026', 'guru_mobile_app', 'guru_mobile_app_with_external_css', 'guru_legacy']],
+    'home' => ['page' => '../../home.php', 'label' => 'Beranda', 'icon' => 'bi-house-door-fill', 'aliases' => ['guru', '../../home.php', 'guru_mobile_app', 'guru_mobile_app_with_external_css', '../../home.php']],
     'kelas' => ['page' => 'data-siswa', 'label' => 'Kelas', 'icon' => 'bi-grid-fill', 'aliases' => ['data-siswa', 'walikelas', 'guru-wali-siswa', 'laporan-kelas', 'rekap-kehadiran', 'leger']],
     'tugas' => ['page' => 'history-tugas', 'label' => 'Tugas', 'icon' => 'bi-clipboard-check-fill', 'aliases' => ['history-tugas', 'history-tugas-simple', 'history-tugas-content', 'inputtugas', 'task-detail']],
     'profil' => ['page' => 'profil-guru', 'label' => 'Profil', 'icon' => 'bi-person-fill', 'aliases' => ['profil-guru']],
@@ -58,11 +72,14 @@ $isActiveFooterItem = static function (array $item) use ($currentGuruFooterPage)
         grid-template-columns: 1fr 1fr 78px 1fr 1fr;
         align-items: center;
         gap: 4px;
-        background: rgba(255, 255, 255, 0.94);
-        border: 1px solid rgba(226, 232, 240, 0.9);
+        background: #f8fafc;
+        border: 2px solid #ffffff;
         border-radius: 35px;
-        box-shadow: 0 -10px 40px rgba(15, 23, 42, 0.12);
-        backdrop-filter: blur(20px);
+        box-shadow: 
+            6px 6px 16px rgba(148, 163, 184, 0.3), 
+            -6px -6px 16px rgba(255, 255, 255, 0.8),
+            inset 2px 2px 4px rgba(255, 255, 255, 0.8);
+        backdrop-filter: none;
         pointer-events: auto;
         font-family: "Poppins", sans-serif !important;
     }
@@ -105,10 +122,21 @@ $isActiveFooterItem = static function (array $item) use ($currentGuruFooterPage)
         place-items: center;
         color: #fff;
         text-decoration: none;
-        font-size: 32px;
-        background: linear-gradient(135deg, #10b981, #047857);
-        border: 5px solid #f8fafc;
-        box-shadow: 0 10px 25px rgba(5, 150, 105, 0.35);
+        font-size: 38px;
+        background: #10b981;
+        box-shadow: 
+            4px 4px 10px rgba(16, 185, 129, 0.4),
+            -4px -4px 10px rgba(255, 255, 255, 0.9),
+            inset 2px 2px 5px rgba(255, 255, 255, 0.3),
+            inset -2px -2px 5px rgba(4, 120, 87, 0.3);
+        border: 4px solid #f8fafc;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .guru-common-footer-center:active {
+        transform: scale(0.95);
+        box-shadow: 
+            inset 4px 4px 10px rgba(4, 120, 87, 0.4),
+            inset -4px -4px 10px rgba(255, 255, 255, 0.3);
     }
     .guru-common-footer-center:hover,
     .guru-common-footer-item:hover {
@@ -142,7 +170,7 @@ $isActiveFooterItem = static function (array $item) use ($currentGuruFooterPage)
             <i class="bi <?= htmlspecialchars($footerItems['kelas']['icon'], ENT_QUOTES, 'UTF-8'); ?>"></i>
             <span><?= htmlspecialchars($footerItems['kelas']['label'], ENT_QUOTES, 'UTF-8'); ?></span>
         </a>
-        <a href="<?= htmlspecialchars(guru_common_footer_url('guru_legacy', ['open_jurnal' => '1']), ENT_QUOTES, 'UTF-8'); ?>" class="guru-common-footer-center" aria-label="Input jurnal">
+        <a href="<?= htmlspecialchars(guru_common_footer_url('../../home.php', ['open_jurnal' => '1']), ENT_QUOTES, 'UTF-8'); ?>" class="guru-common-footer-center" aria-label="Input jurnal">
             <i class="bi bi-fingerprint"></i>
         </a>
         <a href="<?= htmlspecialchars(guru_common_footer_url($footerItems['tugas']['page']), ENT_QUOTES, 'UTF-8'); ?>" class="guru-common-footer-item <?= $isActiveFooterItem($footerItems['tugas']) ? 'is-active' : ''; ?>">

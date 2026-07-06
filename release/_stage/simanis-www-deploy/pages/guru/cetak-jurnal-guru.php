@@ -82,7 +82,7 @@ while ($qJurnal && ($row = mysqli_fetch_assoc($qJurnal))) {
 <main class="page-shell">
     <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
         <div>
-            <a href="guru_legacy" class="btn btn-sm btn-outline-secondary no-print mb-3">Kembali</a>
+            <a href="../../home.php" class="btn btn-sm btn-outline-secondary no-print mb-3">Kembali</a>
             <h1 class="h3 fw-bold mb-1">Cetak Jurnal Guru</h1>
             <div class="text-muted"><?= cjg_h($namaGuru); ?> - <?= cjg_h($nipGuru); ?></div>
         </div>

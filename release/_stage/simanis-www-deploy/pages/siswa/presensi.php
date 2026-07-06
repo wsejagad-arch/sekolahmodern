@@ -130,6 +130,19 @@ $nis        = $_SESSION['no_induk'];
 $kelas      = $_SESSION['kelas'];
 $namaSiswa  = $_SESSION['nama_siswa'] ?? 'Siswa';
 
+// ── Cek apakah siswa punya izin Disetujui Penuh untuk hari ini ──────────────
+$izinHariIni = null;
+$nisEscIzin = mysqli_real_escape_string($conn, $nis);
+$qIzin = mysqli_query($conn, "SELECT id_izin, kategori_pengajuan, jenis_izin, detail_izin, validator_wali_kelas, validator_guru_bk 
+                               FROM tbl_izin_siswa 
+                               WHERE no_induk_siswa = '$nisEscIzin' 
+                                 AND tanggal_izin = '$tglHariIni' 
+                                 AND status_izin IN ('Disetujui Penuh','Disetujui') 
+                               LIMIT 1");
+if ($qIzin && mysqli_num_rows($qIzin) > 0) {
+    $izinHariIni = mysqli_fetch_assoc($qIzin);
+}
+
 // ── Cek apakah siswa adalah ketua kelas ─────────────────────────────────────
 $isKetuaKelas = false;
 $_jabQ = @mysqli_query($conn, "SELECT jabatan FROM tbl_siswa WHERE {$tenantSiswa} AND no_induk='$nisEscJadwal' LIMIT 1");
@@ -173,22 +186,24 @@ $summary = ['Hadir' => 0, 'Ijin' => 0, 'Sakit' => 0, 'Dispen' => 0, 'Alpha' => 0
 if ($tblExists) {
     $qSum = mysqli_query(
         $conn,
-        "SELECT status, COUNT(*) AS jml
+        "SELECT
+            SUM(CASE WHEN LOWER(TRIM(status)) IN ('hadir','telat') THEN 1 ELSE 0 END) AS hadir,
+            SUM(CASE WHEN LOWER(TRIM(status)) IN ('ijin','izin') THEN 1 ELSE 0 END) AS ijin,
+            SUM(CASE WHEN LOWER(TRIM(status)) = 'sakit' THEN 1 ELSE 0 END) AS sakit,
+            SUM(CASE WHEN LOWER(TRIM(status)) IN ('dispen','dispensasi') THEN 1 ELSE 0 END) AS dispen,
+            SUM(CASE WHEN LOWER(TRIM(status)) = 'alpha' THEN 1 ELSE 0 END) AS alpha
          FROM tbl_absen
          WHERE {$tenantAbsen}
            AND no_induk='$nisEsc'
            AND kelas='$klsEsc'
-           AND DATE_FORMAT(tanggal,'%Y-%m')='$bulanEsc'
-         GROUP BY status"
+           AND DATE_FORMAT(tanggal,'%Y-%m')='$bulanEsc'"
     );
-    if ($qSum) {
-        while ($r = mysqli_fetch_assoc($qSum)) {
-            foreach (array_keys($summary) as $k) {
-                if (strcasecmp($k, $r['status']) === 0) {
-                    $summary[$k] = (int)$r['jml'];
-                }
-            }
-        }
+    if ($qSum && ($row = mysqli_fetch_assoc($qSum))) {
+        $summary['Hadir'] = (int)$row['hadir'];
+        $summary['Ijin'] = (int)$row['ijin'];
+        $summary['Sakit'] = (int)$row['sakit'];
+        $summary['Dispen'] = (int)$row['dispen'];
+        $summary['Alpha'] = (int)$row['alpha'];
     }
 }
 $totalPertemuan = array_sum($summary);
@@ -484,16 +499,38 @@ function konfirmasiButtonColor($opt)
     <div class="w-full max-w-4xl mx-auto px-4 sm:px-6 relative z-20">
         
         <!-- PRESENSI MANDIRI CARD -->
-        <div class="mb-5 bg-white border border-gray-100 rounded-xl p-4 shadow-sm card-shadow">
-            <h2 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4 flex items-center">
-                <i class="fas fa-calendar-check mr-2 text-blue-500 text-sm"></i> PRESENSI MANDIRI — <?= strtoupper(htmlspecialchars($hariIndo)) ?>, <?= strtoupper(tgl_indo($tglHariIni)) ?>
+        <div class="mb-5 bg-white border <?= $izinHariIni ? 'border-green-200' : 'border-gray-100' ?> rounded-xl p-4 shadow-sm card-shadow">
+            <h2 class="text-xs font-bold <?= $izinHariIni ? 'text-green-600' : 'text-blue-600' ?> uppercase tracking-wider mb-4 flex items-center">
+                <i class="fas <?= $izinHariIni ? 'fa-check-circle' : 'fa-calendar-check' ?> mr-2 <?= $izinHariIni ? 'text-green-500' : 'text-blue-500' ?> text-sm"></i> 
+                <?= $izinHariIni ? 'PRESENSI TIDAK DIPERLUKAN' : 'PRESENSI MANDIRI' ?> — <?= strtoupper(htmlspecialchars($hariIndo)) ?>, <?= strtoupper(tgl_indo($tglHariIni)) ?>
             </h2>
 
-            <?php if (empty($jadwalHariIni)): ?>
+            <?php if ($izinHariIni): ?>
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 text-green-600 text-xl mt-0.5">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-green-900 mb-1">Anda memiliki izin yang sudah disetujui penuh</p>
+                            <div class="text-xs text-green-800 space-y-0.5">
+                                <p><strong>Kategori:</strong> <?= htmlspecialchars($izinHariIni['kategori_pengajuan']) ?></p>
+                                <p><strong>Jenis:</strong> <?= htmlspecialchars($izinHariIni['jenis_izin']) ?></p>
+                                <?php if (!empty($izinHariIni['detail_izin'])): ?>
+                                <p><strong>Keterangan:</strong> <?= htmlspecialchars($izinHariIni['detail_izin']) ?></p>
+                                <?php endif; ?>
+                                <p class="mt-2"><strong>Persetujuan:</strong> Wali Kelas ✓ | Guru BK ✓</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php elseif (empty($jadwalHariIni)): ?>
                 <div class="text-center py-6">
                     <p class="text-sm text-gray-500"><i class="fas fa-bed mr-2 text-gray-300"></i>Tidak ada jadwal pelajaran hari ini.</p>
                 </div>
-            <?php else: ?>
+            <?php endif; ?>
+            
+            <?php if (!$izinHariIni && !empty($jadwalHariIni)): ?>
                 <?php
                 $lastMapelId = null;
                 $_maxSel = '';
@@ -664,22 +701,36 @@ function konfirmasiButtonColor($opt)
                         <i class="fas fa-chart-pie mr-2 text-blue-500 text-sm"></i> REKAP — <?= strtoupper(bulanIndo($bulan)) ?>
                     </h2>
                     
-                    <div class="space-y-3 mb-4">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="flex items-center gap-2 text-gray-600 font-medium"><div class="w-2.5 h-2.5 rounded-full bg-green-500"></div> Hadir</span>
-                            <span class="font-bold text-gray-800"><?= $summary['Hadir'] ?></span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="flex items-center gap-2 text-gray-600 font-medium"><div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div> Ijin</span>
-                            <span class="font-bold text-gray-800"><?= $summary['Ijin'] ?></span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="flex items-center gap-2 text-gray-600 font-medium"><div class="w-2.5 h-2.5 rounded-full bg-red-500"></div> Alpha</span>
-                            <span class="font-bold text-gray-800"><?= $summary['Alpha'] ?></span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="flex items-center gap-2 text-gray-600 font-medium"><div class="w-2.5 h-2.5 rounded-full bg-blue-500"></div> Sakit/Dispen</span>
-                            <span class="font-bold text-gray-800"><?= $summary['Sakit'] + $summary['Dispen'] ?></span>
+                    <div class="mb-4 overflow-hidden">
+                        <div class="grid grid-cols-4 gap-3 min-w-full">
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center min-w-0">
+                                <div class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-green-100 text-green-700 mb-3 mx-auto">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500 break-words">Hadir</div>
+                                <div class="mt-2 text-xl font-extrabold text-slate-900"><?= $summary['Hadir'] ?></div>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center min-w-0">
+                                <div class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-yellow-100 text-yellow-700 mb-3 mx-auto">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500 break-words">Ijin</div>
+                                <div class="mt-2 text-xl font-extrabold text-slate-900"><?= $summary['Ijin'] ?></div>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center min-w-0">
+                                <div class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-red-100 text-red-700 mb-3 mx-auto">
+                                    <i class="fas fa-user-slash"></i>
+                                </div>
+                                <div class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500 break-words">Alpha</div>
+                                <div class="mt-2 text-xl font-extrabold text-slate-900"><?= $summary['Alpha'] ?></div>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center min-w-0">
+                                <div class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-blue-100 text-blue-700 mb-3 mx-auto">
+                                    <i class="fas fa-heartbeat"></i>
+                                </div>
+                                <div class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500 break-words">Sakit/Dispen</div>
+                                <div class="mt-2 text-xl font-extrabold text-slate-900"><?= $summary['Sakit'] + $summary['Dispen'] ?></div>
+                            </div>
                         </div>
                     </div>
 
@@ -710,70 +761,95 @@ function konfirmasiButtonColor($opt)
                         <div class="mb-3 text-xs font-bold text-gray-600 uppercase tracking-wide flex items-center">
                             <i class="fas fa-list-ul mr-2 text-blue-500"></i>Detail Pertemuan
                         </div>
-                        <div class="divide-y divide-gray-100 max-h-80 overflow-y-auto pr-2">
-                            <?php
-                            $currentDate = null;
-                            foreach ($detailList as $row):
-                                $tgl    = $row['tanggal'];
-                                $mapel  = $row['nama_mapel'] ?? '-';
-                                $guru   = $row['nama_guru']  ?? '-';
-                                $jamMul = !empty($row['jam_mulai'])   ? date('H:i', strtotime($row['jam_mulai']))   : '';
-                                $jamSel = !empty($row['jam_selesai']) ? date('H:i', strtotime($row['jam_selesai'])) : '';
-                                $jam    = ($jamMul && $jamSel) ? "$jamMul – $jamSel" : ($jamMul ?: '-');
-                                $badge  = statusBadge($row['status']);
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-gray-600 border-collapse">
+                                <thead class="bg-gray-50 border-b text-[10px] uppercase text-gray-500 font-bold tracking-wider">
+                                    <tr>
+                                        <th class="py-2 px-3">No</th>
+                                        <th class="py-2 px-3 whitespace-nowrap">Hari/Tgl</th>
+                                        <th class="py-2 px-3">Mata Pelajaran</th>
+                                        <th class="py-2 px-3 text-center">Status</th>
+                                        <th class="py-2 px-3 text-center whitespace-nowrap">Ket Akhir</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    <?php
+                                    $rekapHarian = [];
+                                    foreach ($detailList as $row) {
+                                        $tgl = $row['tanggal'];
+                                        if (!isset($rekapHarian[$tgl])) {
+                                            $rekapHarian[$tgl] = [
+                                                'mapel' => [],
+                                                'status' => [],
+                                                'last_status' => ''
+                                            ];
+                                        }
+                                        $st = strtolower(trim($row['status']));
+                                        $huruf = 'A';
+                                        if ($st == 'hadir') $huruf = 'H';
+                                        elseif ($st == 'ijin' || $st == 'izin') $huruf = 'I';
+                                        elseif ($st == 'sakit') $huruf = 'S';
+                                        elseif ($st == 'dispen' || $st == 'dispensasi') $huruf = 'D';
+                                        else $huruf = strtoupper(substr($st, 0, 1));
+                                        
+                                        $rekapHarian[$tgl]['mapel'][] = $row['nama_mapel'];
+                                        $rekapHarian[$tgl]['status'][] = $huruf;
+                                        $rekapHarian[$tgl]['last_status'] = $huruf;
+                                    }
 
-                                if ($tgl !== $currentDate):
-                                    $currentDate = $tgl;
-                                    $hariTgl = function_exists('tgl_indo') ? tgl_indo($tgl) : date('d M Y', strtotime($tgl));
-                            ?>
-                                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-3 pb-1">
-                                        <?= htmlspecialchars($hariTgl) ?>
-                                    </div>
-                                <?php endif; ?>
+                                    $no = 1;
+                                    foreach ($rekapHarian as $tgl => $d):
+                                        $counts = array_count_values($d['status']);
+                                        $hadir = $counts['H'] ?? 0;
+                                        $total = count($d['status']);
+                                        $nonHadir = $total - $hadir;
+                                        
+                                        $ket = 'A';
+                                        if ($hadir > $nonHadir) {
+                                            $ket = 'H';
+                                        } elseif ($hadir == $nonHadir) {
+                                            $ket = $d['last_status'];
+                                        } else {
+                                            $maxC = 0; $maxS = 'A';
+                                            foreach ($counts as $s => $c) {
+                                                if ($s != 'H' && $c > $maxC) {
+                                                    $maxC = $c; $maxS = $s;
+                                                }
+                                            }
+                                            $ket = $maxS;
+                                        }
 
-                                <div class="flex items-center justify-between py-2.5">
-                                    <div class="flex-1 min-w-0 pr-3">
-                                        <p class="text-sm font-bold text-gray-800 truncate">
-                                            <?= htmlspecialchars($mapel) ?>
-                                        </p>
-                                        <p class="text-[11px] text-gray-500 mt-0.5">
-                                            <i class="fas fa-chalkboard-teacher mr-1"></i><?= htmlspecialchars($guru) ?>
-                                            <?php if ($jam !== '-'): ?>
-                                                &nbsp;&middot;&nbsp;<i class="fas fa-clock mr-1"></i><?= $jam ?>
-                                            <?php endif; ?>
-                                        </p>
-                                    </div>
-                                    <span class="shrink-0 text-[10px] font-bold px-3 py-1 rounded-full <?= $badge ?>">
-                                        <?= htmlspecialchars(strtoupper($row['status'])) ?>
-                                    </span>
-                                </div>
-                            <?php endforeach; ?>
+                                        $hariTgl = function_exists('tgl_indo') ? tgl_indo($tgl) : date('d M Y', strtotime($tgl));
+                                        $mapelStr = implode('<br>', $d['mapel']);
+                                        $statusStr = implode('<br>', $d['status']);
+                                        
+                                        $badgeKet = 'bg-red-100 text-red-700';
+                                        if ($ket == 'H') $badgeKet = 'bg-green-100 text-green-700';
+                                        elseif (in_array($ket, ['I','S','D'])) $badgeKet = 'bg-yellow-100 text-yellow-700';
+                                    ?>
+                                    <tr>
+                                        <td class="py-2 px-3 align-top font-bold text-gray-500"><?= $no++ ?></td>
+                                        <td class="py-2 px-3 align-top whitespace-nowrap font-bold text-[11px] text-gray-800"><?= htmlspecialchars($hariTgl) ?></td>
+                                        <td class="py-2 px-3 align-top text-[11px] leading-relaxed text-gray-600"><?= $mapelStr ?></td>
+                                        <td class="py-2 px-3 align-top text-[11px] text-center font-black leading-relaxed"><?= $statusStr ?></td>
+                                        <td class="py-2 px-3 align-middle text-center">
+                                            <span class="inline-block px-3 py-1 rounded-full text-[11px] font-black <?= $badgeKet ?>">
+                                                <?= $ket ?>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
                         </div>
-                    </div>
                 <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>
     
     <!-- BOTTOM NAV -->
-    <div class="bottom-nav">
-        <a href="siswa.php" class="nav-item active">
-            <i class="fas fa-home text-lg mb-1"></i>
-            Beranda
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fas fa-book text-lg mb-1"></i>
-            Studi
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fas fa-bell text-lg mb-1"></i>
-            Notifikasi
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fas fa-user text-lg mb-1"></i>
-            Profil
-        </a>
-    </div>
+    <?php include 'siswa_footer.php'; ?>
+
 
     <!-- ── MODAL KAMERA & WAJAH ───────────────────────────────────────── -->
     <div id="cameraModal" role="dialog" aria-modal="true" aria-labelledby="cameraTitle">

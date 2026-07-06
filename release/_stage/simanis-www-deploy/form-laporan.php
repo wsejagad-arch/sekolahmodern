@@ -8,6 +8,7 @@ if (!is_admin()) {
 }
 
 require_once __DIR__ . '/koneksi.php';
+require_once __DIR__ . '/notification_helper.php';
 
 // Auto create table if not exists
 $createSql = "CREATE TABLE IF NOT EXISTS tbl_laporan (
@@ -82,6 +83,7 @@ if(isset($_POST['simpan_laporan'])){
         mysqli_stmt_bind_param($stmt,'sssssi',$judul,$tgl_mulai,$tgl_selesai,$deskripsi,$lampiranName,$created_by);
         if(mysqli_stmt_execute($stmt)){
             $msg[]='Laporan tersimpan.';
+            notif_trigger_laporan($conn, $judul, $deskripsi);
         } else {
             $err[]='DB error: '.mysqli_error($conn);
         }

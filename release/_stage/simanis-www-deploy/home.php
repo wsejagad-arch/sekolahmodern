@@ -7,6 +7,11 @@ if (function_exists('is_admin_pusat') && is_admin_pusat()) {
   redirect('admin-pusat.php');
 }
 
+if (isset($_GET['page']) && $_GET['page'] === 'beranda') {
+  header('Location: home.php');
+  exit;
+}
+
 // Get user info
 $id_user = $_SESSION['id_user'] ?? null;
 $username = $_SESSION['username'] ?? '';
@@ -73,6 +78,12 @@ include "sidebar.php";
         case 'lihat-log':
           include "lihat-log.php";
           break;
+        case 'clear-cache':
+          include "pages/admin/clear-cache.php";
+          break;
+        case 'broadcast-wa':
+          include "pages/admin/broadcast-wa.php";
+          break;
         case 'cetak-log':
           include "form-cetak-log.php";
           break;
@@ -118,9 +129,6 @@ include "sidebar.php";
         case 'hapus-kelas-simple':
           include "hapus-kelas-simple.php";
           break;
-        case 'cetak-jurnal-guru':
-          include "cetak-jurnal-guru.php";
-          break;
         case 'cek-nilai':
           include "pages/admin/cek-nilai.php";
           break;
@@ -129,9 +137,6 @@ include "sidebar.php";
           break;
         case 'cari_siswa':
           include "cari_siswa.php";
-          break;
-        case 'cetak-kehadiran-guru':
-          include "form-cetak-kehadiran.php";
           break;
         case 'jurnal-cetak':
           include "jurnal-cetak.php";
@@ -147,9 +152,6 @@ include "sidebar.php";
           break;
         case 'edit-user':
           include "edit-user.php";
-          break;
-        case 'buat-laporan':
-          include "form-laporan.php";
           break;
         case 'import-siswa':
           include "import-siswa.php";
@@ -168,6 +170,9 @@ include "sidebar.php";
           break;
         case 'kenaikan-kelas':
           include "pages/admin/kenaikan-kelas.php";
+          break;
+        case 'data-alumni':
+          include "pages/admin/data-alumni.php";
           break;
         case 'pengumuman':
           include "pages/admin/pengumuman.php";
@@ -202,8 +207,14 @@ include "sidebar.php";
         case 'ekskul':
           include "pages/admin/ekskul.php";
           break;
+        case 'literasi-admin':
+          include "pages/admin/literasi_mapping.php";
+          break;
         case 'kurikulum-microsite':
           echo "<script>window.location='kurikulum-microsite.php';</script>";
+          break;
+        case 'reset-semester':
+          include "reset-semester.php";
           break;
         default:
           echo "<h4 class=\"pl-4 font-weight-bold\">Halaman tidak ditemukan!</h4>";
@@ -424,7 +435,9 @@ include "sidebar.php";
       }
     ?>
       <!-- End of konten include -->
-
+      <?php if ((int)($_SESSION['hak_akses'] ?? 0) === 2): ?>
+        <?php include "pages/guru/dashboard_guru.php"; ?>
+      <?php else: ?>
       <!-- Content Row -->
       <div class="row mx-auto">
 
@@ -479,6 +492,39 @@ include "sidebar.php";
             </div>
           </div>
         </div>
+
+        <?php if ((int)($_SESSION['hak_akses'] ?? 0) === 2): ?>
+        <div class="col-md-12 mb-4">
+          <div class="card border-0 shadow-sm" style="border-radius:18px; background:#fff; overflow:hidden;">
+            <div style="height:5px; background:linear-gradient(90deg,#0f766e,#14b8a6,#22c55e);"></div>
+            <div class="card-body py-3 px-4">
+              <div style="font-size:12px; font-weight:800; color:#0f766e; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:10px;">Aksi Cepat Dasbor Guru</div>
+              <div class="d-flex flex-wrap" style="gap:10px;">
+                <a href="pages/guru/ekinerja.php" class="btn btn-outline-success" style="border-radius:12px; font-weight:600; padding:10px 16px;">
+                  <i class="fas fa-file-pdf mr-2"></i> File E-Kinerja
+                </a>
+                <?php
+                // Cek apakah guru adalah pembina literasi
+                $nipHome = $_SESSION['no_induk'] ?? '';
+                $nipEscHome = mysqli_real_escape_string($conn, $nipHome);
+                $idSekolahHome = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
+                $qHomeLiterasi = @mysqli_query($conn, "SELECT COUNT(*) as total FROM tbl_literasi_ampuh WHERE no_induk_guru='$nipEscHome' AND id_sekolah=$idSekolahHome");
+                $isPembinaLiterasiHome = false;
+                if ($qHomeLiterasi) {
+                    $rowHomeLiterasi = mysqli_fetch_assoc($qHomeLiterasi);
+                    $isPembinaLiterasiHome = (int)($rowHomeLiterasi['total'] ?? 0) > 0;
+                }
+                if ($isPembinaLiterasiHome):
+                ?>
+                <a href="pages/guru/literasi.php" class="btn btn-outline-info" style="border-radius:12px; font-weight:600; padding:10px 16px; border-color: #0ea5e9; color: #0ea5e9;">
+                  <i class="fas fa-book-reader mr-2"></i> LENTERA Literasi
+                </a>
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+        </div>
+        <?php endif; ?>
 
         <?php if ((int)($_SESSION['hak_akses'] ?? 0) === 1): ?>
         <div class="col-md-12 mb-4">
@@ -1092,9 +1138,10 @@ include "sidebar.php";
       </div>
 
 
+    <?php endif; ?>
     <?php
-      // bracket di bawah ini adalah penutup else dari is isset request
-    }
+        // bracket di bawah ini adalah penutup else dari is isset request
+      }
     ?>
 
 
@@ -1103,6 +1150,8 @@ include "sidebar.php";
 
   </div>
   <!-- End of Main Content -->
+
+  <?php include "footer.php"; ?><!-- End of Main Content -->
 
   <!-- Bagian chart Pengisian Jurnal Guru telah dihapus -->
 
@@ -1631,6 +1680,14 @@ include "sidebar.php";
     document.addEventListener('DOMContentLoaded', function() {
       // Only run on dashboard (home page without parameters)
       if (!window.location.search.includes('page=')) {
+        // Intercept back button to stay on beranda
+        if (window.history && window.history.pushState) {
+          window.history.pushState('forward', null, window.location.href);
+          window.addEventListener('popstate', function() {
+            window.history.pushState('forward', null, window.location.href);
+          });
+        }
+
         updateAgendaHomeCountdowns();
         setInterval(updateAgendaHomeCountdowns, 1000);
         refreshAgendaHome();

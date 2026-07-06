@@ -256,3 +256,21 @@ function mt_create_school_code(string $name): string
     $base = substr($base !== '' ? $base : 'SEKOLAH', 0, 12);
     return $base . random_int(100, 999);
 }
+
+// Lightweight morning trigger check to ensure background process runs for morning reminders
+$mt_current_hour = date('H');
+if ($mt_current_hour === '06' || $mt_current_hour === '07') {
+    $mt_trigger_lock = sys_get_temp_dir() . '/simanis_morning_trigger_' . date('YmdH') . '.lock';
+    if (!file_exists($mt_trigger_lock)) {
+        @touch($mt_trigger_lock);
+        if (!function_exists('notif_trigger_background_process')) {
+            $nh_path = __DIR__ . '/notification_helper.php';
+            if (file_exists($nh_path)) {
+                require_once $nh_path;
+            }
+        }
+        if (function_exists('notif_trigger_background_process')) {
+            notif_trigger_background_process();
+        }
+    }
+}

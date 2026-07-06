@@ -1,0 +1,33 @@
+
+--- tbl_tugas ---
+id (int(11))
+id_sekolah (int(11))
+tanggal (date)
+id_mapel (int(11))
+kelas (varchar(50))
+mapel (varchar(100))
+no_induk_guru (varchar(50))
+judul_tugas (varchar(255))
+deskripsi (text)
+link_tugas (text)
+file_tugas (varchar(255))
+tanggal_pengumpulan (date)
+created_at (timestamp)
+updated_at (timestamp)
+status (enum('aktif','selesai','dihapus'))
+
+--- tbl_literasi_tugas ---
+id (int(11))
+id_sekolah (int(11))
+no_induk_guru (varchar(50))
+kelas (varchar(100))
+judul (varchar(255))
+deskripsi (text)
+tipe_media (enum('pdf','gambar','video'))
+file_media (varchar(255))
+durasi_minimal (int(11))
+created_at (timestamp)
+
+--- tbl_tugas_kumpul ---
+
+--- tbl_literasi_evaluasi_jawaban ---

@@ -50,6 +50,8 @@ $lembaga = data_lembaga();
 
   <!-- Font Awesome -->
   <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
   <!-- SB Admin 2 Template -->
   <link href="css/sb-admin-2.min.css" rel="stylesheet">

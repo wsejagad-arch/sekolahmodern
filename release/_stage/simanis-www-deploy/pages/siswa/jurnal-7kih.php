@@ -33,6 +33,9 @@ function kihs_create_table(mysqli $conn): void
             habit_key VARCHAR(40) NOT NULL,
             habit_label VARCHAR(120) NOT NULL,
             prayer_key VARCHAR(30) NOT NULL DEFAULT '',
+            keterangan TEXT DEFAULT NULL,
+            lat VARCHAR(30) DEFAULT NULL,
+            lng VARCHAR(30) DEFAULT NULL,
             submitted_at DATETIME NOT NULL,
             window_start TIME DEFAULT NULL,
             window_end TIME DEFAULT NULL,
@@ -67,14 +70,37 @@ function kihs_habits(): array
     ];
 }
 
-function kihs_prayers(): array
+function kihs_prayers(string $agama): array
 {
+    $agama = strtolower(trim($agama));
+    if (strpos($agama, 'islam') !== false) {
+        $p = [
+            'subuh' => ['label' => 'Subuh', 'start' => '04:00', 'end' => '05:59'],
+            'dzuhur' => ['label' => 'Dzuhur', 'start' => '11:30', 'end' => '13:30'],
+            'ashar' => ['label' => 'Ashar', 'start' => '14:30', 'end' => '17:30'],
+            'maghrib' => ['label' => 'Maghrib', 'start' => '17:30', 'end' => '19:00'],
+            'isya' => ['label' => 'Isya', 'start' => '19:00', 'end' => '03:59'],
+        ];
+        if (date('N') == 5) {
+            $p['jumat'] = ['label' => 'Jumat', 'start' => '11:30', 'end' => '13:30'];
+        }
+        return $p;
+    }
+    if (strpos($agama, 'katolik') !== false) {
+        return [
+            'pagi' => ['label' => 'Ibadah Pagi (06:00)', 'start' => '05:00', 'end' => '08:00'],
+            'siang' => ['label' => 'Ibadah Siang (12:00)', 'start' => '11:00', 'end' => '14:00'],
+            'sore' => ['label' => 'Ibadah Sore (18:00)', 'start' => '17:00', 'end' => '20:00'],
+            'malaikat_tuhan' => ['label' => 'Malaikat Tuhan', 'start' => '00:00', 'end' => '23:59'],
+            'rosario' => ['label' => 'Doa Rosario', 'start' => '00:00', 'end' => '23:59'],
+            'bapa_kami' => ['label' => 'Bapa Kami', 'start' => '00:00', 'end' => '23:59'],
+            'salam_maria' => ['label' => 'Salam Maria', 'start' => '00:00', 'end' => '23:59'],
+            'doa_umum' => ['label' => 'Doa Umum', 'start' => '00:00', 'end' => '23:59'],
+            'novena' => ['label' => 'Doa Novena', 'start' => '00:00', 'end' => '23:59'],
+        ];
+    }
     return [
-        'subuh' => ['label' => 'Subuh', 'start' => '04:00', 'end' => '06:00'],
-        'dzuhur' => ['label' => 'Dzuhur', 'start' => '11:30', 'end' => '13:30'],
-        'ashar' => ['label' => 'Ashar', 'start' => '15:00', 'end' => '16:30'],
-        'maghrib' => ['label' => 'Maghrib', 'start' => '17:30', 'end' => '18:30'],
-        'isya' => ['label' => 'Isya', 'start' => '19:00', 'end' => '20:30'],
+        'umum' => ['label' => 'Ibadah Umum', 'start' => '00:00', 'end' => '23:59']
     ];
 }
 
@@ -89,18 +115,19 @@ $namaSiswa = (string)($siswa['nama_siswa'] ?? ($_SESSION['nama_siswa'] ?? 'Siswa
 $kelas = (string)($siswa['kelas'] ?? ($_SESSION['kelas'] ?? ''));
 $agama = strtolower(trim((string)($siswa['agama'] ?? '')));
 $isIslam = strpos($agama, 'islam') !== false;
+$isKatolik = strpos($agama, 'katolik') !== false;
 
 $today = date('Y-m-d');
 $month = date('Y-m');
 $habits = kihs_habits();
-$prayers = kihs_prayers();
+$prayers = kihs_prayers($agama);
 $done = [];
 $qDone = @mysqli_query($conn, "SELECT habit_key, prayer_key, submitted_at, score, timeliness_status, photo_path FROM tbl_7kih_jurnal WHERE no_induk='$nisEsc' AND tanggal='$today'");
 while ($qDone && ($row = mysqli_fetch_assoc($qDone))) {
     $done[$row['habit_key'] . '|' . (string)$row['prayer_key']] = $row;
 }
 
-$expectedToday = $isIslam ? 11 : 7;
+$expectedToday = count($habits) - 1 + count($prayers); // 6 habits + N prayers
 $doneToday = count($done);
 $todayPct = $expectedToday > 0 ? min(100, round(($doneToday / $expectedToday) * 100)) : 0;
 $avgScore = 0;
@@ -129,6 +156,48 @@ $qMonthStat = @mysqli_query($conn, "
 $monthStat = $qMonthStat ? mysqli_fetch_assoc($qMonthStat) : ['total_jurnal'=>0, 'avg_score_month'=>0, 'total_hari'=>0];
 $totalJurnalBulanIni = (int)($monthStat['total_jurnal'] ?? 0);
 $avgScoreBulanIni = (float)($monthStat['avg_score_month'] ?? 0);
+
+// --- Hitung Bonus Apresiasi Ketepatan Waktu Tugas ---
+$bonusTugas = 0;
+$onTimeCount = 0;
+$lateCount = 0;
+
+$qTugasProg = @mysqli_query($conn, "
+    SELECT t.batas_waktu, ts.waktu_submit 
+    FROM tbl_tugas t 
+    JOIN tbl_tugas_siswa ts ON t.id = ts.id_tugas 
+    WHERE ts.no_induk_siswa = '$nisEsc' AND ts.status = 'Selesai' AND DATE_FORMAT(ts.waktu_submit, '%Y-%m') = '$bulanNow'
+");
+if ($qTugasProg) {
+    while($row = mysqli_fetch_assoc($qTugasProg)) {
+        if ($row['batas_waktu'] && strtotime($row['waktu_submit']) > strtotime($row['batas_waktu'])) {
+            $lateCount++;
+        } else {
+            $onTimeCount++;
+        }
+    }
+}
+
+$qLitProg = @mysqli_query($conn, "
+    SELECT t.batas_waktu, p.waktu_selesai 
+    FROM tbl_literasi_tugas t 
+    JOIN tbl_literasi_progress p ON t.id = p.id_tugas 
+    WHERE p.no_induk_siswa = '$nisEsc' AND p.status = 'Selesai' AND DATE_FORMAT(p.waktu_selesai, '%Y-%m') = '$bulanNow'
+");
+if ($qLitProg) {
+    while($row = mysqli_fetch_assoc($qLitProg)) {
+        if ($row['batas_waktu'] && strtotime($row['waktu_selesai']) > strtotime($row['batas_waktu'])) {
+            $lateCount++;
+        } else {
+            $onTimeCount++;
+        }
+    }
+}
+
+// Tambahkan 5 poin untuk setiap tugas tepat waktu, kurangi 2 poin untuk terlambat.
+$bonusTugas = ($onTimeCount * 5) - ($lateCount * 2);
+$avgScoreBulanIni += $bonusTugas;
+if ($avgScoreBulanIni < 0) $avgScoreBulanIni = 0;
 $hariAktifBulanIni = (int)($monthStat['total_hari'] ?? 0);
 $daysInMonth = (int)date('t', strtotime($today));
 $expectedMonth = $daysInMonth * $expectedToday;
@@ -139,14 +208,14 @@ $pctMonth = $expectedMonth > 0 ? min(100, round(($totalJurnalBulanIni / $expecte
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Jurnal 7KIH - SIMANIS</title>
+    <title>Jurnal 7 KAIH (Tujuh Kebiasaan Anak Indonesia Hebat) - SIMANIS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body { background:linear-gradient(135deg,#e0f2fe,#f8fafc 46%,#dcfce7); min-height:100vh; padding-bottom:78px; }
         .phone { max-width:480px; margin:0 auto; padding:16px; }
         .card { background:rgba(255,255,255,.95); border:1px solid rgba(226,232,240,.9); border-radius:20px; box-shadow:0 12px 30px rgba(15,23,42,.08); }
-        .habit-btn.done { border-color:#16a34a; background:#f0fdf4; }
+        .habit-btn.done, .habit-block.done { border-color:#16a34a; background:#f0fdf4; }
         .camera-modal { position:fixed; inset:0; background:rgba(15,23,42,.72); display:none; place-items:center; z-index:50; padding:16px; }
         .camera-modal.open { display:grid; }
         video, canvas, #previewImg { transform:scaleX(-1); }
@@ -157,13 +226,15 @@ $pctMonth = $expectedMonth > 0 ? min(100, round(($totalJurnalBulanIni / $expecte
         .bnav-item i { font-size: 1.3rem; }
         .bnav-label { font-size: 0.65rem; font-weight: 600; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script defer src="../../assets/js/face-api.min.js"></script>
 </head>
 <body>
 <main class="phone">
     <section class="rounded-[24px] bg-gradient-to-br from-emerald-700 to-slate-900 text-white p-5 shadow-xl">
         <a href="siswa.php" class="text-white/80 text-sm font-bold"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
-        <h1 class="text-2xl font-black mt-3">Jurnal 7KIH</h1>
-        <p class="text-white/70 text-sm mt-1">7 Kebiasaan Anak Indonesia Hebat. Ambil selfie sebagai bukti aktivitas, lalu kirim jurnal harian.</p>
+        <h1 class="text-2xl font-black mt-3">Jurnal 7 KAIH (Tujuh Kebiasaan Anak Indonesia Hebat)</h1>
+        <p class="text-white/70 text-sm mt-1">Tujuh Kebiasaan Anak Indonesia Hebat. Ambil selfie sebagai bukti aktivitas, lalu kirim jurnal harian.</p>
         <div class="grid grid-cols-3 gap-2 mt-4">
             <div class="bg-white/12 rounded-2xl p-3">
                 <div class="text-xs text-white/65">Hari ini</div>
@@ -186,24 +257,37 @@ $pctMonth = $expectedMonth > 0 ? min(100, round(($totalJurnalBulanIni / $expecte
                 <h2 class="font-black text-slate-900">Pilih Jurnal</h2>
                 <p class="text-xs text-slate-500"><?= kihs_h($namaSiswa); ?><?= $kelas !== '' ? ' - ' . kihs_h($kelas) : ''; ?></p>
             </div>
-            <span class="text-[11px] font-bold rounded-full bg-emerald-100 text-emerald-700 px-3 py-1"><?= $isIslam ? 'Islam: 5 sholat' : 'Ibadah umum'; ?></span>
+            <span class="text-[11px] font-bold rounded-full bg-emerald-100 text-emerald-700 px-3 py-1">Agama: <?= kihs_h(ucfirst($agama)) ?: 'Umum'; ?></span>
         </div>
 
         <div class="space-y-3">
             <?php foreach ($habits as $key => $habit): ?>
-                <?php if ($key === 'beribadah' && $isIslam): ?>
-                    <div class="border border-slate-200 rounded-2xl p-3">
-                        <div class="flex gap-3 items-start mb-3">
-                            <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 grid place-items-center"><i class="fa-solid <?= kihs_h($habit['icon']); ?>"></i></div>
-                            <div class="flex-1">
-                                <div class="font-black text-slate-900"><?= kihs_h($habit['label']); ?></div>
-                                <div class="text-xs text-slate-500">Isi 5 kali absen sholat dengan selfie.</div>
+                <?php if ($key === 'beribadah'): ?>
+                    <?php 
+                        $isAllPrayersDone = false;
+                        if (!empty($prayers)) {
+                            $c = 0;
+                            foreach ($prayers as $pk => $pv) {
+                                if (isset($done['beribadah|' . $pk])) $c++;
+                            }
+                            $isAllPrayersDone = ($c === count($prayers));
+                        }
+                    ?>
+                    <div class="habit-block border rounded-2xl p-3 transition-colors <?= $isAllPrayersDone ? 'done' : 'border-slate-200' ?>">
+                        <button type="button" class="w-full text-left flex gap-3 items-start mb-2 <?= $isAllPrayersDone ? 'done' : '' ?>" onclick="document.getElementById('prayers-grid').classList.toggle('hidden')" data-title="Semua Ibadah">
+                            <div class="w-11 h-11 rounded-2xl <?= $isAllPrayersDone ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-700' ?> grid place-items-center transition-colors">
+                                <i class="fa-solid <?= $isAllPrayersDone ? 'fa-check' : kihs_h($habit['icon']); ?>"></i>
                             </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex-1">
+                                <div class="font-black <?= $isAllPrayersDone ? 'text-emerald-700' : 'text-slate-900' ?>"><?= kihs_h($habit['label']); ?> <?= $isAllPrayersDone ? '<span class="text-[10px] bg-emerald-100 px-2 py-0.5 rounded-full ml-1">Selesai Semua</span>' : '' ?></div>
+                                <div class="text-xs <?= $isAllPrayersDone ? 'text-emerald-600/70' : 'text-slate-500' ?>"><?= $isAllPrayersDone ? 'Alhamdulillah, semua kewajiban hari ini tertunaikan.' : 'Isi daftar ibadah sesuai keyakinan (Klik)' ?></div>
+                            </div>
+                            <i class="fa-solid fa-chevron-down <?= $isAllPrayersDone ? 'text-emerald-400' : 'text-slate-400' ?> mt-2 transition-transform"></i>
+                        </button>
+                        <div id="prayers-grid" class="grid grid-cols-2 gap-2 hidden pt-3 border-t border-slate-100 mt-1">
                             <?php foreach ($prayers as $pKey => $prayer): ?>
                                 <?php $d = $done[$key . '|' . $pKey] ?? null; ?>
-                                <button type="button" class="habit-btn <?= $d ? 'done' : ''; ?> text-left border rounded-xl p-3" data-habit="<?= kihs_h($key); ?>" data-prayer="<?= kihs_h($pKey); ?>" data-title="Sholat <?= kihs_h($prayer['label']); ?>">
+                                <button type="button" class="habit-btn <?= $d ? 'done bg-emerald-50/50 border-emerald-300' : 'border-slate-200'; ?> text-left border rounded-xl p-3 transition-colors" data-habit="<?= kihs_h($key); ?>" data-prayer="<?= kihs_h($pKey); ?>" data-title="<?= kihs_h($prayer['label']); ?>">
                                     <div class="font-black text-sm"><?= kihs_h($prayer['label']); ?></div>
                                     <div class="text-[11px] text-slate-500"><?= kihs_h($prayer['start']); ?>-<?= kihs_h($prayer['end']); ?></div>
                                     <div class="text-[11px] mt-1 <?= $d ? 'text-emerald-700' : 'text-slate-400'; ?>"><?= $d ? 'Terkirim ' . date('H:i', strtotime($d['submitted_at'])) : 'Belum diisi'; ?></div>
@@ -212,16 +296,30 @@ $pctMonth = $expectedMonth > 0 ? min(100, round(($totalJurnalBulanIni / $expecte
                         </div>
                     </div>
                 <?php else: ?>
-                    <?php $d = $done[$key . '|'] ?? null; ?>
-                    <button type="button" class="habit-btn <?= $d ? 'done' : ''; ?> w-full text-left border border-slate-200 rounded-2xl p-3 flex gap-3 items-start" data-habit="<?= kihs_h($key); ?>" data-prayer="" data-title="<?= kihs_h($habit['label']); ?>">
-                        <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 grid place-items-center"><i class="fa-solid <?= kihs_h($habit['icon']); ?>"></i></div>
+                    <?php 
+                        $d = $done[$key . '|'] ?? null; 
+                        $disabled = ($key === 'tidur_cepat' && date('H:i') > '21:00') ? 'opacity-50 pointer-events-none' : '';
+                    ?>
+                    <button type="button" class="habit-btn <?= $d ? 'done bg-emerald-50/50 border-emerald-300' : 'border-slate-200'; ?> <?= $disabled ?> w-full text-left border rounded-2xl p-3 flex gap-3 items-start transition-colors" data-habit="<?= kihs_h($key); ?>" data-prayer="" data-title="<?= kihs_h($habit['label']); ?>">
+                        <div class="w-11 h-11 rounded-2xl <?= $d ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-700' ?> grid place-items-center transition-colors">
+                            <i class="fa-solid <?= $d ? 'fa-check' : kihs_h($habit['icon']); ?>"></i>
+                        </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between gap-2">
-                                <div class="font-black text-slate-900"><?= kihs_h($habit['label']); ?></div>
-                                <span class="text-[11px] text-slate-500"><?= kihs_h($habit['start']); ?>-<?= kihs_h($habit['end']); ?></span>
+                                <div class="font-black <?= $d ? 'text-emerald-700' : 'text-slate-900' ?>">
+                                    <?= kihs_h($habit['label']); ?>
+                                    <?= $d ? '<span class="text-[10px] bg-emerald-100 px-2 py-0.5 rounded-full ml-1">Selesai</span>' : '' ?>
+                                </div>
+                                <span class="text-[11px] <?= $d ? 'text-emerald-600/70' : 'text-slate-500' ?>"><?= kihs_h($habit['start']); ?>-<?= kihs_h($habit['end']); ?></span>
                             </div>
-                            <div class="text-xs text-slate-500"><?= kihs_h($habit['hint']); ?></div>
-                            <div class="text-[11px] mt-1 <?= $d ? 'text-emerald-700' : 'text-slate-400'; ?>"><?= $d ? 'Terkirim ' . date('H:i', strtotime($d['submitted_at'])) : 'Belum diisi'; ?></div>
+                            <div class="text-xs <?= $d ? 'text-emerald-600/70' : 'text-slate-500' ?>"><?= kihs_h($habit['hint']); ?></div>
+                            <div class="text-[11px] mt-1 <?= $d ? 'text-emerald-700' : 'text-slate-400'; ?>">
+                                <?php if($key === 'tidur_cepat' && date('H:i') > '21:00' && !$d): ?>
+                                    <span class="text-red-500">Waktu habis (lewat 21:00)</span>
+                                <?php else: ?>
+                                    <?= $d ? 'Terkirim ' . date('H:i', strtotime($d['submitted_at'])) : 'Belum diisi'; ?>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </button>
                 <?php endif; ?>
@@ -239,13 +337,13 @@ $pctMonth = $expectedMonth > 0 ? min(100, round(($totalJurnalBulanIni / $expecte
                 <div class="grid grid-cols-2 gap-2 text-xs">
                     <?php 
                     foreach ($habits as $key => $habit) {
-                        if ($key === 'beribadah' && $isIslam) {
+                        if ($key === 'beribadah') {
                             foreach ($prayers as $pKey => $prayer) {
                                 $isDone = isset($done[$key . '|' . $pKey]);
                                 $color = $isDone ? 'text-emerald-600' : 'text-slate-400';
                                 $icon = $isDone ? 'fa-circle-check' : 'fa-clock';
                                 $label = $prayer['label'];
-                                echo "<div class='flex items-center gap-1.5 $color truncate' title='Sholat $label'><i class='fa-solid $icon'></i> <span class='truncate'>Sholat $label</span></div>";
+                                echo "<div class='flex items-center gap-1.5 $color truncate' title='$label'><i class='fa-solid $icon'></i> <span class='truncate'>$label</span></div>";
                             }
                         } else {
                             $isDone = isset($done[$key . '|']);
@@ -273,8 +371,9 @@ $pctMonth = $expectedMonth > 0 ? min(100, round(($totalJurnalBulanIni / $expecte
                 </div>
                 <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 flex items-center justify-between">
                     <div>
-                        <div class="text-[10px] text-blue-600 font-bold uppercase">Rata-rata Skor</div>
+                        <div class="text-[10px] text-blue-600 font-bold uppercase">Skor Akhir + Apresiasi</div>
                         <div class="text-lg font-black text-blue-900"><?= number_format($avgScoreBulanIni, 1) ?></div>
+                        <div class="text-[9px] text-blue-500 mt-1">Termasuk Bonus Tugas: <?= $bonusTugas > 0 ? "+".$bonusTugas : $bonusTugas ?> Poin (<?= $onTimeCount ?> Tepat, <?= $lateCount ?> Telat)</div>
                     </div>
                     <i class="fa-solid fa-star text-2xl text-blue-200"></i>
                 </div>
@@ -320,12 +419,24 @@ $pctMonth = $expectedMonth > 0 ? min(100, round(($totalJurnalBulanIni / $expecte
             </div>
             <button id="btnClose" class="w-9 h-9 rounded-full bg-slate-100 text-slate-600" type="button"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="rounded-2xl overflow-hidden bg-slate-900 aspect-square grid place-items-center">
+        <div class="relative rounded-2xl overflow-hidden bg-slate-900 aspect-square grid place-items-center">
             <video id="video" autoplay playsinline class="w-full h-full object-cover"></video>
             <img id="previewImg" class="w-full h-full object-cover hidden" alt="Preview selfie">
             <canvas id="canvas" class="hidden"></canvas>
+            <!-- Face Detection Overlay -->
+            <div id="faceOverlay" class="absolute inset-0 flex items-center justify-center pointer-events-none z-10 hidden">
+                <div id="faceBox" class="w-[65%] aspect-[3/4] rounded-[45%] border-[3px] border-dashed border-white/50 transition-all duration-300 flex flex-col items-center justify-center shadow-[0_0_0_999px_rgba(0,0,0,0.6)]">
+                   <div id="faceIcon" class="text-white/60 text-4xl mb-2 transition-colors duration-300"><i class="fa-solid fa-expand"></i></div>
+                   <div id="faceText" class="text-white text-[10px] font-bold text-center px-3 py-1 bg-black/40 rounded-full transition-colors duration-300 backdrop-blur-sm">Posisikan wajah di area ini</div>
+                </div>
+            </div>
         </div>
         <div id="modalMsg" class="text-xs text-slate-500 mt-3 min-h-5">Buka kamera, posisikan wajah, lalu ambil foto.</div>
+        
+        <div id="keteranganWrapper" class="hidden mt-3">
+            <textarea id="keterangan" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500" rows="2" placeholder="Isi detail kegiatan..."></textarea>
+        </div>
+
         <div class="grid grid-cols-2 gap-2 mt-3">
             <button id="btnCapture" class="rounded-xl bg-emerald-600 text-white font-black py-3" type="button"><i class="fa-solid fa-camera"></i> Ambil</button>
             <button id="btnSend" class="rounded-xl bg-slate-900 text-white font-black py-3 disabled:opacity-40" type="button" disabled><i class="fa-solid fa-paper-plane"></i> Kirim</button>
@@ -333,18 +444,18 @@ $pctMonth = $expectedMonth > 0 ? min(100, round(($totalJurnalBulanIni / $expecte
     </div>
 </div>
 
-<nav class="bottom-nav">
-    <a href="siswa.php" class="bnav-item"><i class="fas fa-home"></i><span class="bnav-label">Beranda</span></a>
-    <a href="presensi.php" class="bnav-item"><i class="fas fa-book-open"></i><span class="bnav-label">Studi</span></a>
-    <a href="../../pengumuman.php" class="bnav-item"><i class="far fa-bell"></i><span class="bnav-label">Notifikasi</span></a>
-    <a href="profil.php" class="bnav-item"><i class="far fa-user"></i><span class="bnav-label">Profil</span></a>
-</nav>
+<?php include 'siswa_footer.php'; ?>
+
 
 <script>
 let stream = null;
 let currentHabit = '';
 let currentPrayer = '';
 let photoData = '';
+let currentLat = '';
+let currentLng = '';
+const isIslam = <?= $isIslam ? 'true' : 'false' ?>;
+
 const modal = document.getElementById('cameraModal');
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
@@ -352,13 +463,141 @@ const previewImg = document.getElementById('previewImg');
 const modalTitle = document.getElementById('modalTitle');
 const modalMsg = document.getElementById('modalMsg');
 const btnSend = document.getElementById('btnSend');
+const keteranganWrapper = document.getElementById('keteranganWrapper');
+const keteranganInput = document.getElementById('keterangan');
+
+const faceBox = document.getElementById('faceBox');
+const faceIcon = document.getElementById('faceIcon');
+const faceText = document.getElementById('faceText');
+const faceOverlay = document.getElementById('faceOverlay');
+let isFaceApiLoaded = false;
+let faceDetectionInterval = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof faceapi === 'undefined') {
+        console.error('Face API script belum dimuat!');
+        return;
+    }
+    Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri('../../assets/models'),
+        faceapi.nets.faceLandmark68TinyNet.loadFromUri('../../assets/models')
+    ]).then(() => {
+        isFaceApiLoaded = true;
+        console.log('Face API Models Loaded');
+    }).catch(err => console.error('Gagal memuat model:', err));
+});
+
+async function startFaceDetection() {
+    if (!isFaceApiLoaded) return;
+    
+    const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 160, scoreThreshold: 0.5 });
+    
+    faceDetectionInterval = setInterval(async () => {
+        if (video.paused || video.ended || previewImg.classList.contains('hidden') === false) return;
+        
+        const detection = await faceapi.detectSingleFace(video, options).withFaceLandmarks(true);
+        
+        let isStrictValid = false;
+        let rejectReason = 'Posisikan mata, hidung, dan mulut tepat di area ini';
+        
+        if (detection && detection.landmarks && detection.detection.score > 0.55) {
+            const box = detection.detection.box;
+            const vw = video.videoWidth;
+            
+            // Wajah harus lumayan di tengah dan cukup besar
+            const isCentered = box.x > vw * 0.1 && (box.x + box.width) < vw * 0.9 && box.width > vw * 0.2;
+            
+            const leftEye = detection.landmarks.getLeftEye();
+            const rightEye = detection.landmarks.getRightEye();
+            const nose = detection.landmarks.getNose();
+            
+            if (leftEye && rightEye && nose) {
+                const lx = leftEye.reduce((s, p) => s + p.x, 0) / leftEye.length;
+                const rx = rightEye.reduce((s, p) => s + p.x, 0) / rightEye.length;
+                const nx = nose[nose.length - 1].x;
+                
+                const leftDist = Math.abs(nx - lx);
+                const rightDist = Math.abs(rx - nx);
+                
+                // Rasio tidak boleh terlalu besar (menghindari muka miring / noleh samping)
+                const ratio = Math.max(leftDist, rightDist) / (Math.min(leftDist, rightDist) || 1);
+                
+                if (!isCentered) {
+                    rejectReason = 'Wajah tidak berada di tengah!';
+                } else if (ratio >= 2.5) {
+                    rejectReason = 'Harap menghadap lurus ke depan!';
+                } else {
+                    isStrictValid = true;
+                }
+            }
+        }
+        
+        if (isStrictValid) {
+            faceBox.classList.replace('border-white/50', 'border-emerald-400');
+            faceBox.classList.replace('border-dashed', 'border-solid');
+            faceIcon.classList.replace('text-white/60', 'text-emerald-400');
+            faceText.textContent = 'Wajah (Mata, Hidung, Mulut) terdeteksi presisi. Silakan ambil foto.';
+            faceText.classList.replace('bg-black/40', 'bg-emerald-600/90');
+            
+            document.getElementById('btnCapture').disabled = false;
+            document.getElementById('btnCapture').classList.remove('opacity-50', 'pointer-events-none');
+        } else {
+            faceBox.classList.replace('border-emerald-400', 'border-white/50');
+            faceBox.classList.replace('border-solid', 'border-dashed');
+            faceIcon.classList.replace('text-emerald-400', 'text-white/60');
+            faceText.textContent = rejectReason;
+            faceText.classList.replace('bg-emerald-600/90', 'bg-black/40');
+            
+            document.getElementById('btnCapture').disabled = true;
+            document.getElementById('btnCapture').classList.add('opacity-50', 'pointer-events-none');
+        }
+    }, 200);
+}
+
+function stopFaceDetection() {
+    if (faceDetectionInterval) {
+        clearInterval(faceDetectionInterval);
+        faceDetectionInterval = null;
+    }
+}
+
 
 async function openCamera(btn) {
+    if (btn.classList.contains('done')) {
+        const title = btn.dataset.title || 'Jurnal';
+        let timeStr = 'hari ini';
+        const timeDiv = Array.from(btn.querySelectorAll('div')).find(el => el.textContent.includes('Terkirim'));
+        if (timeDiv) {
+            timeStr = timeDiv.textContent.replace('Terkirim ', 'pada jam ');
+        }
+        Swal.fire({
+            icon: 'info',
+            title: 'Sudah Diisi',
+            html: `<b>${title}</b> sudah diisi ${timeStr}.<br><br><span style="font-size:0.9em; color:#64748b;">Jurnal ini sifatnya hanya diisi sekali dalam sehari dan akan ter-reset otomatis besok.</span>`,
+            confirmButtonText: 'Tutup',
+            confirmButtonColor: '#059669'
+        });
+        return;
+    }
+
     currentHabit = btn.dataset.habit || '';
     currentPrayer = btn.dataset.prayer || '';
     photoData = '';
+    currentLat = '';
+    currentLng = '';
+    
     modalTitle.textContent = btn.dataset.title || 'Ambil Selfie';
     modalMsg.textContent = 'Mengaktifkan kamera...';
+    keteranganInput.value = '';
+    
+    // Show/Hide Keterangan Form
+    const needsKeterangan = ['bangun_pagi', 'berolahraga', 'makan_sehat', 'gemar_belajar', 'bermasyarakat'].includes(currentHabit) || (!isIslam && currentHabit === 'beribadah');
+    if (needsKeterangan) {
+        keteranganWrapper.classList.remove('hidden');
+    } else {
+        keteranganWrapper.classList.add('hidden');
+    }
+
     btnSend.disabled = true;
     previewImg.classList.add('hidden');
     video.classList.remove('hidden');
@@ -366,13 +605,31 @@ async function openCamera(btn) {
     try {
         stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
         video.srcObject = stream;
-        modalMsg.textContent = 'Posisikan wajah dan aktivitas terlihat jelas.';
+        document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-camera"></i> Ambil';
+        document.getElementById('btnCapture').disabled = true;
+        document.getElementById('btnCapture').classList.add('opacity-50', 'pointer-events-none');
+        faceOverlay.classList.remove('hidden');
+        
+        if (!isFaceApiLoaded) {
+            modalMsg.textContent = 'Memuat modul pendeteksi wajah... tunggu sebentar.';
+            const checkLoad = setInterval(() => {
+                if (isFaceApiLoaded) {
+                    clearInterval(checkLoad);
+                    modalMsg.textContent = 'Posisikan mata, hidung, dan mulut terlihat jelas.';
+                    startFaceDetection();
+                }
+            }, 500);
+        } else {
+            modalMsg.textContent = 'Posisikan mata, hidung, dan mulut terlihat jelas.';
+            startFaceDetection();
+        }
     } catch (err) {
         modalMsg.textContent = 'Kamera tidak dapat dibuka: ' + err.message;
     }
 }
 
 function closeCamera() {
+    stopFaceDetection();
     if (stream) {
         stream.getTracks().forEach(track => track.stop());
         stream = null;
@@ -381,6 +638,25 @@ function closeCamera() {
 }
 
 function capturePhoto() {
+    if (!previewImg.classList.contains('hidden')) {
+        // Mode: ULANGI FOTO
+        previewImg.classList.add('hidden');
+        video.classList.remove('hidden');
+        faceOverlay.classList.remove('hidden');
+        btnSend.disabled = true;
+        photoData = '';
+        
+        // Reset capture button to wait for face detection
+        const btnCapture = document.getElementById('btnCapture');
+        btnCapture.disabled = true;
+        btnCapture.classList.add('opacity-50', 'pointer-events-none');
+        btnCapture.innerHTML = '<i class="fa-solid fa-camera"></i> Ambil';
+        modalMsg.textContent = 'Posisikan mata, hidung, dan mulut terlihat jelas.';
+        
+        return; // Exit here so it goes back to detection mode
+    }
+
+    // Mode: AMBIL FOTO
     if (!video.videoWidth) {
         modalMsg.textContent = 'Kamera belum siap.';
         return;
@@ -397,8 +673,36 @@ function capturePhoto() {
     previewImg.src = photoData;
     previewImg.classList.remove('hidden');
     video.classList.add('hidden');
+    faceOverlay.classList.add('hidden'); // Sembunyikan bingkai setelah ambil foto
+    
+    document.getElementById('btnCapture').innerHTML = '<i class="fa-solid fa-rotate-left"></i> Ulangi';
+    document.getElementById('btnCapture').disabled = false;
+    document.getElementById('btnCapture').classList.remove('opacity-50', 'pointer-events-none');
+    
     btnSend.disabled = false;
     modalMsg.textContent = 'Foto siap dikirim. Ukuran sudah diperkecil.';
+
+    // Check GPS if needed
+    if (currentHabit === 'beribadah' && (currentPrayer === 'dzuhur' || currentPrayer === 'jumat')) {
+        modalMsg.textContent = 'Meminta akses lokasi untuk verifikasi mushola...';
+        btnSend.disabled = true;
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    currentLat = pos.coords.latitude;
+                    currentLng = pos.coords.longitude;
+                    modalMsg.textContent = 'Lokasi berhasil didapatkan. Siap dikirim.';
+                    btnSend.disabled = false;
+                },
+                err => {
+                    modalMsg.textContent = 'Akses lokasi ditolak. Ibadah ini membutuhkan verifikasi lokasi.';
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        } else {
+            modalMsg.textContent = 'Perangkat tidak mendukung GPS.';
+        }
+    }
 }
 
 async function sendJournal() {
@@ -406,12 +710,31 @@ async function sendJournal() {
         modalMsg.textContent = 'Ambil foto terlebih dahulu.';
         return;
     }
+    
+    if (!keteranganWrapper.classList.contains('hidden')) {
+        const ket = keteranganInput.value.trim();
+        if (!ket) {
+            Swal.fire({ icon: 'warning', title: 'Belum Diisi', text: 'Keterangan kegiatan harus diisi terlebih dahulu.', confirmButtonColor: '#059669' });
+            return;
+        }
+        const words = ket.split(/\s+/).filter(w => w.length > 0);
+        // User requested minimum 1 word, which is handled by !ket check above.
+        // No further word count checking needed.
+    }
+
     btnSend.disabled = true;
     modalMsg.textContent = 'Mengirim jurnal...';
     const form = new FormData();
     form.append('habit_key', currentHabit);
     form.append('prayer_key', currentPrayer);
     form.append('photo_data', photoData);
+    if (!keteranganWrapper.classList.contains('hidden')) {
+        form.append('keterangan', keteranganInput.value);
+    }
+    if (currentLat && currentLng) {
+        form.append('lat', currentLat);
+        form.append('lng', currentLng);
+    }
     try {
         const res = await fetch('../../api/jurnal_7kih_save.php', { method: 'POST', body: form });
         const json = await res.json();

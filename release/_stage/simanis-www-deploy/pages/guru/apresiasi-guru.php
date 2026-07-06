@@ -463,7 +463,7 @@ if (!empty($rows)) {
 <body>
 <main class="shell">
     <section class="hero">
-        <a href="guru_2026"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+        <a href="../../home.php"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
         <h1 class="mt-3 mb-2">Apresiasi Guru</h1>
         <p class="mb-0 text-white-50">Skor apresiasi berbasis jurnal tepat jadwal, penilaian, absensi kelas, ketepatan hadir, dan bonus wali kelas.</p>
     </section>
@@ -576,7 +576,7 @@ if (!empty($rows)) {
 </main>
 
 <nav class="mobile-nav">
-    <a href="guru_legacy"><i class="bi bi-house-door"></i><span>Beranda</span></a>
+    <a href="../../home.php"><i class="bi bi-house-door"></i><span>Beranda</span></a>
     <a href="laporan-kelas"><i class="bi bi-bar-chart"></i><span>Laporan</span></a>
     <a href="apresiasi-guru" style="color:#0f766e;"><i class="bi bi-award"></i><span>Apresiasi</span></a>
     <a href="profil-guru"><i class="bi bi-person"></i><span>Profil</span></a>

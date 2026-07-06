@@ -6,6 +6,7 @@
  */
 
 require_once __DIR__ . '/bootstrap.php';
+require_admin();
 
 echo "<h2>🧪 Router Test</h2>";
 echo "<hr>";

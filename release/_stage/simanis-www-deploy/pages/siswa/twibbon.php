@@ -573,12 +573,8 @@ $baseUrl = $proto . '://' . ($_SERVER['HTTP_HOST'] ?? '') . $appBase . '/pages/s
 <div id="toast"></div>
 
 <!-- Bottom Nav -->
-<nav class="bottom-nav">
-  <a href="siswa.php" class="bnav-item"><i class="fas fa-home"></i><span class="bnav-label">Beranda</span></a>
-  <a href="presensi.php" class="bnav-item"><i class="fas fa-book-open"></i><span class="bnav-label">Studi</span></a>
-  <a href="../../pengumuman.php" class="bnav-item"><i class="far fa-bell"></i><span class="bnav-label">Notifikasi</span></a>
-  <a href="profil.php" class="bnav-item"><i class="far fa-user"></i><span class="bnav-label">Profil</span></a>
-</nav>
+<?php include 'siswa_footer.php'; ?>
+
 
 <script>
 const CANVAS_SIZE = 1080;

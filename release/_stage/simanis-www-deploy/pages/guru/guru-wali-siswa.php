@@ -103,7 +103,7 @@ while ($qBinaan && ($row = mysqli_fetch_assoc($qBinaan))) {
             <h1 class="h4 fw-bold mb-1">Tambah Siswa Binaan</h1>
             <p class="text-muted mb-0 small">Pilih kelas dan siswa yang menjadi binaan pribadi Anda.</p>
         </div>
-        <a class="btn btn-outline-secondary rounded-pill fw-bold" href="guru_legacy"><i class="bi bi-arrow-left"></i> Dashboard</a>
+        <a class="btn btn-outline-secondary rounded-pill fw-bold" href="../../home.php"><i class="bi bi-arrow-left"></i> Dashboard</a>
     </section>
 
     <?php if ($message !== ''): ?>

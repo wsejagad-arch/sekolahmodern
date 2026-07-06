@@ -1,6 +1,17 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/nocache.php';
 require_once __DIR__ . '/google_auth.php';
+
+// Redirect if already logged in
+if (isset($_SESSION['username']) && (is_admin() || is_guru() || is_siswa())) {
+    header('Location: home.php');
+    exit;
+} elseif (isset($_SESSION['username']) && is_admin_pusat()) {
+    header('Location: admin-pusat.php');
+    exit;
+}
+
 
 function login_page_data_lembaga(): array
 {
@@ -96,31 +107,21 @@ $googleErrorMessages = [
 
         body {
             margin: 0;
+            padding: 0;
             min-height: 100vh;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #0b0f19;
-            background-attachment: fixed;
+            font-family: 'Nunito', 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--panel);
             color: var(--text);
             overflow-x: hidden;
         }
 
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1.5px, transparent 1.5px);
-            background-size: 28px 28px;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* Ambient Glow Blobs Styling */
+        /* Ambient Glow Blobs Styling for Hero Panel */
         .ambient-glow {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
             pointer-events: none;
             z-index: 0;
@@ -129,137 +130,109 @@ $googleErrorMessages = [
         .blob {
             position: absolute;
             border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.15;
+            filter: blur(80px);
+            opacity: 0.5;
             mix-blend-mode: screen;
-            animation: float-blob 25s infinite alternate ease-in-out;
+            animation: float-blob 20s infinite alternate ease-in-out;
         }
 
         .blob-1 {
             top: -10%;
             left: -10%;
-            width: 50vw;
-            height: 50vh;
-            background: radial-gradient(circle, #4F46E5 0%, transparent 70%);
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #10B981 0%, transparent 70%);
         }
 
         .blob-2 {
             bottom: -10%;
             right: -10%;
-            width: 60vw;
-            height: 60vh;
-            background: radial-gradient(circle, #7C3AED 0%, transparent 70%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #059669 0%, transparent 70%);
             animation-delay: -5s;
-            animation-duration: 30s;
+            animation-duration: 25s;
         }
 
         .blob-3 {
             top: 40%;
             left: 30%;
-            width: 40vw;
-            height: 40vh;
-            background: radial-gradient(circle, #10B981 0%, transparent 70%);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #34D399 0%, transparent 70%);
             animation-delay: -10s;
-            animation-duration: 20s;
+            animation-duration: 15s;
         }
 
         @keyframes float-blob {
-            0% {
-                transform: translate(0, 0) scale(1);
-            }
-            50% {
-                transform: translate(5%, 10%) scale(1.1);
-            }
-            100% {
-                transform: translate(-5%, -5%) scale(0.9);
-            }
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(5%, 10%) scale(1.1); }
+            100% { transform: translate(-5%, -5%) scale(0.9); }
         }
 
         .page-shell {
-            min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .login-shell {
-            width: min(100%, 1060px);
-            display: grid;
-            grid-template-columns: 1.05fr 1fr;
-            border-radius: 28px;
-            overflow: hidden;
-            background: rgba(255, 255, 255, .07);
-            border: 1px solid rgba(255, 255, 255, .12);
-            box-shadow: 0 30px 90px rgba(0, 0, 0, .34);
-            backdrop-filter: blur(18px);
+            min-height: 100vh;
+            width: 100vw;
         }
 
         .hero-panel {
-            padding: 42px;
-            background:
-                radial-gradient(circle at top left, rgba(255, 255, 255, .14), transparent 40%),
-                linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
-            color: white;
+            flex: 1.2;
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
             position: relative;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
+            color: #fff;
+            padding: 40px;
+            overflow: hidden;
         }
 
-        .hero-panel::after {
-            content: "";
-            position: absolute;
-            width: 220px;
-            height: 220px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, .08);
-            top: -70px;
-            right: -60px;
-            z-index: 1;
+        /* Glassmorphism card inside hero */
+        .hero-content {
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 50px 40px;
+            border-radius: 30px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 480px;
+            width: 100%;
         }
 
         .hero-panel::before {
             content: "";
             position: absolute;
-            width: 160px;
-            height: 160px;
-            border-radius: 36px;
-            background: rgba(255, 255, 255, .06);
-            bottom: -40px;
-            left: -40px;
-            transform: rotate(18deg);
+            inset: 0;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
             z-index: 1;
         }
 
-        .hero-brand {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            z-index: 2;
-        }
-
         .brand-mark {
-            width: 110px;
-            height: 110px;
+            width: 120px;
+            height: 120px;
             border-radius: 28px;
             background: #ffffff;
             display: grid;
             place-items: center;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-            padding: 12px;
-            transition: transform 0.3s ease;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            margin-bottom: 25px;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .brand-mark:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px) scale(1.05);
         }
 
         .brand-mark img {
@@ -270,52 +243,63 @@ $googleErrorMessages = [
 
         .brand-title {
             margin: 0;
-            font-size: clamp(2rem, 4vw, 2.5rem);
+            font-size: clamp(2rem, 3.5vw, 2.8rem);
             font-weight: 900;
             letter-spacing: .05em;
-            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(to right, #fff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .brand-subtitle {
-            margin: 10px 0 0;
-            color: rgba(255, 255, 255, .9);
-            font-size: 1rem;
+            margin: 15px 0 0;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1.05rem;
             line-height: 1.6;
-            max-width: 360px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
         .form-panel {
-            padding: 42px;
+            flex: 1;
             background: #ffffff;
-            color: #1e293b;
-        }
-
-        .form-card {
-            height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
+            padding: 40px;
+            position: relative;
+            z-index: 5;
+            box-shadow: -20px 0 40px rgba(0,0,0,0.05);
+        }
+
+        .form-card {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .form-heading {
+            margin-bottom: 35px;
         }
 
         .form-heading h2 {
             margin: 0;
-            font-size: 1.85rem;
+            font-size: 2.2rem;
             font-weight: 900;
+            color: #0f172a;
         }
 
         .form-heading p {
-            margin: 8px 0 0;
+            margin: 10px 0 0;
             color: #64748b;
             line-height: 1.6;
+            font-size: 1.05rem;
         }
 
         .alert {
             border: none;
             border-radius: 16px;
-            padding: 14px 16px;
+            padding: 16px 20px;
             font-weight: 600;
+            margin-bottom: 25px;
         }
 
         .alert-danger {
@@ -329,13 +313,15 @@ $googleErrorMessages = [
         }
 
         .form-group {
-            margin-top: 16px;
+            margin-bottom: 22px;
         }
 
         .form-label {
             font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 8px;
+            color: #1e293b;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 0.95rem;
         }
 
         .input-wrap {
@@ -344,229 +330,208 @@ $googleErrorMessages = [
 
         .input-icon {
             position: absolute;
-            left: 14px;
+            left: 18px;
             top: 50%;
             transform: translateY(-50%);
             color: #94a3b8;
+            font-size: 1.2rem;
             pointer-events: none;
+            transition: color 0.3s ease;
         }
 
         .form-control {
             width: 100%;
-            min-height: 56px;
-            border: 1px solid #dbe3ef;
-            border-radius: 16px;
-            background: var(--input);
-            padding: 12px 16px 12px 46px;
-            font-size: 1rem;
-            transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+            min-height: 60px;
+            border: 2px solid #e2e8f0;
+            border-radius: 18px;
+            background: #f8fafc;
+            padding: 12px 20px 12px 52px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #0f172a;
+            transition: all 0.3s ease;
         }
 
         .form-control:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: #fff;
+            box-shadow: 0 0 0 5px rgba(79, 70, 229, 0.1);
             outline: 0;
+        }
+
+        .form-control:focus + .input-icon,
+        .input-wrap:focus-within .input-icon {
+            color: var(--primary);
         }
 
         .password-toggle {
             position: absolute;
-            right: 12px;
+            right: 18px;
             top: 50%;
             transform: translateY(-50%);
             border: 0;
             background: transparent;
-            color: #0f766e;
-            font-size: 1.1rem;
+            color: #64748b;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
         }
 
         .submit-btn {
             width: 100%;
-            margin-top: 24px;
-            min-height: 56px;
+            margin-top: 15px;
+            min-height: 60px;
             border: 0;
-            border-radius: 16px;
+            border-radius: 18px;
             font-weight: 800;
-            font-size: 1rem;
+            font-size: 1.1rem;
             letter-spacing: .02em;
             color: #fff;
             background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
-            box-shadow: 0 10px 30px var(--primary-glow);
+            box-shadow: 0 10px 25px var(--primary-glow);
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .submit-btn:hover {
-            filter: brightness(1.03);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(79, 70, 229, 0.5);
         }
 
-        .google-btn {
-            width: 100%;
-            margin-top: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 13px 18px;
-            background: #ffffff;
-            color: #0f172a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            text-decoration: none;
-            font-weight: 800;
-        }
-
-        .google-btn:hover {
-            background: #f8fafc;
-            color: #0f172a;
-        }
-
-        .google-btn:disabled,
-        .google-btn-disabled {
-            cursor: not-allowed;
-            opacity: .65;
-        }
-
-        .google-dot {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            display: inline-grid;
-            place-items: center;
-            color: #ffffff;
-            background: conic-gradient(#4285f4 0 25%, #34a853 0 50%, #fbbc05 0 75%, #ea4335 0);
-            font-weight: 900;
-            font-size: .8rem;
+        .submit-btn:active {
+            transform: translateY(0);
         }
 
         .footer-note {
-            margin-top: 18px;
-            color: #64748b;
-            font-size: .85rem;
+            margin-top: 35px;
+            color: #94a3b8;
+            font-size: 0.9rem;
             text-align: center;
+            font-weight: 500;
         }
 
-        @media (max-width: 900px) {
-            .login-shell {
-                grid-template-columns: 1fr;
-            }
-
-            .hero-panel,
-            .form-panel {
-                padding: 28px 22px;
-            }
-        }
-
-        @media (max-width: 576px) {
+        @media (max-width: 992px) {
             .page-shell {
-                padding: 14px;
-                position: relative;
-                z-index: 2;
+                flex-direction: column;
             }
-
-            .hero-brand {
-                gap: 12px;
+            .hero-panel {
+                flex: none;
+                padding: 60px 20px;
+                border-radius: 0 0 40px 40px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             }
-
+            .hero-content {
+                padding: 40px 30px;
+                box-shadow: none;
+                background: transparent;
+                border: none;
+                backdrop-filter: none;
+            }
+            .form-panel {
+                padding: 50px 20px;
+                box-shadow: none;
+            }
             .brand-mark {
-                width: 80px;
-                height: 80px;
-                border-radius: 20px;
-                padding: 8px;
+                width: 90px;
+                height: 90px;
+                padding: 12px;
+                margin-bottom: 20px;
             }
-
-            .brand-title,
+            .brand-title {
+                font-size: 2.2rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero-panel {
+                padding: 40px 15px;
+                border-radius: 0 0 30px 30px;
+            }
+            .hero-content {
+                padding: 20px 10px;
+            }
+            .form-panel {
+                padding: 40px 15px;
+            }
             .form-heading h2 {
-                font-size: 1.35rem;
+                font-size: 1.8rem;
             }
-
-            .form-control,
-            .submit-btn {
-                min-height: 52px;
-                border-radius: 14px;
+            .form-control, .submit-btn {
+                min-height: 55px;
             }
         }
     </style>
 </head>
 
 <body>
-    <!-- Ambient Glow Blobs Background -->
-    <div class="ambient-glow">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
     <div class="page-shell">
-        <section class="login-shell">
-            <aside class="hero-panel">
-                <div class="hero-brand">
-                    <div class="brand-mark">
-                        <img src="img/<?= htmlspecialchars($logoFile); ?>" alt="Logo <?= htmlspecialchars($lembaga['nama_aplikasi']); ?>">
-                    </div>
-                    <div>
-                        <h1 class="brand-title"><?= htmlspecialchars($lembaga['nama_aplikasi']); ?></h1>
-                        <p class="brand-subtitle">
-                            <span style="font-size: 0.9rem; opacity: 0.8; font-weight: 500; display: block; margin-bottom: 4px;">Sistem Informasi Manajemen Akademik</span>
-                            <span style="font-weight: 800; font-size: 1.15rem; display: block; letter-spacing: 0.02em; text-transform: uppercase;"><?= htmlspecialchars($lembaga['nmsekolah']); ?></span>
-                        </p>
-                    </div>
+        <!-- Panel Kiri: Hero Banner -->
+        <aside class="hero-panel">
+            <div class="ambient-glow">
+                <div class="blob blob-1"></div>
+                <div class="blob blob-2"></div>
+                <div class="blob blob-3"></div>
+            </div>
+            <div class="hero-content">
+                <div class="brand-mark">
+                    <img src="img/<?= htmlspecialchars($logoFile); ?>" alt="Logo <?= htmlspecialchars($lembaga['nama_aplikasi']); ?>">
                 </div>
-            </aside>
+                <h1 class="brand-title"><?= htmlspecialchars($lembaga['nama_aplikasi']); ?></h1>
+                <p class="brand-subtitle">
+                    <span style="font-size: 0.95rem; opacity: 0.9; font-weight: 500; display: block; margin-bottom: 6px;">Sistem Informasi Manajemen Akademik</span>
+                    <span style="font-weight: 800; font-size: 1.25rem; display: block; letter-spacing: 0.03em; text-transform: uppercase; color: #fff;"><?= htmlspecialchars($lembaga['nmsekolah']); ?></span>
+                </p>
+            </div>
+        </aside>
 
-            <section class="form-panel">
-                <div class="form-card">
-                    <div class="form-heading">
-                        <h2>Masuk</h2>
-                        <p>Masukkan NPSN sekolah, username, dan password Anda untuk melanjutkan.</p>
+        <!-- Panel Kanan: Form Login -->
+        <section class="form-panel">
+            <div class="form-card">
+
+
+                <?php if (isset($_GET['haruslogin'])): ?>
+                    <div class="alert alert-danger">Silakan login terlebih dahulu untuk melanjutkan.</div>
+                <?php elseif (isset($_GET['db_error'])): ?>
+                    <div class="alert alert-danger">Database tidak tersambung. Jalankan server dengan PHP XAMPP, lalu coba login lagi.</div>
+                <?php elseif (isset($_GET['gagallogin'])): ?>
+                    <div class="alert alert-danger">Username atau password tidak sesuai.</div>
+                <?php elseif (isset($_GET['google_error'])): ?>
+                    <div class="alert alert-danger"><?= htmlspecialchars($googleErrorMessages[$_GET['google_error']] ?? 'Login Gmail gagal.'); ?></div>
+                <?php elseif (isset($_GET['logout'])): ?>
+                    <div class="alert alert-success">Anda berhasil logout.</div>
+                <?php endif; ?>
+
+                <form method="post" action="login_action.php">
+                    <input type="hidden" name="hak_akses" value="auto">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(generate_csrf_token()); ?>">
+                    <input type="hidden" id="kode_sekolah" name="kode_sekolah" value="<?= htmlspecialchars($_GET['kode'] ?? 'DEFAULT'); ?>">
+
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username / NIP / NIS</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-person input-icon"></i>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Ketikkan username Anda" required autocomplete="username">
+                        </div>
                     </div>
 
-                    <?php if (isset($_GET['haruslogin'])): ?>
-                        <div class="alert alert-danger mt-4">Silakan login terlebih dahulu untuk melanjutkan.</div>
-                    <?php elseif (isset($_GET['db_error'])): ?>
-                        <div class="alert alert-danger mt-4">Database tidak tersambung. Jalankan server dengan PHP XAMPP, lalu coba login lagi.</div>
-                    <?php elseif (isset($_GET['gagallogin'])): ?>
-                        <div class="alert alert-danger mt-4">Username atau password tidak sesuai.</div>
-                    <?php elseif (isset($_GET['google_error'])): ?>
-                        <div class="alert alert-danger mt-4"><?= htmlspecialchars($googleErrorMessages[$_GET['google_error']] ?? 'Login Gmail gagal.'); ?></div>
-                    <?php elseif (isset($_GET['logout'])): ?>
-                        <div class="alert alert-success mt-4">Anda berhasil logout.</div>
-                    <?php endif; ?>
-
-                    <form method="post" action="login_action.php" class="mt-3">
-                        <input type="hidden" name="hak_akses" value="auto">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(generate_csrf_token()); ?>">
-
-                        <div class="form-group">
-                            <label class="form-label" for="kode_sekolah">NPSN Sekolah</label>
-                            <div class="input-wrap">
-                                <i class="bi bi-building input-icon"></i>
-                                <input type="text" class="form-control" id="kode_sekolah" name="kode_sekolah" placeholder="Masukkan NPSN sekolah" value="<?= htmlspecialchars($_GET['kode'] ?? 'DEFAULT'); ?>" required autocomplete="organization">
-                            </div>
+                    <div class="form-group">
+                        <label class="form-label" for="password">Password</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-lock input-icon"></i>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Ketikkan password Anda" required autocomplete="current-password">
+                            <button type="button" class="password-toggle" id="togglePassword" aria-label="Tampilkan password"><i class="bi bi-eye"></i></button>
                         </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="username">Username / NIP / NIS</label>
-                            <div class="input-wrap">
-                                <i class="bi bi-person input-icon"></i>
-                                <input type="text" class="form-control" id="username" name="username" placeholder="Masukkan username" required autocomplete="username">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="password">Password</label>
-                            <div class="input-wrap">
-                                <i class="bi bi-lock input-icon"></i>
-                                <input type="password" class="form-control" id="password" name="password" placeholder="Masukkan password" required autocomplete="current-password">
-                                <button type="button" class="password-toggle" id="togglePassword" aria-label="Tampilkan password"><i class="bi bi-eye"></i></button>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="submit-btn">Masuk Sekarang</button>
-                    </form>
-                    <div class="text-center mt-3">
-                        <a href="daftar-sekolah.php" class="text-decoration-none fw-semibold">Daftarkan sekolah baru</a>
                     </div>
 
-                    <div class="footer-note">© <?= date('Y'); ?> <?= htmlspecialchars($lembaga['nama_aplikasi']); ?></div>
-                </div>
-            </section>
+                    <button type="submit" class="submit-btn">Masuk Sekarang</button>
+                </form>
+
+                <div class="footer-note">© <?= date('Y'); ?> <?= htmlspecialchars($lembaga['nama_aplikasi']); ?> - Hak Cipta Dilindungi</div>
+            </div>
         </section>
     </div>
 

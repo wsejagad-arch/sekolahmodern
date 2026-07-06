@@ -20,6 +20,14 @@ $_chkBK = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'is_guru_bk'");
 if ($_chkBK && mysqli_num_rows($_chkBK) === 0) {
   @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN is_guru_bk TINYINT(1) NOT NULL DEFAULT 0 AFTER status");
 }
+$_chkLit = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'is_pendamping_literasi'");
+if ($_chkLit && mysqli_num_rows($_chkLit) === 0) {
+  @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN is_pendamping_literasi TINYINT(1) NOT NULL DEFAULT 0 AFTER is_guru_bk");
+}
+$_chkAduan = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'is_tim_aduan'");
+if ($_chkAduan && mysqli_num_rows($_chkAduan) === 0) {
+  @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN is_tim_aduan TINYINT(1) NOT NULL DEFAULT 0 AFTER is_pendamping_literasi");
+}
 $_chkJabatan = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'jabatan'");
 if ($_chkJabatan && mysqli_num_rows($_chkJabatan) === 0) {
   @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN jabatan VARCHAR(100) DEFAULT NULL AFTER status_kepegawaian");
@@ -35,8 +43,12 @@ if (isset($_POST['submit'])) {
   $status_kepegawaian = mysqli_real_escape_string($conn, $_POST['status_kepegawaian']);
   $jabatan          = mysqli_real_escape_string($conn, trim(isset($_POST['jabatan']) ? $_POST['jabatan'] : ''));
   $is_guru_bk       = isset($_POST['is_guru_bk']) ? 1 : 0;
+  $is_pendamping_literasi = isset($_POST['is_pendamping_literasi']) ? 1 : 0;
+  $is_tim_aduan       = isset($_POST['is_tim_aduan']) ? 1 : 0;
+  $id_kelas_wali    = isset($_POST['wali_kelas']) ? (int)$_POST['wali_kelas'] : 0;
+  $walas_status     = ($id_kelas_wali > 0) ? 'Ya' : 'Tidak';
   $status           = mysqli_real_escape_string($conn, $_POST['status_keaktifan']);
-  $akses            = $_POST['hak_akses'];
+  $akses            = isset($_POST['is_admin']) ? '1' : '2';
   $tglskr           = date('Y-m-d H:i:s');
   $namafile         = $_FILES['file']['name'];
   $ukuranFile       = $_FILES['file']['size'];
@@ -47,9 +59,21 @@ if (isset($_POST['submit'])) {
   $cek = cek_guru($nip);
   if ($cek == True && $error != UPLOAD_ERR_NO_FILE) {
     $cekfoto = cek_foto($namafile);
-    mysqli_query($conn, "INSERT INTO tbl_guru(no_induk, nama_guru, no_wa, status_kepegawaian, jabatan, is_guru_bk, foto, status) VALUES('$nip','$nami','$no_wa','$status_kepegawaian','$jabatan',$is_guru_bk,'$cekfoto','$status')");
+    $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
+    
+    mysqli_query($conn, "INSERT INTO tbl_guru(no_induk, nama_guru, no_wa, status_kepegawaian, jabatan, is_guru_bk, is_pendamping_literasi, is_tim_aduan, walas, foto, status) VALUES('$nip','$nami','$no_wa','$status_kepegawaian','$jabatan',$is_guru_bk,$is_pendamping_literasi,$is_tim_aduan,'$walas_status','$cekfoto','$status')");
     move_uploaded_file($tmpName, 'foto/' . $cekfoto);
     mysqli_query($conn, "INSERT INTO tbl_pengguna(no_induk, password, hak_akses) VALUES('$nip','$hashnip','$akses')");
+    
+    // --- SINKRONISASI WALI KELAS ---
+    if ($id_kelas_wali > 0) {
+        mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
+        $tgl_now = date('Y-m-d H:i:s');
+        mysqli_query($conn, "INSERT INTO tbl_wali_kelas(id_kelas, nip_wali, nama_wali, id_sekolah, created_at, updated_at) VALUES($id_kelas_wali, '$nip', '$nami', $tenantId, '$tgl_now', '$tgl_now')");
+        mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas='$nami', nip_wali='$nip' WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
+    }
+    // -------------------------------
+    
     mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr','$isilog')");
   ?>
     <script>
@@ -65,8 +89,20 @@ if (isset($_POST['submit'])) {
         });
     </script>
   <?php } else if ($cek == True && $error === UPLOAD_ERR_NO_FILE) {
-    mysqli_query($conn, "INSERT INTO tbl_guru(no_induk, nama_guru, no_wa, status_kepegawaian, jabatan, is_guru_bk, status) VALUES('$nip','$nami','$no_wa','$status_kepegawaian','$jabatan',$is_guru_bk,'$status')");
+    $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
+    
+    mysqli_query($conn, "INSERT INTO tbl_guru(no_induk, nama_guru, no_wa, status_kepegawaian, jabatan, is_guru_bk, is_pendamping_literasi, is_tim_aduan, walas, status) VALUES('$nip','$nami','$no_wa','$status_kepegawaian','$jabatan',$is_guru_bk,$is_pendamping_literasi,$is_tim_aduan,'$walas_status','$status')");
     mysqli_query($conn, "INSERT INTO tbl_pengguna(no_induk, password, hak_akses) VALUES('$nip','$hashnip','$akses')");
+    
+    // --- SINKRONISASI WALI KELAS ---
+    if ($id_kelas_wali > 0) {
+        mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
+        $tgl_now = date('Y-m-d H:i:s');
+        mysqli_query($conn, "INSERT INTO tbl_wali_kelas(id_kelas, nip_wali, nama_wali, id_sekolah, created_at, updated_at) VALUES($id_kelas_wali, '$nip', '$nami', $tenantId, '$tgl_now', '$tgl_now')");
+        mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas='$nami', nip_wali='$nip' WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
+    }
+    // -------------------------------
+    
     mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr','$isilog')");
   ?>
     <script>
@@ -89,7 +125,6 @@ if (isset($_POST['submit'])) {
 }
 ?>
 
-<!-- Begin Page Content -->
 <div class="container-fluid">
 
   <!-- Modern Page Header -->
@@ -187,6 +222,27 @@ if (isset($_POST['submit'])) {
                       <small class="text-muted d-block">Bimbingan Konseling — dapat memvalidasi izin siswa</small>
                     </label>
                   </div>
+                  <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" name="is_pendamping_literasi" value="1" id="is_pendamping_literasi">
+                    <label class="form-check-label" for="is_pendamping_literasi">
+                      <strong>Pendamping Literasi</strong>
+                      <small class="text-muted d-block">Dapat mengatur kelas & memberi tugas literasi</small>
+                    </label>
+                  </div>
+                  <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" name="is_tim_aduan" value="1" id="is_tim_aduan">
+                    <label class="form-check-label" for="is_tim_aduan">
+                      <strong>Tim Aduan</strong>
+                      <small class="text-muted d-block">Koordinasi aduan — menerima notifikasi aduan siswa</small>
+                    </label>
+                  </div>
+                  <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" name="is_admin" value="1" id="is_admin">
+                    <label class="form-check-label" for="is_admin">
+                      <strong>Admin</strong>
+                      <small class="text-muted d-block">Jadikan Admin — memiliki akses penuh ke dashboard admin</small>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -218,8 +274,11 @@ if (isset($_POST['submit'])) {
                     <option value="WKS Kurikulum">WKS Kurikulum</option>
                     <option value="Tim WKS Kurikulum">Tim WKS Kurikulum</option>
                     <option value="WKS Kesiswaan">WKS Kesiswaan</option>
+                    <option value="Tim WKS Kesiswaan">Tim WKS Kesiswaan</option>
                     <option value="WKS Humas">WKS Humas</option>
+                    <option value="Tim WKS Humas">Tim WKS Humas</option>
                     <option value="WKS Sarpras">WKS Sarpras</option>
+                    <option value="Tim WKS Sarpras">Tim WKS Sarpras</option>
                     <option value="STPKS">STPKS</option>
                     <option value="Kepala Sekolah">Kepala Sekolah</option>
                   </select>
@@ -237,6 +296,26 @@ if (isset($_POST['submit'])) {
                     <option value="Non-Aktif">Non-Aktif</option>
                   </select>
                   <div class="invalid-feedback">Harap pilih status keaktifan</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="wali_kelas" class="form-label font-weight-bold text-dark mb-2">
+                    <i class="fas fa-chalkboard-teacher text-info me-2"></i>Wali Kelas
+                  </label>
+                  <select class="form-control" name="wali_kelas" id="wali_kelas"
+                    style="border-radius: 10px; padding: 10px 16px; border: 2px solid #e9ecef;">
+                    <option value="">-- Tidak Menjabat --</option>
+                    <?php
+                    $sqlKelas = "SELECT id_kelas, kelas FROM tbl_kelas ORDER BY kelas ASC";
+                    $resultKelas = mysqli_query($conn, $sqlKelas);
+                    while ($dataKelas = mysqli_fetch_array($resultKelas)) {
+                    ?>
+                        <option value="<?= $dataKelas['id_kelas']; ?>">
+                            <?= htmlspecialchars($dataKelas['kelas']); ?>
+                        </option>
+                    <?php } ?>
+                  </select>
                 </div>
               </div>
             </div>
@@ -366,12 +445,14 @@ if (isset($_POST['submit'])) {
     }
   }
 
+  // Clear photo
   function clearPhoto() {
     document.getElementById('file').value = '';
     document.getElementById('uploadContent').style.display = 'block';
     document.getElementById('photoPreview').style.display = 'none';
   }
 
+  // Reset form
   function resetForm() {
     clearPhoto();
     document.getElementById('formGuru').reset();

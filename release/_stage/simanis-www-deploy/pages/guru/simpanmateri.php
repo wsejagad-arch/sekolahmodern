@@ -3,6 +3,7 @@
 
 include "../../koneksi.php";
 include "../../functions.php";
+require_once "../../notification_helper.php";
 
 $tanggal    = mysqli_real_escape_string($conn, $_POST['tanggal']);
 $nip        = mysqli_real_escape_string($conn, $_POST['nip']);
@@ -123,13 +124,21 @@ foreach ($absenData as $no_induk => $status) {
                                  AND tanggal='$tanggal' 
                                  AND kelas='$kelas'
                                  AND id_mapel='$idmapel'");
-            if (!$update_result) {
+            if ($update_result) {
+                if (function_exists('notif_trigger_presensi')) {
+                    notif_trigger_presensi($conn, $no_induk_escaped, $status, $tanggal . ' ' . date('H:i:s'));
+                }
+            } else {
                 error_log("Error updating attendance for student $no_induk: " . mysqli_error($conn));
             }
         } else {
             $insert_result = mysqli_query($conn, "INSERT INTO tbl_absen (tanggal,kelas,id_mapel,no_induk_guru,no_induk,status) 
                                  VALUES ('$tanggal','$kelas','$idmapel','$nip','$no_induk_escaped','$status')");
-            if (!$insert_result) {
+            if ($insert_result) {
+                if (function_exists('notif_trigger_presensi')) {
+                    notif_trigger_presensi($conn, $no_induk_escaped, $status, $tanggal . ' ' . date('H:i:s'));
+                }
+            } else {
                 error_log("Error inserting attendance for student $no_induk: " . mysqli_error($conn));
             }
         }
@@ -140,6 +149,9 @@ foreach ($absenData as $no_induk => $status) {
 $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
 if($sql) { 
+    if (function_exists('notif_trigger_jurnal')) {
+        notif_trigger_jurnal($conn, $nip, $idmapel, $tanggal, $materi, $kegiatan);
+    }
     if ($error === UPLOAD_ERR_OK && !empty($cekfoto) && is_uploaded_file($tmpName)) {
         @move_uploaded_file($tmpName, '../../file_materi/'. $cekfoto);
     }

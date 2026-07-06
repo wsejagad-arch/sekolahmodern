@@ -93,12 +93,19 @@ if (empty($tahunList)) $tahunList = [$tahunAwal];
 
   <!-- Header gradient -->
   <div class="bg-gradient-to-r from-red-600 to-rose-500 text-white px-4 pt-10 pb-16">
-    <div class="max-w-2xl mx-auto">
-      <a href="siswa.php" class="flex items-center gap-1 text-red-100 hover:text-white text-sm mb-4 transition">
-        <i class="fas fa-arrow-left"></i> Kembali
-      </a>
-      <h1 class="text-2xl font-bold"><i class="fas fa-exclamation-triangle mr-2"></i>Riwayat Pelanggaran</h1>
-      <p class="text-red-200 text-sm mt-1"><?= htmlspecialchars($namaSiswa) ?> &middot; Kelas <?= htmlspecialchars($kelas) ?></p>
+    <div class="max-w-2xl mx-auto flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+      <div>
+        <a href="siswa.php" class="flex items-center gap-1 text-red-100 hover:text-white text-sm mb-4 transition">
+          <i class="fas fa-arrow-left"></i> Kembali
+        </a>
+        <h1 class="text-2xl font-bold"><i class="fas fa-exclamation-triangle mr-2"></i>Riwayat Pelanggaran</h1>
+        <p class="text-red-200 text-sm mt-1"><?= htmlspecialchars($namaSiswa) ?> &middot; Kelas <?= htmlspecialchars($kelas) ?></p>
+      </div>
+      <div>
+        <button id="btnBukaModalMandiri" class="bg-white text-red-600 hover:bg-red-50 hover:scale-[1.03] active:scale-95 transition-all px-4 py-2.5 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 w-full sm:w-auto justify-center">
+          <i class="fas fa-plus-circle"></i> Catat Pelanggaran Mandiri
+        </button>
+      </div>
     </div>
   </div>
 
@@ -239,6 +246,168 @@ if (empty($tahunList)) $tahunList = [$tahunAwal];
 
     <?php endif; ?>
   </div>
+
+  <!-- Modal Catat Pelanggaran Mandiri -->
+  <div id="modalMandiri" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <!-- Overlay backdrop -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+    
+    <!-- Modal container -->
+    <div class="flex min-h-screen items-center justify-center p-4">
+      <div class="relative w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden transform transition-all">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-red-600 to-rose-500 text-white px-6 py-4 flex items-center justify-between">
+          <h3 class="text-lg font-bold"><i class="fas fa-exclamation-triangle mr-2"></i>Catat Pelanggaran Mandiri</h3>
+          <button type="button" id="btnTutupModalMandiri" class="text-red-100 hover:text-white transition focus:outline-none">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+        
+        <!-- Form -->
+        <form id="formPelanggaranMandiri" class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Kategori Pelanggaran</label>
+            <select class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400" id="kategoriPelanggaranMandiri" name="kategori_pelanggaran" required>
+              <option value="">Pilih kategori</option>
+              <option value="Ringan">Ringan</option>
+              <option value="Sedang">Sedang</option>
+              <option value="Berat">Berat</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Jenis Pelanggaran</label>
+            <select class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400" id="jenisPelanggaranMandiri" name="jenis_pelanggaran" required disabled>
+              <option value="">Pilih kategori terlebih dahulu</option>
+            </select>
+          </div>
+          
+          <div id="jenisPelanggaranKustomWrapperMandiri" class="hidden">
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Jenis Pelanggaran Lainnya</label>
+            <input type="text" class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400" id="jenisPelanggaranKustomMandiri" name="jenis_pelanggaran_kustom" placeholder="Sebutkan jenis pelanggaran...">
+          </div>
+          
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Keterangan / Kronologi</label>
+            <textarea class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400" id="deskripsiPelanggaranMandiri" name="deskripsi_pelanggaran" rows="3" placeholder="Ceritakan kronologi singkat pelanggaran..."></textarea>
+          </div>
+          
+          <div id="modalStatusMandiri" class="hidden text-xs rounded-xl p-3"></div>
+          
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" id="btnBatalMandiri" class="px-4 py-2 border border-gray-200 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-50 transition focus:outline-none">
+              Batal
+            </button>
+            <button type="submit" id="btnSimpanMandiri" class="px-4 py-2 bg-red-600 hover:bg-red-700 active:scale-95 transition text-white rounded-xl text-xs font-bold flex items-center gap-1.5 focus:outline-none">
+              <i class="fas fa-check"></i> Simpan Laporan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(function() {
+      var jenisPelanggaranData = {
+        'Berat': ['Tindak kekerasan', 'Membawa minuman keras', 'Membawa senjata tajam/berbahaya', 'Merokok di area sekolah', 'Membawa/menggunakan narkoba', 'Perbuatan asusila', 'Bullying/intimidasi', 'Mencuri', 'Bolos berkepanjangan (>3 hari berturut)', 'Lainnya'],
+        'Sedang': ['Seragam tidak sesuai aturan', 'Terlambat berulang kali', 'Alpha tanpa keterangan (2-3 kali)', 'Tidak mengerjakan tugas berulang kali', 'Membawa HP saat ujian', 'Berkelahi ringan', 'Tidak hormat pada guru', 'Lainnya'],
+        'Ringan': ['Terlambat masuk kelas', 'Alpha tanpa keterangan (1 kali)', 'Tidak mengerjakan PR', 'Ramai di kelas', 'Tidak membawa buku/alat tulis', 'Makan di kelas saat pelajaran', 'Tidur di kelas', 'Lainnya']
+      };
+
+      $('#btnBukaModalMandiri').on('click', function() {
+        $('#modalMandiri').removeClass('hidden');
+      });
+
+      function closeMandiriModal() {
+        $('#modalMandiri').addClass('hidden');
+        $('#formPelanggaranMandiri')[0].reset();
+        $('#jenisPelanggaranMandiri').prop('disabled', true).html('<option value="">Pilih kategori terlebih dahulu</option>');
+        $('#jenisPelanggaranKustomWrapperMandiri').addClass('hidden');
+        $('#jenisPelanggaranKustomMandiri').prop('required', false).val('');
+        $('#modalStatusMandiri').addClass('hidden').removeClass('bg-green-100 text-green-800 bg-red-100 text-red-800').text('');
+      }
+
+      $('#btnTutupModalMandiri, #btnBatalMandiri').on('click', closeMandiriModal);
+
+      $('#kategoriPelanggaranMandiri').on('change', function() {
+        var kategori = $(this).val();
+        var $jenis = $('#jenisPelanggaranMandiri');
+
+        $jenis.empty();
+        $('#jenisPelanggaranKustomWrapperMandiri').addClass('hidden');
+        $('#jenisPelanggaranKustomMandiri').prop('required', false).val('');
+        
+        if (!kategori || !jenisPelanggaranData[kategori]) {
+          $jenis.append('<option value="">Pilih kategori terlebih dahulu</option>');
+          $jenis.prop('disabled', true);
+          return;
+        }
+        
+        $jenis.append('<option value="">Pilih jenis pelanggaran</option>');
+        jenisPelanggaranData[kategori].forEach(function(jenis) {
+          $('<option></option>').val(jenis).text(jenis).appendTo($jenis);
+        });
+        $jenis.prop('disabled', false);
+      });
+
+      $('#jenisPelanggaranMandiri').on('change', function() {
+        var val = $(this).val();
+        if (val === 'Lainnya') {
+          $('#jenisPelanggaranKustomWrapperMandiri').removeClass('hidden');
+          $('#jenisPelanggaranKustomMandiri').prop('required', true).focus();
+        } else {
+          $('#jenisPelanggaranKustomWrapperMandiri').addClass('hidden');
+          $('#jenisPelanggaranKustomMandiri').prop('required', false).val('');
+        }
+      });
+
+      $('#formPelanggaranMandiri').on('submit', function(e) {
+        e.preventDefault();
+        var form = this;
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+
+        var $btn = $('#btnSimpanMandiri');
+        var $status = $('#modalStatusMandiri');
+        var originalHtml = $btn.html();
+
+        $status.addClass('hidden').removeClass('bg-green-100 text-green-800 bg-red-100 text-red-800').text('');
+        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...');
+
+        $.ajax({
+          url: '../../simpan_pelanggaran.php',
+          method: 'POST',
+          data: new FormData(form),
+          processData: false,
+          contentType: false,
+          dataType: 'json'
+        }).done(function(response) {
+          if (response && response.success) {
+            $status.removeClass('hidden').addClass('bg-green-100 text-green-800').text(response.message || 'Laporan mandiri berhasil dikirim.').show();
+            setTimeout(function() {
+              window.location.reload();
+            }, 800);
+          } else {
+            $status.removeClass('hidden').addClass('bg-red-100 text-red-800').text(response.message || 'Gagal menyimpan laporan.').show();
+          }
+        }).fail(function(xhr) {
+          var message = 'Gagal menghubungi server.';
+          if (xhr.responseJSON && xhr.responseJSON.message) {
+            message = xhr.responseJSON.message;
+          }
+          $status.removeClass('hidden').addClass('bg-red-100 text-red-800').text(message).show();
+        }).always(function() {
+          $btn.prop('disabled', false).html(originalHtml);
+        });
+      });
+    });
+  </script>
+<?php include 'siswa_footer.php'; ?>
 
 </body>
 </html>

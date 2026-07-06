@@ -64,7 +64,7 @@ function render_app_header($firstName, $totalNotifikasi = 0, $notifikasiData = [
                 </div>
             </div>
 
-            <button class="header-icon" title="Logout" onclick="if(confirm('Yakin mau logout?')) window.location='../../keluar'">
+            <button class="header-icon" title="Logout" type="button" data-bs-toggle="modal" data-bs-target="#logoutModal">
                 <i class="bi bi-box-arrow-right"></i>
             </button>
         </div>

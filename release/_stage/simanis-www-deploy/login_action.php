@@ -382,6 +382,12 @@ if ($akses === 'auto' || $akses === '') {
 		'admin_found' => $user ? true : false,
 		'admin_password_hash' => $user ? substr($user['password'], 0, 20) : 'N/A',
 	];
+	$debug_admin = [
+		'msg' => 'admin_check',
+		'username' => $username,
+		'admin_found' => $user ? true : false,
+		'admin_password_hash' => $user ? substr($user['password'], 0, 20) : 'N/A',
+	];
 	if ($user) {
 		$debug_admin['password_verify_result'] = verify_password($passwordRaw, $user['password']);
 	}
@@ -393,7 +399,11 @@ if ($akses === 'auto' || $akses === '') {
 		set_admin_session($user);
 		session_regenerate_id(true);
 		record_login_attempt($ip, true);
-		redirect_login_success('home.php');
+		if (isset($user['hak_akses']) && $user['hak_akses'] == '4') {
+			redirect_login_success('satpam.php');
+		} else {
+			redirect_login_success('home.php');
+		}
 	}
 
 	$guru = get_guru_user($username, $stt, $loginSchoolId);
@@ -416,7 +426,7 @@ if ($akses === 'auto' || $akses === '') {
 		set_guru_session($guru);
 		session_regenerate_id(true);
 		record_login_attempt($ip, true);
-		redirect_login_success(guru_page('guru_legacy'));
+		redirect_login_success('home.php');
 	}
 
 	ensure_jabatan_column_exists();
@@ -468,7 +478,11 @@ if ($akses == 1) {
 		set_admin_session($user);
 		session_regenerate_id(true);
 		record_login_attempt($ip, true);
-		redirect_login_success('home.php');
+		if (isset($user['hak_akses']) && $user['hak_akses'] == '4') {
+			redirect_login_success('satpam.php');
+		} else {
+			redirect_login_success('home.php');
+		}
 	}
 
 	record_login_attempt($ip, false);
@@ -494,7 +508,7 @@ if ($akses == 1) {
 		set_guru_session($guru);
 		session_regenerate_id(true);
 		record_login_attempt($ip, true);
-		redirect_login_success(guru_page('guru_legacy'));
+		redirect_login_success('home.php');
 	}
 
 	record_login_attempt($ip, false);

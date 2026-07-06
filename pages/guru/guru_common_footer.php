@@ -2,21 +2,31 @@
 if (!function_exists('guru_common_footer_url')) {
     function guru_common_footer_url(string $page, array $params = []): string
     {
-        // Allow slashes and dots for correct path routing
+        // Dynamically find base path by removing known entry points
+        $script = $_SERVER['SCRIPT_NAME'];
+        $base = '';
+        if (($pos = strpos($script, '/home.php')) !== false) {
+            $base = substr($script, 0, $pos);
+        } elseif (($pos = strpos($script, '/pages/')) !== false) {
+            $base = substr($script, 0, $pos);
+        } else {
+            $base = rtrim(dirname($script), '/\\');
+            if ($base === '/' || $base === '\\') $base = '';
+        }
+
         $safe = preg_replace('/[^a-z0-9_\-\.\/]/i', '', $page);
         
-        // If it looks like a direct file path (contains / or .php), use as is
-        // Otherwise, prepend ?page= for the main router
-        if (strpos($safe, '/') !== false || preg_match('/\.php$/', $safe)) {
-            $url = $safe;
-        } else {
-            $url = '?page=' . $safe;
+        // If it's the home page
+        if ($safe === '../../home.php' || $safe === 'home') {
+            return $base . '/home.php?page=dashboard';
+        }
+
+        // For all other guru pages, use the direct path to pages/guru/
+        if (!preg_match('/\.php$/', $safe)) {
+            $safe .= '.php';
         }
         
-        // CLI server fallback
-        if (php_sapi_name() === 'cli-server' && !preg_match('/\.php$/', $url) && strpos($url, '?') !== 0) {
-            $url .= '.php';
-        }
+        $url = $base . '/pages/guru/' . $safe;
 
         if (!empty($params)) {
             $url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($params);

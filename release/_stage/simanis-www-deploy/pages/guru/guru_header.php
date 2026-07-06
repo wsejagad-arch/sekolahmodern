@@ -64,9 +64,38 @@ $lembaga = data_lembaga();
         }
         .sidebar-link[href="<?= $activePage ?>"] i,
         .sidebar-link[href="<?= $activePage ?>.php"] i { color: white; }
-    </style>
+      @keyframes pulse-red { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } } .notif-blink { animation: pulse-red 2s infinite; background-color: #ef4444 !important; }
+</style>
 </head>
 <body class="modern-theme <?= $guruLayoutVisible ? '' : 'layout-hidden' ?>">
+<?php
+$is_wali_kelas_or_bk = false;
+// Gunakan no_induk (NIP) dari session
+$nip_check = $_SESSION['no_induk'] ?? ($_SESSION['username'] ?? '');
+if (!empty($nip_check) && isset($conn)) {
+    $nip_check_esc = mysqli_real_escape_string($conn, $nip_check);
+    // Cek di tbl_kelas (kolom nip_wali)
+    $qWk = mysqli_query($conn, "SELECT id_kelas FROM tbl_kelas WHERE nip_wali = '$nip_check_esc' LIMIT 1");
+    if ($qWk && mysqli_num_rows($qWk) > 0) {
+        $is_wali_kelas_or_bk = true;
+    }
+    // Cek di tbl_wali_kelas (relasi terpisah)
+    if (!$is_wali_kelas_or_bk) {
+        $qWk2 = mysqli_query($conn, "SELECT id FROM tbl_wali_kelas WHERE nip_wali = '$nip_check_esc' LIMIT 1");
+        if ($qWk2 && mysqli_num_rows($qWk2) > 0) {
+            $is_wali_kelas_or_bk = true;
+        }
+    }
+    // Cek Guru BK
+    if (!$is_wali_kelas_or_bk) {
+        $qBk = mysqli_query($conn, "SELECT id_guru FROM tbl_guru WHERE no_induk = '$nip_check_esc' AND (jabatan LIKE '%BK%' OR is_guru_bk = 1) LIMIT 1");
+        if ($qBk && mysqli_num_rows($qBk) > 0) {
+            $is_wali_kelas_or_bk = true;
+        }
+    }
+}
+?>
+
 
     <?php if ($guruLayoutVisible): ?>
         <!-- Desktop Sidebar -->
@@ -76,13 +105,14 @@ $lembaga = data_lembaga();
                 <span>SIMANIS</span>
             </div>
             <nav class="sidebar-nav">
-                <a href="<?= guru_nav_url('guru_legacy'); ?>" class="sidebar-link"><i class="bi bi-house-door"></i> <span>Dashboard</span></a>
-                <a href="<?= guru_nav_url('validasi-izin'); ?>" class="sidebar-link"><i class="bi bi-patch-check"></i> <span>Validasi Izin</span></a>
+                <a href="<?= guru_nav_url('../../home.php'); ?>" class="sidebar-link"><i class="bi bi-house-door"></i> <span>Dashboard</span></a>
+                <?php if($is_wali_kelas_or_bk): ?><a href="<?= guru_nav_url('validasi-izin'); ?>" class="sidebar-link"><i class="bi bi-patch-check"></i> <span>Validasi Izin</span></a><?php endif; ?>
                 <a href="<?= guru_nav_url('data-siswa'); ?>" class="sidebar-link"><i class="bi bi-people"></i> <span>Data Siswa</span></a>
                 <a href="<?= guru_nav_url('nilai'); ?>" class="sidebar-link"><i class="bi bi-clipboard-data"></i> <span>Input Nilai</span></a>
                 <a href="<?= guru_nav_url('cetak-jurnal-guru'); ?>" class="sidebar-link"><i class="bi bi-printer"></i> <span>Cetak Jurnal</span></a>
                 <a href="<?= guru_nav_url('laporan-kelas'); ?>" class="sidebar-link"><i class="bi bi-bar-chart-line"></i> <span>Laporan Kelas</span></a>
                 <a href="<?= guru_nav_url('apresiasi-guru'); ?>" class="sidebar-link"><i class="bi bi-award"></i> <span>Apresiasi Guru</span></a>
+                <a href="<?= guru_nav_url('ekinerja'); ?>" class="sidebar-link"><i class="bi bi-file-earmark-bar-graph"></i> <span>E-Kinerja</span></a>
             </nav>
             <div class="sidebar-footer" style="padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
                 <a href="../../logout.php" class="sidebar-link" style="color: #fca5a5;" onclick="return confirm('Yakin mau logout?');">

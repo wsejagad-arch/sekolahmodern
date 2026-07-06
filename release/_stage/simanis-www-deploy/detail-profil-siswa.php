@@ -105,7 +105,7 @@ if ($qIzinGlobal && ($rowIzinGlobal = mysqli_fetch_assoc($qIzinGlobal))) {
     $izinEditGlobal = ((string) ($rowIzinGlobal['nilai'] ?? '0') === '1') ? 1 : 0;
 }
 
-$editMode = ((string) ($_GET['edit'] ?? '') === '1');
+$editMode = true;
 $notice = $_SESSION['_detail_profile_notice'] ?? '';
 $noticeType = $_SESSION['_detail_profile_notice_type'] ?? 'info';
 unset($_SESSION['_detail_profile_notice'], $_SESSION['_detail_profile_notice_type']);
@@ -235,7 +235,7 @@ foreach ($editableFields as $field => $meta) {
                     width: 100%;
                     gap: 1rem;
                     padding: 0 0.75rem 1.5rem;
-                    max-width: 1180px;
+                    /* max-width removed */
                     min-height: calc(100vh - 190px);
                 }
 
@@ -469,142 +469,7 @@ foreach ($editableFields as $field => $meta) {
                 </div>
                 <div class="detail-action-row">
                     <?php if ($editMode): ?>
-                        <a href="detail-profil-siswa.php?no_induk=<?php echo urlencode($noInduk); ?>" class="btn btn-sm btn-outline-secondary rounded-pill">
-                            <i class="fas fa-eye me-1"></i> Mode Lihat
-                        </a>
-                    <?php else: ?>
-                        <a href="detail-profil-siswa.php?no_induk=<?php echo urlencode($noInduk); ?>&edit=1" class="btn btn-sm btn-primary rounded-pill">
-                            <i class="fas fa-unlock me-1"></i> Buka Kunci Edit Admin
-                        </a>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <?php if ($notice !== ''): ?>
-                <div class="alert alert-<?php echo htmlspecialchars($noticeType); ?> border-0 shadow-sm mb-0">
-                    <?php echo htmlspecialchars($notice); ?>
-                </div>
-            <?php endif; ?>
-
-            <div class="profile-hero">
-                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3">
-                    <div class="student-avatar">
-                        <?php echo mb_strtoupper(mb_substr((string) ($student['nama_siswa'] ?? '?'), 0, 1)); ?>
-                    </div>
-                    <div class="flex-grow-1">
-                        <h4 class="fw-bold mb-1"><?php echo htmlspecialchars($student['nama_siswa'] ?? '-'); ?></h4>
-                        <div class="profile-meta">
-                            <span class="badge bg-light text-primary rounded-pill"><?php echo htmlspecialchars($student['kelas'] ?? '-'); ?></span>
-                            <span class="badge bg-light text-dark rounded-pill"><?php echo htmlspecialchars($student['status'] ?? '-'); ?></span>
-                            <span class="badge bg-light text-dark rounded-pill">No. Induk: <?php echo htmlspecialchars($student['no_induk'] ?? '-'); ?></span>
-                        </div>
-                        <div class="mt-3 small opacity-75">Halaman ini menampilkan data lengkap siswa terpilih dan memungkinkan admin tetap mengedit meski izin global sedang dikunci.</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="profile-card p-4">
-                <h6 class="fw-bold text-muted mb-3"><i class="fas fa-user-lock me-2"></i>Izin Edit Profil Siswa</h6>
-                <div class="status-banner">
-                    <div class="status-icon bg-<?php echo $izinEditGlobal === 1 ? 'info' : 'warning'; ?>">
-                        <i class="fas <?php echo $izinEditGlobal === 1 ? 'fa-unlock' : 'fa-lock'; ?>"></i>
-                    </div>
-                    <div class="status-copy">
-                        <p class="status-title"><?php echo $izinEditGlobal === 1 ? 'Edit profil global diizinkan' : 'Edit profil global dikunci'; ?></p>
-                        <p class="status-text"><?php echo $izinEditGlobal === 1 ? 'Semua siswa bisa mengubah profil mereka sendiri.' : 'Siswa tidak bisa mengubah profil sendiri saat kunci aktif.'; ?></p>
-                    </div>
-                </div>
-                <div class="detail-action-row mt-3">
-                    <a href="home.php?page=data-siswa#global-izin-edit" class="btn btn-sm btn-outline-primary rounded-pill">
-                        <i class="fas fa-sliders-h me-1"></i> Atur Global
-                    </a>
-                    <span class="text-muted small align-self-center">Admin tetap bisa membuka mode edit di halaman ini.</span>
-                </div>
-            </div>
-
-            <div class="profile-table-card p-4">
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-                    <div>
-                        <h6 class="form-section-title mb-1"><i class="fas fa-id-card text-primary"></i>Data Lengkap Terpilih</h6>
-                        <div class="text-muted small">Seluruh kolom yang tersedia di tabel siswa ditampilkan di sini.</div>
-                    </div>
-                    <span class="badge bg-primary rounded-pill"><?php echo count($displayColumns); ?> kolom</span>
-                </div>
-
-                <div class="detail-table-wrap table-responsive">
-                    <table class="table table-striped table-hover align-middle detail-table mb-0">
-                        <tbody>
-                            <?php foreach ($displayColumns as $column): ?>
-                                <tr>
-                                    <th><?php echo htmlspecialchars(detail_profile_label($column)); ?></th>
-                                    <td>
-                                        <?php if ($column === 'alamat'): ?>
-                                            <?php echo detail_profile_value($column, $student[$column] ?? ''); ?>
-                                        <?php elseif (($column === 'lat' || $column === 'lng') && !empty($student['lat']) && !empty($student['lng'])): ?>
-                                            <a href="https://www.google.com/maps?q=<?php echo urlencode($student['lat'] . ',' . $student['lng']); ?>" target="_blank" rel="noopener">
-                                                <?php echo htmlspecialchars((string) ($student[$column] ?? '')); ?>
-                                            </a>
-                                        <?php elseif (($column === 'no_wa' || $column === 'no_darurat') && !empty($student[$column])): ?>
-                                            <?php $waLink = detail_profile_whatsapp_link($student[$column]); ?>
-                                            <?php if ($waLink !== ''): ?>
-                                                <a href="<?php echo htmlspecialchars($waLink); ?>" target="_blank" rel="noopener">
-                                                    <?php echo htmlspecialchars((string) $student[$column]); ?>
-                                                </a>
-                                            <?php else: ?>
-                                                <?php echo detail_profile_value($column, $student[$column] ?? ''); ?>
-                                            <?php endif; ?>
-                                        <?php else: ?>
-                                            <?php echo detail_profile_value($column, $student[$column] ?? ''); ?>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="profile-card p-4">
-                <h6 class="fw-bold text-muted mb-3"><i class="fas fa-map-marked-alt me-2 text-primary"></i>Ringkasan Lokasi dan Kontak</h6>
-                <div class="detail-grid">
-                    <div class="detail-pill">
-                        <div class="detail-label">Alamat Lengkap</div>
-                        <div class="detail-value"><?php echo nl2br(htmlspecialchars((string) ($student['alamat'] ?? '—'))); ?></div>
-                    </div>
-                    <div class="detail-pill">
-                        <div class="detail-label">Koordinat</div>
-                        <div class="detail-value">
-                            <?php echo htmlspecialchars((string) ($student['lat'] ?? '—')); ?>, <?php echo htmlspecialchars((string) ($student['lng'] ?? '—')); ?>
-                        </div>
-                        <?php if (!empty($student['lat']) && !empty($student['lng'])): ?>
-                            <div class="info-note">Klik koordinat atau buka Google Maps dari tabel data lengkap.</div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="detail-pill">
-                        <div class="detail-label">WhatsApp Siswa</div>
-                        <div class="detail-value"><?php echo htmlspecialchars((string) ($student['no_wa'] ?? '—')); ?></div>
-                        <?php if (!empty($student['no_wa'])): ?>
-                            <div class="info-note">Nomor ini bisa dihubungi lewat tautan chat.</div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="detail-pill">
-                        <div class="detail-label">Kontak Darurat</div>
-                        <div class="detail-value"><?php echo htmlspecialchars((string) ($student['nama_darurat'] ?? '—')); ?></div>
-                        <div class="info-note"><?php echo htmlspecialchars((string) ($student['no_darurat'] ?? '—')); ?></div>
-                    </div>
-                </div>
-            </div>
-
-            <?php if ($editMode): ?>
-                <div class="profile-edit-card p-4">
-                    <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
-                        <div>
-                            <h6 class="form-section-title mb-1"><i class="fas fa-pen-to-square text-primary"></i>Mode Edit Admin</h6>
-                            <div class="text-muted small">Perubahan di halaman ini tetap bisa dilakukan walaupun izin edit global siswa sedang dikunci.</div>
-                        </div>
-                        <a href="detail-profil-siswa.php?no_induk=<?php echo urlencode($noInduk); ?>" class="btn btn-sm btn-outline-secondary rounded-pill">
-                            <i class="fas fa-eye me-1"></i> Tutup Mode Edit
-                        </a>
+                        
                     </div>
 
                     <form method="post" action="detail-profil-siswa.php?no_induk=<?php echo urlencode($noInduk); ?>&edit=1">
@@ -696,7 +561,4 @@ foreach ($editableFields as $field => $meta) {
                 </div>
             <?php endif; ?>
         </div>
-    </div>
-</div>
-
 <?php include 'footer.php'; ?>

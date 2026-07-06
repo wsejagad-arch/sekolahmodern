@@ -250,13 +250,8 @@ if (!empty($aduanRows)) {
                     <div class="card-body">
                         <div class="p-3 mb-3" style="background:#f8fafc; border-radius:14px;">
                             <div class="small text-muted font-weight-bold mb-1">Identitas Pelapor</div>
-                            <?php if ($isAdminAduan): ?>
-                                <div><strong><?= adm_ad_h($row['nama_pelapor']); ?></strong> - <?= adm_ad_h($row['kelas_pelapor']); ?></div>
-                                <div class="small text-muted">NIS: <?= adm_ad_h($row['no_induk_pelapor']); ?></div>
-                            <?php else: ?>
-                                <div><strong>Pelapor Anonim</strong> - <?= adm_ad_h($row['kelas_pelapor']); ?></div>
-                                <div class="small text-muted">Identitas lengkap hanya terlihat oleh admin.</div>
-                            <?php endif; ?>
+                            <div><strong>Pelapor Anonim</strong> - <?= adm_ad_h($row['kelas_pelapor']); ?></div>
+                            <div class="small text-muted">Aduan ini bersifat anonim untuk menjaga privasi pelapor.</div>
                         </div>
                         <div class="mb-2"><strong>Lokasi:</strong> <?= adm_ad_h($row['lokasi'] ?: '-'); ?></div>
                         <div class="mb-3"><strong>Tanggal kejadian:</strong> <?= $row['tanggal_kejadian'] ? date('d M Y', strtotime($row['tanggal_kejadian'])) : '-'; ?></div>

@@ -23,6 +23,7 @@ if (!isset($_SESSION['no_induk']) || ($_SESSION['hak_akses'] ?? 0) != 3) {
 
 include __DIR__ . '/../koneksi.php';
 include __DIR__ . '/../functions.php';
+require_once __DIR__ . '/../notification_helper.php';
 
 if (!$conn) {
     http_response_code(500);
@@ -215,6 +216,9 @@ if ($qCek && mysqli_num_rows($qCek) > 0) {
          WHERE {$tenantAbsen} AND id = '$idAbsen'"
     );
     if ($updRes) {
+        if (function_exists('notif_trigger_presensi')) {
+            notif_trigger_presensi($conn, $nisEsc, $statusAbsen);
+        }
         jsonOut(['success' => true, 'message' => ($statusAbsen === 'Telat' ? '⚠️ Presensi diperbarui: TERLAMBAT — ' : 'Presensi berhasil diperbarui: ') . $namaMapel, 'status' => 'updated', 'status_absen' => $statusAbsen]);
     } else {
         jsonOut(['success' => false, 'message' => 'Gagal memperbarui presensi: ' . mysqli_error($conn)], 500);
@@ -229,6 +233,9 @@ if ($qCek && mysqli_num_rows($qCek) > 0) {
          VALUES ('$tglEsc', '$kelasEsc', '$idMapelEsc', '$nipGuruEsc', '$nisEsc', '$statusAbsen', 'siswa')"
     );
     if ($insRes) {
+        if (function_exists('notif_trigger_presensi')) {
+            notif_trigger_presensi($conn, $nisEsc, $statusAbsen);
+        }
         jsonOut(['success' => true, 'message' => ($statusAbsen === 'Telat' ? '⚠️ Presensi tercatat TERLAMBAT: ' : 'Presensi berhasil: ') . $namaMapel, 'status' => 'inserted', 'status_absen' => $statusAbsen]);
     } else {
         // Mungkin kolom sumber belum ada, coba ulang tanpa sumber
@@ -237,6 +244,9 @@ if ($qCek && mysqli_num_rows($qCek) > 0) {
              VALUES ('$tglEsc', '$kelasEsc', '$idMapelEsc', '$nipGuruEsc', '$nisEsc', '$statusAbsen')"
         );
         if ($insRes2) {
+            if (function_exists('notif_trigger_presensi')) {
+                notif_trigger_presensi($conn, $nisEsc, $statusAbsen);
+            }
             jsonOut(['success' => true, 'message' => ($statusAbsen === 'Telat' ? '⚠️ Presensi tercatat TERLAMBAT: ' : 'Presensi berhasil: ') . $namaMapel, 'status' => 'inserted', 'status_absen' => $statusAbsen]);
         } else {
             jsonOut(['success' => false, 'message' => 'Gagal menyimpan presensi: ' . mysqli_error($conn)], 500);

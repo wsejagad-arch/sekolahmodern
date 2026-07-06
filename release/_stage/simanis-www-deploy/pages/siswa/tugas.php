@@ -18,7 +18,7 @@ $tenantTugas = function_exists('mt_column_exists') && $conn instanceof mysqli &&
 
 // Ambil daftar tugas aktif untuk kelas siswa
 $query = "
-    SELECT t.*, ts.status AS status_siswa
+    SELECT t.*, t.batas_waktu, ts.status AS status_siswa, ts.waktu_submit
     FROM tbl_tugas t
     LEFT JOIN tbl_tugas_siswa ts ON t.id = ts.id_tugas AND ts.no_induk_siswa = '$nisEsc'
     WHERE t.kelas = '$kelasEsc' AND t.status = 'aktif' {$tenantTugas}
@@ -165,5 +165,7 @@ if ($result) {
         });
     }
     </script>
+<?php include 'siswa_footer.php'; ?>
+
 </body>
 </html>

@@ -130,10 +130,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Guru tidak ditemukan di sekolah Anda.';
       } else {
         // upsert: jika sudah ada record untuk kelas ini, update; kalau belum insert
-        $cek = mysqli_query($conn, "SELECT id_wali FROM tbl_wali_kelas WHERE id_kelas=$id_kelas AND id_sekolah=$tenantId LIMIT 1");
+        $cek = mysqli_query($conn, "SELECT id_wali, nip_wali FROM tbl_wali_kelas WHERE id_kelas=$id_kelas AND id_sekolah=$tenantId LIMIT 1");
         if ($cek && mysqli_num_rows($cek) > 0) {
           $r = mysqli_fetch_assoc($cek);
           $id_wali = (int)$r['id_wali'];
+          $old_nip_wali = $r['nip_wali'];
+          if ($old_nip_wali != $nip) {
+             @mysqli_query($conn, "UPDATE tbl_guru SET walas='Tidak' WHERE no_induk='$old_nip_wali'");
+          }
           $sql = "UPDATE tbl_wali_kelas SET nip_wali='$nip', nama_wali='" . mysqli_real_escape_string($conn, $nama) . "', updated_at='$now' WHERE id_wali=$id_wali AND id_sekolah=$tenantId";
         } else {
           $sql = "INSERT INTO tbl_wali_kelas(id_kelas, nip_wali, nama_wali, id_sekolah, created_at, updated_at) VALUES($id_kelas, '$nip', '" . mysqli_real_escape_string($conn, $nama) . "', $tenantId, '$now', '$now')";
@@ -141,6 +145,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (mysqli_query($conn, $sql)) {
           // Coba sinkronkan ke tbl_kelas jika kolom tersedia
           @mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas='" . mysqli_real_escape_string($conn, $nama) . "', nip_wali='$nip' WHERE id_kelas=$id_kelas AND id_sekolah=$tenantId");
+          // SINKRONISASI KE TBL_GURU
+          @mysqli_query($conn, "UPDATE tbl_guru SET walas='Ya' WHERE no_induk='$nip'");
           $messages[] = 'Berhasil menyimpan wali kelas.';
         } else {
           $errors[] = 'Gagal menyimpan wali kelas: ' . mysqli_error($conn);
@@ -161,9 +167,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else if (!$kelasValid) {
       $errors[] = 'Kelas tidak ditemukan atau bukan milik sekolah Anda.';
     } else {
+      // get the nip_wali before delete
+      $cek_hapus = mysqli_query($conn, "SELECT nip_wali FROM tbl_wali_kelas WHERE id_kelas=$id_kelas AND id_sekolah=$tenantId LIMIT 1");
+      $hapus_nip = ($r_hapus = mysqli_fetch_assoc($cek_hapus)) ? $r_hapus['nip_wali'] : '';
+
       if (mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE id_kelas=$id_kelas AND id_sekolah=$tenantId")) {
         // Sinkronkan ke tbl_kelas (set null)
         @mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas=NULL, nip_wali=NULL WHERE id_kelas=$id_kelas AND id_sekolah=$tenantId");
+        if ($hapus_nip) {
+           @mysqli_query($conn, "UPDATE tbl_guru SET walas='Tidak' WHERE no_induk='$hapus_nip'");
+        }
         $messages[] = 'Wali kelas berhasil dihapus untuk kelas terpilih.';
       } else {
         $errors[] = 'Gagal menghapus: ' . mysqli_error($conn);
@@ -239,7 +252,7 @@ $dataKelas = kelas_list($conn, $tenantId);
                     <input type="hidden" name="id_kelas" value="<?php echo (int)$row['id_kelas']; ?>">
                     <select name="nip" class="form-control form-control-sm" style="min-width:220px;">
                       <option value="">-- pilih guru aktif --</option>
-                      <?php echo get_guru_options($conn, $row['nip_wali']); ?>
+                      <?php echo get_guru_options($conn, $tenantId, $row['nip_wali']); ?>
                     </select>
                     <button type="submit" class="btn btn-sm btn-primary ml-2">Simpan</button>
                   </form>

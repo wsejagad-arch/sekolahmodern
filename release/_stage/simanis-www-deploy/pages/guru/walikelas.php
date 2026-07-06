@@ -22,6 +22,7 @@ require_once __DIR__ . '/../../functions.php';
 
 date_default_timezone_set('Asia/Jakarta');
 
+
 if (!isset($conn) || !($conn instanceof mysqli)) {
     http_response_code(500);
     echo '<div style="font-family:Arial,sans-serif;padding:24px;color:#991b1b;">Koneksi database tidak tersedia.</div>';
@@ -184,7 +185,90 @@ $selectedPeriodLabel = $periodeMulai === $periodeSelesai
     ? guru_wk_month_label($periodeMulai, $namaBulan)
     : guru_wk_month_label($periodeMulai, $namaBulan) . ' - ' . guru_wk_month_label($periodeSelesai, $namaBulan);
 
+
+// Handle Validasi Izin Action
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    $action = $_POST['action'];
+    if ($action === 'acc_wali' || $action === 'tolak_wali') {
+        $id_izin = (int)$_POST['id_izin'];
+        $nama_guru_val = $_SESSION['nama'] ?? $_SESSION['nama_guru'] ?? 'Guru';
+        
+        $qCek = mysqli_query($conn, "SELECT * FROM tbl_izin_siswa WHERE id_izin = $id_izin");
+        $rCek = mysqli_fetch_assoc($qCek);
+        if ($rCek) {
+            if ($action === 'acc_wali') {
+                $status_baru = 'Menunggu Guru BK';
+                if ($rCek['validasi_guru_bk'] === 'Disetujui') {
+                    $status_baru = ($rCek['kategori_pengajuan'] === 'Keluar Sekolah') ? 'Menunggu Satpam' : 'Disetujui Penuh';
+                }
+                $q = "UPDATE tbl_izin_siswa SET validasi_wali_kelas = 'Disetujui', validator_wali_kelas = '$nama_guru_val', waktu_validasi_wali_kelas = NOW(), status_izin = '$status_baru' WHERE id_izin = $id_izin";
+                mysqli_query($conn, $q);
+                $msg_validasi = "Izin berhasil disetujui.";
+            } elseif ($action === 'tolak_wali') {
+                $q = "UPDATE tbl_izin_siswa SET validasi_wali_kelas = 'Ditolak', validator_wali_kelas = '$nama_guru_val', waktu_validasi_wali_kelas = NOW(), status_izin = 'Ditolak' WHERE id_izin = $id_izin";
+                mysqli_query($conn, $q);
+                $msg_validasi = "Izin berhasil ditolak.";
+            }
+            
+            // Auto Absen jika sudah fully disetujui (selain keluar sekolah) dan aksi validasi berhasil
+            if (isset($msg_validasi) && strpos($msg_validasi, 'berhasil') !== false) {
+                $qCekAkhir = mysqli_query($conn, "SELECT * FROM tbl_izin_siswa WHERE id_izin = $id_izin");
+                $rCekAkhir = mysqli_fetch_assoc($qCekAkhir);
+                if ($rCekAkhir['validasi_wali_kelas'] === 'Disetujui' && $rCekAkhir['validasi_guru_bk'] === 'Disetujui') {
+                    $expectedStatus = ($rCekAkhir['kategori_pengajuan'] === 'Keluar Sekolah') ? 'Menunggu Satpam' : 'Disetujui Penuh';
+                    if ($rCekAkhir['status_izin'] !== $expectedStatus) {
+                        mysqli_query($conn, "UPDATE tbl_izin_siswa SET status_izin = '$expectedStatus' WHERE id_izin = $id_izin");
+                        $rCekAkhir['status_izin'] = $expectedStatus;
+                    }
+                }
+                if (in_array($rCekAkhir['status_izin'], ['Disetujui Penuh', 'Disetujui'], true)) {
+                    $nis = $rCekAkhir['no_induk_siswa'];
+                    $tgl = $rCekAkhir['tanggal_izin'];
+                    $kls = $rCekAkhir['kelas_siswa'];
+                    
+                    $kat = strtolower($rCekAkhir['kategori_pengajuan']);
+                    $kode_absen = 'I';
+                    if (strpos($kat, 'sakit') !== false) $kode_absen = 'S';
+                    elseif (strpos($kat, 'dispen') !== false) $kode_absen = 'D'; // D atau I
+                    
+                    // Cek apakah sudah ada absen di tbl_absen
+                    $cekAbsen = mysqli_query($conn, "SELECT id FROM tbl_absen WHERE no_induk = '$nis' AND tanggal = '$tgl' AND id_mapel IS NULL LIMIT 1");
+                    if (mysqli_num_rows($cekAbsen) > 0) {
+                        mysqli_query($conn, "UPDATE tbl_absen SET status = '$kode_absen', sumber = 'Sistem Izin' WHERE no_induk = '$nis' AND tanggal = '$tgl' AND id_mapel IS NULL");
+                    } else {
+                        mysqli_query($conn, "INSERT INTO tbl_absen (id_sekolah, tanggal, kelas, no_induk, status, sumber, created_at) VALUES (1, '$tgl', '$kls', '$nis', '$kode_absen', 'Sistem Izin', NOW())");
+                    }
+
+                    $tblJurnal = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_jurnal'");
+                    if ($tblJurnal && mysqli_num_rows($tblJurnal) > 0) {
+                        $nisEsc = mysqli_real_escape_string($conn, $nis);
+                        $tglEsc = mysqli_real_escape_string($conn, $tgl);
+                        $klsEsc = mysqli_real_escape_string($conn, $kls);
+                        $detailIzin = mysqli_real_escape_string($conn, $rCekAkhir['detail_izin'] ?? '');
+                        $jenisIzin = mysqli_real_escape_string($conn, $rCekAkhir['jenis_izin'] ?? 'Izin');
+                        $catatan = "Izin disetujui penuh: {$jenisIzin}. {$detailIzin}";
+                        mysqli_query($conn, "INSERT INTO tbl_jurnal (no_induk, kelas, tanggal, mapel, jurnal, catatan) VALUES ('$nisEsc', '$klsEsc', '$tglEsc', 'Izin', 'Izin disetujui', '$catatan')");
+                    }
+                }
+            }
+        }
+    }
+}
+
 $kelasFilter = trim((string) ($_GET['kelas'] ?? ''));
+
+// Fetch pending izin for the selected class
+$list_izin = [];
+if ($kelasFilter !== '') {
+    $kelas_esc_v = mysqli_real_escape_string($conn, str_replace(' ', '', $kelasFilter));
+    $qIzin = mysqli_query($conn, "SELECT i.*, s.nama_siswa, s.kelas as kelas_siswa FROM tbl_izin_siswa i JOIN tbl_siswa s ON i.no_induk_siswa = s.no_induk WHERE REPLACE(s.kelas, ' ', '') = '$kelas_esc_v' AND i.validasi_wali_kelas = 'Menunggu' ORDER BY i.waktu_pengajuan DESC");
+    if ($qIzin) {
+        while ($row = mysqli_fetch_assoc($qIzin)) {
+            $list_izin[] = $row;
+        }
+    }
+}
+
 if ($kelasFilter === '' && count($kelasOptions) === 1) {
     $kelasFilter = (string) reset($kelasOptions);
 }
@@ -639,7 +723,7 @@ if ($hasClass && isset($_GET['cetak_pdf']) && (string) $_GET['cetak_pdf'] === '1
 <body>
 <main class="page-shell">
     <section class="hero">
-        <a href="guru_legacy" class="text-white-50 text-decoration-none"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+        <a href="../../home.php" class="text-white-50 text-decoration-none"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
         <h1 class="mt-3 mb-2">Ruang Analisis Walikelas</h1>
         <p class="mb-0 text-white-50">Pantau kehadiran, nilai, rencana siswa, dan cetak laporan resmi wali kelas.</p>
     </section>
@@ -700,7 +784,11 @@ if ($hasClass && isset($_GET['cetak_pdf']) && (string) $_GET['cetak_pdf'] === '1
           <li class="nav-item" role="presentation">
             <button class="nav-link active fw-semibold rounded-pill px-4 me-2 shadow-sm" id="monitoring-tab" data-bs-toggle="pill" data-bs-target="#monitoring" type="button" role="tab" aria-controls="monitoring" aria-selected="true"><i class="bi bi-activity"></i> Monitoring Siswa</button>
           </li>
+                    
           <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold rounded-pill px-4 me-2 shadow-sm" id="validasi-tab" data-bs-toggle="pill" data-bs-target="#validasi" type="button" role="tab" aria-controls="validasi" aria-selected="false"><i class="bi bi-patch-check"></i> Validasi Izin</button>
+          </li>
+<li class="nav-item" role="presentation">
             <button class="nav-link fw-semibold rounded-pill px-4 me-2 shadow-sm" id="jurnal-tab" data-bs-toggle="pill" data-bs-target="#jurnal" type="button" role="tab" aria-controls="jurnal" aria-selected="false"><i class="bi bi-journal-text"></i> Jurnal Pendampingan</button>
           </li>
           <li class="nav-item" role="presentation">
@@ -709,8 +797,79 @@ if ($hasClass && isset($_GET['cetak_pdf']) && (string) $_GET['cetak_pdf'] === '1
         </ul>
 
         <div class="tab-content" id="waliTabsContent">
+          <!-- Tab Validasi Izin -->
+          <div class="tab-pane fade" id="validasi" role="tabpanel" aria-labelledby="validasi-tab">
+            <section class="panel">
+                <div class="panel-pad border-bottom">
+                    <h2 class="h5 mb-1">Daftar Pengajuan Izin Menunggu Persetujuan</h2>
+                    <p class="text-muted mb-0">Kelas <?= guru_wk_h($kelasFilter); ?></p>
+                </div>
+                <div class="panel-pad">
+                    <?php if(isset($msg_validasi)): ?>
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <?= htmlspecialchars($msg_validasi) ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if(empty($list_izin)): ?>
+                    <div class="alert alert-info">Tidak ada pengajuan izin yang menunggu validasi Anda untuk kelas ini.</div>
+                    <?php else: ?>
+                    <div class="row">
+                        <?php foreach($list_izin as $izin): ?>
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 shadow-sm border-0">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title fw-bold text-primary mb-0"><?= htmlspecialchars($izin['nama_siswa']) ?></h5>
+                                        <span class="badge bg-secondary"><?= htmlspecialchars($izin['kelas_siswa']) ?></span>
+                                    </div>
+                                    <p class="text-muted small mb-3"><i class="bi bi-clock"></i> <?= date('d M Y, H:i', strtotime($izin['waktu_pengajuan'])) ?></p>
+                                    
+                                    <ul class="list-unstyled mb-3">
+                                        <li><strong>Kategori:</strong> <?= htmlspecialchars($izin['kategori_pengajuan']) ?></li>
+                                        <li><strong>Jenis:</strong> <?= htmlspecialchars($izin['jenis_izin']) ?></li>
+                                        <li><strong>Keterangan:</strong> <?= htmlspecialchars($izin['detail_izin']) ?></li>
+                                        <?php if ($izin['kategori_pengajuan'] === 'Keluar Sekolah'): ?>
+                                        <li><strong>Opsi Kembali:</strong> <?= htmlspecialchars($izin['opsi_kembali'] ?: '-') ?></li>
+                                        <?php endif; ?>
+                                        <?php if (!empty($izin['validasi_guru_bk']) && $izin['validasi_guru_bk'] !== 'Menunggu'): ?>
+                                        <li><strong>Status BK:</strong> <span class="badge <?= $izin['validasi_guru_bk'] === 'Disetujui' ? 'bg-success' : 'bg-danger' ?>"><?= htmlspecialchars($izin['validasi_guru_bk']) ?></span> 
+                                            <small class="text-muted">(<?= htmlspecialchars($izin['validator_guru_bk'] ?: 'Sistem') ?>)</small>
+                                        </li>
+                                        <?php endif; ?>
+                                    </ul>
+
+                                    <?php if (!empty($izin['foto_selfie'])): ?>
+                                    <div class="mb-3">
+                                        <img src="../../uploads/izin/<?= htmlspecialchars($izin['foto_selfie']) ?>" class="img-fluid rounded" alt="Bukti Foto" style="max-height:150px; object-fit:cover;">
+                                    </div>
+                                    <?php endif; ?>
+                                    
+                                </div>
+                                <div class="card-footer bg-white border-top-0 d-flex gap-2">
+                                    <form method="POST" class="w-50">
+                                        <input type="hidden" name="id_izin" value="<?= $izin['id_izin'] ?>">
+                                        <input type="hidden" name="action" value="acc_wali">
+                                        <button type="submit" class="btn btn-success w-100 fw-bold" onclick="return confirm('Setujui izin ini?')"><i class="bi bi-check"></i> Setujui</button>
+                                    </form>
+                                    <form method="POST" class="w-50">
+                                        <input type="hidden" name="id_izin" value="<?= $izin['id_izin'] ?>">
+                                        <input type="hidden" name="action" value="tolak_wali">
+                                        <button type="submit" class="btn btn-danger w-100 fw-bold" onclick="return confirm('Tolak izin ini?')"><i class="bi bi-x"></i> Tolak</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </section>
+          </div>
+
           <!-- Tab Monitoring -->
-          <div class="tab-pane fade show active" id="monitoring" role="tabpanel" aria-labelledby="monitoring-tab">
+                    <div class="tab-pane fade show active" id="monitoring" role="tabpanel" aria-labelledby="monitoring-tab">
             <section class="panel">
             <div class="panel-pad border-bottom">
                 <h2 class="h5 mb-1">Rekap Kehadiran dan Nilai Siswa</h2>

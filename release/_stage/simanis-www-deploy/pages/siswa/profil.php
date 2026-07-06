@@ -778,6 +778,7 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
             <span class="progress-stat-number" id="totalFields">0</span>
             <span class="progress-stat-label">Total</span>
           </div>
+
           <div class="progress-stat">
             <span class="progress-stat-number" id="emptyFields">0</span>
             <span class="progress-stat-label">Kosong</span>
@@ -810,14 +811,8 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
           <?php if ($hasColumn('status')): ?>
             <div class="col-md-6">
               <label class="form-label-custom">Status</label>
-              <select name="status" class="form-select form-control-app" <?= $izinEdit ? '' : 'disabled' ?>>
-                <?php $currentStatus = strtolower((string)($siswa['status'] ?? '')); ?>
-                <option value="aktif" <?= $currentStatus === 'aktif' ? 'selected' : '' ?>>Aktif</option>
-                <option value="nonaktif" <?= $currentStatus === 'nonaktif' ? 'selected' : '' ?>>Nonaktif</option>
-              </select>
-              <?php if (!$izinEdit): ?>
-                <input type="hidden" name="status" value="<?= htmlspecialchars((string)($siswa['status'] ?? '')) ?>">
-              <?php endif; ?>
+              <input type="text" class="form-control form-control-app bg-light" value="<?= htmlspecialchars(ucwords((string)($siswa['status'] ?? ''))) ?>" readonly>
+              <input type="hidden" name="status" value="<?= htmlspecialchars((string)($siswa['status'] ?? '')) ?>">
             </div>
           <?php endif; ?>
           <?php if ($hasColumn('jabatan')): ?>
@@ -932,6 +927,30 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
                           <label class="form-label-custom"><?= htmlspecialchars($labelForColumn($column)) ?></label>
                           <?php if ($column === 'tanggal_lahir'): ?>
                             <input type="date" name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" value="<?= htmlspecialchars((string)($siswa[$column] ?? '')) ?>" <?= $izinEdit ? '' : 'readonly' ?>>
+                          <?php elseif ($column === 'agama'): ?>
+                            <?php
+                            $currentAgama = trim((string)($siswa[$column] ?? ''));
+                            $agamaOptions = ['Islam', 'Hindu', 'Buddha', 'Kristen', 'Katolik', 'Lainnya'];
+                            $foundAgama = false;
+                            foreach ($agamaOptions as $opt) {
+                                if (strcasecmp($currentAgama, $opt) === 0) {
+                                    $foundAgama = true;
+                                    break;
+                                }
+                            }
+                            if ($currentAgama !== '' && !$foundAgama) {
+                                $agamaOptions[] = ucfirst(strtolower($currentAgama));
+                            }
+                            ?>
+                            <select name="<?= htmlspecialchars($column) ?>" class="form-select form-control-app" <?= $izinEdit ? '' : 'disabled' ?>>
+                              <option value="">Pilih agama...</option>
+                              <?php foreach ($agamaOptions as $opt): ?>
+                                <option value="<?= htmlspecialchars($opt) ?>" <?= strcasecmp($currentAgama, $opt) === 0 ? 'selected' : '' ?>><?= htmlspecialchars($opt) ?></option>
+                              <?php endforeach; ?>
+                            </select>
+                            <?php if (!$izinEdit): ?>
+                              <input type="hidden" name="<?= htmlspecialchars($column) ?>" value="<?= htmlspecialchars($currentAgama) ?>">
+                            <?php endif; ?>
                           <?php elseif ($column === 'rencana_setelah_lulus'): ?>
                             <?php
                             $currentPlan = (string)($siswa[$column] ?? '');
@@ -1024,20 +1043,8 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
     </form>
   </div>
 
-  <nav class="bottom-nav">
-    <a href="siswa.php" class="nav-item-app">
-      <i class="fas fa-home"></i>
-      <span>Beranda</span>
-    </a>
-    <a href="absen.php" class="nav-item-app">
-      <i class="fas fa-calendar-check"></i>
-      <span>Absen</span>
-    </a>
-    <a href="#" class="nav-item-app active">
-      <i class="fas fa-user"></i>
-      <span>Profil</span>
-    </a>
-  </nav>
+  <?php include 'siswa_footer.php'; ?>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>

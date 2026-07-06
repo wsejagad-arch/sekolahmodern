@@ -433,5 +433,7 @@ $selPengumuman = $pengumumanByDate[$selDate] ?? [];
   <?php endif; ?>
 
 </div>
+<?php include 'siswa_footer.php'; ?>
+
 </body>
 </html>

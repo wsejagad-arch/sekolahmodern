@@ -132,12 +132,49 @@ if ($checkTableWali && mysqli_num_rows($checkTableWali) > 0) {
 if ($siswaBermasalah > 0) {
     $notifikasiData[] = [
         'type' => 'siswa_bermasalah',
-        'title' => 'Siswa Bermasalah',
-        'message' => $siswaBermasalah . ' siswa Alpha > 3x atau Sakit > 3 hari',
-        'icon' => 'bi-exclamation-circle',
+        'title' => 'Siswa Butuh Pendampingan',
+        'message' => $siswaBermasalah . ' siswa butuh pendampingan (Alpha > 3x atau Sakit > 3 hari)',
+        'icon' => 'bi-heart-pulse',
         'color' => 'danger',
         'count' => $siswaBermasalah,
         'link' => 'presensi.php'
+    ];
+}
+
+// 4. Pengajuan Izin Menunggu Validasi (Jika Wali Kelas atau Guru BK)
+$jmlIzinValidasi = 0;
+if (!empty($nipguru)) {
+    // Cek apakah guru adalah Wali Kelas
+    $qWk = mysqli_query($conn, "SELECT kelas FROM tbl_kelas WHERE nip_wali = '$nipguru' LIMIT 1");
+    if ($qWk && mysqli_num_rows($qWk) > 0) {
+        $rwk = mysqli_fetch_assoc($qWk);
+        $k_wali = mysqli_real_escape_string($conn, $rwk['kelas']);
+        $qIzinWk = mysqli_query($conn, "SELECT COUNT(*) as jml FROM tbl_izin_siswa WHERE REPLACE(kelas_siswa, ' ', '') = REPLACE('$k_wali', ' ', '') AND validasi_wali_kelas IN ('Menunggu', 'Menunggu Validasi')");
+        if ($qIzinWk) {
+            $rowIzin = mysqli_fetch_assoc($qIzinWk);
+            $jmlIzinValidasi += (int)($rowIzin['jml'] ?? 0);
+        }
+    }
+    
+    // Cek apakah guru adalah Guru BK
+    $qBk = mysqli_query($conn, "SELECT id_guru FROM tbl_guru WHERE no_induk = '$nipguru' AND (jabatan LIKE '%BK%' OR is_guru_bk = 1) LIMIT 1");
+    if ($qBk && mysqli_num_rows($qBk) > 0) {
+        $qIzinBk = mysqli_query($conn, "SELECT COUNT(*) as jml FROM tbl_izin_siswa WHERE validasi_guru_bk IN ('Menunggu', 'Menunggu Validasi')");
+        if ($qIzinBk) {
+            $rowIzinBk = mysqli_fetch_assoc($qIzinBk);
+            $jmlIzinValidasi += (int)($rowIzinBk['jml'] ?? 0);
+        }
+    }
+}
+if ($jmlIzinValidasi > 0) {
+    $notifikasiData[] = [
+        'type' => 'validasi_izin',
+        'title' => 'Validasi Izin Siswa',
+        'message' => $jmlIzinValidasi . ' pengajuan izin menunggu validasi Anda.',
+        'icon' => 'bi-patch-check',
+        'color' => 'warning',
+        'count' => $jmlIzinValidasi,
+        'link' => 'validasi-izin.php'
     ];
 }
 

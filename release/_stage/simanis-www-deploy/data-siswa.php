@@ -130,7 +130,7 @@ if ($hasKelasTable) {
 }
 
 if (empty($kelasOptions)) {
-    $sqlDistinct = @mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_siswa s WHERE {$tenantSiswa} AND kelas IS NOT NULL AND kelas <> '' ORDER BY kelas ASC");
+    $sqlDistinct = @mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_siswa s WHERE {$tenantSiswa} AND s.status = 'Aktif' AND kelas IS NOT NULL AND kelas <> '' ORDER BY kelas ASC");
     if ($sqlDistinct) {
         while ($rowKelas = mysqli_fetch_assoc($sqlDistinct)) {
             $kelasOptions[] = [
@@ -168,7 +168,7 @@ $waliFilterExpr = ($hasKelasTable && $hasWaliTable)
     ? "COALESCE(NULLIF(wk.nama_wali, ''), NULLIF(k.wali_kelas, ''), '-')"
     : "'-'";
 
-$conditions = [$tenantSiswa];
+$conditions = [$tenantSiswa, "s.status = 'Aktif'"];
 if ($kelasFilter !== '') {
     $conditions[] = "TRIM(s.kelas) = '{$kelasFilterEsc}'";
 }

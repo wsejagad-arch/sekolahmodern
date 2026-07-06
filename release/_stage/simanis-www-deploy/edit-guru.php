@@ -8,7 +8,6 @@ if (!isset($_SESSION["username"])) {
     </script>
     <?php }
 
-
 include "koneksi.php";
 date_default_timezone_set('Asia/Jakarta');
 $idguru = $_GET['id_guru'];
@@ -21,6 +20,14 @@ if ($_chkWa && mysqli_num_rows($_chkWa) === 0) {
 $_chkBK = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'is_guru_bk'");
 if ($_chkBK && mysqli_num_rows($_chkBK) === 0) {
     @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN is_guru_bk TINYINT(1) NOT NULL DEFAULT 0 AFTER status");
+}
+$_chkLit = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'is_pendamping_literasi'");
+if ($_chkLit && mysqli_num_rows($_chkLit) === 0) {
+    @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN is_pendamping_literasi TINYINT(1) NOT NULL DEFAULT 0 AFTER is_guru_bk");
+}
+$_chkAduan = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'is_tim_aduan'");
+if ($_chkAduan && mysqli_num_rows($_chkAduan) === 0) {
+    @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN is_tim_aduan TINYINT(1) NOT NULL DEFAULT 0 AFTER is_pendamping_literasi");
 }
 $_chkJabatan = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'jabatan'");
 if ($_chkJabatan && mysqli_num_rows($_chkJabatan) === 0) {
@@ -36,6 +43,11 @@ if (isset($_POST['submit'])) {
     $status_kepegawaian = mysqli_real_escape_string($conn, $_POST['status_kepegawaian']);
     $jabatan = mysqli_real_escape_string($conn, trim($_POST['jabatan'] ?? ''));
     $is_guru_bk = isset($_POST['is_guru_bk']) ? 1 : 0;
+    $is_pendamping_literasi = isset($_POST['is_pendamping_literasi']) ? 1 : 0;
+    $is_tim_aduan = isset($_POST['is_tim_aduan']) ? 1 : 0;
+    $akses = isset($_POST['is_admin']) ? '1' : '2';
+    $id_kelas_wali = isset($_POST['wali_kelas']) ? (int)$_POST['wali_kelas'] : 0;
+    $walas_status = ($id_kelas_wali > 0) ? 'Ya' : 'Tidak';
     $status = mysqli_real_escape_string($conn, $_POST['status_keaktifan']);
     $fotolama = $_POST['foto'];
     $namafile = $_FILES['file']['name'];
@@ -46,7 +58,31 @@ if (isset($_POST['submit'])) {
 
     if ($error != UPLOAD_ERR_NO_FILE) {
         $cekfoto = cek_foto($namafile);
-        mysqli_query($conn, "UPDATE tbl_guru g LEFT JOIN tbl_mapel_ampu m ON g.no_induk=m.no_induk SET g.no_induk='$nip', g.nama_guru='$nami', g.no_wa='$no_wa', g.status_kepegawaian='$status_kepegawaian', g.jabatan='$jabatan', g.is_guru_bk=$is_guru_bk, g.foto='$cekfoto', g.status='$status', m.no_induk='$nip' WHERE g.id_guru='$idguru'");
+        
+        // Ambil NIP lama untuk update relasi jika NIP diubah
+        $q_old = mysqli_query($conn, "SELECT no_induk FROM tbl_guru WHERE id_guru='$idguru'");
+        $old_nip = ($r_old = mysqli_fetch_assoc($q_old)) ? $r_old['no_induk'] : $nip;
+        $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
+        
+        mysqli_query($conn, "UPDATE tbl_guru g LEFT JOIN tbl_mapel_ampu m ON g.no_induk=m.no_induk SET g.no_induk='$nip', g.nama_guru='$nami', g.no_wa='$no_wa', g.status_kepegawaian='$status_kepegawaian', g.jabatan='$jabatan', g.is_guru_bk=$is_guru_bk, g.is_pendamping_literasi=$is_pendamping_literasi, g.is_tim_aduan=$is_tim_aduan, g.walas='$walas_status', g.foto='$cekfoto', g.status='$status', m.no_induk='$nip' WHERE g.id_guru='$idguru'");
+        mysqli_query($conn, "UPDATE tbl_pengguna SET hak_akses='$akses', no_induk='$nip' WHERE no_induk='$old_nip'");
+        
+        // --- SINKRONISASI WALI KELAS ---
+        $old_wk_q = mysqli_query($conn, "SELECT id_kelas FROM tbl_wali_kelas WHERE nip_wali='$old_nip' AND id_sekolah=$tenantId");
+        while($row_old = mysqli_fetch_assoc($old_wk_q)) {
+            $old_id = $row_old['id_kelas'];
+            mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas=NULL, nip_wali=NULL WHERE id_kelas=$old_id AND id_sekolah=$tenantId");
+        }
+        mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE nip_wali='$old_nip' AND id_sekolah=$tenantId");
+
+        if ($id_kelas_wali > 0) {
+            mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
+            $tgl_now = date('Y-m-d H:i:s');
+            mysqli_query($conn, "INSERT INTO tbl_wali_kelas(id_kelas, nip_wali, nama_wali, id_sekolah, created_at, updated_at) VALUES($id_kelas_wali, '$nip', '$nami', $tenantId, '$tgl_now', '$tgl_now')");
+            mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas='$nami', nip_wali='$nip' WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
+        }
+        // -------------------------------
+        
         move_uploaded_file($tmpName, 'foto/' . $cekfoto);
         unlink('foto/' . $fotolama);
         mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr', '$isilog')");
@@ -63,7 +99,30 @@ if (isset($_POST['submit'])) {
             })
         </script>
     <?php } else if ($error === UPLOAD_ERR_NO_FILE) {
-        mysqli_query($conn, "UPDATE tbl_guru g LEFT JOIN tbl_mapel_ampu m ON g.no_induk=m.no_induk SET g.no_induk='$nip', g.nama_guru='$nami', g.no_wa='$no_wa', g.status_kepegawaian='$status_kepegawaian', g.jabatan='$jabatan', g.is_guru_bk=$is_guru_bk, g.status='$status', m.no_induk='$nip' WHERE g.id_guru='$idguru'");
+        // Ambil NIP lama untuk update relasi jika NIP diubah
+        $q_old = mysqli_query($conn, "SELECT no_induk FROM tbl_guru WHERE id_guru='$idguru'");
+        $old_nip = ($r_old = mysqli_fetch_assoc($q_old)) ? $r_old['no_induk'] : $nip;
+        $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
+        
+        mysqli_query($conn, "UPDATE tbl_guru g LEFT JOIN tbl_mapel_ampu m ON g.no_induk=m.no_induk SET g.no_induk='$nip', g.nama_guru='$nami', g.no_wa='$no_wa', g.status_kepegawaian='$status_kepegawaian', g.jabatan='$jabatan', g.is_guru_bk=$is_guru_bk, g.is_pendamping_literasi=$is_pendamping_literasi, g.is_tim_aduan=$is_tim_aduan, g.walas='$walas_status', g.status='$status', m.no_induk='$nip' WHERE g.id_guru='$idguru'");
+        mysqli_query($conn, "UPDATE tbl_pengguna SET hak_akses='$akses', no_induk='$nip' WHERE no_induk='$old_nip'");
+        
+        // --- SINKRONISASI WALI KELAS ---
+        $old_wk_q = mysqli_query($conn, "SELECT id_kelas FROM tbl_wali_kelas WHERE nip_wali='$old_nip' AND id_sekolah=$tenantId");
+        while($row_old = mysqli_fetch_assoc($old_wk_q)) {
+            $old_id = $row_old['id_kelas'];
+            mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas=NULL, nip_wali=NULL WHERE id_kelas=$old_id AND id_sekolah=$tenantId");
+        }
+        mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE nip_wali='$old_nip' AND id_sekolah=$tenantId");
+
+        if ($id_kelas_wali > 0) {
+            mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
+            $tgl_now = date('Y-m-d H:i:s');
+            mysqli_query($conn, "INSERT INTO tbl_wali_kelas(id_kelas, nip_wali, nama_wali, id_sekolah, created_at, updated_at) VALUES($id_kelas_wali, '$nip', '$nami', $tenantId, '$tgl_now', '$tgl_now')");
+            mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas='$nami', nip_wali='$nip' WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
+        }
+        // -------------------------------
+        
         mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr', '$isilog')"); ?>
         <script>
             Swal.fire({
@@ -92,7 +151,7 @@ if (isset($_POST['submit'])) {
 
         <?php
         // Ambil dulu data guru
-        $guru = mysqli_query($conn, "SELECT * FROM tbl_guru WHERE id_guru='$idguru'");
+        $guru = mysqli_query($conn, "SELECT g.*, p.hak_akses FROM tbl_guru g LEFT JOIN tbl_pengguna p ON g.no_induk = p.no_induk WHERE g.id_guru='$idguru'");
         $data = mysqli_fetch_array($guru);
         ?>
 
@@ -133,7 +192,7 @@ if (isset($_POST['submit'])) {
                 </div>
                 <!-- No. WA -->
 
-                <!-- Guru BK -->
+                <!-- Role Khusus -->
                 <div class="form-group col-sm-4">
                     <label>Role Khusus:</label>
                     <div class="form-check mt-1">
@@ -143,7 +202,30 @@ if (isset($_POST['submit'])) {
                             <strong>Guru BK</strong> <small class="text-muted">(Bimbingan Konseling — dapat memvalidasi izin siswa)</small>
                         </label>
                     </div>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" name="is_pendamping_literasi" value="1" id="is_pendamping_literasi"
+                            <?= (!empty($data['is_pendamping_literasi']) ? 'checked' : '') ?>>
+                        <label class="form-check-label" for="is_pendamping_literasi">
+                            <strong>Pendamping Literasi</strong> <small class="text-muted">(Dapat mengatur kelas & memberi tugas literasi)</small>
+                        </label>
+                    </div>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" name="is_tim_aduan" value="1" id="is_tim_aduan"
+                            <?= (!empty($data['is_tim_aduan']) ? 'checked' : '') ?>>
+                        <label class="form-check-label" for="is_tim_aduan">
+                            <strong>Tim Aduan</strong> <small class="text-muted">(Koordinasi aduan — menerima notifikasi aduan siswa)</small>
+                        </label>
+                    </div>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" name="is_admin" value="1" id="is_admin"
+                            <?= ((string)($data['hak_akses'] ?? '') === '1' ? 'checked' : '') ?>>
+                        <label class="form-check-label" for="is_admin">
+                            <strong>Admin</strong> <small class="text-muted">(Jadikan Admin — memiliki akses penuh ke dashboard admin)</small>
+                        </label>
+                    </div>
                 </div>
+                <!-- Role Khusus -->
+
                 <!-- Status Kepegawaian -->
                 <div class="form-group col-sm-4">
                     <label for="status_kepegawaian">Status Kepegawaian:</label>
@@ -175,8 +257,11 @@ if (isset($_POST['submit'])) {
                         <option value="WKS Kurikulum" <?= (($data['jabatan'] ?? '') === 'WKS Kurikulum' ? 'selected' : '') ?>>WKS Kurikulum</option>
                         <option value="Tim WKS Kurikulum" <?= (($data['jabatan'] ?? '') === 'Tim WKS Kurikulum' ? 'selected' : '') ?>>Tim WKS Kurikulum</option>
                         <option value="WKS Kesiswaan" <?= (($data['jabatan'] ?? '') === 'WKS Kesiswaan' ? 'selected' : '') ?>>WKS Kesiswaan</option>
+                        <option value="Tim WKS Kesiswaan" <?= (($data['jabatan'] ?? '') === 'Tim WKS Kesiswaan' ? 'selected' : '') ?>>Tim WKS Kesiswaan</option>
                         <option value="WKS Humas" <?= (($data['jabatan'] ?? '') === 'WKS Humas' ? 'selected' : '') ?>>WKS Humas</option>
+                        <option value="Tim WKS Humas" <?= (($data['jabatan'] ?? '') === 'Tim WKS Humas' ? 'selected' : '') ?>>Tim WKS Humas</option>
                         <option value="WKS Sarpras" <?= (($data['jabatan'] ?? '') === 'WKS Sarpras' ? 'selected' : '') ?>>WKS Sarpras</option>
+                        <option value="Tim WKS Sarpras" <?= (($data['jabatan'] ?? '') === 'Tim WKS Sarpras' ? 'selected' : '') ?>>Tim WKS Sarpras</option>
                         <option value="STPKS" <?= (($data['jabatan'] ?? '') === 'STPKS' ? 'selected' : '') ?>>STPKS</option>
                         <option value="Kepala Sekolah" <?= (($data['jabatan'] ?? '') === 'Kepala Sekolah' ? 'selected' : '') ?>>Kepala Sekolah</option>
                     </select>
@@ -207,20 +292,23 @@ if (isset($_POST['submit'])) {
                 <!-- Wali Kelas -->
                 <div class="form-group col-sm-4">
                     <label for="wali_kelas">Wali Kelas:</label>
+                    <?php
+                        $q_wk = mysqli_query($conn, "SELECT id_kelas FROM tbl_wali_kelas WHERE nip_wali='{$data['no_induk']}' LIMIT 1");
+                        $current_kelas_id = ($r_wk = mysqli_fetch_assoc($q_wk)) ? $r_wk['id_kelas'] : 0;
+                    ?>
                     <select class="form-control" name="wali_kelas">
-                        <option selected disabled>-- pilih --</option>
+                        <option value="">-- Tidak Menjabat --</option>
                         <?php
-                        $kelasArray = array();
-                        $sqlKelas = "SELECT DISTINCT kelas FROM tbl_mapel_ampu";
+                        $sqlKelas = "SELECT id_kelas, kelas FROM tbl_kelas ORDER BY kelas ASC";
                         $resultKelas = mysqli_query($conn, $sqlKelas);
                         while ($dataKelas = mysqli_fetch_array($resultKelas)) {
-                            $kelasArray[] = $dataKelas['kelas'];
-                            $selected = (isset($_GET['kelas']) && $_GET['kelas'] == $dataKelas['kelas']) ? 'selected' : '';
+                            $selected = ($dataKelas['id_kelas'] == $current_kelas_id) ? 'selected' : '';
                         ?>
-                            <option value="<?= $dataKelas['kelas']; ?>" <?= $selected; ?>>
-                                <?= $dataKelas['kelas']; ?>
+                            <option value="<?= $dataKelas['id_kelas']; ?>" <?= $selected; ?>>
+                                <?= htmlspecialchars($dataKelas['kelas']); ?>
                             </option>
                         <?php } ?>
+                    </select>
                 </div>
                 <!-- Wali Kelas -->
 

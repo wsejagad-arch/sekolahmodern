@@ -74,8 +74,45 @@ function nk_write_log($conn, $message)
     @mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES ('$now', '$safeMessage')");
 }
 
+function nk_graduate_student($conn, $no_induk, $tenantId)
+{
+    $noIndukEsc = nk_esc($conn, $no_induk);
+    $tenantEsc = (int)$tenantId;
+    
+    // Get student info
+    $q_s = mysqli_query($conn, "SELECT * FROM tbl_siswa WHERE no_induk='$noIndukEsc' LIMIT 1");
+    if (!$q_s || mysqli_num_rows($q_s) === 0) return false;
+    $s = mysqli_fetch_assoc($q_s);
+    
+    $nisn = nk_esc($conn, $s['nisn'] ?? '');
+    $nama = nk_esc($conn, $s['nama_siswa'] ?? '');
+    $wa = nk_esc($conn, $s['no_wa'] ?? '');
+    $alamat = nk_esc($conn, $s['alamat'] ?? '');
+    $kelas = nk_esc($conn, $s['kelas'] ?? '');
+    $tahun_lulus = date('Y');
+    
+    // Get wali kelas
+    $wali_kelas = '';
+    if ($kelas !== '') {
+        $q_wk = mysqli_query($conn, "SELECT wali_kelas FROM tbl_kelas WHERE TRIM(kelas)='$kelas' AND id_sekolah=$tenantEsc LIMIT 1");
+        if ($q_wk && $r_wk = mysqli_fetch_assoc($q_wk)) {
+            $wali_kelas = nk_esc($conn, $r_wk['wali_kelas'] ?? '');
+        }
+    }
+    
+    // Insert to tbl_alumni
+    $now = date('Y-m-d H:i:s');
+    mysqli_query($conn, "INSERT INTO tbl_alumni (no_induk, nisn, nama_siswa, no_wa, alamat, histori_kelas, histori_wali_kelas, tahun_lulus, id_sekolah, created_at) VALUES ('$noIndukEsc', '$nisn', '$nama', '$wa', '$alamat', '$kelas', '$wali_kelas', '$tahun_lulus', $tenantEsc, '$now')");
+    
+    // Update status to Lulus
+    mysqli_query($conn, "UPDATE tbl_siswa SET status='Lulus' WHERE no_induk='$noIndukEsc'");
+    
+    return true;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $mode = $_POST['mode'] ?? '';
+    $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
     mysqli_autocommit($conn, false);
 
     try {
@@ -113,6 +150,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             nk_write_log($conn, $adminNama . ' menjalankan kenaikan kelas global XI ke XII, total siswa: ' . $totalUpdated);
             $notifType = 'success';
             $notifMsg = 'Kenaikan kelas global XI ke XII berhasil. Total siswa diperbarui: ' . $totalUpdated;
+        } elseif ($mode === 'global_xii_lulus') {
+            $activeFilter = nk_is_active_filter_sql();
+            // Ambil semua siswa XII
+            $resSiswa = mysqli_query($conn, "SELECT no_induk FROM tbl_siswa WHERE $activeFilter AND (kelas REGEXP '^[[:space:]]*(XII|12)\\\\b')");
+            if (!$resSiswa) {
+                throw new Exception('Gagal membaca daftar siswa kelas XII.');
+            }
+            
+            $totalGraduated = 0;
+            while ($row = mysqli_fetch_assoc($resSiswa)) {
+                if (nk_graduate_student($conn, $row['no_induk'], $tenantId)) {
+                    $totalGraduated++;
+                }
+            }
+            
+            nk_write_log($conn, $adminNama . ' menjalankan kelulusan global kelas XII, total lulus: ' . $totalGraduated);
+            $notifType = 'success';
+            $notifMsg = 'Kelulusan global kelas XII berhasil. Total siswa lulus: ' . $totalGraduated;
         } elseif ($mode === 'per_kelas') {
             $sourceClass = trim((string)($_POST['source_class'] ?? ''));
             $targetClass = trim((string)($_POST['target_class'] ?? ''));
@@ -158,15 +213,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $rowSiswa = mysqli_fetch_assoc($cek);
 
-            $q = mysqli_query($conn, "UPDATE tbl_siswa SET $setSql WHERE no_induk = '$noIndukEsc'");
-            if (!$q) {
-                throw new Exception('Gagal memindahkan siswa: ' . mysqli_error($conn));
+            if ($targetClass === 'LULUS') {
+                nk_graduate_student($conn, $noInduk, $tenantId);
+                $updated = 1;
+                $notifMsg = 'Siswa ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' berhasil diluluskan.';
+            } elseif ($targetClass === 'TIDAK_LULUS') {
+                $q = mysqli_query($conn, "UPDATE tbl_siswa SET status='Tidak Lulus' WHERE no_induk = '$noIndukEsc'");
+                $updated = 1;
+                $notifMsg = 'Status siswa ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' diubah menjadi Tidak Lulus.';
+            } else {
+                nk_ensure_class_exists($conn, $targetClass);
+                $targetEsc = nk_esc($conn, $targetClass);
+                $setSql = nk_update_class_sql_parts($conn, $targetEsc);
+                
+                $q = mysqli_query($conn, "UPDATE tbl_siswa SET $setSql WHERE no_induk = '$noIndukEsc'");
+                if (!$q) {
+                    throw new Exception('Gagal memindahkan siswa: ' . mysqli_error($conn));
+                }
+                $updated = mysqli_affected_rows($conn);
+                $notifMsg = 'Berhasil memindahkan siswa ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' ke kelas ' . $targetClass . '. Data diperbarui: ' . $updated;
             }
 
-            $updated = mysqli_affected_rows($conn);
-            nk_write_log($conn, $adminNama . ' memindahkan siswa ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' dari ' . ($rowSiswa['kelas'] ?? '-') . ' ke ' . $targetClass);
+            nk_write_log($conn, $adminNama . ' melakukan aksi individu pada siswa ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' ke target ' . $targetClass);
             $notifType = 'success';
-            $notifMsg = 'Berhasil memindahkan siswa ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' ke kelas ' . $targetClass . '. Data diperbarui: ' . $updated;
         } elseif ($mode === 'individu_tabel') {
             $noInduk = trim((string)($_POST['student_no_induk_row'] ?? ''));
             $targetClass = trim((string)($_POST['target_class_row'] ?? ''));
@@ -186,17 +255,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $rowSiswa = mysqli_fetch_assoc($cek);
 
-            if (trim((string)($rowSiswa['kelas'] ?? '')) === $targetClass) {
-                throw new Exception('Siswa sudah berada di kelas tujuan.');
+            if ($targetClass === 'LULUS') {
+                nk_graduate_student($conn, $noInduk, $tenantId);
+                $updated = 1;
+                $notifMsg = 'Siswa ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' berhasil diluluskan.';
+            } elseif ($targetClass === 'TIDAK_LULUS') {
+                $q = mysqli_query($conn, "UPDATE tbl_siswa SET status='Tidak Lulus' WHERE no_induk = '$noIndukEsc'");
+                $updated = 1;
+                $notifMsg = 'Status siswa ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' diubah menjadi Tidak Lulus.';
+            } else {
+                if (trim((string)($rowSiswa['kelas'] ?? '')) === $targetClass) {
+                    throw new Exception('Siswa sudah berada di kelas tujuan.');
+                }
+                
+                nk_ensure_class_exists($conn, $targetClass);
+                $targetEsc = nk_esc($conn, $targetClass);
+                $setSql = nk_update_class_sql_parts($conn, $targetEsc);
+
+                $q = mysqli_query($conn, "UPDATE tbl_siswa SET $setSql WHERE no_induk = '$noIndukEsc'");
+                if (!$q) {
+                    throw new Exception('Gagal memindahkan siswa: ' . mysqli_error($conn));
+                }
+                $updated = mysqli_affected_rows($conn);
+                $notifMsg = 'Berhasil memindahkan siswa ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' ke kelas ' . $targetClass . '. Data diperbarui: ' . $updated;
             }
 
-            $q = mysqli_query($conn, "UPDATE tbl_siswa SET $setSql WHERE no_induk = '$noIndukEsc'");
-            if (!$q) {
-                throw new Exception('Gagal memindahkan siswa: ' . mysqli_error($conn));
-            }
-
-            $updated = mysqli_affected_rows($conn);
-            nk_write_log($conn, $adminNama . ' memindahkan siswa (aksi tabel) ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' dari ' . ($rowSiswa['kelas'] ?? '-') . ' ke ' . $targetClass);
+            nk_write_log($conn, $adminNama . ' melakukan aksi individu (tabel) pada ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' ke target ' . $targetClass);
             $notifType = 'success';
             $notifMsg = 'Berhasil memindahkan siswa ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' ke kelas ' . $targetClass . '. Data diperbarui: ' . $updated;
         } else {
@@ -302,25 +386,40 @@ ksort($studentsByClass, SORT_NATURAL | SORT_FLAG_CASE);
     </div>
 
     <div class="row">
-        <div class="col-lg-4 mb-4">
+        <div class="col-lg-3 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">1) Global XI ke XII</h6>
                 </div>
                 <div class="card-body">
-                    <p class="small text-muted">Semua siswa aktif dengan kelas diawali XI/11 akan otomatis naik ke kelas XII dengan nama kelas yang disesuaikan.</p>
+                    <p class="small text-muted">Semua siswa aktif dengan kelas diawali XI/11 otomatis naik ke kelas XII.</p>
                     <form method="post" onsubmit="return confirm('Jalankan kenaikan global XI ke XII sekarang?');">
                         <input type="hidden" name="mode" value="global_xi_to_xii">
-                        <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-rocket mr-1"></i>Proses Global XI → XII</button>
+                        <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-rocket mr-1"></i>Proses XI ke XII</button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-4 mb-4">
+        <div class="col-lg-3 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-success">2) Naik Kelas Per Kelas</h6>
+                    <h6 class="m-0 font-weight-bold text-danger">2) Global Kelulusan XII</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">Meluluskan semua siswa aktif berawalan kelas XII dan memindahkannya ke tabel alumni.</p>
+                    <form method="post" onsubmit="return confirm('Luluskan semua siswa kelas XII dan masukkan ke Data Alumni?');">
+                        <input type="hidden" name="mode" value="global_xii_lulus">
+                        <button type="submit" class="btn btn-danger btn-block"><i class="fas fa-graduation-cap mr-1"></i>Proses Global Kelulusan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">3) Naik Kelas Per Kelas</h6>
                 </div>
                 <div class="card-body">
                     <p class="small text-muted">Pindahkan seluruh siswa aktif dari satu kelas ke kelas tujuan. Cocok untuk X ke XI atau XI ke XII sesuai hasil kenaikan.</p>
@@ -350,10 +449,10 @@ ksort($studentsByClass, SORT_NATURAL | SORT_FLAG_CASE);
             </div>
         </div>
 
-        <div class="col-lg-4 mb-4">
+        <div class="col-lg-3 mb-4">
             <div class="card shadow h-100">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-warning">3) Naik Kelas Individu</h6>
+                    <h6 class="m-0 font-weight-bold text-warning">4) Naik Kelas Individu</h6>
                 </div>
                 <div class="card-body">
                     <p class="small text-muted">Pindahkan siswa satu per satu sesuai hasil kenaikan kelas masing-masing siswa.</p>
@@ -369,12 +468,18 @@ ksort($studentsByClass, SORT_NATURAL | SORT_FLAG_CASE);
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Kelas Tujuan</label>
+                            <label>Kelas / Status Tujuan</label>
                             <select class="form-control" name="target_class_individual" required>
-                                <option value="">-- Pilih kelas tujuan --</option>
+                                <option value="">-- Pilih tujuan / status --</option>
+                                <optgroup label="Ubah Status">
+                                    <option value="LULUS">Lulus (Pindah ke Alumni)</option>
+                                    <option value="TIDAK_LULUS">Tidak Lulus (Tetap Aktif/Mengulang)</option>
+                                </optgroup>
+                                <optgroup label="Pindah Kelas">
                                 <?php foreach ($kelasOptions as $kelas): ?>
                                     <option value="<?= htmlspecialchars($kelas) ?>"><?= htmlspecialchars($kelas) ?></option>
                                 <?php endforeach; ?>
+                                </optgroup>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-warning btn-block"><i class="fas fa-user-edit mr-1"></i>Proses Individu</button>
@@ -419,13 +524,19 @@ ksort($studentsByClass, SORT_NATURAL | SORT_FLAG_CASE);
                                                 <form method="post" class="d-flex" onsubmit="return confirm('Pindahkan siswa ini ke kelas tujuan?');">
                                                     <input type="hidden" name="mode" value="individu_tabel">
                                                     <input type="hidden" name="student_no_induk_row" value="<?= htmlspecialchars($s['no_induk'] ?? '') ?>">
-                                                    <select class="form-control form-control-sm mr-2" name="target_class_row" required>
-                                                        <option value="">Kelas tujuan</option>
+                                                    <select class="form-control form-control-sm mr-2" name="target_class_row" required style="max-width: 150px;">
+                                                        <option value="">Aksi / Tujuan...</option>
+                                                        <optgroup label="Ubah Status">
+                                                            <option value="LULUS">🎓 Lulus</option>
+                                                            <option value="TIDAK_LULUS">❌ Tidak Lulus</option>
+                                                        </optgroup>
+                                                        <optgroup label="Pindah Kelas">
                                                         <?php foreach ($kelasOptions as $kelasOpt): ?>
                                                             <option value="<?= htmlspecialchars($kelasOpt) ?>" <?= (($s['kelas'] ?? '') === $kelasOpt) ? 'disabled' : '' ?>>
                                                                 <?= htmlspecialchars($kelasOpt) ?>
                                                             </option>
                                                         <?php endforeach; ?>
+                                                        </optgroup>
                                                     </select>
                                                     <button type="submit" class="btn btn-sm btn-outline-primary">Proses</button>
                                                 </form>

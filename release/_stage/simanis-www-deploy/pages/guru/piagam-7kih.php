@@ -204,7 +204,7 @@ $avgFinal = !empty($rows) ? array_sum(array_column($rows, 'final_score')) / coun
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Piagam 7KIH - SIMANIS</title>
+    <title>Piagam 7 KAIH (Tujuh Kebiasaan Anak Indonesia Hebat) - SIMANIS</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
@@ -240,8 +240,8 @@ $avgFinal = !empty($rows) ? array_sum(array_column($rows, 'final_score')) / coun
 <body>
 <main class="shell">
     <section class="hero">
-        <a href="guru_2026"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
-        <h1 class="mt-3 mb-2">Piagam 7KIH</h1>
+        <a href="../../home.php"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+        <h1 class="mt-3 mb-2">Piagam 7 KAIH (Tujuh Kebiasaan Anak Indonesia Hebat)</h1>
         <p class="mb-0 text-white-50">Analisis otomatis Jurnal 7 Kebiasaan Anak Indonesia Hebat berdasarkan kelengkapan, konsistensi harian, dan ketepatan waktu siswa mengirim selfie jurnal.</p>
     </section>
 
@@ -302,7 +302,7 @@ $avgFinal = !empty($rows) ? array_sum(array_column($rows, 'final_score')) / coun
 
     <section class="panel">
         <div class="panel-pad border-bottom">
-            <h5 class="fw-bold mb-1">Peringkat 7KIH Siswa</h5>
+            <h5 class="fw-bold mb-1">Peringkat 7 KAIH Siswa</h5>
             <div class="mini">Skor akhir = kelengkapan 55%, ketepatan waktu 35%, konsistensi hari aktif 10%.</div>
         </div>
         <div class="table-responsive">
@@ -354,8 +354,8 @@ $avgFinal = !empty($rows) ? array_sum(array_column($rows, 'final_score')) / coun
 </main>
 
 <nav class="mobile-nav">
-    <a href="guru_2026"><i class="bi bi-house-door"></i><span>Beranda</span></a>
-    <a href="piagam-7kih" style="color:#16a34a;"><i class="bi bi-patch-check"></i><span>7KIH</span></a>
+    <a href="../../home.php"><i class="bi bi-house-door"></i><span>Beranda</span></a>
+    <a href="piagam-7kih" style="color:#16a34a;"><i class="bi bi-patch-check"></i><span>7 KAIH</span></a>
     <a href="apresiasi-guru"><i class="bi bi-award"></i><span>Apresiasi</span></a>
     <a href="profil-guru"><i class="bi bi-person"></i><span>Profil</span></a>
 </nav>

@@ -1,2 +1,7 @@
-node_modules
-koneksi.php
+venv/
+__pycache__/
+*.pyc
+.env
+notifications.db
+*.zip
+node_modules/

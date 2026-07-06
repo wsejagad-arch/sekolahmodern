@@ -66,8 +66,8 @@ if (strtotime($dateStart) > strtotime($dateEnd)) {
 $dateStartEsc = mysqli_real_escape_string($conn, $dateStart);
 $dateEndEsc = mysqli_real_escape_string($conn, $dateEnd);
 $periodLabel = date('d M Y', strtotime($dateStart)) . ' - ' . date('d M Y', strtotime($dateEnd));
-$backHomeUrl = php_sapi_name() === 'cli-server' ? 'guru_2026.php' : 'guru_2026';
-$inputJurnalUrl = php_sapi_name() === 'cli-server' ? 'guru_legacy.php?open_jurnal=1' : 'guru_legacy?open_jurnal=1';
+$backHomeUrl = php_sapi_name() === 'cli-server' ? '../../home.php' : '../../home.php';
+$inputJurnalUrl = php_sapi_name() === 'cli-server' ? '../../home.php?open_jurnal=1' : '../../home.php?open_jurnal=1';
 
 // Get Gemini API Key
 $geminiApiKey = '';
@@ -125,6 +125,107 @@ if ($kelasFilter === '' && !empty($kelasOptions)) {
 }
 $kelasEsc = mysqli_real_escape_string($conn, $kelasFilter);
 $canTindakLanjut = $kelasFilter !== '' && in_array($kelasFilter, $kelasWaliOptions, true);
+
+// Get actual Wali Kelas details
+$waliKelasNama = '........................................';
+$waliKelasNip = '................................';
+
+if ($kelasFilter !== '') {
+    // 1. Try tbl_wali_kelas joined with tbl_kelas and tbl_guru
+    $checkWaliTable = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_wali_kelas'");
+    if ($checkWaliTable && mysqli_num_rows($checkWaliTable) > 0) {
+        $checkGuruCol = mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'nip_guru'");
+        $nipSelect = ($checkGuruCol && mysqli_num_rows($checkGuruCol) > 0)
+            ? "COALESCE(NULLIF(g.nip_guru,''), g.no_induk)"
+            : "g.no_induk";
+            
+        $qWaliInfo = mysqli_query(
+            $conn,
+            "SELECT g.nama_guru, {$nipSelect} AS nip_guru
+             FROM tbl_wali_kelas wk
+             JOIN tbl_kelas k ON k.id_kelas = wk.id_kelas
+             JOIN tbl_guru g ON g.no_induk = wk.nip_wali
+             WHERE k.kelas = '$kelasEsc'
+             LIMIT 1"
+        );
+        if ($qWaliInfo && $rowWali = mysqli_fetch_assoc($qWaliInfo)) {
+            $waliKelasNama = (string)($rowWali['nama_guru'] ?? $waliKelasNama);
+            $waliKelasNip = (string)($rowWali['nip_guru'] ?? $waliKelasNip);
+        }
+    }
+    
+    // 2. Try tbl_kelas + tbl_guru directly (legacy column nip_wali in tbl_kelas)
+    if ($waliKelasNama === '........................................') {
+        $checkKelasCol = mysqli_query($conn, "SHOW COLUMNS FROM tbl_kelas LIKE 'nip_wali'");
+        if ($checkKelasCol && mysqli_num_rows($checkKelasCol) > 0) {
+            $checkGuruCol = mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'nip_guru'");
+            $nipSelect = ($checkGuruCol && mysqli_num_rows($checkGuruCol) > 0)
+                ? "COALESCE(NULLIF(g.nip_guru,''), g.no_induk)"
+                : "g.no_induk";
+                
+            $qWaliInfo = mysqli_query(
+                $conn,
+                "SELECT g.nama_guru, {$nipSelect} AS nip_guru
+                 FROM tbl_kelas k
+                 JOIN tbl_guru g ON g.no_induk = k.nip_wali
+                 WHERE k.kelas = '$kelasEsc'
+                 LIMIT 1"
+            );
+            if ($qWaliInfo && $rowWali = mysqli_fetch_assoc($qWaliInfo)) {
+                $waliKelasNama = (string)($rowWali['nama_guru'] ?? $waliKelasNama);
+                $waliKelasNip = (string)($rowWali['nip_guru'] ?? $waliKelasNip);
+            }
+        }
+    }
+    
+    // 3. Try tbl_wali_kelas nama_wali directly
+    if ($waliKelasNama === '........................................') {
+        $checkWaliTable = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_wali_kelas'");
+        if ($checkWaliTable && mysqli_num_rows($checkWaliTable) > 0) {
+            $checkNamaWaliCol = mysqli_query($conn, "SHOW COLUMNS FROM tbl_wali_kelas LIKE 'nama_wali'");
+            if ($checkNamaWaliCol && mysqli_num_rows($checkNamaWaliCol) > 0) {
+                $qWaliInfo = mysqli_query(
+                    $conn,
+                    "SELECT wk.nama_wali, wk.nip_wali
+                     FROM tbl_wali_kelas wk
+                     JOIN tbl_kelas k ON k.id_kelas = wk.id_kelas
+                     WHERE k.kelas = '$kelasEsc'
+                     LIMIT 1"
+                );
+                if ($qWaliInfo && $rowWali = mysqli_fetch_assoc($qWaliInfo)) {
+                    if (!empty($rowWali['nama_wali'])) {
+                        $waliKelasNama = $rowWali['nama_wali'];
+                        if (!empty($rowWali['nip_wali'])) {
+                            $waliKelasNip = $rowWali['nip_wali'];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 4. Try tbl_kelas wali_kelas column directly
+    if ($waliKelasNama === '........................................') {
+        $checkWaliCol = mysqli_query($conn, "SHOW COLUMNS FROM tbl_kelas LIKE 'wali_kelas'");
+        if ($checkWaliCol && mysqli_num_rows($checkWaliCol) > 0) {
+            $qWaliInfo = mysqli_query(
+                $conn,
+                "SELECT k.wali_kelas, k.nip_wali
+                 FROM tbl_kelas k
+                 WHERE k.kelas = '$kelasEsc'
+                 LIMIT 1"
+            );
+            if ($qWaliInfo && $rowWali = mysqli_fetch_assoc($qWaliInfo)) {
+                if (!empty($rowWali['wali_kelas']) && $rowWali['wali_kelas'] !== '0') {
+                    $waliKelasNama = $rowWali['wali_kelas'];
+                    if (!empty($rowWali['nip_wali']) && $rowWali['nip_wali'] !== '0') {
+                        $waliKelasNip = $rowWali['nip_wali'];
+                    }
+                }
+            }
+        }
+    }
+}
 
 $students = [];
 $classStats = [
@@ -303,6 +404,7 @@ try {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/guru-desktop.css?v=<?= time() ?>">
     <style>
         :root {
             --primary: #4f46e5;
@@ -317,21 +419,16 @@ try {
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            font-family: "Poppins", sans-serif;
+            font-family: "Plus Jakarta Sans", system-ui, sans-serif;
             font-weight: 400;
-            background:
-                radial-gradient(circle at top right,
-                    rgba(223,255,154,0.35) 0%,
-                    transparent 35%),
-                radial-gradient(circle at bottom left,
-                    rgba(0,107,47,0.35) 0%,
-                    transparent 35%),
-                linear-gradient(
-                    135deg,
-                    rgba(11,122,50,0.75),
-                    rgba(126,217,87,0.55),
-                    rgba(217,255,159,0.45)
-                );
+            background: #ebf1f6;
+            color: var(--text);
+        }
+        .page-shell { padding: 0; }
+        .hero { display: none; }
+        .background { display: none; }
+        
+        body {
             background-attachment: fixed;
             color: var(--text);
             padding-bottom: 112px;
@@ -789,26 +886,28 @@ try {
     </style>
 </head>
 <body>
+<?php include 'guru_sidebar_shared.php'; ?>
 
-  <div class="background">
-    <div class="shape one"></div>
-    <div class="shape two"></div>
-    <div class="shape three"></div>
-    <div class="shape four"></div>
-    <div class="wave"></div>
-    <div class="dots"></div>
-  </div>
-<main class="page-shell">
-    <section class="hero">
-        <a href="<?= htmlspecialchars($backHomeUrl, ENT_QUOTES, 'UTF-8'); ?>" class="text-white-50 text-decoration-none d-inline-flex align-items-center mb-3">
-            <i class="bi bi-arrow-left me-1"></i> Kembali ke Beranda
-        </a>
-        <h1 class="mb-2">Laporan Analisis Kelas AI</h1>
-        <p class="mb-0 text-white-50">Analisis kondisi kelas dan identifikasi siswa yang membutuhkan pendampingan segera.</p>
-        <div class="mt-3 small text-white-50">
-            Periode data: <strong class="text-white"><?= htmlspecialchars($periodLabel); ?></strong>
+
+<div class="app-shell" style="grid-template-columns: 1fr; padding-right: 24px;">
+    <div class="desktop-center-column">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner-premium mb-4">
+            <div class="banner-content">
+                <div class="banner-text">
+                    <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Laporan Analisis Kelas AI 🤖</h2>
+                    <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Analisis kondisi kelas dan identifikasi siswa yang membutuhkan pendampingan segera. Periode data: <strong class="text-white"><?= htmlspecialchars($periodLabel); ?></strong>.</p>
+                </div>
+                <div class="banner-actions">
+                    <a href="<?= htmlspecialchars($backHomeUrl, ENT_QUOTES, 'UTF-8'); ?>" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali ke Dashboard</a>
+                </div>
+            </div>
+            <div class="banner-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
         </div>
-    </section>
 
     <!-- Filters -->
     <section class="panel panel-pad">
@@ -935,7 +1034,7 @@ try {
                             </tr>
                             <tr>
                                 <td>Wali Kelas</td>
-                                <td><?= $canTindakLanjut ? htmlspecialchars($namaGuru) : '........................................'; ?></td>
+                                <td><?= htmlspecialchars($waliKelasNama); ?></td>
                             </tr>
                             <tr>
                                 <td>Semester</td>
@@ -1176,8 +1275,8 @@ try {
                                 <td>
                                     Wali Kelas,
                                     <br><br><br><br><br>
-                                    <span class="signature-name"><?= $canTindakLanjut ? htmlspecialchars($namaGuru) : '........................................'; ?></span><br>
-                                    NIP. ................................
+                                    <span class="signature-name"><?= htmlspecialchars($waliKelasNama); ?></span><br>
+                                    NIP. <?= htmlspecialchars($waliKelasNip); ?>
                                 </td>
                             </tr>
                         </table>
@@ -1286,7 +1385,8 @@ try {
             <?php endif; ?>
         </section>
     <?php endif; ?>
-</main>
+    </div> <!-- End desktop-center-column -->
+</div> <!-- End app-shell -->
 
 <!-- Tindak Lanjut Modal -->
 <div class="modal fade" id="tindakLanjutModal" tabindex="-1" aria-labelledby="tindakLanjutModalLabel" aria-hidden="true">
@@ -1378,7 +1478,7 @@ try {
 <!-- Bottom Navigation for Teacher Mobile Context -->
 <div class="bottom-nav-wrap">
     <nav class="bottom-nav" aria-label="Navigasi guru">
-        <a href="guru_legacy.php" class="nav-link-item"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
+        <a href="../../home.php" class="nav-link-item"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
         <a href="data-siswa.php" class="nav-link-item"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
         <a href="<?= htmlspecialchars($inputJurnalUrl, ENT_QUOTES, 'UTF-8'); ?>" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
         <a href="nilai.php" class="nav-link-item"><i class="bi bi-clipboard-check"></i><span>Nilai</span></a>
@@ -1389,21 +1489,12 @@ try {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script type="module">
-import { GoogleGenAI } from "https://esm.sh/@google/genai";
-
-const geminiApiKey = <?= json_encode($geminiApiKey); ?>;
+<script>
 const studentData = <?= json_encode(array_values($students)); ?>;
 const kelasWali = <?= json_encode($kelasFilter); ?>;
 const periodLabel = <?= json_encode($periodLabel); ?>;
 
-async function analyzeClassWithAI() {
-    const key = geminiApiKey;
-    if(!key) {
-        alert('API Key Gemini belum diatur di halaman pengaturan admin.');
-        return;
-    }
-
+function analyzeClassWithAI() {
     if(studentData.length === 0) {
         alert('Data siswa kosong, tidak ada yang bisa dianalisis.');
         return;
@@ -1428,30 +1519,36 @@ ${summaryData}
 
 Tolong berikan laporan analisis kondisi kelas yang komprehensif:
 1. **Analisis Umum**: Ringkasan singkat mengenai tingkat kedisiplinan, kehadiran, akademik, dan kepatuhan kelas secara umum.
-2. **Prioritas Pendampingan (Siswa Bermasalah)**: Identifikasi 3-5 siswa yang paling bermasalah (prioritas tinggi) berdasarkan Indeks Masalah mereka. Jelaskan aspek apa saja yang menjadi masalah utama bagi masing-masing siswa tersebut (misal: sering alpha/telat, nilai di bawah KKM 75, atau banyak pelanggaran).
-3. **Rekomendasi Tindak Lanjut**: Berikan rekomendasi langkah konkret dan solutif yang bisa diambil oleh Guru Mata Pelajaran maupun Wali Kelas untuk mendampingi siswa-siswa bermasalah tersebut, serta langkah pencegahan agar siswa lain tidak mengalami hal serupa.
+2. **Prioritas Pendampingan (Siswa Butuh Pendampingan)**: Identifikasi 3-5 siswa yang paling membutuhkan pendampingan (prioritas tinggi) berdasarkan Indeks Masalah mereka. Jelaskan aspek apa saja yang menjadi masalah utama bagi masing-masing siswa tersebut (misal: sering alpha/telat, nilai di bawah KKM 75, atau banyak pelanggaran).
+3. **Rekomendasi Tindak Lanjut**: Berikan rekomendasi langkah konkret dan solutif yang bisa diambil oleh Guru Mata Pelajaran maupun Wali Kelas untuk mendampingi siswa-siswa yang membutuhkan pendampingan tersebut, serta langkah pencegahan agar siswa lain tidak mengalami hal serupa.
 
 Gunakan format Markdown (tabel, bullet points, teks tebal) dengan penyajian yang profesional, objektif, dan solutif dalam bahasa Indonesia. Tidak perlu menyapa panjang lebar, langsung berikan hasil analisis secara rapi.`;
 
-    try {
-        const ai = new GoogleGenAI({ apiKey: key });
-        const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: promptText
-        });
-
-        const aiResponse = response.text;
-        $('#ai-result-content').html(marked.parse(aiResponse));
-        $('#ai-result-container').removeClass('d-none');
-    } catch(err) {
-        alert('Gagal mengambil analisis AI: ' + err.message);
+    $.ajax({
+        url: 'ajax_laporan_kelas_ai.php',
+        method: 'POST',
+        data: { prompt: promptText },
+        dataType: 'json'
+    }).done(function(response) {
+        if (response && response.success) {
+            const aiResponse = response.text;
+            $('#ai-result-content').html(marked.parse(aiResponse));
+            $('#ai-result-container').removeClass('d-none');
+        } else {
+            alert('Gagal mengambil analisis AI: ' + (response.message || 'Error tidak dikenal.'));
+            $('#ai-action-btn').removeClass('d-none');
+        }
+    }).fail(function(xhr) {
+        let msg = 'Gagal menghubungi server AI.';
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+            msg = xhr.responseJSON.message;
+        }
+        alert('Gagal mengambil analisis AI: ' + msg);
         $('#ai-action-btn').removeClass('d-none');
-    } finally {
+    }).always(function() {
         $('#ai-loading').addClass('d-none');
-    }
+    });
 }
-
-window.analyzeClassWithAI = analyzeClassWithAI;
 </script>
 <script>
     function syncPeriodFields() {

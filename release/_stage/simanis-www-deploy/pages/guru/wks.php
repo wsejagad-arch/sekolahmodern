@@ -143,13 +143,13 @@ function wks_create_tables(mysqli $conn): void
 
 function wks_seed_default(mysqli $conn, array $teams, string $nip): void
 {
+    $qTotal = @mysqli_query($conn, "SELECT id FROM tbl_wks_microsite LIMIT 1");
+    if ($qTotal && mysqli_num_rows($qTotal) > 0) {
+        return; // Sudah ada data, jangan seed ulang secara otomatis
+    }
+
     foreach ($teams as $unit => $team) {
         $unitEsc = mysqli_real_escape_string($conn, $unit);
-        $qExisting = @mysqli_query($conn, "SELECT id FROM tbl_wks_microsite WHERE unit='$unitEsc' LIMIT 1");
-        if ($qExisting && mysqli_num_rows($qExisting) > 0) {
-            continue;
-        }
-
         $titleEsc = mysqli_real_escape_string($conn, $team['name']);
         $descEsc = mysqli_real_escape_string($conn, $team['summary']);
         $nipEsc = mysqli_real_escape_string($conn, $nip);
@@ -168,7 +168,24 @@ $qGuru = @mysqli_query($conn, "SELECT no_induk, nama_guru, jabatan, foto FROM tb
 $guru = $qGuru ? mysqli_fetch_assoc($qGuru) : null;
 $jabatan = (string)($guru['jabatan'] ?? '');
 $normalizedRole = wks_normalize_role($jabatan);
-$canManage = in_array($normalizedRole, ['wks kurikulum', 'tim wks kurikulum'], true);
+
+$userManagedUnits = [];
+if (strpos($normalizedRole, 'kurikulum') !== false) {
+    $userManagedUnits[] = 'kurikulum';
+}
+if (strpos($normalizedRole, 'kesiswaan') !== false) {
+    $userManagedUnits[] = 'kesiswaan';
+}
+if (strpos($normalizedRole, 'humas') !== false) {
+    $userManagedUnits[] = 'humas';
+}
+if (strpos($normalizedRole, 'sarpras') !== false) {
+    $userManagedUnits[] = 'sarpras';
+}
+if (strpos($normalizedRole, 'kepala sekolah') !== false || $normalizedRole === 'admin' || $normalizedRole === 'stpks') {
+    $userManagedUnits = ['kurikulum', 'kesiswaan', 'humas', 'sarpras'];
+}
+$isPengelola = count($userManagedUnits) > 0;
 
 $kelasAmpu = [];
 $qKelas = @mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_mapel_ampu WHERE no_induk='$nipEsc' AND kelas <> ''");
@@ -188,12 +205,30 @@ $flash = '';
 $flashType = 'success';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!$canManage) {
-        $flash = 'Akses ditolak. Hanya WKS Kurikulum atau Tim WKS Kurikulum yang dapat mengelola microsite.';
+    if (!$isPengelola) {
+        $flash = 'Akses ditolak. Anda tidak memiliki hak untuk mengelola microsite WKS.';
         $flashType = 'danger';
     } else {
         $action = (string)($_POST['action'] ?? '');
         $id = (int)($_POST['id'] ?? 0);
+        $unit = (string)($_POST['unit'] ?? '');
+        
+        $actionAllowed = true;
+        if (in_array($action, ['update', 'delete', 'toggle_status']) && $id > 0) {
+            $qCheck = @mysqli_query($conn, "SELECT unit FROM tbl_wks_microsite WHERE id=$id LIMIT 1");
+            $existing = $qCheck ? mysqli_fetch_assoc($qCheck) : null;
+            if (!$existing || !in_array($existing['unit'], $userManagedUnits, true)) {
+                $actionAllowed = false;
+            }
+        }
+        if (in_array($action, ['create', 'update']) && !in_array($unit, $userManagedUnits, true)) {
+            $actionAllowed = false;
+        }
+
+        if (!$actionAllowed) {
+            $flash = 'Akses ditolak untuk bidang WKS tersebut.';
+            $flashType = 'danger';
+        } else {
         $unit = (string)($_POST['unit'] ?? '');
         $title = trim((string)($_POST['title'] ?? ''));
         $description = trim((string)($_POST['description'] ?? ''));
@@ -249,6 +284,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $flashType = $ok ? 'success' : 'danger';
             }
         }
+        } // close if (!$actionAllowed) else
     }
 }
 
@@ -257,17 +293,22 @@ foreach (array_keys($teams) as $unit) {
     $itemsByUnit[$unit] = [];
 }
 
-$whereActive = $canManage ? '1=1' : 'is_active=1';
 $qItems = @mysqli_query($conn, "
     SELECT *
     FROM tbl_wks_microsite
-    WHERE $whereActive
     ORDER BY FIELD(unit, 'kurikulum', 'kesiswaan', 'humas', 'sarpras'), sort_order ASC, id ASC
 ");
-while ($qItems && ($row = mysqli_fetch_assoc($qItems))) {
-    $unit = (string)$row['unit'];
-    if (isset($itemsByUnit[$unit])) {
-        $itemsByUnit[$unit][] = $row;
+while ($qItems && ($item = mysqli_fetch_assoc($qItems))) {
+    $itemUnit = $item['unit'];
+    $canManageItem = in_array($itemUnit, $userManagedUnits, true);
+    
+    // Jika nonaktif dan user bukan pengelola unit tsb, maka jangan dimasukkan ke array
+    if (!(int)$item['is_active'] && !$canManageItem) {
+        continue;
+    }
+    
+    if (isset($itemsByUnit[$itemUnit])) {
+        $itemsByUnit[$itemUnit][] = $item;
     }
 }
 ?>
@@ -299,14 +340,14 @@ while ($qItems && ($row = mysqli_fetch_assoc($qItems))) {
         .team-section.is-active { display:block; }
         .team-head { color:#fff; padding:18px; display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
         .team-head i { width:46px; height:46px; display:grid; place-items:center; border-radius:14px; background:rgba(255,255,255,.18); font-size:24px; }
-        .microsite-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; padding:18px; }
-        .site-card { border:1px solid var(--line); border-radius:14px; background:#fff; padding:16px; min-height:180px; display:flex; flex-direction:column; gap:12px; }
-        .site-title { font-weight:900; font-size:17px; }
-        .site-desc { color:#475569; font-size:13px; line-height:1.55; flex:1; }
-        .site-actions { display:flex; flex-wrap:wrap; gap:8px; }
-        .btn-soft { border:1px solid var(--line); background:#f8fafc; color:#0f172a; font-weight:800; border-radius:10px; padding:9px 12px; text-decoration:none; display:inline-flex; gap:7px; align-items:center; }
-        .btn-soft.primary { background:#0f766e; border-color:#0f766e; color:#fff; }
-        .btn-soft.disabled { color:#94a3b8; pointer-events:none; }
+        .microsite-grid { display:flex; flex-direction:column; gap:16px; padding:24px; max-width:680px; margin:0 auto; }
+        .sid-button { background:#fff; border:2px solid var(--line); border-radius:99px; padding:12px 24px; text-decoration:none; color:var(--ink); display:flex; align-items:center; gap:16px; transition:.2s ease; box-shadow:0 4px 15px rgba(0,0,0,.03); position:relative; }
+        .sid-button:hover { border-color:var(--brand); transform:translateY(-2px); box-shadow:0 8px 25px rgba(15,118,110,.12); color:var(--ink); }
+        .sid-button.disabled { opacity:0.6; pointer-events:none; border-style:dashed; }
+        .sid-icon { font-size:24px; color:var(--brand); display:grid; place-items:center; width:48px; height:48px; background:rgba(15,118,110,.08); border-radius:50%; flex-shrink:0; }
+        .sid-content { flex:1; text-align:center; padding-right:48px; }
+        .sid-title { font-weight:800; font-size:16px; margin-bottom:2px; }
+        .sid-desc { font-size:13px; color:var(--muted); line-height:1.4; }
         .empty { padding:28px; text-align:center; color:var(--muted); border:1px dashed #cbd5e1; border-radius:14px; background:#f8fafc; }
         .manage-form { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
         .manage-form .wide { grid-column:1 / -1; }
@@ -340,15 +381,15 @@ while ($qItems && ($row = mysqli_fetch_assoc($qItems))) {
 <body>
 <main class="shell">
     <section class="hero">
-        <a href="guru_2026"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+        <a href="../../home.php"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
         <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mt-3">
             <div>
                 <h1 class="mb-2">Menu WKS</h1>
                 <p class="mb-0">Pusat microsite dan folder kerja WKS Kurikulum, Kesiswaan, Humas, dan Sarpras. Guru biasa dapat melihat tautan yang aktif, sedangkan pengelolaan dibuka untuk WKS Kurikulum dan Tim WKS Kurikulum.</p>
             </div>
             <div class="manager-badge">
-                <i class="bi <?= $canManage ? 'bi-unlock-fill' : 'bi-lock-fill'; ?>"></i>
-                <?= $canManage ? 'Mode pengelola' : 'Mode baca'; ?><?= $jabatan !== '' ? ' - ' . wks_h($jabatan) : ''; ?>
+                <i class="bi <?= $isPengelola ? 'bi-unlock-fill' : 'bi-lock-fill'; ?>"></i>
+                <?= $isPengelola ? 'Mode pengelola' : 'Mode baca'; ?><?= $jabatan !== '' ? ' - ' . wks_h($jabatan) : ''; ?>
             </div>
         </div>
     </section>
@@ -359,6 +400,7 @@ while ($qItems && ($row = mysqli_fetch_assoc($qItems))) {
 
     <nav class="team-nav" aria-label="Navigasi bidang WKS">
         <?php foreach ($teams as $unit => $team): ?>
+            <?php if (empty($itemsByUnit[$unit])) continue; ?>
             <a class="team-chip" href="#wks-<?= wks_h($unit); ?>" data-wks-target="wks-<?= wks_h($unit); ?>" aria-controls="wks-<?= wks_h($unit); ?>" aria-expanded="false">
                 <i class="bi <?= wks_h($team['icon']); ?>" style="background:<?= wks_h($team['accent']); ?>"></i>
                 <div>
@@ -373,7 +415,7 @@ while ($qItems && ($row = mysqli_fetch_assoc($qItems))) {
         Pilih salah satu bidang WKS di atas untuk menampilkan microsite dan folder timnya.
     </div>
 
-    <?php if ($canManage): ?>
+    <?php if ($isPengelola): ?>
         <section class="panel panel-pad mb-3">
             <h5 class="fw-bold mb-1"><i class="bi bi-plus-circle-fill text-success"></i> Tambah Microsite WKS</h5>
             <p class="text-muted small mb-3">Gunakan form ini untuk menambahkan link microsite dan folder tim. Item nonaktif hanya terlihat oleh pengelola.</p>
@@ -382,8 +424,10 @@ while ($qItems && ($row = mysqli_fetch_assoc($qItems))) {
                 <div>
                     <label class="form-label fw-bold">Bidang WKS</label>
                     <select class="form-select" name="unit" required>
-                        <?php foreach ($teams as $unit => $team): ?>
-                            <option value="<?= wks_h($unit); ?>"><?= wks_h($team['name']); ?></option>
+                        <?php foreach ($teams as $k => $v): ?>
+                            <?php if (in_array($k, $userManagedUnits, true)): ?>
+                                <option value="<?= wks_h($k); ?>"><?= wks_h($v['name']); ?></option>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -419,6 +463,7 @@ while ($qItems && ($row = mysqli_fetch_assoc($qItems))) {
     <?php endif; ?>
 
     <?php foreach ($teams as $unit => $team): ?>
+        <?php if (empty($itemsByUnit[$unit])) continue; ?>
         <section class="panel team-section" id="wks-<?= wks_h($unit); ?>" aria-hidden="true">
             <div class="team-head" style="background:linear-gradient(135deg,<?= wks_h($team['accent']); ?>,#0f172a);">
                 <div class="d-flex gap-3 align-items-start">
@@ -436,32 +481,43 @@ while ($qItems && ($row = mysqli_fetch_assoc($qItems))) {
                 <?php endif; ?>
 
                 <?php foreach ($itemsByUnit[$unit] as $item): ?>
-                    <article class="site-card">
-                        <div class="d-flex justify-content-between gap-2">
-                            <div class="site-title"><?= wks_h($item['title']); ?></div>
-                            <?php if ($canManage && !(int)$item['is_active']): ?>
-                                <span class="badge text-bg-secondary">Nonaktif</span>
-                            <?php endif; ?>
+                    <article class="mb-3">
+                        <?php
+                            $url = $item['microsite_url'] ?: $item['folder_url'];
+                            $hasUrl = $url !== '';
+                            $canManageItem = in_array($unit, $userManagedUnits, true);
+                        ?>
+                        <?php if ($hasUrl): ?>
+                        <a href="<?= wks_h($url) ?>" target="_blank" rel="noopener" class="sid-button <?= !(int)$item['is_active'] ? 'opacity-75' : '' ?>">
+                        <?php else: ?>
+                        <div class="sid-button disabled">
+                        <?php endif; ?>
+                            
+                            <div class="sid-icon">
+                                <i class="bi <?= $item['microsite_url'] ? 'bi-globe' : 'bi-folder2-open' ?>"></i>
+                            </div>
+                            <div class="sid-content">
+                                <div class="sid-title">
+                                    <?= wks_h($item['title']); ?>
+                                    <?php if ($canManageItem && !(int)$item['is_active']): ?>
+                                        <span class="badge text-bg-secondary ms-2" style="font-size:10px; vertical-align:middle;">Nonaktif</span>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if ($item['description']): ?>
+                                <div class="sid-desc"><?= nl2br(wks_h($item['description'])); ?></div>
+                                <?php endif; ?>
+                            </div>
+                            
+                        <?php if ($hasUrl): ?>
+                        </a>
+                        <?php else: ?>
                         </div>
-                        <div class="site-desc"><?= nl2br(wks_h($item['description'] ?: 'Belum ada deskripsi.')); ?></div>
-                        <div class="site-actions">
-                            <?php if ((string)$item['microsite_url'] !== ''): ?>
-                                <a class="btn-soft primary" href="<?= wks_h($item['microsite_url']); ?>" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Microsite</a>
-                            <?php else: ?>
-                                <span class="btn-soft disabled"><i class="bi bi-link-45deg"></i> Microsite kosong</span>
-                            <?php endif; ?>
+                        <?php endif; ?>
 
-                            <?php if ((string)$item['folder_url'] !== ''): ?>
-                                <a class="btn-soft" href="<?= wks_h($item['folder_url']); ?>" target="_blank" rel="noopener"><i class="bi bi-folder2-open"></i> Folder Tim</a>
-                            <?php else: ?>
-                                <span class="btn-soft disabled"><i class="bi bi-folder"></i> Folder kosong</span>
-                            <?php endif; ?>
-                        </div>
-
-                        <?php if ($canManage): ?>
-                            <details class="mt-2">
-                                <summary class="fw-bold text-success" style="cursor:pointer;">Edit item</summary>
-                                <form method="post" class="manage-form mt-3">
+                        <?php if ($canManageItem): ?>
+                            <details class="mt-2 text-center">
+                                <summary class="fw-bold text-success" style="cursor:pointer; display:inline-block;">Edit item</summary>
+                                <form method="post" class="manage-form mt-3 text-start">
                                     <input type="hidden" name="action" value="update">
                                     <input type="hidden" name="id" value="<?= (int)$item['id']; ?>">
                                     <div>
@@ -516,10 +572,10 @@ while ($qItems && ($row = mysqli_fetch_assoc($qItems))) {
 
 <div class="bottom-nav-wrap">
     <nav class="bottom-nav">
-        <a href="guru_2026" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
+        <a href="../../home.php" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
         <a href="<?= wks_h($kelasDetailUrl); ?>" class="nav-link"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
-        <a href="guru_2026?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
-        <a href="guru_2026" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Tugas</span></a>
+        <a href="../../home.php?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
+        <a href="../../home.php" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Tugas</span></a>
         <a href="profil-guru" class="nav-link">
             <div style="width:24px; height:24px; border-radius:50%; overflow:hidden; border:1.5px solid #cbd5e1; margin-bottom:2px; position:relative;">
                 <?php if (!empty($guru['foto'])): ?>

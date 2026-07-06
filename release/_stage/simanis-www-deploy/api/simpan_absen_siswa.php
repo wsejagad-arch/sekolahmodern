@@ -6,6 +6,7 @@ if (!isset($_SESSION['no_induk'])) {
     exit;
 }
 include "../koneksi.php";
+require_once "../notification_helper.php";
 // create settings table if not exists
 mysqli_query($conn, "CREATE TABLE IF NOT EXISTS tbl_presensi_setting (id INT PRIMARY KEY AUTO_INCREMENT, lat DOUBLE, lng DOUBLE, radius_m INT, updated_at DATETIME)");
 
@@ -48,6 +49,9 @@ if(mysqli_num_rows($cek) > 0){
 $waktu = date('Y-m-d H:i:s');
 $ins = mysqli_query($conn, "INSERT INTO tbl_absen (no_induk, kelas, tanggal, status, lat, lng) VALUES ('$no_induk', '$kelas', '$waktu', 'Hadir', '$lat', '$lng')");
 if($ins){
+    if (function_exists('notif_trigger_presensi')) {
+        notif_trigger_presensi($conn, $no_induk, 'Hadir', $waktu);
+    }
     echo json_encode(['success'=>true,'message'=>'Terdata hadir pada '.$waktu]);
 } else {
     echo json_encode(['success'=>false,'message'=>'DB error']);
