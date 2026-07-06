@@ -375,9 +375,9 @@ if ($qTugas) {
     }
 }
 
-$kelasDetailUrl = 'data-siswa';
-if ($totalKelasAmpu === 1) {
-    $kelasDetailUrl .= '?kelas=' . rawurlencode((string) $kelasAmpu[0]);
+$kelasDetailUrl = '?page=data-siswa';
+if (count($kelasAmpu) === 1) {
+    $kelasDetailUrl .= '&kelas=' . rawurlencode((string) $kelasAmpu[0]);
 }
 
 // Cek Wali Kelas
