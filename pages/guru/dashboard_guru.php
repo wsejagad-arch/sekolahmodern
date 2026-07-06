@@ -690,7 +690,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             <div class="quick-actions-modern-grid">
                 <!-- 1. Validasi Izin -->
                 <?php if ($isWaliKelas || $isGuruBK): ?>
-                    <a href="pages/guru/validasi-izin" class="action-btn-modern danger-hover">
+                    <a href="/pages/guru/validasi-izin.php" class="action-btn-modern danger-hover">
                         <div class="icon-wrap"><i class="bi bi-patch-check-fill"></i></div>
                         <?php if ($pendingIzinCount > 0): ?>
                             <span class="action-badge"><?= $pendingIzinCount ?></span>
@@ -701,14 +701,14 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
                 <!-- 2. LENTERA Literasi -->
                 <?php if ($isPembinaLiterasi): ?>
-                    <a href="pages/guru/literasi" class="action-btn-modern info-hover">
+                    <a href="/pages/guru/literasi.php" class="action-btn-modern info-hover">
                         <div class="icon-wrap"><i class="bi bi-book-half"></i></div>
                         <span>LENTERA Literasi</span>
                     </a>
                 <?php endif; ?>
 
                 <!-- 3. Data Kehadiran -->
-                <a href="pages/guru/rekap-kehadiran" class="action-btn-modern success-hover">
+                <a href="/pages/guru/rekap-kehadiran.php" class="action-btn-modern success-hover">
                     <div class="icon-wrap"><i class="bi bi-clipboard2-data-fill"></i></div>
                     <span>Data Kehadiran</span>
                 </a>
@@ -720,26 +720,26 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 </a>
 
                 <!-- 5. Setting Jadwal -->
-                <a href="pages/guru/setting-jadwal" class="action-btn-modern primary-hover">
+                <a href="/pages/guru/setting-jadwal.php" class="action-btn-modern primary-hover">
                     <div class="icon-wrap"><i class="bi bi-calendar-week-fill"></i></div>
                     <span>Jadwal</span>
                 </a>
 
                 <!-- 6. Materi Pembelajaran -->
-                <a href="pages/guru/materi" class="action-btn-modern purple-hover">
+                <a href="/pages/guru/materi.php" class="action-btn-modern purple-hover">
                     <div class="icon-wrap"><i class="bi bi-journal-bookmark-fill"></i></div>
                     <span>Materi</span>
                 </a>
 
                 <!-- 7. Nilai Siswa -->
-                <a href="pages/guru/nilai" class="action-btn-modern warning-hover">
+                <a href="/pages/guru/nilai.php" class="action-btn-modern warning-hover">
                     <div class="icon-wrap"><i class="bi bi-table"></i></div>
                     <span>Nilai Siswa</span>
                 </a>
 
                 <!-- 8. Wali Kelas -->
                 <?php if ($isWaliKelas): ?>
-                    <a href="pages/guru/walikelas" class="action-btn-modern primary-hover">
+                    <a href="/pages/guru/walikelas.php" class="action-btn-modern primary-hover">
                         <div class="icon-wrap"><i class="bi bi-person-vcard-fill"></i></div>
                         <span>Wali Kelas</span>
                     </a>
@@ -752,43 +752,43 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 </a>
 
                 <!-- 10. Monitoring Kelas -->
-                <a href="pages/guru/laporan-kelas" class="action-btn-modern warning-hover">
+                <a href="/pages/guru/laporan-kelas.php" class="action-btn-modern warning-hover">
                     <div class="icon-wrap"><i class="bi bi-bar-chart-fill"></i></div>
                     <span>Monitoring</span>
                 </a>
 
                 <!-- 11. Ekstra kurikuler -->
-                <a href="pages/guru/ekskul" class="action-btn-modern danger-hover">
+                <a href="/pages/guru/ekskul.php" class="action-btn-modern danger-hover">
                     <div class="icon-wrap"><i class="bi bi-dribbble"></i></div>
                     <span>Ekskul</span>
                 </a>
 
                 <!-- 12. Leger Nilai -->
-                <a href="pages/guru/leger" class="action-btn-modern success-hover">
+                <a href="/pages/guru/leger.php" class="action-btn-modern success-hover">
                     <div class="icon-wrap"><i class="bi bi-file-earmark-spreadsheet-fill"></i></div>
                     <span>Leger Nilai</span>
                 </a>
 
                 <!-- 13. File Ekin -->
-                <a href="pages/guru/ekinerja" class="action-btn-modern primary-hover">
+                <a href="/pages/guru/ekinerja.php" class="action-btn-modern primary-hover">
                     <div class="icon-wrap"><i class="bi bi-file-earmark-bar-graph-fill"></i></div>
                     <span>File Ekin</span>
                 </a>
 
                 <!-- 14. Apresiasi Guru -->
-                <a href="pages/guru/apresiasi-guru" class="action-btn-modern warning-hover">
+                <a href="/pages/guru/apresiasi-guru.php" class="action-btn-modern warning-hover">
                     <div class="icon-wrap"><i class="bi bi-award-fill"></i></div>
                     <span>Apresiasi</span>
                 </a>
 
                 <!-- 15. Piagam 7 KAIH -->
-                <a href="pages/guru/piagam-7kih" class="action-btn-modern success-hover">
+                <a href="/pages/guru/piagam-7kih.php" class="action-btn-modern success-hover">
                     <div class="icon-wrap"><i class="bi bi-patch-check-fill"></i></div>
                     <span>Piagam KAIH</span>
                 </a>
 
                 <!-- 16. INFO WKS -->
-                <a href="pages/guru/wks" class="action-btn-modern info-hover">
+                <a href="/pages/guru/wks.php" class="action-btn-modern info-hover">
                     <div class="icon-wrap"><i class="bi bi-diagram-3-fill"></i></div>
                     <span>INFO WKS</span>
                 </a>
@@ -872,7 +872,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         <div class="premium-card">
             <div class="card-header-flex">
                 <h3 class="card-title-modern">Siswa Binaan</h3>
-                <a href="pages/guru/data-siswa" class="link-view-all">Lihat Semua</a>
+                <a href="/pages/guru/data-siswa" class="link-view-all">Lihat Semua</a>
             </div>
             <div class="modern-list">
                 <?php if (empty($problematicStudents)): ?>
@@ -889,7 +889,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                                 <span>Kelas <?= htmlspecialchars($rowP['kelas']) ?></span>
                             </div>
                             <div class="item-actions">
-                                <a href="pages/guru/data-siswa" class="btn-icon-soft" title="Detail"><i class="bi bi-person-badge"></i></a>
+                                <a href="/pages/guru/data-siswa" class="btn-icon-soft" title="Detail"><i class="bi bi-person-badge"></i></a>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -1002,7 +1002,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             </div>
             <div class="greet-block" style="margin-top: 0; padding-top: 0; text-align: left; flex: 1;">
                 <p class="greet-small" style="color: #64748b; font-weight: 500; font-size: 0.75rem;">Selamat pagi,</p>
-                <h1 style="font-size: 1rem; margin-bottom: 2px; color: #0f172a; font-weight: 800; line-height: 1.2; letter-spacing: -0.3px;"><?= $dataGuru['nama_guru'] ?: 'Bu Amanda' ?></h1>
+                <h1 style="font-size: 1rem; margin-bottom: 2px; color: #000000; font-weight: 800; line-height: 1.2; letter-spacing: -0.3px;"><?= $dataGuru['nama_guru'] ?: 'Bu Amanda' ?></h1>
                 <p class="greet-school" style="margin: 0; font-size: 0.75rem; color: #94a3b8;"><?= htmlspecialchars($lembaga['nmsekolah']); ?></p>
             </div>
         </a>
@@ -1064,29 +1064,34 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         }
         ?>
         <?php if ($runningPanel !== null): ?>
-            <div id="kbm-box" class="kbm-mobile-card <?= $hasRunningSchedule ? 'is-live' : 'is-idle'; ?>" <?= $runningTarget !== '' ? 'data-target="' . htmlspecialchars($runningTarget, ENT_QUOTES, 'UTF-8') . '"' : ''; ?> style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.2);">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
-                    <i class="bi <?= $hasRunningSchedule ? 'bi-broadcast-pin text-warning' : 'bi-calendar2-week text-white'; ?>" style="font-size: 24px;"></i>
-                </div>
-                <div style="flex: 1; min-width: 0;">
-                    <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; color: <?= $hasRunningSchedule ? '#fcd34d' : 'rgba(255,255,255,0.9)'; ?>;">
-                        <?php if($hasRunningSchedule): ?>
-                           <span style="width:6px; height:6px; border-radius:50%; background:#fcd34d; animation: pulse-live 1.5s infinite;"></span>
-                        <?php endif; ?>
-                        <?= htmlspecialchars($runningKickerLabel, ENT_QUOTES, 'UTF-8'); ?>
+            <div id="kbm-box" class="kbm-mobile-card <?= $hasRunningSchedule ? 'is-live' : 'is-idle'; ?>" <?= $runningTarget !== '' ? 'data-target="' . htmlspecialchars($runningTarget, ENT_QUOTES, 'UTF-8') . '"' : ''; ?> style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.2);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
+                        <i class="bi <?= $hasRunningSchedule ? 'bi-broadcast-pin text-warning' : 'bi-calendar2-week text-white'; ?>" style="font-size: 24px;"></i>
                     </div>
-                    <h3 style="font-size: 15px; font-weight: 700; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">
-                        <?= htmlspecialchars($runningPanel['nama_mapel']); ?>
-                    </h3>
-                    <div style="font-size: 12px; opacity: 0.9; display: flex; align-items: center; gap: 8px; color: #fff;">
-                        <span><i class="bi bi-door-open-fill"></i> <?= htmlspecialchars($runningPanel['kelas']); ?></span>
-                        <span style="opacity:0.5;">&bull;</span>
-                        <span><i class="bi bi-clock-fill"></i> <?= substr($runningPanel['jam_mulai'], 0, 5); ?> - <?= substr($runningPanel['jam_selesai'], 0, 5); ?></span>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; color: <?= $hasRunningSchedule ? '#fcd34d' : 'rgba(255,255,255,0.9)'; ?>;">
+                            <?php if($hasRunningSchedule): ?>
+                               <span style="width:6px; height:6px; border-radius:50%; background:#fcd34d; animation: pulse-live 1.5s infinite;"></span>
+                            <?php endif; ?>
+                            <?= htmlspecialchars($runningKickerLabel, ENT_QUOTES, 'UTF-8'); ?>
+                        </div>
+                        <h3 style="font-size: 15px; font-weight: 700; margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">
+                            <?= htmlspecialchars($runningPanel['nama_mapel']); ?>
+                        </h3>
+                        <div style="font-size: 12px; opacity: 0.9; display: flex; align-items: center; gap: 8px; color: #fff;">
+                            <span><i class="bi bi-door-open-fill"></i> <?= htmlspecialchars($runningPanel['kelas']); ?></span>
+                            <span style="opacity:0.5;">&bull;</span>
+                            <span><i class="bi bi-clock-fill"></i> <?= substr($runningPanel['jam_mulai'], 0, 5); ?> - <?= substr($runningPanel['jam_selesai'], 0, 5); ?></span>
+                        </div>
                     </div>
                 </div>
-                <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center;">
-                    <div style="font-size: 10px; opacity: 0.8; margin-bottom: 4px; color:#fff; text-align: center;"><i class="bi <?= $runningStateIcon; ?>"></i> <br> <?= htmlspecialchars($runningCountdownLabel, ENT_QUOTES, 'UTF-8'); ?></div>
-                    <strong id="kbm-timer" style="font-size: 12px; background: rgba(255,255,255,0.15); padding: 4px 8px; border-radius: 6px; color: #fff; text-align: center;">--:--:--</strong>
+                <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 8px;">
+                    <div style="font-size: 11px; opacity: 0.9; color:#fff; display: flex; align-items: center; gap: 6px;">
+                        <i class="bi <?= $runningStateIcon; ?>"></i> 
+                        <span><?= htmlspecialchars($runningCountdownLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+                    </div>
+                    <strong id="kbm-timer" style="font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 0.5px;">--:--:--</strong>
                 </div>
             </div>
             <style>
@@ -1182,7 +1187,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
     <?php if (($isWaliKelas || $isGuruBK) && $pendingIzinCount > 0): ?>
         <!-- BANNER IZIN PENDING -->
-        <a href="validasi-izin" style="text-decoration:none; display:block; margin-bottom:14px;">
+        <a href="/pages/guru/validasi-izin.php" style="text-decoration:none; display:block; margin-bottom:14px;">
             <div style="background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff; border-radius:16px; padding:14px 18px; display:flex; align-items:center; gap:14px; box-shadow:0 8px 24px rgba(220,38,38,.3); animation:pendingPulse 2s ease-in-out infinite;">
                 <div style="width:48px; height:48px; background:rgba(255,255,255,.2); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                     <i class="bi bi-patch-exclamation-fill" style="font-size:26px;"></i>
@@ -1354,7 +1359,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     <div class="quick-grid">
         <!-- 1. Validasi Izin -->
         <?php if ($isWaliKelas || $isGuruBK): ?>
-            <a href="validasi-izin" class="quick-item" style="position:relative;">
+            <a href="/pages/guru/validasi-izin.php" class="quick-item" style="position:relative;">
                 <i class="bi bi-patch-check-fill" style="color:#dc2626;"></i>
                 <?php if ($pendingIzinCount > 0): ?>
                     <span style="position:absolute; top:6px; right:6px; background:#dc2626; color:#fff; font-size:9px; font-weight:800; min-width:16px; height:16px; border-radius:999px; display:flex; align-items:center; justify-content:center; line-height:1; padding:0 3px;"><?= $pendingIzinCount ?></span>
@@ -1365,14 +1370,14 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
         <!-- LENTERA Literasi -->
         <?php if ($isPembinaLiterasi): ?>
-            <a href="literasi.php" class="quick-item">
+            <a href="/pages/guru/literasi.php" class="quick-item">
                 <i class="bi bi-book-half" style="color:#0ea5e9"></i>
                 <span>LENTERA<br>Literasi</span>
             </a>
         <?php endif; ?>
 
         <!-- 2. Data Kehadiran -->
-        <a href="rekap-kehadiran" class="quick-item">
+        <a href="/pages/guru/rekap-kehadiran.php" class="quick-item">
             <i class="bi bi-clipboard2-data-fill" style="color:var(--green)"></i>
             <span>Data<br>Kehadiran</span>
         </a>
@@ -1384,26 +1389,26 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         </a>
 
         <!-- 4. Setting Jadwal -->
-        <a href="setting-jadwal" class="quick-item">
+        <a href="/pages/guru/setting-jadwal.php" class="quick-item">
             <i class="bi bi-calendar-week-fill" style="color:#2563EB"></i>
             <span>Setting<br>Jadwal</span>
         </a>
 
         <!-- 5. Materi Pembelajaran -->
-        <a href="materi" class="quick-item">
+        <a href="/pages/guru/materi.php" class="quick-item">
             <i class="bi bi-book-half" style="color:var(--purple)"></i>
             <span>Materi<br>Pembelajaran</span>
         </a>
 
         <!-- 6. Nilai Siswa -->
-        <a href="nilai" class="quick-item">
+        <a href="/pages/guru/nilai.php" class="quick-item">
             <i class="bi bi-table" style="color:var(--orange)"></i>
             <span>Nilai<br>Siswa</span>
         </a>
 
         <!-- 7. Wali Kelas -->
         <?php if ($isWaliKelas): ?>
-            <a href="walikelas" class="quick-item">
+            <a href="/pages/guru/walikelas.php" class="quick-item">
                 <i class="bi bi-person-vcard-fill" style="color:var(--blue)"></i>
                 <span>Wali<br>Kelas</span>
             </a>
@@ -1416,39 +1421,39 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         </a>
 
         <!-- 9. Monitoring Kelas -->
-        <a href="laporan-kelas" class="quick-item">
+        <a href="/pages/guru/laporan-kelas.php" class="quick-item">
             <i class="bi bi-bar-chart-fill" style="color:var(--orange)"></i>
             <span>Monitoring<br>Kelas</span>
         </a>
 
         <!-- 10. Ekstra Kulikuler -->
-        <a href="ekskul" class="quick-item">
+        <a href="/pages/guru/ekskul.php" class="quick-item">
             <i class="bi bi-dribbble" style="color:#EC4899"></i>
             <span>Ekstra<br>kurikuler</span>
         </a>
 
         <!-- 11. Leger -->
-        <a href="leger" class="quick-item">
+        <a href="/pages/guru/leger.php" class="quick-item">
             <i class="bi bi-file-earmark-spreadsheet-fill" style="color:#059669"></i>
             <span>Leger<br>Nilai</span>
         </a>
 
         <!-- 12. File Ekin -->
-        <a href="ekinerja" class="quick-item">
+        <a href="/pages/guru/ekinerja.php" class="quick-item">
             <i class="bi bi-file-earmark-bar-graph-fill" style="color:#0F766E"></i>
             <span>File<br>Ekin</span>
         </a>
 
         <!-- Item Lainnya yang tidak disebutkan tetapi penting untuk dipertahankan -->
-        <a href="apresiasi-guru" class="quick-item">
+        <a href="/pages/guru/apresiasi-guru.php" class="quick-item">
             <i class="bi bi-award-fill" style="color:#F59E0B"></i>
             <span>Apresiasi<br>Guru</span>
         </a>
-        <a href="piagam-7kih" class="quick-item">
+        <a href="/pages/guru/piagam-7kih.php" class="quick-item">
             <i class="bi bi-patch-check-fill" style="color:#16A34A"></i>
             <span>Piagam<br>7 KAIH</span>
         </a>
-        <a href="wks" class="quick-item">
+        <a href="/pages/guru/wks.php" class="quick-item">
             <i class="bi bi-diagram-3-fill" style="color:#0F766E"></i>
             <span>INFO<br>WKS</span>
         </a>
@@ -1981,6 +1986,28 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             </div>
         </div>
     </div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav-wrap">
+        <nav class="bottom-nav">
+            <a href="#" class="nav-link active"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
+            <a href="<?= htmlspecialchars($kelasDetailUrl, ENT_QUOTES, 'UTF-8'); ?>" class="nav-link"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
+            <a href="#" class="nav-center btn-open-input-jurnal" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
+            <a href="#" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Tugas</span></a>
+            <a href="/pages/guru/profil-guru.php" class="nav-link">
+                <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; border: 1.5px solid #cbd5e1; margin-bottom: 2px; position: relative;">
+                    <?php if ($dataGuru['foto']): ?>
+                        <img src="../../foto/<?= $dataGuru['foto'] ?>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                    <?php else: ?>
+                        <?= get_guru_avatar_svg(get_guru_gender($dataGuru['no_induk'], $dataGuru['nama_guru'])) ?>
+                    <?php endif; ?>
+                </div>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+</div>
+
 
     <div class="journal-modal-backdrop" id="pelanggaranModal" aria-hidden="true">
         <div class="journal-modal" style="max-width:620px;">
