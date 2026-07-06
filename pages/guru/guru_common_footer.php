@@ -4,7 +4,20 @@ if (!function_exists('guru_common_footer_url')) {
     {
         // Allow slashes and dots for correct path routing
         $safe = preg_replace('/[^a-z0-9_\-\.\/]/i', '', $page);
-        $url = php_sapi_name() === 'cli-server' && !preg_match('/\.php$/', $safe) && strpos($safe, '?') === false ? $safe . '.php' : $safe;
+        
+        // If it looks like a direct file path (contains / or .php), use as is
+        // Otherwise, prepend ?page= for the main router
+        if (strpos($safe, '/') !== false || preg_match('/\.php$/', $safe)) {
+            $url = $safe;
+        } else {
+            $url = '?page=' . $safe;
+        }
+        
+        // CLI server fallback
+        if (php_sapi_name() === 'cli-server' && !preg_match('/\.php$/', $url) && strpos($url, '?') !== 0) {
+            $url .= '.php';
+        }
+
         if (!empty($params)) {
             $url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($params);
         }
