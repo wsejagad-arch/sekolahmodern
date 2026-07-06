@@ -1555,43 +1555,60 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     <!-- Modal Pilih Jadwal (Bootstrap) -->
     <div class="modal fade" id="schedulePickerModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header">
+            <div class="modal-content border-0 shadow" style="border-radius: 24px; overflow: hidden;">
+                <div class="modal-header border-0 pb-0" style="padding: 24px 24px 16px 24px;">
                     <div>
-                        <h5 class="modal-title mb-0 fw-bold" id="schedulePickerTitle">Pilih Jadwal</h5>
-                        <p class="text-muted mb-0 small">Jurnal akan diisi sesuai jadwal yang dipilih.</p>
+                        <h5 class="modal-title fw-bold" id="schedulePickerTitle" style="color: #0f172a; font-size: 1.25rem;">Pilih Jadwal</h5>
+                        <p class="text-muted mb-0" style="font-size: 0.85rem; color: #64748b !important;">Jurnal akan diisi sesuai jadwal yang dipilih.</p>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close" style="background-color: #f1f5f9; border-radius: 50%; padding: 12px; margin-top: -10px; margin-right: -10px;"></button>
                 </div>
-                <div class="modal-body bg-light p-3">
+                <div class="modal-body p-4 pt-2">
                     <?php if (empty($jadwalHariIni)): ?>
-                        <div class="alert alert-warning text-center mb-0 border-0 shadow-sm"><i class="bi bi-exclamation-circle me-2"></i>Belum ada jadwal mengajar hari ini.</div>
+                        <div class="alert text-center mb-0 border-0" style="background: rgba(245, 158, 11, 0.1); color: #d97706; border-radius: 16px; padding: 24px;">
+                            <i class="bi bi-calendar-x" style="font-size: 2rem; display: block; margin-bottom: 8px;"></i>
+                            <span style="font-weight: 600;">Belum ada jadwal mengajar hari ini.</span>
+                        </div>
                     <?php else: ?>
-                        <div class="list-group">
+                        <div class="d-flex flex-column" style="gap: 14px;">
                             <?php foreach ($jadwalHariIni as $j):
                                 $idMapel = (int)($j['id_mapel'] ?? 0);
                                 $kelasJadwal = (string)($j['kelas'] ?? '');
                                 $mapelJadwal = (string)($j['nama_mapel'] ?? '');
                                 $isJurnalTerisi = isset($jurnalStatusByMapel[$idMapel]);
                             ?>
-                                <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-2 rounded shadow-sm border-0" style="cursor: default;">
-                                    <div class="mb-3 mb-md-0">
-                                        <h6 class="mb-1 text-primary" style="font-weight: 700;"><?= htmlspecialchars($kelasJadwal, ENT_QUOTES, 'UTF-8'); ?> <span class="text-dark">&bull; <?= htmlspecialchars($mapelJadwal, ENT_QUOTES, 'UTF-8'); ?></span></h6>
-                                        <div class="d-flex align-items-center mt-2 flex-wrap">
-                                            <span class="badge badge-secondary mr-2 mb-1 p-2"><i class="bi bi-clock"></i> <?= htmlspecialchars(substr((string)($j['jam_mulai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars(substr((string)($j['jam_selesai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?></span>
-                                            <?php if ($isJurnalTerisi): ?>
-                                                <span class="badge badge-success mb-1 p-2"><i class="bi bi-check2-circle"></i> Sudah terisi</span>
-                                            <?php else: ?>
-                                                <span class="badge badge-warning text-dark mb-1 p-2"><i class="bi bi-clock-history"></i> Belum terisi</span>
-                                            <?php endif; ?>
+                                <div class="premium-card d-flex flex-column" style="padding: 18px; border-radius: 16px; border-left: 4px solid <?= $isJurnalTerisi ? '#10b981' : '#f59e0b'; ?>; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <h6 class="mb-1" style="font-weight: 700; color: #0f172a; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                                                <span style="color: #2563eb; background: #eff6ff; padding: 2px 8px; border-radius: 6px; font-size: 13px;"><?= htmlspecialchars($kelasJadwal, ENT_QUOTES, 'UTF-8'); ?></span> 
+                                                <span style="color: #475569;"><?= htmlspecialchars($mapelJadwal, ENT_QUOTES, 'UTF-8'); ?></span>
+                                            </h6>
+                                            <div class="d-flex align-items-center mt-3 flex-wrap" style="gap: 8px;">
+                                                <span style="font-size: 11px; background: #f8fafc; color: #475569; padding: 6px 12px; border-radius: 20px; font-weight: 600; border: 1px solid #e2e8f0;">
+                                                    <i class="bi bi-clock me-1" style="color: #64748b;"></i> <?= htmlspecialchars(substr((string)($j['jam_mulai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?> - <?= htmlspecialchars(substr((string)($j['jam_selesai'] ?? ''), 0, 5), ENT_QUOTES, 'UTF-8'); ?>
+                                                </span>
+                                                <?php if ($isJurnalTerisi): ?>
+                                                    <span style="font-size: 11px; background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 6px 12px; border-radius: 20px; font-weight: 700;">
+                                                        <i class="bi bi-check2-circle me-1"></i> Sudah terisi
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span style="font-size: 11px; background: rgba(245, 158, 11, 0.1); color: #d97706; padding: 6px 12px; border-radius: 20px; font-weight: 700;">
+                                                        <i class="bi bi-clock-history me-1"></i> Belum terisi
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="d-flex align-items-center">
-                                        <button class="btn btn-sm btn-primary btn-open-schedule-journal mr-2 shadow-sm text-white" type="button" data-id="<?= $idMapel; ?>" style="white-space: nowrap; color: #fff !important;">
-                                            <i class="bi bi-journal-plus" style="color: #fff !important;"></i> <?= $isJurnalTerisi ? 'Lihat/Edit' : 'Input Jurnal'; ?>
+                                    
+                                    <div class="d-flex align-items-center" style="gap: 10px; margin-top: 4px;">
+                                        <button class="btn btn-open-schedule-journal flex-grow-1" type="button" data-id="<?= $idMapel; ?>" 
+                                                style="background: <?= $isJurnalTerisi ? '#10b981' : 'linear-gradient(135deg, #3b82f6, #2563eb)'; ?>; color: #fff; border-radius: 12px; padding: 10px 0; border: none; font-weight: 600; font-size: 13px; box-shadow: 0 4px 12px <?= $isJurnalTerisi ? 'rgba(16,185,129,0.25)' : 'rgba(37,99,235,0.25)'; ?>; transition: all 0.2s;">
+                                            <i class="bi <?= $isJurnalTerisi ? 'bi-journal-text' : 'bi-journal-plus'; ?> me-1"></i> <?= $isJurnalTerisi ? 'Lihat/Edit Jurnal' : 'Input Jurnal'; ?>
                                         </button>
-                                        <a class="btn btn-sm btn-outline-primary shadow-sm" href="inputnilai?getDetail=<?= $idMapel; ?>" style="white-space: nowrap;">
-                                            <i class="bi bi-clipboard2-check"></i> Nilai
+                                        <a class="btn d-flex align-items-center justify-content-center" href="inputnilai?getDetail=<?= $idMapel; ?>" 
+                                           style="background: #fff; color: #3b82f6; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 18px; font-weight: 600; font-size: 13px; transition: all 0.2s;">
+                                            <i class="bi bi-clipboard2-check me-1"></i> Nilai
                                         </a>
                                     </div>
                                 </div>
