@@ -18,18 +18,14 @@
           </a>
         </div>
 
-        <div style="display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;">
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; margin-top:16px;">
           <span style="font-size:13px; color:#64748b; font-weight:600;">
             <i class="fas fa-school mr-1" style="color:#1a3c6e;"></i>
             <?= isset($lembaga) && !empty($lembaga['nmsekolah']) ? htmlspecialchars($lembaga['nmsekolah']) : 'SMA Negeri 1 Sumber'; ?>
           </span>
-          <span style="color:#e2e8f0;">|</span>
           <span style="font-size:12px; color:#94a3b8;">
             &copy; <?= date('Y'); ?> &mdash; Sistem Manajemen Jurnal
           </span>
-        </div>
-        
-        <div style="display:flex; align-items:center; justify-content:center; margin-top:2px;">
           <span style="font-size:12px; color:#94a3b8;">
             <i class="fas fa-code mr-1" style="color:#f0b429;"></i>TIM IT SMAN1S
           </span>
