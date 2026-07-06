@@ -27,7 +27,9 @@
           <span style="font-size:12px; color:#94a3b8;">
             &copy; <?= date('Y'); ?> &mdash; Sistem Manajemen Jurnal
           </span>
-          <span style="color:#e2e8f0;">|</span>
+        </div>
+        
+        <div style="display:flex; align-items:center; justify-content:center; margin-top:2px;">
           <span style="font-size:12px; color:#94a3b8;">
             <i class="fas fa-code mr-1" style="color:#f0b429;"></i>TIM IT SMAN1S
           </span>
