@@ -379,7 +379,7 @@ $existingKeterangan = $existingKeterangan ?? '';
                             modal.setAttribute('aria-hidden', 'true');
                         }
                         document.body.classList.remove('modal-open-dashboard');
-                        window.location.href = 'home.php?sukses=jurnal';
+                        window.location.href = '../../home.php?sukses=jurnal';
                     }, 900);
                 } else {
                     btn.innerHTML = 'Coba Lagi';
