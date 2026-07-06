@@ -2020,10 +2020,10 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
-            <div class="journal-modal-body">
-                <form id="formPelanggaran" style="display:grid; gap:12px;">
-                    <div class="row g-2">
-                        <div class="col-12 col-md-6">
+            <div class="journal-modal-body" style="padding: 20px 24px;">
+                <form id="formPelanggaran" style="display:grid; gap:16px;">
+                    <div class="row g-2 m-0">
+                        <div class="col-12 col-md-6 px-1">
                             <label class="form-label" for="selectKelasP" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Kelas</label>
                             <select class="form-select" id="selectKelasP" name="kelas" required style="border-radius:12px; font-size:13px;">
                                 <option value="">Pilih kelas</option>
@@ -2032,15 +2032,15 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-6 px-1 mt-2 mt-md-0">
                             <label class="form-label" for="selectSiswaP" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Siswa</label>
                             <select class="form-select" id="selectSiswaP" name="no_induk" required disabled style="border-radius:12px; font-size:13px;">
                                 <option value="">Pilih kelas terlebih dahulu</option>
                             </select>
                         </div>
                     </div>
-                    <div class="row g-2">
-                        <div class="col-12 col-md-6">
+                    <div class="row g-2 m-0">
+                        <div class="col-12 col-md-6 px-1">
                             <label class="form-label" for="kategoriPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Kategori</label>
                             <select class="form-select" id="kategoriPelanggaran" name="kategori_pelanggaran" required style="border-radius:12px; font-size:13px;">
                                 <option value="">Pilih kategori</option>
@@ -2049,27 +2049,27 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                                 <option value="Berat">Berat</option>
                             </select>
                         </div>
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-6 px-1 mt-2 mt-md-0">
                             <label class="form-label" for="jenisPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Jenis Pelanggaran</label>
                             <select class="form-select" id="jenisPelanggaran" name="jenis_pelanggaran" required disabled style="border-radius:12px; font-size:13px;">
                                 <option value="">Pilih kategori terlebih dahulu</option>
                             </select>
                         </div>
-                        <div class="col-12" id="jenisPelanggaranKustomWrapper" style="display:none; margin-top:8px;">
+                        <div class="col-12 px-1" id="jenisPelanggaranKustomWrapper" style="display:none; margin-top:8px;">
                             <label class="form-label" for="jenisPelanggaranKustom" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Jenis Pelanggaran Lainnya</label>
                             <input class="form-control" type="text" id="jenisPelanggaranKustom" name="jenis_pelanggaran_kustom" placeholder="Sebutkan jenis pelanggaran..." style="border-radius:12px; font-size:13px;">
                         </div>
                     </div>
-                    <div>
+                    <div class="px-1">
                         <label class="form-label" for="deskripsiPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Deskripsi</label>
                         <textarea class="form-control" id="deskripsiPelanggaran" name="deskripsi_pelanggaran" rows="3" placeholder="Jelaskan detail pelanggaran yang dilakukan." style="border-radius:12px; font-size:13px;"></textarea>
                     </div>
-                    <div>
+                    <div class="px-1">
                         <label class="form-label" for="tindakanGuru" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Tindakan yang Diambil</label>
                         <textarea class="form-control" id="tindakanGuru" name="tindakan_guru" rows="2" placeholder="Teguran, pembinaan, komunikasi wali, atau tindak lanjut lain." style="border-radius:12px; font-size:13px;"></textarea>
                     </div>
-                    <div class="row g-2">
-                        <div class="col-12">
+                    <div class="row g-2 m-0">
+                        <div class="col-12 px-1">
                             <label class="form-label" for="statusPelanggaran" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Status</label>
                             <select class="form-select" id="statusPelanggaran" name="status_pelanggaran" style="border-radius:12px; font-size:13px;">
                                 <option value="Aktif">Aktif</option>
