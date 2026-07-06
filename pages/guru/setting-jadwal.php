@@ -268,7 +268,7 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
 <?php include 'guru_sidebar_shared.php'; ?>
 
 <div class="app-shell" style="grid-template-columns: 1fr; padding-right: 24px;">
-    <div class="desktop-center-column">
+    <div class="w-100">
         
         <!-- Welcome Banner -->
         <div class="welcome-banner-green">
