@@ -18,15 +18,14 @@ if (!function_exists('guru_common_footer_url')) {
         
         // If it's the home page
         if ($safe === '../../home.php' || $safe === 'home') {
-            return $base . '/home.php';
+            $url = $base . '/home.php';
+        } else {
+            // For all other guru pages, use the direct path to pages/guru/
+            if (!preg_match('/\.php$/', $safe)) {
+                $safe .= '.php';
+            }
+            $url = $base . '/pages/guru/' . $safe;
         }
-
-        // For all other guru pages, use the direct path to pages/guru/
-        if (!preg_match('/\.php$/', $safe)) {
-            $safe .= '.php';
-        }
-        
-        $url = $base . '/pages/guru/' . $safe;
 
         if (!empty($params)) {
             $url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($params);
