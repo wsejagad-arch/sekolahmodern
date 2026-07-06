@@ -990,15 +990,7 @@ $tanggalCetak = tgl_indo(date('Y-m-d')) . ' pukul ' . date('H:i:s') . ' WIB';
     <?php endif; ?>
 </main>
 
-<div class="bottom-nav-wrap">
-    <nav class="bottom-nav" aria-label="Navigasi guru">
-        <a href="../../home.php" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
-        <a href="<?= guru_rk_h($kelasDetailUrl); ?>" class="nav-link active"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
-        <a href="../../home.php?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
-        <a href="inputtugas" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Tugas</span></a>
-        <a href="profil-guru" class="nav-link"><i class="bi bi-person-fill"></i><span>Profil</span></a>
-    </nav>
-</div>
+
 <script>
     (function() {
         var mode = document.getElementById('mode');

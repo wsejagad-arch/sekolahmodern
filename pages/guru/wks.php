@@ -570,24 +570,7 @@ while ($qItems && ($item = mysqli_fetch_assoc($qItems))) {
     <?php endforeach; ?>
 </main>
 
-<div class="bottom-nav-wrap">
-    <nav class="bottom-nav">
-        <a href="../../home.php" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
-        <a href="<?= wks_h($kelasDetailUrl); ?>" class="nav-link"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
-        <a href="../../home.php?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
-        <a href="../../home.php" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Tugas</span></a>
-        <a href="profil-guru" class="nav-link">
-            <div style="width:24px; height:24px; border-radius:50%; overflow:hidden; border:1.5px solid #cbd5e1; margin-bottom:2px; position:relative;">
-                <?php if (!empty($guru['foto'])): ?>
-                    <img src="../../foto/<?= wks_h($guru['foto']); ?>" alt="Profile" style="width:100%; height:100%; object-fit:cover;">
-                <?php else: ?>
-                    <?= get_guru_avatar_svg(get_guru_gender((string)($guru['no_induk'] ?? $nip), (string)($guru['nama_guru'] ?? 'Guru'))); ?>
-                <?php endif; ?>
-            </div>
-            <span>Profil</span>
-        </a>
-    </nav>
-</div>
+
 <script>
     (function() {
         var chips = document.querySelectorAll('[data-wks-target]');

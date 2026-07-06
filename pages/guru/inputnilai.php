@@ -1053,15 +1053,7 @@ if (isset($_POST['getDetail']) || isset($_GET['getDetail'])) {
     </script>
     <?php if ($standalone) { ?>
     </main>
-    <div class="bottom-nav-wrap">
-        <nav class="bottom-nav" aria-label="Navigasi guru">
-            <a href="../../home.php" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
-            <a href="<?= htmlspecialchars($kelasDetailUrl, ENT_QUOTES, 'UTF-8'); ?>" class="nav-link"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
-            <a href="../../home.php?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
-            <a href="inputtugas" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Tugas</span></a>
-            <a href="profil-guru" class="nav-link"><i class="bi bi-person-fill"></i><span>Profil</span></a>
-        </nav>
-    </div>
+
     <?php include __DIR__ . '/guru_common_footer.php'; ?>
 </body>
     </html>

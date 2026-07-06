@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -322,14 +322,7 @@ if ($hasKelasFilter && !empty($kelasOptions)) {
     </div>
 </div>
 
-<div class="bottom-nav-wrap">
-    <nav class="bottom-nav mobile-nav" aria-label="Navigasi guru">
-        <a href="../../home.php" class="nav-link"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
-        <a href="data-siswa" class="nav-link active" style="color:#2563eb;"><i class="bi bi-people"></i><span>Data Siswa</span></a>
-        <a href="materi" class="nav-link"><i class="bi bi-journal-text"></i><span>Jurnal</span></a>
-        <a href="profil-guru" class="nav-link"><i class="bi bi-person-fill"></i><span>Profil</span></a>
-    </nav>
-</div>
+
 <?php include __DIR__ . '/guru_common_footer.php'; ?>
 </body>
 </html>

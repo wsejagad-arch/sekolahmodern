@@ -1547,8 +1547,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         </div>
     </div>
 
-    <!-- BOTTOM NAV -->
-    <?php include 'guru_common_footer.php'; ?>
+
 
 
     <!-- Modal Pilih Jadwal (Bootstrap) -->
@@ -1988,24 +1987,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     </div>
 
     <!-- BOTTOM NAV -->
-    <div class="bottom-nav-wrap">
-        <nav class="bottom-nav">
-            <a href="#" class="nav-link active"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
-            <a href="<?= htmlspecialchars($kelasDetailUrl, ENT_QUOTES, 'UTF-8'); ?>" class="nav-link"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
-            <a href="#" class="nav-center btn-open-input-jurnal" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
-            <a href="#" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Tugas</span></a>
-            <a href="/pages/guru/profil-guru.php" class="nav-link">
-                <div style="width: 24px; height: 24px; border-radius: 50%; overflow: hidden; border: 1.5px solid #cbd5e1; margin-bottom: 2px; position: relative;">
-                    <?php if ($dataGuru['foto']): ?>
-                        <img src="../../foto/<?= $dataGuru['foto'] ?>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
-                    <?php else: ?>
-                        <?= get_guru_avatar_svg(get_guru_gender($dataGuru['no_induk'], $dataGuru['nama_guru'])) ?>
-                    <?php endif; ?>
-                </div>
-                <span>Profil</span>
-            </a>
-        </nav>
-    </div>
+    <?php include 'guru_common_footer.php'; ?>
 </div>
 
 

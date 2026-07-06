@@ -1475,16 +1475,7 @@ try {
     </div>
 </div>
 
-<!-- Bottom Navigation for Teacher Mobile Context -->
-<div class="bottom-nav-wrap">
-    <nav class="bottom-nav" aria-label="Navigasi guru">
-        <a href="../../home.php" class="nav-link-item"><i class="bi bi-house-door-fill"></i><span>Beranda</span></a>
-        <a href="data-siswa.php" class="nav-link-item"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
-        <a href="<?= htmlspecialchars($inputJurnalUrl, ENT_QUOTES, 'UTF-8'); ?>" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
-        <a href="nilai.php" class="nav-link-item"><i class="bi bi-clipboard-check"></i><span>Nilai</span></a>
-        <a href="profil-guru.php" class="nav-link-item"><i class="bi bi-person-fill"></i><span>Profil</span></a>
-    </nav>
-</div>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -705,25 +705,7 @@ sort($classes);
         <i class="bi bi-plus-lg"></i>
     </div>
 
-    <!-- BOTTOM NAV (INTEGRATED SHELL NAVIGATION) -->
-    <div class="bottom-nav-wrap">
-        <nav class="bottom-nav">
-            <a href="../../home.php" class="nav-link"><i class="bi bi-house-door"></i><span>Beranda</span></a>
-            <a href="data-siswa" class="nav-link"><i class="bi bi-journal-bookmark"></i><span>Kelas</span></a>
-            <a href="../../home.php?open_jurnal=1" class="nav-center" aria-label="Input jurnal"><i class="bi bi-fingerprint"></i></a>
-            <a href="nilai" class="nav-link"><i class="bi bi-clipboard-check"></i><span>Nilai</span></a>
-            <a href="profil-guru.php" class="nav-link">
-                <div style="width: 20px; height: 20px; border-radius: 50%; overflow: hidden; border: 1.5px solid #cbd5e1; margin-bottom: 2px; position: relative;">
-                    <?php if ($dataGuru['foto']): ?>
-                        <img src="../../foto/<?= $dataGuru['foto'] ?>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
-                    <?php else: ?>
-                        <?= get_guru_avatar_svg(get_guru_gender($dataGuru['no_induk'], $dataGuru['nama_guru'])) ?>
-                    <?php endif; ?>
-                </div>
-                <span>Profil</span>
-            </a>
-        </nav>
-    </div>
+
     </div>
 </div>
 
