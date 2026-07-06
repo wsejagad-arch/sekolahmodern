@@ -677,7 +677,7 @@ body {
 
     .journal-modal {
         width: calc(100vw - 24px);
-        max-height: 82vh;
+        max-height: 92vh;
         border-radius: 22px;
     }
 

@@ -2079,7 +2079,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         </div>
                     </div>
                     <div id="pelanggaranStatus" style="display:none; font-size:12px; border-radius:12px; padding:10px 12px;"></div>
-                    <div style="display:flex; gap:10px; justify-content:flex-end; padding-top:4px;">
+                    <div style="display:flex; gap:10px; justify-content:flex-end; padding-top:4px; padding-bottom:16px;">
                         <button type="button" data-close-modal class="btn btn-light" style="border-radius:12px; font-weight:800;">Batal</button>
                         <button type="submit" id="btnSimpanPelanggaran" class="btn" style="background:#dc2626; color:#fff; border-radius:12px; font-weight:800;">
                             <i class="bi bi-check-lg me-1"></i>Simpan Catatan
