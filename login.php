@@ -141,7 +141,7 @@ $googleErrorMessages = [
             left: -10%;
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, #4F46E5 0%, transparent 70%);
+            background: radial-gradient(circle, #10B981 0%, transparent 70%);
         }
 
         .blob-2 {
@@ -149,7 +149,7 @@ $googleErrorMessages = [
             right: -10%;
             width: 600px;
             height: 600px;
-            background: radial-gradient(circle, #7C3AED 0%, transparent 70%);
+            background: radial-gradient(circle, #059669 0%, transparent 70%);
             animation-delay: -5s;
             animation-duration: 25s;
         }
@@ -159,7 +159,7 @@ $googleErrorMessages = [
             left: 30%;
             width: 400px;
             height: 400px;
-            background: radial-gradient(circle, #10B981 0%, transparent 70%);
+            background: radial-gradient(circle, #34D399 0%, transparent 70%);
             animation-delay: -10s;
             animation-duration: 15s;
         }
@@ -178,7 +178,7 @@ $googleErrorMessages = [
 
         .hero-panel {
             flex: 1.2;
-            background: #0b0f19;
+            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
             position: relative;
             display: flex;
             flex-direction: column;
@@ -211,8 +211,9 @@ $googleErrorMessages = [
             content: "";
             position: absolute;
             inset: 0;
-            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1.5px, transparent 1.5px);
-            background-size: 30px 30px;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+            background-size: 40px 40px;
             pointer-events: none;
             z-index: 1;
         }
