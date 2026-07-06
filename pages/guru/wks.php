@@ -190,7 +190,7 @@ $qKelas = @mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_mapel_ampu WHERE 
 while ($qKelas && ($rowKelas = mysqli_fetch_assoc($qKelas))) {
     $kelasAmpu[] = (string)$rowKelas['kelas'];
 }
-$kelasDetailUrl = 'data-siswa';
+$kelasDetailUrl = 'data-siswa.php';
 if (count($kelasAmpu) === 1) {
     $kelasDetailUrl .= '?kelas=' . rawurlencode($kelasAmpu[0]);
 }
