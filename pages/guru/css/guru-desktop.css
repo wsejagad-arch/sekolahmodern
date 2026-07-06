@@ -715,7 +715,7 @@
 
 /* Hide desktop elements on mobile */
 @media (max-width: 767px) {
-    .desktop-sidebar, .desktop-topbar-wrapper, .desktop-center-column, .desktop-right-column {
+    .desktop-sidebar, .desktop-topbar-wrapper, #desktopAppShell .desktop-center-column, #desktopAppShell .desktop-right-column {
         display: none !important;
     }
 }
