@@ -143,22 +143,20 @@ function wks_create_tables(mysqli $conn): void
 
 function wks_seed_default(mysqli $conn, array $teams, string $nip): void
 {
-    $qTotal = @mysqli_query($conn, "SELECT id FROM tbl_wks_microsite LIMIT 1");
-    if ($qTotal && mysqli_num_rows($qTotal) > 0) {
-        return; // Sudah ada data, jangan seed ulang secara otomatis
-    }
-
     foreach ($teams as $unit => $team) {
         $unitEsc = mysqli_real_escape_string($conn, $unit);
-        $titleEsc = mysqli_real_escape_string($conn, $team['name']);
-        $descEsc = mysqli_real_escape_string($conn, $team['summary']);
-        $nipEsc = mysqli_real_escape_string($conn, $nip);
-        @mysqli_query($conn, "
-            INSERT INTO tbl_wks_microsite
-                (unit, title, description, microsite_url, folder_url, sort_order, created_by, updated_by)
-            VALUES
-                ('$unitEsc', '$titleEsc', '$descEsc', '', '', 10, '$nipEsc', '$nipEsc')
-        ");
+        $qCheck = @mysqli_query($conn, "SELECT id FROM tbl_wks_microsite WHERE unit='$unitEsc' LIMIT 1");
+        if (!$qCheck || mysqli_num_rows($qCheck) === 0) {
+            $titleEsc = mysqli_real_escape_string($conn, $team['name']);
+            $descEsc = mysqli_real_escape_string($conn, $team['summary']);
+            $nipEsc = mysqli_real_escape_string($conn, $nip);
+            @mysqli_query($conn, "
+                INSERT INTO tbl_wks_microsite
+                    (unit, title, description, microsite_url, folder_url, sort_order, created_by, updated_by)
+                VALUES
+                    ('$unitEsc', '$titleEsc', '$descEsc', '', '', 10, '$nipEsc', '$nipEsc')
+            ");
+        }
     }
 }
 
