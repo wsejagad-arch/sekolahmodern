@@ -38,7 +38,7 @@ if (isset($_GET['toggle_edit'])) {
     }
     $newVal = ($currentVal === '1') ? '0' : '1';
     @mysqli_query($conn, "UPDATE tbl_pengaturan SET nilai='$newVal' WHERE kunci='izin_edit_profil_guru'");
-    header("Location: ?page=data-guru");
+    echo "<script>window.location.href = '?page=data-guru';</script>";
     exit;
 }
 
