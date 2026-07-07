@@ -34,7 +34,7 @@ if (function_exists('track_user_online_status')) {
 // Check maintenance mode
 $lembaga = data_lembaga();
 $currentScript = basename($_SERVER['PHP_SELF'] ?? '');
-if ($lembaga['maintenance_mode'] && !in_array($currentScript, ['maintenance.php', 'admin-pusat-login.php', 'login.php', 'index.php', 'ceklogin.php'], true)) {
+if ($lembaga['maintenance_mode'] && !in_array($currentScript, ['maintenance.php', 'admin-pusat-login.php', 'login.php', 'index.php', 'ceklogin.php', 'login_action.php', 'google-login.php'], true)) {
     if (!is_admin_pusat() && !is_admin()) {
         header('Location: maintenance.php');
         exit;
