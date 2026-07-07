@@ -6,13 +6,13 @@
         <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; margin-bottom:16px;">
           <span style="font-size:13px; color:#64748b; font-weight:600;">
             <i class="fas fa-school mr-1" style="color:#1a3c6e;"></i>
-            <?= isset($lembaga) && !empty($lembaga['nmsekolah']) ? htmlspecialchars($lembaga['nmsekolah']) : 'SMA Negeri 1 Sumber'; ?>
+            SMA Negeri 1 Sumber
           </span>
           <span style="font-size:12px; color:#94a3b8;">
-            &copy; <?= date('Y'); ?> &mdash; Sistem Manajemen Jurnal
+            &copy; 2026 &mdash; Sistem Manajemen Pendidikan SMA Negeri 1 Sumber
           </span>
           <span style="font-size:12px; color:#94a3b8;">
-            <i class="fas fa-code mr-1" style="color:#f0b429;"></i>TIM IT SMAN1S
+            <i class="fas fa-code mr-1" style="color:#f0b429;"></i>TIM IT SMAN1S - Hak Cipta Dilindungi Undang-undang
           </span>
         </div>
 
