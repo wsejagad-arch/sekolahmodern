@@ -81,9 +81,15 @@ $lembaga = data_lembaga();
 
   <script src="vendor/chart.js/Chart.min.js"></script>
 
+  <!-- Global JS Variables untuk WebView APK -->
+  <script>
+    window.currentUserId = "<?= htmlspecialchars($id_user ?? '') ?>";
+    window.currentUserNoInduk = "<?= htmlspecialchars($_SESSION['no_induk'] ?? '') ?>";
+    window.currentUserRole = "<?= htmlspecialchars($hakakses ?? '') ?>";
+  </script>
 </head>
 
-<body id="page-top">
+<body id="page-top" data-user-id="<?= htmlspecialchars($id_user ?? '') ?>" data-no-induk="<?= htmlspecialchars($_SESSION['no_induk'] ?? '') ?>" data-role="<?= htmlspecialchars($hakakses ?? '') ?>">
 <script src="js/sweetalert2.all.min.js"></script>
   <!-- Page Wrapper -->
   <div id="wrapper">
