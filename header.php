@@ -86,6 +86,14 @@ $lembaga = data_lembaga();
     window.currentUserId = "<?= htmlspecialchars($id_user ?? '') ?>";
     window.currentUserNoInduk = "<?= htmlspecialchars($_SESSION['no_induk'] ?? '') ?>";
     window.currentUserRole = "<?= htmlspecialchars($hakakses ?? '') ?>";
+    
+    // Fungsi untuk navigasi link terenkripsi (Anti-hover detection)
+    function secNav(el) {
+        var t = el.getAttribute('data-sec-target');
+        if (t) {
+            window.location.href = atob(t);
+        }
+    }
   </script>
 </head>
 
