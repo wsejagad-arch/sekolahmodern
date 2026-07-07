@@ -16,6 +16,7 @@
           </span>
         </div>
 
+        <?php if (!isset($_SESSION['hak_akses']) || (int)$_SESSION['hak_akses'] !== 2): ?>
         <div style="display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; flex-direction:column;">
           <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
             <a href="https://www.instagram.com/sman1sumber_rembang" target="_blank" rel="noopener noreferrer" class="btn btn-sm" style="border-radius:999px; background:#fdf2f8; color:#db2777; border:1px solid #f9a8d4; font-weight:700; padding:6px 12px; font-size:12px; display:inline-flex; align-items:center; gap:4px; text-decoration:none;">
@@ -32,6 +33,7 @@
             <i class="fas fa-globe"></i>sman1sumber.sch.id
           </a>
         </div>
+        <?php endif; ?>
       </div>
     </div>
   </div>
