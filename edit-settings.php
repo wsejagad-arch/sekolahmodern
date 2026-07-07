@@ -71,6 +71,38 @@ if (isset($_POST['submit'])) {
 		<script>Swal.fire('Gagal', 'merubah data lembaga!', 'error')</script>
 	<?php }
 }
+
+if (isset($_POST['hapus_semua_aduan']) && $hakakses == 1) {
+    $is_multi = function_exists('mt_current_school_id');
+    $idSekolah = $is_multi ? mt_current_school_id() : 1;
+    $qAduan = mysqli_query($conn, "SELECT id_aduan FROM tbl_aduan_siswa WHERE id_sekolah=$idSekolah");
+    if ($qAduan) {
+        $ids = [];
+        while($r = mysqli_fetch_assoc($qAduan)) {
+            $ids[] = (int)$r['id_aduan'];
+        }
+        if (!empty($ids)) {
+            $idList = implode(',', $ids);
+            mysqli_query($conn, "DELETE FROM tbl_aduan_tindak_lanjut WHERE id_aduan IN ($idList)");
+            mysqli_query($conn, "DELETE FROM tbl_aduan_siswa WHERE id_sekolah=$idSekolah");
+        }
+    }
+    $isilog = "$nama"." menghapus seluruh data aduan siswa";
+    mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr', '$isilog')");
+    ?>
+    <script>
+        Swal.fire({
+        position: 'top-end',
+        icon: 'success',
+        title: 'Berhasil menghapus semua data aduan!',
+        showConfirmButton: false,
+        timer: 1500
+        }).then(function(){
+            window.location.href = "?page=setting";
+        })
+    </script>
+<?php
+}
 ?>
 
     <div class="container-fluid">
@@ -170,6 +202,27 @@ $data = mysqli_fetch_array($res_lembaga);
 
 </form>
 </div>
+
+<?php if ($hakakses == 1): ?>
+<div class="container rounded mt-4 p-4" style="background-color: #ffffff; outline: 1px solid lightgrey">
+    <h5 class="text-danger font-weight-bold mb-3"><i class="fas fa-exclamation-triangle"></i> Zona Berbahaya</h5>
+    <div class="alert alert-warning mb-3">
+        Tindakan di bawah ini akan menghapus data secara permanen dan tidak dapat dipulihkan.
+    </div>
+    <form method="POST" action="">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <strong>Hapus Semua Data Aduan Siswa</strong>
+                <div class="small text-muted">Menghapus seluruh aduan beserta riwayat tindak lanjutnya.</div>
+            </div>
+            <button type="submit" name="hapus_semua_aduan" class="btn btn-danger" onclick="return confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA data aduan siswa? Tindakan ini tidak dapat dibatalkan!');">
+                <i class="fas fa-trash"></i> Hapus Semua Aduan
+            </button>
+        </div>
+    </form>
+</div>
+<?php endif; ?>
+
 </div>
 </div>
 

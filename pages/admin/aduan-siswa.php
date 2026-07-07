@@ -129,43 +129,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['aduan_action'])) {
         $nextStage = $currentStage;
         $status = 'diproses';
         $aksi = $action;
-        if ($action === 'tangani') {
-            $status = 'diproses';
-        } elseif ($action === 'lanjut') {
-            $nextStage = adm_ad_next_stage($currentStage);
-            $status = $nextStage === 'selesai' ? 'selesai' : 'diteruskan';
-        } elseif ($action === 'selesai') {
-            $nextStage = 'selesai';
-            $status = 'selesai';
+        
+        if ($action === 'hapus') {
+            if ($hakAksesAduan !== 1) {
+                $flashAduan = 'Hanya admin utama yang dapat menghapus aduan.';
+                $flashTypeAduan = 'danger';
+            } else {
+                @mysqli_query($conn, "DELETE FROM tbl_aduan_tindak_lanjut WHERE id_aduan=$idAduan");
+                $ok = @mysqli_query($conn, "DELETE FROM tbl_aduan_siswa WHERE id_sekolah=$idSekolah AND id_aduan=$idAduan LIMIT 1");
+                $flashAduan = $ok ? 'Aduan berhasil dihapus.' : 'Gagal menghapus aduan.';
+                $flashTypeAduan = $ok ? 'success' : 'danger';
+            }
         } else {
-            $flashAduan = 'Aksi tidak valid.';
-            $flashTypeAduan = 'danger';
-        }
+            if ($action === 'tangani') {
+                $status = 'diproses';
+            } elseif ($action === 'lanjut') {
+                $nextStage = adm_ad_next_stage($currentStage);
+                $status = $nextStage === 'selesai' ? 'selesai' : 'diteruskan';
+            } elseif ($action === 'selesai') {
+                $nextStage = 'selesai';
+                $status = 'selesai';
+            } else {
+                $flashAduan = 'Aksi tidak valid.';
+                $flashTypeAduan = 'danger';
+            }
 
-        if ($flashAduan === '') {
-            $catatanEsc = mysqli_real_escape_string($conn, $catatan);
-            $handlerEsc = mysqli_real_escape_string($conn, $noIndukAduan);
-            $handlerNameEsc = mysqli_real_escape_string($conn, $handlerName);
-            $stageEsc = mysqli_real_escape_string($conn, $currentStage);
-            $aksiEsc = mysqli_real_escape_string($conn, $aksi);
-            $statusEsc = mysqli_real_escape_string($conn, $status);
-            $nextEsc = mysqli_real_escape_string($conn, $nextStage);
-            @mysqli_query($conn, "
-                INSERT INTO tbl_aduan_tindak_lanjut
-                    (id_aduan, tahap, aksi, catatan, handled_by, handled_name)
-                VALUES
-                    ($idAduan, '$stageEsc', '$aksiEsc', '$catatanEsc', '$handlerEsc', '$handlerNameEsc')
-            ");
-            $closedSql = $nextStage === 'selesai' ? ', closed_at=NOW()' : '';
-            $idSekolah = mt_current_school_id();
-            $ok = @mysqli_query($conn, "
-                UPDATE tbl_aduan_siswa
-                SET status='$statusEsc', tahap_aktif='$nextEsc' $closedSql
-                WHERE id_sekolah=$idSekolah AND id_aduan=$idAduan
-                LIMIT 1
-            ");
-            $flashAduan = $ok ? 'Status aduan berhasil diperbarui.' : 'Gagal memperbarui aduan.';
-            $flashTypeAduan = $ok ? 'success' : 'danger';
+            if ($flashAduan === '') {
+                $catatanEsc = mysqli_real_escape_string($conn, $catatan);
+                $handlerEsc = mysqli_real_escape_string($conn, $noIndukAduan);
+                $handlerNameEsc = mysqli_real_escape_string($conn, $handlerName);
+                $stageEsc = mysqli_real_escape_string($conn, $currentStage);
+                $aksiEsc = mysqli_real_escape_string($conn, $aksi);
+                $statusEsc = mysqli_real_escape_string($conn, $status);
+                $nextEsc = mysqli_real_escape_string($conn, $nextStage);
+                @mysqli_query($conn, "
+                    INSERT INTO tbl_aduan_tindak_lanjut
+                        (id_aduan, tahap, aksi, catatan, handled_by, handled_name)
+                    VALUES
+                        ($idAduan, '$stageEsc', '$aksiEsc', '$catatanEsc', '$handlerEsc', '$handlerNameEsc')
+                ");
+                $closedSql = $nextStage === 'selesai' ? ', closed_at=NOW()' : '';
+                $idSekolah = mt_current_school_id();
+                $ok = @mysqli_query($conn, "
+                    UPDATE tbl_aduan_siswa
+                    SET status='$statusEsc', tahap_aktif='$nextEsc' $closedSql
+                    WHERE id_sekolah=$idSekolah AND id_aduan=$idAduan
+                    LIMIT 1
+                ");
+                $flashAduan = $ok ? 'Status aduan berhasil diperbarui.' : 'Gagal memperbarui aduan.';
+                $flashTypeAduan = $ok ? 'success' : 'danger';
+            }
         }
     }
 }
@@ -275,16 +288,31 @@ if (!empty($aduanRows)) {
                                 <input type="hidden" name="id_aduan" value="<?= (int)$row['id_aduan']; ?>">
                                 <label class="small font-weight-bold">Catatan penanganan</label>
                                 <textarea class="form-control mb-2" name="catatan" rows="2" placeholder="Tulis catatan tindak lanjut..."></textarea>
-                                <div class="d-flex flex-wrap" style="gap:8px;">
+                                <div class="d-flex flex-wrap align-items-center" style="gap:8px;">
                                     <button class="btn btn-sm btn-outline-primary" name="aduan_action" value="tangani" type="submit">Sudah Ditangani</button>
                                     <button class="btn btn-sm btn-outline-warning" name="aduan_action" value="lanjut" type="submit">Teruskan ke Tahap Berikut</button>
                                     <button class="btn btn-sm btn-success" name="aduan_action" value="selesai" type="submit" onclick="return confirm('Tandai aduan selesai?');">Selesai</button>
+                                    <?php if ($hakAksesAduan === 1): ?>
+                                    <button class="btn btn-sm btn-outline-danger ml-auto" name="aduan_action" value="hapus" type="submit" onclick="return confirm('Yakin ingin menghapus aduan ini beserta historinya? Tindakan ini tidak dapat dibatalkan.');"><i class="fas fa-trash"></i> Hapus</button>
+                                    <?php endif; ?>
                                 </div>
                             </form>
                         <?php elseif ($row['status'] === 'selesai'): ?>
-                            <div class="alert alert-success mb-0 py-2">Aduan selesai pada <?= $row['closed_at'] ? date('d M Y H:i', strtotime($row['closed_at'])) : '-'; ?>.</div>
+                            <div class="alert alert-success mb-2 py-2">Aduan selesai pada <?= $row['closed_at'] ? date('d M Y H:i', strtotime($row['closed_at'])) : '-'; ?>.</div>
+                            <?php if ($hakAksesAduan === 1): ?>
+                            <form method="post">
+                                <input type="hidden" name="id_aduan" value="<?= (int)$row['id_aduan']; ?>">
+                                <button class="btn btn-sm btn-outline-danger mt-1" name="aduan_action" value="hapus" type="submit" onclick="return confirm('Yakin ingin menghapus aduan ini beserta historinya? Tindakan ini tidak dapat dibatalkan.');"><i class="fas fa-trash"></i> Hapus Aduan</button>
+                            </form>
+                            <?php endif; ?>
                         <?php else: ?>
-                            <div class="alert alert-secondary mb-0 py-2">Menunggu tahap <?= adm_ad_h(adm_ad_stage_label((string)$row['tahap_aktif'])); ?>.</div>
+                            <div class="alert alert-secondary mb-2 py-2">Menunggu tahap <?= adm_ad_h(adm_ad_stage_label((string)$row['tahap_aktif'])); ?>.</div>
+                            <?php if ($hakAksesAduan === 1): ?>
+                            <form method="post">
+                                <input type="hidden" name="id_aduan" value="<?= (int)$row['id_aduan']; ?>">
+                                <button class="btn btn-sm btn-outline-danger mt-1" name="aduan_action" value="hapus" type="submit" onclick="return confirm('Yakin ingin menghapus aduan ini beserta historinya? Tindakan ini tidak dapat dibatalkan.');"><i class="fas fa-trash"></i> Hapus Aduan</button>
+                            </form>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 </div>
