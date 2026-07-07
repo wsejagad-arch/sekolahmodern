@@ -19,6 +19,13 @@ if ($checkCol && mysqli_num_rows($checkCol) == 0) {
     mysqli_query($conn, "UPDATE tbl_setting SET gemini_api_key='AIzaSyC9zh6FHEnbqrW1MSlO4fVnSdu2L8SjSE8' WHERE id=1");
 }
 
+// Migration Check: Ensure adsense columns exist
+$checkAdsense = mysqli_query($conn, "SHOW COLUMNS FROM tbl_setting LIKE 'adsense_enabled'");
+if ($checkAdsense && mysqli_num_rows($checkAdsense) == 0) {
+    mysqli_query($conn, "ALTER TABLE tbl_setting ADD COLUMN adsense_enabled TINYINT(1) DEFAULT 0");
+    mysqli_query($conn, "ALTER TABLE tbl_setting ADD COLUMN adsense_script TEXT DEFAULT NULL");
+}
+
 // Pemrosesan form
 if (isset($_POST['submit'])) {
     //definisikan variabel dulu
@@ -28,6 +35,8 @@ if (isset($_POST['submit'])) {
 	  $nip = mysqli_real_escape_string($conn, $_POST['nippimpinan']);
 	  $gemini_api_key = mysqli_real_escape_string($conn, $_POST['gemini_api_key']);
 	  $maintenance = isset($_POST['maintenance_mode']) ? 1 : 0;
+      $adsense_enabled = isset($_POST['adsense_enabled']) ? 1 : 0;
+      $adsense_script = mysqli_real_escape_string($conn, $_POST['adsense_script']);
 	  $fotolama = $_POST['foto'];
 	  $namafile = $_FILES['file']['name'];
 	  $ukuranFile = $_FILES['file']['size'];
@@ -37,7 +46,7 @@ if (isset($_POST['submit'])) {
       
 	  if($error != UPLOAD_ERR_NO_FILE) {
 		$cekfoto = cek_foto($namafile);
-		mysqli_query($conn, "UPDATE tbl_setting SET nama_sekolah='$nmlembaga', alamat='$alamat', nama_pimpinan='$pimpinan', nip_pimpinan='$nip', logo='$cekfoto', maintenance_mode='$maintenance', gemini_api_key='$gemini_api_key' WHERE id='$id'");
+		mysqli_query($conn, "UPDATE tbl_setting SET nama_sekolah='$nmlembaga', alamat='$alamat', nama_pimpinan='$pimpinan', nip_pimpinan='$nip', logo='$cekfoto', maintenance_mode='$maintenance', gemini_api_key='$gemini_api_key', adsense_enabled='$adsense_enabled', adsense_script='$adsense_script' WHERE id='$id'");
 		move_uploaded_file($tmpName, 'img/' . $cekfoto);
 		unlink('img/' . $fotolama);
 		mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr', '$isilog')");
@@ -54,7 +63,7 @@ if (isset($_POST['submit'])) {
 			  })
 		</script>
 	<?php } else if($error === UPLOAD_ERR_NO_FILE) {
-		mysqli_query($conn, "UPDATE tbl_setting SET nama_sekolah='$nmlembaga', alamat='$alamat', nama_pimpinan='$pimpinan', nip_pimpinan='$nip', maintenance_mode='$maintenance', gemini_api_key='$gemini_api_key' WHERE id='$id'");
+		mysqli_query($conn, "UPDATE tbl_setting SET nama_sekolah='$nmlembaga', alamat='$alamat', nama_pimpinan='$pimpinan', nip_pimpinan='$nip', maintenance_mode='$maintenance', gemini_api_key='$gemini_api_key', adsense_enabled='$adsense_enabled', adsense_script='$adsense_script' WHERE id='$id'");
 		mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr', '$isilog')"); ?>
 		<script>
 			  Swal.fire({
@@ -188,6 +197,21 @@ $data = mysqli_fetch_array($res_lembaga);
     </div>
 </div>
 <!-- Maintenance Mode -->
+
+<hr>
+<!-- AdSense Settings -->
+<div class="form-group col-sm-12">
+    <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="adsenseEnabled" name="adsense_enabled" value="1" <?= isset($data['adsense_enabled']) && $data['adsense_enabled'] ? 'checked' : ''; ?>>
+        <label class="form-check-label font-weight-bold" for="adsenseEnabled">
+            Aktifkan Google AdSense
+        </label>
+    </div>
+    <label for="adsenseScript">Skrip AdSense (Kode Iklan):</label>
+    <textarea class="form-control" id="adsenseScript" name="adsense_script" rows="4" placeholder="Masukkan skrip AdSense Anda di sini..."><?= isset($data['adsense_script']) ? htmlspecialchars($data['adsense_script']) : ''; ?></textarea>
+    <small class="form-text text-muted">Contoh: <code>&lt;script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxx" crossorigin="anonymous"&gt;&lt;/script&gt;</code></small>
+</div>
+<!-- AdSense Settings -->
 
 <!-- Tombol Submit dan cancel -->
 <div class="form-group col-sm-2 pb-4">

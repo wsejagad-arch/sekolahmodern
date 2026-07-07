@@ -43,6 +43,11 @@ $lembaga = data_lembaga();
     }
   </script>
 
+  <?php if (!empty($lembaga['adsense_enabled']) && !empty($lembaga['adsense_script'])): ?>
+  <!-- Google AdSense -->
+  <?= $lembaga['adsense_script'] ?>
+  <?php endif; ?>
+
   <!-- Google Fonts - Plus Jakarta Sans (dimuat lebih awal, non-blocking) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
