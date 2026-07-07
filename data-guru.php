@@ -21,6 +21,30 @@ if (function_exists('online_status_ensure_table')) {
   online_status_ensure_table($conn);
 }
 
+// Pastikan tabel pengaturan ada
+@mysqli_query($conn, "CREATE TABLE IF NOT EXISTS tbl_pengaturan (
+    kunci VARCHAR(60) PRIMARY KEY,
+    nilai VARCHAR(255) DEFAULT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+@mysqli_query($conn, "INSERT IGNORE INTO tbl_pengaturan (kunci,nilai) VALUES ('izin_edit_profil_guru','0')");
+
+// Toggle izin edit profil
+if (isset($_GET['toggle_edit'])) {
+    $currentVal = '0';
+    $qCheck = @mysqli_query($conn, "SELECT nilai FROM tbl_pengaturan WHERE kunci='izin_edit_profil_guru'");
+    if ($qCheck && $rowCheck = mysqli_fetch_assoc($qCheck)) {
+        $currentVal = $rowCheck['nilai'];
+    }
+    $newVal = ($currentVal === '1') ? '0' : '1';
+    @mysqli_query($conn, "UPDATE tbl_pengaturan SET nilai='$newVal' WHERE kunci='izin_edit_profil_guru'");
+    header("Location: ?page=data-guru");
+    exit;
+}
+
+$qIzin = @mysqli_query($conn, "SELECT nilai FROM tbl_pengaturan WHERE kunci='izin_edit_profil_guru'");
+$isIzinEdit = ($qIzin && ($rIzin = mysqli_fetch_assoc($qIzin))) ? ($rIzin['nilai'] === '1') : false;
+
 if (!function_exists('format_last_active_label')) {
   function format_last_active_label($datetime)
   {
@@ -88,6 +112,9 @@ if (!function_exists('get_user_online_visual_state')) {
             <p class="mb-0 opacity-75">Kelola informasi guru di <?= $lembaga['nmsekolah']; ?></p>
           </div>
           <div class="d-flex gap-2 flex-wrap">
+            <a href="?page=data-guru&toggle_edit=1" class="btn <?= $isIzinEdit ? 'btn-warning' : 'btn-info' ?> btn-sm px-4 shadow-sm" style="border-radius: 25px; font-weight: 600;">
+              <i class="fas <?= $isIzinEdit ? 'fa-lock-open' : 'fa-lock' ?> me-2"></i><?= $isIzinEdit ? 'Tutup Akses Edit' : 'Buka Akses Edit' ?>
+            </a>
             <a href="?page=tambah-guru" class="btn btn-light btn-sm px-4 shadow-sm" style="border-radius: 25px; font-weight: 600;">
               <i class="fas fa-plus me-2"></i>Tambah Guru
             </a>
