@@ -53,6 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $no_wa = trim((string)($_POST['no_wa'] ?? ''));
     $alamat = trim((string)($_POST['alamat'] ?? ''));
     $jabatan = trim((string)($_POST['jabatan'] ?? ''));
+    $status_kepegawaian = trim((string)($_POST['status_kepegawaian'] ?? ''));
+    $is_guru_bk = isset($_POST['is_guru_bk']) ? 1 : 0;
+    $is_pendamping_literasi = isset($_POST['is_pendamping_literasi']) ? 1 : 0;
+    $is_tim_aduan = isset($_POST['is_tim_aduan']) ? 1 : 0;
+    $id_kelas_wali = isset($_POST['wali_kelas']) ? (int)$_POST['wali_kelas'] : 0;
+    $walas_status = ($id_kelas_wali > 0) ? 'Ya' : 'Tidak';
 
     $qOld = mysqli_query($conn, "SELECT foto FROM tbl_guru WHERE no_induk='$noIndukEsc' LIMIT 1");
     $old = $qOld ? mysqli_fetch_assoc($qOld) : null;
@@ -104,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $waEsc = mysqli_real_escape_string($conn, $no_wa);
         $alamatEsc = mysqli_real_escape_string($conn, $alamat);
         $jabatanEsc = mysqli_real_escape_string($conn, $jabatan);
+        $statusKepEsc = mysqli_real_escape_string($conn, $status_kepegawaian);
         $fotoEsc = mysqli_real_escape_string($conn, $fotoBaru);
 
         $update = mysqli_query($conn, "
@@ -112,11 +119,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 no_wa='$waEsc',
                 alamat='$alamatEsc',
                 jabatan='$jabatanEsc',
+                status_kepegawaian='$statusKepEsc',
+                is_guru_bk=$is_guru_bk,
+                is_pendamping_literasi=$is_pendamping_literasi,
+                is_tim_aduan=$is_tim_aduan,
+                walas='$walas_status',
                 foto='$fotoEsc'
             WHERE no_induk='$noIndukEsc'
         ");
 
         if ($update) {
+            // --- SINKRONISASI WALI KELAS ---
+            $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
+            $old_wk_q = mysqli_query($conn, "SELECT id_kelas FROM tbl_wali_kelas WHERE nip_wali='$noIndukEsc' AND id_sekolah=$tenantId");
+            while($row_old = mysqli_fetch_assoc($old_wk_q)) {
+                $old_id = $row_old['id_kelas'];
+                mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas=NULL, nip_wali=NULL WHERE id_kelas=$old_id AND id_sekolah=$tenantId");
+            }
+            mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE nip_wali='$noIndukEsc' AND id_sekolah=$tenantId");
+
+            if ($id_kelas_wali > 0) {
+                mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
+                $tgl_now = date('Y-m-d H:i:s');
+                mysqli_query($conn, "INSERT INTO tbl_wali_kelas(id_kelas, nip_wali, nama_wali, id_sekolah, created_at, updated_at) VALUES($id_kelas_wali, '$noIndukEsc', '$namaEsc', $tenantId, '$tgl_now', '$tgl_now')");
+                mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas='$namaEsc', nip_wali='$noIndukEsc' WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
+            }
+            // -------------------------------
+
             $_SESSION['nama_guru'] = $nama_guru;
             $pesan = 'Profil berhasil diperbarui.';
             $tipePesan = 'success';
@@ -568,7 +597,60 @@ textarea.form-control-profile {
 
                 <div class="form-group">
                     <label class="form-label">Status Kepegawaian</label>
-                    <input type="text" class="form-control-profile" value="<?= htmlspecialchars($guru['status_kepegawaian'] ?? ''); ?>" readonly>
+                    <?php if (!$izinEditProfilGuru): ?>
+                        <input type="text" class="form-control-profile" value="<?= htmlspecialchars($guru['status_kepegawaian'] ?? ''); ?>" readonly>
+                    <?php else: ?>
+                        <select name="status_kepegawaian" class="form-control-profile">
+                            <?php $currStatus = $guru['status_kepegawaian'] ?? ''; ?>
+                            <option value="ASN" <?= $currStatus === 'ASN' ? 'selected' : '' ?>>ASN</option>
+                            <option value="Non-ASN" <?= $currStatus === 'Non-ASN' ? 'selected' : '' ?>>Non-ASN</option>
+                        </select>
+                    <?php endif; ?>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Wali Kelas</label>
+                    <?php if (!$izinEditProfilGuru): ?>
+                        <input type="text" class="form-control-profile" value="<?= htmlspecialchars($guru['walas'] === 'Ya' ? 'Ya' : 'Tidak Menjabat'); ?>" readonly>
+                    <?php else: ?>
+                        <?php
+                            $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
+                            $q_wk = mysqli_query($conn, "SELECT id_kelas FROM tbl_wali_kelas WHERE nip_wali='{$guru['no_induk']}' AND id_sekolah=$tenantId LIMIT 1");
+                            $current_kelas_id = ($r_wk = mysqli_fetch_assoc($q_wk)) ? $r_wk['id_kelas'] : 0;
+                        ?>
+                        <select name="wali_kelas" class="form-control-profile">
+                            <option value="0">-- Tidak Menjabat --</option>
+                            <?php
+                            $q_kelas = mysqli_query($conn, "SELECT id_kelas, nama_kelas, nip_wali FROM tbl_kelas WHERE id_sekolah=$tenantId ORDER BY nama_kelas ASC");
+                            while ($k = mysqli_fetch_assoc($q_kelas)) {
+                                $selected = ($k['id_kelas'] == $current_kelas_id) ? "selected" : "";
+                                $keterangan = "";
+                                if ($k['nip_wali'] && $k['nip_wali'] != $guru['no_induk']) {
+                                    $keterangan = " (Sudah ada wali)";
+                                }
+                                echo "<option value='{$k['id_kelas']}' $selected>{$k['nama_kelas']} $keterangan</option>";
+                            }
+                            ?>
+                        </select>
+                    <?php endif; ?>
+                </div>
+
+                <div class="form-group full">
+                    <label class="form-label">Tugas Tambahan</label>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:#334155;">
+                            <input type="checkbox" name="is_guru_bk" value="1" <?= (!empty($guru['is_guru_bk']) ? 'checked' : '') ?> <?= !$izinEditProfilGuru ? 'disabled' : '' ?> style="width:18px;height:18px;">
+                            Guru BK <span style="font-size:12px; font-weight:400; color:#64748b;">(Dapat memvalidasi izin siswa)</span>
+                        </label>
+                        <label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:#334155;">
+                            <input type="checkbox" name="is_pendamping_literasi" value="1" <?= (!empty($guru['is_pendamping_literasi']) ? 'checked' : '') ?> <?= !$izinEditProfilGuru ? 'disabled' : '' ?> style="width:18px;height:18px;">
+                            Pendamping Literasi <span style="font-size:12px; font-weight:400; color:#64748b;">(Mengatur tugas literasi)</span>
+                        </label>
+                        <label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:#334155;">
+                            <input type="checkbox" name="is_tim_aduan" value="1" <?= (!empty($guru['is_tim_aduan']) ? 'checked' : '') ?> <?= !$izinEditProfilGuru ? 'disabled' : '' ?> style="width:18px;height:18px;">
+                            Tim Aduan <span style="font-size:12px; font-weight:400; color:#64748b;">(Menerima notifikasi aduan)</span>
+                        </label>
+                    </div>
                 </div>
 
                 <div class="form-group full">
