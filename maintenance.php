@@ -6,9 +6,8 @@
 
 include "bootstrap.php";
 
-// Jika admin dan sudah bypass, lanjutkan
-if (is_admin() && isset($_SESSION['bypass_maintenance'])) {
-    // Admin bypass, redirect ke home
+// Jika admin, kembalikan ke home karena admin otomatis bypass
+if (is_admin()) {
     header('Location: home.php');
     exit;
 }
@@ -52,26 +51,9 @@ if (is_admin() && isset($_SESSION['bypass_maintenance'])) {
         </div>
         <h1 class="h3 mb-3 font-weight-normal">Sistem Sedang Dalam Perbaikan</h1>
         <p class="text-muted">Maaf, sistem sedang dalam mode maintenance. Silakan kembali lagi nanti.</p>
-        <?php if (is_admin()): ?>
-            <form method="POST" action="">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="bypass" name="bypass" onchange="this.form.submit()">
-                    <label class="form-check-label" for="bypass">
-                        Saya admin, izinkan saya masuk untuk memperbaiki sistem
-                    </label>
-                </div>
-            </form>
-        <?php endif; ?>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-<?php
-if (isset($_POST['bypass']) && is_admin()) {
-    $_SESSION['bypass_maintenance'] = true;
-    header('Location: home.php');
-    exit;
-}
-?>
