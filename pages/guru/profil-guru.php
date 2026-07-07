@@ -56,7 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $status_kepegawaian = trim((string)($_POST['status_kepegawaian'] ?? ''));
     $is_guru_bk = isset($_POST['is_guru_bk']) ? 1 : 0;
     $is_pendamping_literasi = isset($_POST['is_pendamping_literasi']) ? 1 : 0;
-    $is_tim_aduan = isset($_POST['is_tim_aduan']) ? 1 : 0;
     $id_kelas_wali = isset($_POST['wali_kelas']) ? (int)$_POST['wali_kelas'] : 0;
     $walas_status = ($id_kelas_wali > 0) ? 'Ya' : 'Tidak';
 
@@ -122,7 +121,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 status_kepegawaian='$statusKepEsc',
                 is_guru_bk=$is_guru_bk,
                 is_pendamping_literasi=$is_pendamping_literasi,
-                is_tim_aduan=$is_tim_aduan,
                 walas='$walas_status',
                 foto='$fotoEsc'
             WHERE no_induk='$noIndukEsc'
@@ -645,10 +643,6 @@ textarea.form-control-profile {
                         <label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:#334155;">
                             <input type="checkbox" name="is_pendamping_literasi" value="1" <?= (!empty($guru['is_pendamping_literasi']) ? 'checked' : '') ?> <?= !$izinEditProfilGuru ? 'disabled' : '' ?> style="width:18px;height:18px;">
                             Pendamping Literasi <span style="font-size:12px; font-weight:400; color:#64748b;">(Mengatur tugas literasi)</span>
-                        </label>
-                        <label style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:#334155;">
-                            <input type="checkbox" name="is_tim_aduan" value="1" <?= (!empty($guru['is_tim_aduan']) ? 'checked' : '') ?> <?= !$izinEditProfilGuru ? 'disabled' : '' ?> style="width:18px;height:18px;">
-                            Tim Aduan <span style="font-size:12px; font-weight:400; color:#64748b;">(Menerima notifikasi aduan)</span>
                         </label>
                     </div>
                 </div>
