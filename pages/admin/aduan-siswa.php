@@ -76,11 +76,11 @@ function adm_ad_next_stage(string $stage): string
 function adm_ad_guru_role(mysqli $conn, string $noInduk): array
 {
     if ($noInduk === '') {
-        return ['name' => '', 'jabatan' => '', 'is_bk' => false, 'stages' => []];
+        return ['name' => '', 'jabatan' => '', 'is_bk' => false, 'is_tim_aduan' => false, 'stages' => []];
     }
     $nipEsc = mysqli_real_escape_string($conn, $noInduk);
     $idSekolah = mt_current_school_id();
-    $q = @mysqli_query($conn, "SELECT nama_guru, jabatan, is_guru_bk FROM tbl_guru WHERE id_sekolah=$idSekolah AND no_induk='$nipEsc' LIMIT 1");
+    $q = @mysqli_query($conn, "SELECT * FROM tbl_guru WHERE id_sekolah=$idSekolah AND no_induk='$nipEsc' LIMIT 1");
     $row = $q ? mysqli_fetch_assoc($q) : [];
     $jabatan = strtolower((string)($row['jabatan'] ?? ''));
     $stages = [];
@@ -92,6 +92,7 @@ function adm_ad_guru_role(mysqli $conn, string $noInduk): array
         'name' => (string)($row['nama_guru'] ?? ''),
         'jabatan' => (string)($row['jabatan'] ?? ''),
         'is_bk' => !empty($row['is_guru_bk']),
+        'is_tim_aduan' => (!empty($row['is_tim_aduan']) && (int)$row['is_tim_aduan'] === 1),
         'stages' => array_values(array_unique($stages)),
     ];
 }
@@ -99,7 +100,7 @@ function adm_ad_guru_role(mysqli $conn, string $noInduk): array
 adm_ad_create_tables($conn);
 
 $guruRoleAduan = adm_ad_guru_role($conn, $noIndukAduan);
-$isAdminAduan = $hakAksesAduan === 1;
+$isAdminAduan = ($hakAksesAduan === 1 || $guruRoleAduan['is_tim_aduan']);
 $allowedStagesAduan = $isAdminAduan ? ['stpks', 'bk', 'kesiswaan', 'kepala_sekolah'] : $guruRoleAduan['stages'];
 if (!$isAdminAduan && empty($allowedStagesAduan)) {
     echo '<div class="container-fluid"><div class="alert alert-danger">Anda tidak memiliki akses penanganan aduan siswa.</div></div>';
