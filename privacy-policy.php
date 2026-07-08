@@ -9,9 +9,10 @@
     <title>Privacy Policy - SIMANIS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Nunito', 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: #f8fafc;
             color: #0f172a;
             line-height: 1.6;
@@ -107,7 +108,14 @@
     <p>Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu. Setiap perubahan akan diinformasikan melalui sistem kami. Anda disarankan untuk meninjau halaman ini secara berkala untuk mengetahui perubahan apa pun.</p>
 
     <h2>6. Kontak Kami</h2>
-    <p>Jika Anda memiliki pertanyaan atau kekhawatiran tentang Kebijakan Privasi ini atau pengelolaan data pribadi Anda, silakan hubungi administrator sistem atau pihak tata usaha sekolah.</p>
+    <p>Jika Anda memiliki pertanyaan atau kekhawatiran tentang Kebijakan Privasi ini atau pengelolaan data pribadi Anda, silakan hubungi administrator sistem melalui kontak di bawah ini:</p>
+    <div style="background-color: #f1f5f9; padding: 20px; border-radius: 8px; margin-top: 10px;">
+        <ul style="list-style: none; padding-left: 0; margin-bottom: 0; color: #334155;">
+            <li style="margin-bottom: 12px; display: flex; align-items: center;"><i class="bi bi-telephone-fill" style="color: #4F46E5; font-size: 1.2rem; margin-right: 12px; width: 24px; text-align: center;"></i> <strong>Owner:</strong> &nbsp;087815873285</li>
+            <li style="margin-bottom: 12px; display: flex; align-items: center;"><i class="bi bi-envelope-fill" style="color: #4F46E5; font-size: 1.2rem; margin-right: 12px; width: 24px; text-align: center;"></i> <strong>Email:</strong> &nbsp;<a href="mailto:wsejagad@gmail.com" style="color: #334155; text-decoration: none;">wsejagad@gmail.com</a></li>
+            <li style="display: flex; align-items: center;"><i class="bi bi-globe" style="color: #4F46E5; font-size: 1.2rem; margin-right: 12px; width: 24px; text-align: center;"></i> <strong>Website:</strong> &nbsp;<a href="https://pintarhub.com" target="_blank" style="color: #334155; text-decoration: none;">pintarhub.com</a></li>
+        </ul>
+    </div>
 </div>
 
 </body>
