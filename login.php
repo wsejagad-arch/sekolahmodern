@@ -530,6 +530,10 @@ $googleErrorMessages = [
                     <button type="submit" class="submit-btn">Masuk Sekarang</button>
                 </form>
 
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="privacy-policy.php" style="color: #64748b; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: color 0.3s;" onmouseover="this.style.color='#4F46E5'" onmouseout="this.style.color='#64748b'">Kebijakan Privasi (Privacy Policy)</a>
+                </div>
+
                 <div class="footer-note">© <?= date('Y'); ?> <?= htmlspecialchars($lembaga['nama_aplikasi']); ?> - Hak Cipta Dilindungi</div>
             </div>
         </section>

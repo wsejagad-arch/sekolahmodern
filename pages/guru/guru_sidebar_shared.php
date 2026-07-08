@@ -24,6 +24,7 @@ $lembaga = $lembaga ?? (function_exists('data_lembaga') ? data_lembaga() : []);
         <a href="<?= $prefix ?>laporan-kelas" class="<?= ($current_page === 'laporan-kelas') ? 'active' : '' ?>"><i class="bi bi-cpu"></i> Laporan & AI</a>
         <a href="<?= $prefix ?>ekinerja" class="<?= ($current_page === 'ekinerja') ? 'active' : '' ?>"><i class="bi bi-speedometer2"></i> e-Kinerja</a>
         <a href="<?= $prefix ?>profil-guru" class="<?= ($current_page === 'profil-guru') ? 'active' : '' ?>"><i class="bi bi-gear"></i> Pengaturan</a>
+        <a href="<?= $img_prefix ?>privacy-policy.php" target="_blank"><i class="bi bi-shield-check"></i> Kebijakan Privasi</a>
     </div>
     <div class="desktop-logout-wrap">
         <a href="<?= $img_prefix ?>logout.php" onclick="return confirm('Apakah Anda yakin ingin keluar?');" class="btn-desktop-logout">

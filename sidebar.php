@@ -352,6 +352,14 @@
 
   <?php endif; ?>
 
+  <!-- Nav Item - Privacy Policy -->
+  <li class="nav-item">
+    <a class="nav-link" href="privacy-policy.php" target="_blank">
+      <i class="fas fa-fw fa-shield-alt"></i>
+      <span>Privacy Policy</span>
+    </a>
+  </li>
+
   <!-- Divider -->
   <hr class="sidebar-divider d-none d-md-block">
 
