@@ -81,40 +81,54 @@
 <body>
 
 <div class="container-pp">
-    <a href="javascript:history.back()" class="back-btn"><i class="bi bi-arrow-left"></i> Kembali</a>
+    <a href="javascript:history.back()" class="back-btn"><i class="bi bi-arrow-left"></i> Kembali / Back</a>
     
-    <h1>Privacy Policy (Kebijakan Privasi)</h1>
+    <h1>Privacy Policy <br><span style="font-size: 1.25rem; font-weight: 600; color: #64748b;">(Kebijakan Privasi)</span></h1>
     
-    <p>Terakhir diperbarui: <?= date('d M Y') ?></p>
+    <p style="text-align: center; margin-bottom: 40px; color: #94a3b8;">Terakhir diperbarui / Last updated: <?= date('d M Y') ?></p>
     
-    <p>Selamat datang di sistem manajemen akademik. Kami menghargai privasi Anda dan berkomitmen untuk melindungi informasi pribadi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi data Anda saat menggunakan layanan kami.</p>
+    <div style="margin-bottom: 40px;">
+        <h2>1. Pengumpulan Data (Data Collection)</h2>
+        <p><strong>[ID]</strong> Kami mengumpulkan informasi yang Anda berikan secara langsung kepada kami, seperti saat Anda membuat akun, memperbarui profil, atau berinteraksi dengan layanan kami. Informasi yang kami kumpulkan meliputi nama, nomor identitas (NIP/NIS), email, dan data akademik lainnya yang relevan.</p>
+        <p><strong>[EN]</strong> We collect information you provide directly to us, such as when you create an account, update your profile, or interact with our services. The information we collect includes names, identity numbers (NIP/NIS), emails, and other relevant academic data.</p>
+    </div>
 
-    <h2>1. Pengumpulan Data</h2>
-    <p>Kami mengumpulkan informasi yang Anda berikan secara langsung kepada kami, seperti saat Anda membuat akun, memperbarui profil, atau berinteraksi dengan layanan kami. Informasi yang kami kumpulkan meliputi nama, nomor identitas (NIP/NIS), email, dan data akademik lainnya yang relevan.</p>
+    <div style="margin-bottom: 40px;">
+        <h2>2. Data Lokasi (Location Data)</h2>
+        <p><strong>[ID]</strong> Aplikasi kami mengambil data lokasi (GPS) pengguna saat melakukan presensi. Data ini <strong>hanya</strong> digunakan untuk memvalidasi posisi presensi siswa atau guru agar sesuai dengan radius sekolah yang diizinkan.</p>
+        <p><strong>[EN]</strong> Our application collects user location data (GPS) during attendance. This data is used <strong>solely</strong> to validate the student's or teacher's attendance position to ensure it is within the permitted school radius.</p>
+    </div>
 
-    <h2>2. Penggunaan Lokasi dan Kamera untuk Presensi</h2>
-    <p>Sistem kami memiliki fitur absensi/presensi digital yang menggunakan fitur geolokasi (Lokasi GPS) dan Kamera perangkat Anda.
-    <br><strong>Lokasi (GPS):</strong> Digunakan semata-mata untuk memverifikasi posisi Anda saat melakukan absensi, memastikan presensi dilakukan pada area yang diizinkan (misalnya: area sekolah).
-    <br><strong>Kamera:</strong> Digunakan untuk mengambil foto wajah saat proses absensi atau pengajuan izin, sebagai bukti kehadiran yang valid.
-    <br>Data lokasi dan foto (swafoto) ini dikirim secara aman, hanya disimpan untuk kebutuhan arsip kehadiran, dan tidak akan dibagikan ke pihak ketiga tanpa persetujuan Anda.</p>
+    <div style="margin-bottom: 40px;">
+        <h2>3. Kamera (Camera)</h2>
+        <p><strong>[ID]</strong> Aplikasi kami membutuhkan akses ke kamera perangkat Anda. Kamera digunakan <strong>hanya untuk verifikasi identitas (foto diri/swafoto)</strong> sebagai bukti kehadiran yang valid saat melakukan presensi. Kami tidak akan mengakses kamera Anda di luar proses tersebut.</p>
+        <p><strong>[EN]</strong> Our application requires access to your device's camera. The camera is used <strong>only for identity verification (selfie/photo)</strong> as valid proof of attendance during the check-in process. We will not access your camera outside of this process.</p>
+    </div>
 
-    <h2>3. Keamanan Data</h2>
-    <p>Kami menerapkan langkah-langkah keamanan teknis dan organisasional untuk melindungi informasi pribadi Anda dari akses yang tidak sah, kehilangan, atau penyalahgunaan. Meskipun demikian, tidak ada metode transmisi di internet atau penyimpanan elektronik yang 100% aman.</p>
+    <div style="margin-bottom: 40px;">
+        <h2>4. Iklan AdMob (AdMob Advertising)</h2>
+        <p><strong>[ID]</strong> Kami menggunakan layanan pihak ketiga, yaitu Google AdMob, untuk menampilkan iklan di dalam aplikasi kami. Google AdMob mungkin mengumpulkan dan menggunakan data teknis (seperti pengenal perangkat / device ID) untuk keperluan identifikasi perangkat dan personalisasi iklan.</p>
+        <p><strong>[EN]</strong> We use a third-party service, Google AdMob, to display advertisements within our application. Google AdMob may collect and use technical data (such as device identifiers / device ID) for device identification and personalized advertising purposes.</p>
+    </div>
 
-    <h2>4. Penyimpanan dan Retensi Data</h2>
-    <p>Data pribadi Anda akan disimpan selama akun Anda aktif atau selama diperlukan untuk menyediakan layanan terkait aktivitas akademik dan administratif di sekolah.</p>
+    <div style="margin-bottom: 40px;">
+        <h2>5. Keamanan Data (Data Security)</h2>
+        <p><strong>[ID]</strong> Kami sangat menjaga keamanan data Anda. Seluruh data presensi dan informasi pribadi Anda dikirim secara aman langsung ke server sekolah. Kami menjamin bahwa data Anda <strong>tidak akan dijual, disewakan, atau dibagikan ke pihak ketiga</strong> untuk tujuan komersial di luar keperluan sistem pendidikan kami.</p>
+        <p><strong>[EN]</strong> We take the security of your data very seriously. All attendance data and personal information are transmitted securely directly to the school server. We guarantee that your data <strong>will not be sold, rented, or shared with third parties</strong> for commercial purposes outside of our educational system needs.</p>
+    </div>
 
-    <h2>5. Perubahan Kebijakan Privasi</h2>
-    <p>Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu. Setiap perubahan akan diinformasikan melalui sistem kami. Anda disarankan untuk meninjau halaman ini secara berkala untuk mengetahui perubahan apa pun.</p>
-
-    <h2>6. Kontak Kami</h2>
-    <p>Jika Anda memiliki pertanyaan atau kekhawatiran tentang Kebijakan Privasi ini atau pengelolaan data pribadi Anda, silakan hubungi administrator sistem melalui kontak di bawah ini:</p>
-    <div style="background-color: #f1f5f9; padding: 20px; border-radius: 8px; margin-top: 10px;">
-        <ul style="list-style: none; padding-left: 0; margin-bottom: 0; color: #334155;">
-            <li style="margin-bottom: 12px; display: flex; align-items: center;"><i class="bi bi-telephone-fill" style="color: #4F46E5; font-size: 1.2rem; margin-right: 12px; width: 24px; text-align: center;"></i> <strong>Owner:</strong> &nbsp;087815873285</li>
-            <li style="margin-bottom: 12px; display: flex; align-items: center;"><i class="bi bi-envelope-fill" style="color: #4F46E5; font-size: 1.2rem; margin-right: 12px; width: 24px; text-align: center;"></i> <strong>Email:</strong> &nbsp;<a href="mailto:wsejagad@gmail.com" style="color: #334155; text-decoration: none;">wsejagad@gmail.com</a></li>
-            <li style="display: flex; align-items: center;"><i class="bi bi-globe" style="color: #4F46E5; font-size: 1.2rem; margin-right: 12px; width: 24px; text-align: center;"></i> <strong>Website:</strong> &nbsp;<a href="https://pintarhub.com" target="_blank" style="color: #334155; text-decoration: none;">pintarhub.com</a></li>
-        </ul>
+    <div style="margin-bottom: 40px;">
+        <h2>6. Kontak Kami (Contact Us)</h2>
+        <p><strong>[ID]</strong> Jika Anda memiliki pertanyaan atau kekhawatiran tentang Kebijakan Privasi ini, silakan hubungi administrator sistem melalui kontak di bawah ini:<br>
+        <strong>[EN]</strong> If you have any questions or concerns about this Privacy Policy, please contact the system administrator via the contact details below:</p>
+        
+        <div style="background-color: #f1f5f9; padding: 20px; border-radius: 8px; margin-top: 15px;">
+            <ul style="list-style: none; padding-left: 0; margin-bottom: 0; color: #334155;">
+                <li style="margin-bottom: 12px; display: flex; align-items: center;"><i class="bi bi-telephone-fill" style="color: #4F46E5; font-size: 1.2rem; margin-right: 12px; width: 24px; text-align: center;"></i> <strong>Owner:</strong> &nbsp;087815873285</li>
+                <li style="margin-bottom: 12px; display: flex; align-items: center;"><i class="bi bi-envelope-fill" style="color: #4F46E5; font-size: 1.2rem; margin-right: 12px; width: 24px; text-align: center;"></i> <strong>Email:</strong> &nbsp;<a href="mailto:wsejagad@gmail.com" style="color: #334155; text-decoration: none;">wsejagad@gmail.com</a></li>
+                <li style="display: flex; align-items: center;"><i class="bi bi-globe" style="color: #4F46E5; font-size: 1.2rem; margin-right: 12px; width: 24px; text-align: center;"></i> <strong>Website:</strong> &nbsp;<a href="https://pintarhub.com" target="_blank" style="color: #334155; text-decoration: none;">pintarhub.com</a></li>
+            </ul>
+        </div>
     </div>
 </div>
 
