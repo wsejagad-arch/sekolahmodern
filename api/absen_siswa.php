@@ -162,8 +162,8 @@ $rLastChk     = $qLastChk ? mysqli_fetch_assoc($qLastChk) : ['cnt' => 0];
 $isLastPeriod = ((int)($rLastChk['cnt'] ?? 0) === 0);
 
 if ($isLastPeriod) {
-    // Absen pulang: hanya boleh antara jam_selesai s/d 19:00
-    $batasMax = '19:00:00';
+    // Absen pulang: hanya boleh antara jam_selesai s/d 23:59
+    $batasMax = '23:59:59';
     if (strtotime($waktuIni) < strtotime($jamSelesaiMapel)) {
         jsonOut([
             'success' => false,
@@ -175,7 +175,7 @@ if ($isLastPeriod) {
     if (strtotime($waktuIni) > strtotime($batasMax)) {
         jsonOut([
             'success' => false,
-            'message' => 'Waktu absen pulang sudah berakhir (batas maksimal 19:00 WIB)',
+            'message' => 'Waktu absen pulang sudah berakhir (batas maksimal 23:59 WIB)',
             'kode'    => 'LEWAT_BATAS',
         ]);
     }

@@ -939,7 +939,7 @@ function konfirmasiButtonColor($opt)
             function updateTimeIndicators() {
                 const now = new Date();
                 const batas = new Date();
-                batas.setHours(19, 0, 0, 0);
+                batas.setHours(23, 59, 59, 0);
 
                 document.querySelectorAll('.btn-absen-mandiri').forEach(function(btn) {
                     const id = btn.getAttribute('data-idmapel');
@@ -969,7 +969,7 @@ function konfirmasiButtonColor($opt)
                             btn.disabled = false;
                             btn.classList.remove('opacity-50', 'cursor-not-allowed');
                             btn.classList.add('hover:bg-blue-600');
-                            ind.innerHTML = '<span style="color:#166534;font-size:10px"><i class="fas fa-sign-out-alt mr-1"></i>Sedia hingga 19:00</span>';
+                            ind.innerHTML = '<span style="color:#166534;font-size:10px"><i class="fas fa-sign-out-alt mr-1"></i>Sedia hingga 23:59</span>';
                         }
                     } else {
                         // ── Bukan jam terakhir: logika Hadir/Telat biasa ─────────────────
@@ -1160,7 +1160,7 @@ function konfirmasiButtonColor($opt)
                 (function renderModalTimeMsg() {
                     const now = new Date();
                     const batas = new Date();
-                    batas.setHours(19, 0, 0, 0);
+                    batas.setHours(23, 59, 59, 0);
                     if (isLast && jamSelesai) {
                         const selesai = parseJam(jamSelesai);
                         if (now < selesai) {
@@ -1169,10 +1169,10 @@ function konfirmasiButtonColor($opt)
                                 jamSelesai.substring(0, 5) + ' WIB</strong></span>';
                         } else if (now > batas) {
                             modalMsg.innerHTML = '<span style="color:#991b1b;background:#fee2e2;border:1px solid #fca5a5;border-radius:.5rem;padding:4px 10px;display:inline-block;font-size:11px;">' +
-                                '<i class="fas fa-times-circle mr-1"></i>Waktu absen pulang sudah berakhir (batas <strong>19:00 WIB</strong>)</span>';
+                                '<i class="fas fa-times-circle mr-1"></i>Waktu absen pulang sudah berakhir (batas <strong>23:59 WIB</strong>)</span>';
                         } else {
                             modalMsg.innerHTML = '<span style="color:#166534;background:#dcfce7;border:1px solid #86efac;border-radius:.5rem;padding:4px 10px;display:inline-block;font-size:11px;">' +
-                                '<i class="fas fa-sign-out-alt mr-1"></i>Absen pulang — berlaku hingga <strong>19:00 WIB</strong></span>';
+                                '<i class="fas fa-sign-out-alt mr-1"></i>Absen pulang — berlaku hingga <strong>23:59 WIB</strong></span>';
                         }
                     } else if (jamMulai) {
                         const late = isTelat(jamMulai);
