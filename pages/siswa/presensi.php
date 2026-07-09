@@ -950,29 +950,11 @@ function konfirmasiButtonColor($opt)
                     if (!ind) return;
 
                     if (isLast) {
-                        // ── Jam terakhir: window mulai jam_selesai s/d 19:00 ─────────────
-                        const selesai = parseJam(js);
-                        if (!selesai) return;
-                        // UNTUK PENGETESAN: Hapus blokir jam_selesai
-                        /*
-                        if (now < selesai) {
-                            btn.disabled = true;
-                            btn.classList.add('opacity-50', 'cursor-not-allowed');
-                            btn.classList.remove('hover:bg-blue-600');
-                            const sisaMnt = Math.max(0, Math.round((selesai - now) / 60000));
-                            ind.innerHTML = '<span style="color:#92400e;font-size:10px"><i class="fas fa-door-closed mr-1"></i>Pulang mulai ' +
-                                (js.substring(0, 5)) + ' (' + sisaMnt + ' mnt lagi)</span>';
-                        } else */ if (now > batas) {
-                            btn.disabled = true;
-                            btn.classList.add('opacity-50', 'cursor-not-allowed');
-                            btn.classList.remove('hover:bg-blue-600');
-                            ind.innerHTML = '<span style="color:#9ca3af;font-size:10px"><i class="fas fa-times-circle mr-1"></i>Waktu absen berakhir</span>';
-                        } else {
-                            btn.disabled = false;
-                            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                            btn.classList.add('hover:bg-blue-600');
-                            ind.innerHTML = '<span style="color:#166534;font-size:10px"><i class="fas fa-sign-out-alt mr-1"></i>Sedia hingga 23:59</span>';
-                        }
+                        // ── Jam terakhir: Bebas absen pulang kapan saja untuk pengetesan ─────────────
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        btn.classList.add('hover:bg-blue-600');
+                        ind.innerHTML = '<span style="color:#166534;font-size:10px"><i class="fas fa-sign-out-alt mr-1"></i>Sedia Absen Pulang Kapan Saja</span>';
                     } else {
                         // ── Bukan jam terakhir: logika Hadir/Telat biasa ─────────────────
                         if (!jm) return;
@@ -1164,19 +1146,8 @@ function konfirmasiButtonColor($opt)
                     const batas = new Date();
                     batas.setHours(23, 59, 59, 0);
                     if (isLast && jamSelesai) {
-                        const selesai = parseJam(jamSelesai);
-                        /*
-                        if (now < selesai) {
-                            modalMsg.innerHTML = '<span style="color:#92400e;background:#fef3c7;border:1px solid #f59e0b;border-radius:.5rem;padding:4px 10px;display:inline-block;font-size:11px;">' +
-                                '<i class="fas fa-door-closed mr-1"></i>Belum waktunya pulang — absen tersedia mulai <strong>' +
-                                jamSelesai.substring(0, 5) + ' WIB</strong></span>';
-                        } else */ if (now > batas) {
-                            modalMsg.innerHTML = '<span style="color:#991b1b;background:#fee2e2;border:1px solid #fca5a5;border-radius:.5rem;padding:4px 10px;display:inline-block;font-size:11px;">' +
-                                '<i class="fas fa-times-circle mr-1"></i>Waktu absen pulang sudah berakhir (batas <strong>23:59 WIB</strong>)</span>';
-                        } else {
-                            modalMsg.innerHTML = '<span style="color:#166534;background:#dcfce7;border:1px solid #86efac;border-radius:.5rem;padding:4px 10px;display:inline-block;font-size:11px;">' +
-                                '<i class="fas fa-sign-out-alt mr-1"></i>Absen pulang — berlaku hingga <strong>23:59 WIB</strong></span>';
-                        }
+                        modalMsg.innerHTML = '<span style="color:#166534;background:#dcfce7;border:1px solid #86efac;border-radius:.5rem;padding:4px 10px;display:inline-block;font-size:11px;">' +
+                            '<i class="fas fa-sign-out-alt mr-1"></i>Sedia Absen Pulang Kapan Saja (Mode Tes)</span>';
                     } else if (jamMulai) {
                         const late = isTelat(jamMulai);
                         if (late) {
