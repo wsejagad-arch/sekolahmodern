@@ -308,21 +308,21 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
                 
                 <div class="col-md-4">
                     <label class="form-label">Mata Pelajaran</label>
-                    <input class="form-control" name="nama_mapel" list="mapelOptions" value="<?= sj_h($selectedMapel); ?>" required placeholder="Contoh: MATEMATIKA">
-                    <datalist id="mapelOptions">
+                    <select class="form-select" name="nama_mapel" required>
+                        <option value="" disabled <?= empty($selectedMapel) ? 'selected' : ''; ?>>-- pilih --</option>
                         <?php foreach ($mapelOptions as $mapel): ?>
-                            <option value="<?= sj_h($mapel); ?>"></option>
+                            <option value="<?= sj_h($mapel); ?>" <?= $selectedMapel === $mapel ? 'selected' : ''; ?>><?= sj_h($mapel); ?></option>
                         <?php endforeach; ?>
-                    </datalist>
+                    </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Kelas</label>
-                    <input class="form-control" name="kelas" list="kelasOptions" value="<?= sj_h($selectedKelas); ?>" required placeholder="Contoh: X E 1">
-                    <datalist id="kelasOptions">
-                        <?php foreach ($kelasOptions as $kelas): ?>
-                            <option value="<?= sj_h($kelas); ?>"></option>
+                    <select class="form-select" name="kelas" required>
+                        <option value="" disabled <?= empty($selectedKelas) ? 'selected' : ''; ?>>-- pilih --</option>
+                        <?php foreach ($kelasOptions as $kelasOpt): ?>
+                            <option value="<?= sj_h($kelasOpt); ?>" <?= $selectedKelas === $kelasOpt ? 'selected' : ''; ?>><?= sj_h($kelasOpt); ?></option>
                         <?php endforeach; ?>
-                    </datalist>
+                    </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Hari</label>
