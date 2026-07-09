@@ -100,7 +100,7 @@ $datasql = mysqli_fetch_array($sql);
 <!-- Jam Mulai -->
 <div class="form-group col-sm-2">
     <label for="jammulai">Jam Mulai:</label>
-    <input type="time" class="form-control" id="jammulai" name="jammulai" value="<?= $datasql['jam_mulai']; ?>" required>
+    <input type="time" class="form-control" id="jammulai" name="jammulai" value="<?= $datasql['jam_mulai']; ?>" lang="id-ID" required>
     <div class="valid-feedback">Valid.</div>
     <div class="invalid-feedback">Harap diisi kolom ini.</div>
   </div>
@@ -109,7 +109,7 @@ $datasql = mysqli_fetch_array($sql);
 <!-- Jam Selesai -->
 <div class="form-group col-sm-2">
     <label for="jamselesai">Jam Selesai:</label>
-    <input type="time" class="form-control" id="jamselesai" name="jamselesai" value="<?= $datasql['jam_selesai']; ?>" required>
+    <input type="time" class="form-control" id="jamselesai" name="jamselesai" value="<?= $datasql['jam_selesai']; ?>" lang="id-ID" required>
     <div class="valid-feedback">Valid.</div>
     <div class="invalid-feedback">Harap diisi kolom ini.</div>
   </div>

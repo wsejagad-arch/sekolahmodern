@@ -191,11 +191,11 @@ $unitOptions = agenda_allowed_units();
                                 </div>
                                 <div class="form-group col-md-3">
                                     <label class="font-weight-bold">Mulai</label>
-                                    <input type="time" name="jam_mulai" class="form-control" required value="<?= htmlspecialchars(substr((string)($agendaEdit['jam_mulai'] ?? '07:00:00'), 0, 5)); ?>">
+                                    <input type="time" name="jam_mulai" class="form-control" lang="id-ID" required value="<?= htmlspecialchars(substr((string)($agendaEdit['jam_mulai'] ?? '07:00:00'), 0, 5)); ?>">
                                 </div>
                                 <div class="form-group col-md-3">
                                     <label class="font-weight-bold">Selesai</label>
-                                    <input type="time" name="jam_selesai" class="form-control" required value="<?= htmlspecialchars(substr((string)($agendaEdit['jam_selesai'] ?? '08:00:00'), 0, 5)); ?>">
+                                    <input type="time" name="jam_selesai" class="form-control" lang="id-ID" required value="<?= htmlspecialchars(substr((string)($agendaEdit['jam_selesai'] ?? '08:00:00'), 0, 5)); ?>">
                                 </div>
                             </div>
 

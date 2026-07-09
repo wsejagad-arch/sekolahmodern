@@ -481,11 +481,11 @@ if ($id_ekskul_active > 0) {
                                 </div>
                                 <div class="col-md-3">
                                     <label>Jam Mulai</label>
-                                    <input type="time" name="jam_mulai" class="form-control" required>
+                                    <input type="time" name="jam_mulai" class="form-control" lang="id-ID" required>
                                 </div>
                                 <div class="col-md-3">
                                     <label>Jam Selesai</label>
-                                    <input type="time" name="jam_selesai" class="form-control" required>
+                                    <input type="time" name="jam_selesai" class="form-control" lang="id-ID" required>
                                 </div>
                                 <div class="col-md-3">
                                     <button type="submit" class="btn btn-primary w-100" style="background-color: #EC4899; border-color:#EC4899;">Tambah Jadwal</button>

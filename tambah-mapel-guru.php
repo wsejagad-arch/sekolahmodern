@@ -132,7 +132,7 @@ if (isset($_POST['submit'])) {
 <!-- Jam Mulai -->
 <div class="form-group col-sm-2">
     <label for="jammulai">Jam Mulai:</label>
-    <input type="time" class="form-control" id="jammulai" name="jammulai" required>
+    <input type="time" class="form-control" id="jammulai" name="jammulai" lang="id-ID" required>
     <div class="valid-feedback">Valid.</div>
     <div class="invalid-feedback">Harap diisi kolom ini.</div>
   </div>
@@ -141,7 +141,7 @@ if (isset($_POST['submit'])) {
 <!-- Jam Selesai -->
 <div class="form-group col-sm-2">
     <label for="jamselesai">Jam Selesai:</label>
-    <input type="time" class="form-control" id="jamselesai" name="jamselesai" required>
+    <input type="time" class="form-control" id="jamselesai" name="jamselesai" lang="id-ID" required>
     <div class="valid-feedback">Valid.</div>
     <div class="invalid-feedback">Harap diisi kolom ini.</div>
   </div>

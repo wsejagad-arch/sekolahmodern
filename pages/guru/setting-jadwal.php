@@ -338,11 +338,11 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Jam Mulai</label>
-                    <input class="form-control" type="time" name="jam_mulai" value="<?= sj_h($selectedMulai); ?>" required>
+                    <input class="form-control" type="time" name="jam_mulai" value="<?= sj_h($selectedMulai); ?>" lang="id-ID" required>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Jam Selesai</label>
-                    <input class="form-control" type="time" name="jam_selesai" value="<?= sj_h($selectedSelesai); ?>" required>
+                    <input class="form-control" type="time" name="jam_selesai" value="<?= sj_h($selectedSelesai); ?>" lang="id-ID" required>
                 </div>
                 <div class="col-md-6 d-flex align-items-end">
                     <button class="btn btn-green w-100 fw-bold" style="padding:10px; border-radius:12px; box-shadow:0 4px 12px rgba(5,150,105,0.2);" type="submit">
