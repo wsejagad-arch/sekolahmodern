@@ -716,6 +716,15 @@ document.getElementById('fotoInput').addEventListener('change', function () {
     </div>
     </div>
 </div>
+<?php 
+$lembagaQuery = mysqli_query($conn, "SELECT nmsekolah FROM tbl_lembaga WHERE id_sekolah = " . (int)($tenantId ?? 1));
+$lembagaRow = mysqli_fetch_assoc($lembagaQuery);
+$nmsekolah = $lembagaRow['nmsekolah'] ?? 'Portal Sekolah';
+?>
+<!-- Footer info -->
+<p style="text-align:center;font-size:0.7rem;color:#6c757d;padding: 20px 0 30px;">
+  &copy; <?= date('Y') ?> <?= htmlspecialchars($nmsekolah) ?>
+</p>
 <?php include __DIR__ . '/guru_common_footer.php'; ?>
 </body>
 </html>
