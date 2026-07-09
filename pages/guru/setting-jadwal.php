@@ -428,11 +428,18 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/bootstrap-clockpicker.min.js"></script>
 <script>
 $(document).ready(function(){
-    $('.clockpicker').clockpicker({
+    // Initialize clockpicker directly on inputs so they open on click
+    $('input[name="jam_mulai"], input[name="jam_selesai"]').clockpicker({
         placement: 'bottom',
         align: 'left',
         autoclose: true,
         'default': 'now'
+    });
+    
+    // Also allow clicking the icon to open it
+    $('.input-group-text').on('click', function(e){
+        e.stopPropagation();
+        $(this).siblings('input').clockpicker('show');
     });
 });
 </script>
