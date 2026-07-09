@@ -203,6 +203,7 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
     <title>Setting Jadwal - SIMANIS</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/bootstrap-clockpicker.min.css">
     <link rel="stylesheet" href="css/guru-desktop.css?v=<?= time() ?>">
     <style>
         body { margin:0; font-family:"Plus Jakarta Sans", system-ui, sans-serif; background:#ebf1f6; color:#0f172a; }
@@ -338,11 +339,17 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Jam Mulai</label>
-                    <input class="form-control" type="time" name="jam_mulai" value="<?= sj_h($selectedMulai); ?>" lang="id-ID" required>
+                    <div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true">
+                        <input class="form-control" type="text" name="jam_mulai" value="<?= sj_h($selectedMulai); ?>" required readonly style="background-color: white; cursor: pointer;">
+                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                    </div>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Jam Selesai</label>
-                    <input class="form-control" type="time" name="jam_selesai" value="<?= sj_h($selectedSelesai); ?>" lang="id-ID" required>
+                    <div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true">
+                        <input class="form-control" type="text" name="jam_selesai" value="<?= sj_h($selectedSelesai); ?>" required readonly style="background-color: white; cursor: pointer;">
+                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                    </div>
                 </div>
                 <div class="col-md-6 d-flex align-items-end">
                     <button class="btn btn-green w-100 fw-bold" style="padding:10px; border-radius:12px; box-shadow:0 4px 12px rgba(5,150,105,0.2);" type="submit">
@@ -417,6 +424,18 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
     <a href="profil-guru"><i class="bi bi-person"></i><span>Profil</span></a>
 </nav>
 <?php include __DIR__ . '/guru_common_footer.php'; ?>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/bootstrap-clockpicker.min.js"></script>
+<script>
+$(document).ready(function(){
+    $('.clockpicker').clockpicker({
+        placement: 'bottom',
+        align: 'left',
+        autoclose: true,
+        'default': 'now'
+    });
+});
+</script>
 </body>
 </html>
 
