@@ -45,7 +45,10 @@ $sisLng  = isset($_POST['lng'])  ? (float)$_POST['lng']  : null;
 
 function jsonOut($data, $code = 200) {
     http_response_code($code);
-    echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    header('Content-Type: application/json; charset=utf-8');
+    $out = json_encode($data);
+    file_put_contents(__DIR__ . '/absen_log.txt', date('Y-m-d H:i:s') . " - " . print_r($_POST, true) . " - " . $out . "\n", FILE_APPEND);
+    echo $out;
     exit;
 }
 
