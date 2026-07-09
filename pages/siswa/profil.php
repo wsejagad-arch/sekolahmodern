@@ -1053,6 +1053,16 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
     </form>
   </div>
 
+  <?php 
+  $lembagaQuery = mysqli_query($conn, "SELECT nmsekolah FROM tbl_lembaga WHERE id_sekolah = " . (int)($tenantId ?? 1));
+  $lembagaRow = mysqli_fetch_assoc($lembagaQuery);
+  $nmsekolah = $lembagaRow['nmsekolah'] ?? 'Portal Siswa';
+  ?>
+  <!-- Footer info -->
+  <p style="text-align:center;font-size:0.7rem;color:var(--muted);padding: 20px 0 30px;">
+    &copy; <?= date('Y') ?> <?= htmlspecialchars($nmsekolah) ?>
+  </p>
+
   <?php include 'siswa_footer.php'; ?>
 
 
