@@ -118,7 +118,14 @@
     </div>
 
     <div style="margin-bottom: 40px;">
-        <h2>6. Kontak Kami (Contact Us)</h2>
+        <h2>6. Penghapusan Data (Data Deletion)</h2>
+        <p><strong>[ID]</strong> Catatan: Google mewajibkan adanya link dimana pengguna bisa mengetahui cara menghapus data mereka. Cara menghapus profil: melalui menu profil, di dalam menu profil terdapat fitur "Hapus Data" untuk mengajukan penghapusan akun dan data Anda.</p>
+        <p><strong>[EN]</strong> Note: Google requires a link where users can find out how to delete their data. How to delete your profile: via the profile menu, inside the profile menu there is a "Delete Data" feature to request the deletion of your account and data.</p>
+        <p>Masukkan link kebijakan privasi Anda: <a href="https://simanis.sman1sumber.sch.id/privacy-policy.php" style="color: #4F46E5;">https://simanis.sman1sumber.sch.id/privacy-policy.php</a></p>
+    </div>
+
+    <div style="margin-bottom: 40px;">
+        <h2>7. Kontak Kami (Contact Us)</h2>
         <p><strong>[ID]</strong> Jika Anda memiliki pertanyaan atau kekhawatiran tentang Kebijakan Privasi ini, silakan hubungi administrator sistem melalui kontak di bawah ini:<br>
         <strong>[EN]</strong> If you have any questions or concerns about this Privacy Policy, please contact the system administrator via the contact details below:</p>
         

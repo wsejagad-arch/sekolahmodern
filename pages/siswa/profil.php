@@ -1012,12 +1012,53 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
               <div class="form-label-custom mb-2">WhatsApp Siswa</div>
               <div><?= $formatProfileValue('no_wa', $siswa['no_wa'] ?? '') ?></div>
             </div>
+                            <select name="<?= htmlspecialchars($column) ?>" class="form-select form-control-app" <?= $izinEdit ? '' : 'disabled' ?>>
+                              <?php $boolValue = (string)($siswa[$column] ?? '0'); ?>
+                              <option value="0" <?= $boolValue === '0' ? 'selected' : '' ?>>0</option>
+                              <option value="1" <?= $boolValue === '1' ? 'selected' : '' ?>>1</option>
+                            </select>
+                            <?php if (!$izinEdit): ?>
+                              <input type="hidden" name="<?= htmlspecialchars($column) ?>" value="<?= htmlspecialchars($boolValue) ?>">
+                            <?php endif; ?>
+                          <?php else: ?>
+                            <input type="text" name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" value="<?= htmlspecialchars((string)($siswa[$column] ?? '')) ?>" <?= $izinEdit ? '' : 'readonly' ?>>
+                          <?php endif; ?>
+                        </div>
+                      <?php endforeach; ?>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+      </div>
+
+      <div class="card-app p-4 mb-4">
+        <h6 class="mb-3 fw-bold">Ringkasan Lokasi dan Kontak</h6>
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <div class="border rounded-3 p-3 h-100">
+              <div class="form-label-custom mb-2">Alamat Lengkap</div>
+              <div><?= $formatProfileValue('alamat', $siswa['alamat'] ?? '') ?></div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="border rounded-3 p-3 h-100">
+              <div class="form-label-custom mb-2">Koordinat</div>
+              <div><?= htmlspecialchars((string)($siswa['lat'] ?? '')) ?>, <?= htmlspecialchars((string)($siswa['lng'] ?? '')) ?></div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="border rounded-3 p-3 h-100">
+              <div class="form-label-custom mb-2">WhatsApp Siswa</div>
+              <div><?= $formatProfileValue('no_wa', $siswa['no_wa'] ?? '') ?></div>
+            </div>
           </div>
           <div class="col-12 col-md-6">
             <div class="border rounded-3 p-3 h-100">
               <div class="form-label-custom mb-2">Kontak Darurat</div>
               <div><?= $formatProfileValue('nama_darurat', $siswa['nama_darurat'] ?? '') ?></div>
-              <div class="small text-muted"><?= $formatProfileValue('no_darurat', $siswa['no_darurat'] ?? '') ?></div>
             </div>
           </div>
         </div>
@@ -1033,6 +1074,16 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
         </div>
       </div>
 
+      <div class="card-app p-4 mb-4" style="border: 1px solid #fecaca; background-color: #fef2f2;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+          <div>
+            <h6 class="mb-1 fw-bold text-danger"><i class="fas fa-exclamation-triangle me-1"></i> Hapus Data Akun</h6>
+            <p class="small text-danger mb-0">Ajukan penghapusan akun dan seluruh data profil Anda secara permanen dari sistem sesuai kebijakan Google Play.</p>
+          </div>
+          <a href="hapus-data.php" class="btn btn-danger rounded-3 fw-bold" onclick="return confirm('Apakah Anda yakin ingin mengajukan penghapusan seluruh data profil dan akun Anda? Tindakan ini tidak dapat dibatalkan.')">Hapus Data</a>
+        </div>
+      </div>
+
       <?php if ($izinEdit): ?>
         <button type="submit" class="fab-save">
           <i class="fas fa-save"></i>
@@ -1044,7 +1095,6 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
   </div>
 
   <?php include 'siswa_footer.php'; ?>
-
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>

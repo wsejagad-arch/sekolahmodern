@@ -663,6 +663,23 @@ textarea.form-control-profile {
             </div>
         </div>
     </form>
+
+    <div class="profile-card" style="margin-top: 24px; grid-template-columns: 1fr;">
+        <div class="profile-right" style="background: #fef2f2; border-color: #fecaca;">
+            <div class="form-title" style="color: #dc3545; margin-bottom: 8px;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                Hapus Data Akun
+            </div>
+            <p style="color: #dc3545; font-size: 14px; margin-top: 0; margin-bottom: 16px;">
+                Ajukan penghapusan akun dan seluruh data profil Anda secara permanen dari sistem sesuai kebijakan Google Play.
+            </p>
+            <div>
+                <a href="hapus-data.php" class="btn-profile btn-primary-profile" style="background: #dc3545; box-shadow: 0 10px 22px rgba(220, 53, 69, .22);" onclick="return confirm('Apakah Anda yakin ingin mengajukan penghapusan seluruh data profil dan akun Anda? Tindakan ini tidak dapat dibatalkan.')">
+                    <i class="bi bi-trash-fill"></i> Hapus Data
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
