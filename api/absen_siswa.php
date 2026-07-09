@@ -167,6 +167,8 @@ $isLastPeriod = ((int)($rLastChk['cnt'] ?? 0) === 0);
 if ($isLastPeriod) {
     // Absen pulang: hanya boleh antara jam_selesai s/d 23:59
     $batasMax = '23:59:59';
+    // UNTUK PENGETESAN: Hapus blokir jam_selesai
+    /*
     if (strtotime($waktuIni) < strtotime($jamSelesaiMapel)) {
         jsonOut([
             'success' => false,
@@ -175,6 +177,7 @@ if ($isLastPeriod) {
             'kode'    => 'BELUM_WAKTUNYA',
         ]);
     }
+    */
     if (strtotime($waktuIni) > strtotime($batasMax)) {
         jsonOut([
             'success' => false,
