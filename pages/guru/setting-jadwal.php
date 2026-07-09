@@ -248,6 +248,26 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
         @media (max-width: 767px) {
             .app-shell { padding: 16px !important; margin-bottom: 60px; display: block !important; }
             .btn-green-desktop { display: none; }
+            
+            /* Center the clockpicker as a popup on mobile */
+            .clockpicker-popover {
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                z-index: 9999 !important;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
+                border: none !important;
+                border-radius: 12px !important;
+            }
+            /* Add a backdrop */
+            body.clockpicker-open::before {
+                content: '';
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 9998;
+            }
         }
 
         .form-control, .form-select { border-radius: 12px; border: 1px solid #e2e8f0; padding: 10px 14px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
@@ -433,7 +453,13 @@ $(document).ready(function(){
         placement: 'bottom',
         align: 'left',
         autoclose: true,
-        'default': 'now'
+        'default': 'now',
+        beforeShow: function() {
+            $('body').addClass('clockpicker-open');
+        },
+        afterHide: function() {
+            $('body').removeClass('clockpicker-open');
+        }
     });
     
     // Also allow clicking the icon to open it
