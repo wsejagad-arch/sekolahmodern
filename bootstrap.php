@@ -271,10 +271,12 @@ function hide_links_callback($buffer) {
     $buffer = str_replace("href='logout.php'", "href='" . $keluar . "'", $buffer);
     $buffer = str_replace('href="home.php"', 'href="' . $home . '"', $buffer);
     $buffer = str_replace("href='home.php'", "href='" . $home . "'", $buffer);
+    $buffer = str_replace('action="home.php"', 'action="' . $home . '"', $buffer);
+    $buffer = str_replace("action='home.php'", "action='" . $home . "'", $buffer);
     
     // Replace home.php?page=xxx to absolute URL home/xxx
-    $buffer = preg_replace_callback('/href=["\']home\.php\?page=([a-zA-Z0-9_-]+)["\']/', function($matches) {
-        return 'href="' . asset_url('home/' . $matches[1]) . '"';
+    $buffer = preg_replace_callback('/(href|action)=["\']home\.php\?page=([a-zA-Z0-9_-]+)["\']/', function($matches) {
+        return $matches[1] . '="' . asset_url('home/' . $matches[2]) . '"';
     }, $buffer);
 
     // 2. JS Obfuscation for extreme hiding (Optional, but enabled here)
