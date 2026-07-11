@@ -260,20 +260,33 @@ define('APP_VERSION', '2.0.0');
 // Additional app-specific session configuration can go here
 // Function for output buffering link obfucator
 function hide_links_callback($buffer) {
-    // 1. Clean URL Replacements
-    $buffer = str_replace('href="login.php"', 'href="masuk"', $buffer);
-    $buffer = str_replace("href='login.php'", "href='masuk'", $buffer);
-    $buffer = str_replace('href="logout.php"', 'href="keluar"', $buffer);
-    $buffer = str_replace("href='logout.php'", "href='keluar'", $buffer);
+    $masuk = asset_url('masuk');
+    $keluar = asset_url('keluar');
+    $home = asset_url('home');
     
-    // Replace home.php?page=xxx to home/xxx
-    $buffer = preg_replace('/href="home\.php\?page=([a-zA-Z0-9_-]+)"/', 'href="home/$1"', $buffer);
-    $buffer = preg_replace('/href=\'home\.php\?page=([a-zA-Z0-9_-]+)\'/', 'href=\'home/$1\'', $buffer);
+    // 1. Clean URL Replacements using absolute paths
+    $buffer = str_replace('href="login.php"', 'href="' . $masuk . '"', $buffer);
+    $buffer = str_replace("href='login.php'", "href='" . $masuk . "'", $buffer);
+    $buffer = str_replace('href="logout.php"', 'href="' . $keluar . '"', $buffer);
+    $buffer = str_replace("href='logout.php'", "href='" . $keluar . "'", $buffer);
+    $buffer = str_replace('href="home.php"', 'href="' . $home . '"', $buffer);
+    $buffer = str_replace("href='home.php'", "href='" . $home . "'", $buffer);
+    
+    // Replace home.php?page=xxx to absolute URL home/xxx
+    $buffer = preg_replace_callback('/href=["\']home\.php\?page=([a-zA-Z0-9_-]+)["\']/', function($matches) {
+        return 'href="' . asset_url('home/' . $matches[1]) . '"';
+    }, $buffer);
 
     // 2. JS Obfuscation for extreme hiding (Optional, but enabled here)
-    // We only obfuscate links that start with masuk, keluar, home/, or pages/
-    $buffer = preg_replace_callback('/<a\s+(.*?)href="((?:masuk|keluar|home\/|pages\/)[^"]*)"(.*?)>/i', function($matches) {
-        $b64 = base64_encode($matches[2]);
+    // We only obfuscate links that start with masuk, keluar, home, or pages
+    $app_url_quoted = preg_quote(get_app_url() . get_base_path(), '/');
+    
+    $buffer = preg_replace_callback('/<a\s+(.*?)href="((?:' . $app_url_quoted . '\/|)(?:masuk|keluar|home|pages)[^"]*)"(.*?)>/i', function($matches) {
+        $url = $matches[2];
+        if (strpos($url, 'http') !== 0) {
+            $url = asset_url(ltrim($url, '/'));
+        }
+        $b64 = base64_encode($url);
         return '<a ' . $matches[1] . 'href="javascript:void(0)" data-sec-target="' . $b64 . '" onclick="secNav(this)"' . $matches[3] . '>';
     }, $buffer);
 
