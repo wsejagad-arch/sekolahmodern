@@ -82,6 +82,8 @@ if ($isLocal && file_exists(__DIR__ . '/koneksi_local.php')) {
     if (isset($conn) && $conn instanceof mysqli) {
         require_once __DIR__ . '/multi_tenant.php';
         mt_bootstrap($conn);
+        require_once __DIR__ . '/auto_migrate.php';
+        run_auto_migrations($conn);
     }
     return;
 }
@@ -123,6 +125,8 @@ try {
         mysqli_set_charset($conn, 'utf8');
         require_once __DIR__ . '/multi_tenant.php';
         mt_bootstrap($conn);
+        require_once __DIR__ . '/auto_migrate.php';
+        run_auto_migrations($conn);
     }
 } catch (Throwable $e) {
     error_log('[koneksi.php] MySQL exception: ' . $e->getMessage());
