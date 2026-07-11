@@ -388,6 +388,46 @@ if (isset($GLOBALS['custom_modals'])) {
   </script>
 <?php endif; ?>
 
+<?php if (isset($_SESSION['no_induk'])): ?>
+<script>
+  (function() {
+    function cekNotifikasi() {
+      fetch('ajax_cek_notifikasi.php')
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'ada' && data.data) {
+            Swal.fire({
+              title: 'Pesan dari Kepala Sekolah!',
+              html: data.data.pesan,
+              icon: 'info',
+              confirmButtonText: 'Tutup & Mengerti',
+              allowOutsideClick: false
+            }).then((result) => {
+              if (result.isConfirmed) {
+                fetch('ajax_baca_notifikasi.php', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ id: data.data.id_notifikasi })
+                }).then(() => {
+                  setTimeout(cekNotifikasi, 2000); // Cek apakah masih ada notif lain
+                });
+              }
+            });
+          }
+        })
+        .catch(err => console.error(err));
+    }
+    
+    // Cek setelah halaman dimuat
+    window.addEventListener('load', function() {
+      setTimeout(cekNotifikasi, 1500);
+      // Cek berkala setiap 60 detik
+      setInterval(cekNotifikasi, 60000);
+    });
+  })();
+</script>
+<?php endif; ?>
+
 </body>
 
 </html>

@@ -161,7 +161,7 @@ if (isset($_POST['submit'])) {
                 <!-- NIP -->
                 <div class="form-group col-sm-4 pt-4">
                     <label for="nip">NIP/NUPTK:</label>
-                    <input type="number" class="form-control" id="nip" name="nip" value="<?= $data['no_induk']; ?>" readonly>
+                    <input type="number" class="form-control" id="nip" name="nip" value="<?= $data['no_induk']; ?>" required>
                     <div class="valid-feedback">Valid.</div>
                     <div class="invalid-feedback">Harap diisi kolom ini.</div>
                 </div>

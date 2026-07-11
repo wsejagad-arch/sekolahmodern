@@ -257,7 +257,7 @@
 
   
 
-  <?php if (isset($_SESSION['hak_akses']) && $_SESSION['hak_akses'] == 1): ?>
+  <?php if (isset($_SESSION['hak_akses']) && ($_SESSION['hak_akses'] == 1 || $_SESSION['hak_akses'] == 5)): ?>
 
     <?php
     // Hitung jumlah pengumuman aktif
@@ -273,6 +273,40 @@
       }
     }
     ?>
+
+    <?php if (isset($_SESSION['hak_akses']) && $_SESSION['hak_akses'] == 5): ?>
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+    
+    <!-- Heading -->
+    <div class="sidebar-heading">
+      <i class="fas fa-crown mr-1" style="font-size:9px;"></i> Ruang Kepala Sekolah
+    </div>
+
+    <!-- Nav Item - Kepsek Monitoring Jurnal -->
+    <li class="nav-item">
+      <a class="nav-link" href="home.php?page=monitoring-jurnal-kepsek">
+        <i class="fas fa-fw fa-book-reader"></i>
+        <span>Monitoring Jurnal Guru</span>
+      </a>
+    </li>
+
+    <!-- Nav Item - Kepsek Monitoring Kehadiran -->
+    <li class="nav-item">
+      <a class="nav-link" href="home.php?page=monitoring-kehadiran-kepsek">
+        <i class="fas fa-fw fa-users"></i>
+        <span>Monitoring Kehadiran Siswa</span>
+      </a>
+    </li>
+
+    <!-- Nav Item - Intervensi -->
+    <li class="nav-item">
+      <a class="nav-link" href="home.php?page=intervensi-kepsek">
+        <i class="fas fa-fw fa-paper-plane"></i>
+        <span>Kirim Intervensi / Notif</span>
+      </a>
+    </li>
+    <?php endif; ?>
 
     <!-- Nav Item - Pengumuman (direct link) -->
     <li class="nav-item">
@@ -378,7 +412,7 @@
 <?php endif; ?>
 
 <!-- Mobile overlay — dipakai untuk menutup sidebar ketika klik di luar -->
-<div class="sb-overlay" id="sbOverlay"></div>
+<div class="sb-overlay" id="sbOverlay" onclick="document.body.classList.remove('sidebar-open');"></div>
 
 <script>
   (function() {
@@ -426,7 +460,10 @@
       'broadcast-wa': 'collapseSetting',
       'reset-semester': 'collapseSetting',
       'buat-laporan': 'collapseLaporan',
-      'cetak-jurnal-guru': 'collapseLaporan'
+      'cetak-jurnal-guru': 'collapseLaporan',
+      'monitoring-jurnal-kepsek': 'collapseMonitoring',
+      'monitoring-kehadiran-kepsek': 'collapseMonitoring',
+      'intervensi-kepsek': 'collapseMonitoring'
     };
 
     if (currentPage && pageToCollapse[currentPage]) {

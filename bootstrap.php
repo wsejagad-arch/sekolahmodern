@@ -77,6 +77,12 @@ function get_base_path(): string
         // Otherwise try to get dirname
         $path = dirname($scriptName);
         $path = str_replace('\\', '/', $path);
+        
+        // Prevent duplicate /home if SCRIPT_NAME was rewritten to /home/something
+        if (preg_match('/\/home$/', $path) || $path === '/home') {
+            $path = substr($path, 0, -5);
+        }
+        
         if ($path === '/' || $path === '.' || $path === '') {
             return '';
         }
@@ -274,9 +280,14 @@ function hide_links_callback($buffer) {
     $buffer = str_replace('action="home.php"', 'action="' . $home . '"', $buffer);
     $buffer = str_replace("action='home.php'", "action='" . $home . "'", $buffer);
     
-    // Replace home.php?page=xxx to absolute URL home/xxx
-    $buffer = preg_replace_callback('/(href|action)=["\']home\.php\?page=([a-zA-Z0-9_-]+)["\']/', function($matches) {
-        return $matches[1] . '="' . asset_url('home/' . $matches[2]) . '"';
+    // Replace home.php?page=xxx to absolute URL home/xxx (including extra params)
+    $buffer = preg_replace_callback('/(href|action)=["\']home\.php\?page=([a-zA-Z0-9_-]+)(?:&amp;|&)([^"\']*)["\']|(href|action)=["\']home\.php\?page=([a-zA-Z0-9_-]+)["\']/', function($matches) {
+        if (!empty($matches[5])) { // Matched without extra parameters
+            return $matches[4] . '="' . asset_url('home/' . $matches[5]) . '"';
+        } else { // Matched with extra parameters
+            $extra = isset($matches[3]) && $matches[3] !== '' ? '?' . str_replace('&amp;', '&', $matches[3]) : '';
+            return $matches[1] . '="' . asset_url('home/' . $matches[2]) . $extra . '"';
+        }
     }, $buffer);
 
     // 2. JS Obfuscation for extreme hiding (Optional, but enabled here)

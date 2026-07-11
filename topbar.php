@@ -3,7 +3,7 @@
 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
   <!-- Sidebar Toggle (Topbar) -->
-  <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3" type="button" aria-label="Toggle sidebar" style="color:#1a3c6e;font-size:18px;padding:4px 10px;">
+  <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3" type="button" aria-label="Toggle sidebar" style="color:#1a3c6e;font-size:18px;padding:4px 10px;" onclick="document.body.classList.toggle('sidebar-open');">
     <i class="fa fa-bars"></i>
   </button>
 

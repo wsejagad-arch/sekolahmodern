@@ -8,7 +8,7 @@ if (!isset($_SESSION["username"])) {
     header("location: index.php?haruslogin");
     exit;
 }
-if ($hakakses != 1) { ?>
+if ($hakakses != 1 && $hakakses != 5) { ?>
     <script>window.location='404.html';</script>
 <?php exit; }
 

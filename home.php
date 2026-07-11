@@ -220,6 +220,15 @@ include "sidebar.php";
         case 'reset-semester':
           include "reset-semester.php";
           break;
+        case 'monitoring-jurnal-kepsek':
+          include "monitoring-jurnal-kepsek.php";
+          break;
+        case 'monitoring-kehadiran-kepsek':
+          include "monitoring-kehadiran-kepsek.php";
+          break;
+        case 'intervensi-kepsek':
+          include "intervensi-kepsek.php";
+          break;
         default:
           echo "<h4 class=\"pl-4 font-weight-bold\">Halaman tidak ditemukan!</h4>";
           exit();

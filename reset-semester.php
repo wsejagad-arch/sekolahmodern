@@ -31,7 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['btn_reset'])) {
                     $whitelist = [
                         'tbl_kehadiran', 'tbl_mapel_ampu', 'tbl_izin_siswa', 
                         'tbl_pelanggaran_siswa', 'tbl_literasi_misi', 
-                        'tbl_literasi_progress', 'tbl_tugas_siswa', 'tbl_nilai_tugas'
+                        'tbl_literasi_progress', 'tbl_tugas_siswa', 'tbl_nilai_tugas',
+                        'tbl_presensi_ekskul', 'tbl_jurnal_ekskul', 'tbl_tugas_ekskul'
                     ];
                     if (in_array($t, $whitelist)) {
                         $check = mysqli_query($conn, "SHOW TABLES LIKE '$t'");
@@ -160,6 +161,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['btn_reset'])) {
                                         <td><input type="checkbox" name="tables[]" value="tbl_nilai_tugas" class="checkItem"></td>
                                         <td><strong>Nilai Tugas Siswa</strong></td>
                                         <td>Mengosongkan hasil nilai yang sudah diinput.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" name="tables[]" value="tbl_presensi_ekskul" class="checkItem"></td>
+                                        <td><strong>Presensi Ekstrakurikuler</strong></td>
+                                        <td>Mengosongkan riwayat presensi/kehadiran ekskul.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" name="tables[]" value="tbl_jurnal_ekskul" class="checkItem"></td>
+                                        <td><strong>Jurnal Ekstrakurikuler</strong></td>
+                                        <td>Mengosongkan riwayat jurnal/materi ekskul.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" name="tables[]" value="tbl_tugas_ekskul" class="checkItem"></td>
+                                        <td><strong>Tugas Ekstrakurikuler</strong></td>
+                                        <td>Mengosongkan tugas yang diberikan di ekskul.</td>
                                     </tr>
                                 </tbody>
                             </table>

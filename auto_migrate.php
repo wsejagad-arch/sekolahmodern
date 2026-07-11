@@ -45,6 +45,18 @@ function run_auto_migrations($conn) {
             `status` varchar(50) DEFAULT 'Belum Selesai',
             `tanggal_update` datetime DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (`id_progress`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+
+        // Tabel Notifikasi Intervensi Kepala Sekolah
+        "CREATE TABLE IF NOT EXISTS `tbl_notifikasi` (
+            `id_notif` int(11) NOT NULL AUTO_INCREMENT,
+            `id_pengirim` int(11) NOT NULL,
+            `id_penerima` int(11) NOT NULL,
+            `jenis` varchar(50) NOT NULL,
+            `pesan` text NOT NULL,
+            `status_baca` int(1) DEFAULT 0,
+            `tanggal` datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id_notif`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
         
         /* 
@@ -61,4 +73,9 @@ function run_auto_migrations($conn) {
     foreach ($migrations as $query) {
         @mysqli_query($conn, $query);
     }
+
+    // Eksekusi Alter Table terpisah karena akan error jika kolom sudah ada
+    // Menambahkan kolom password_plain khusus untuk melihat password user non-admin
+    @mysqli_query($conn, "ALTER TABLE `tbl_user` ADD COLUMN `password_plain` VARCHAR(255) DEFAULT ''");
+    @mysqli_query($conn, "ALTER TABLE `tbl_pengguna` ADD COLUMN `password_plain` VARCHAR(255) DEFAULT ''");
 }
