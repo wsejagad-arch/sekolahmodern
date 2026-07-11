@@ -34,9 +34,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['btn_reset'])) {
                         'tbl_literasi_progress', 'tbl_tugas_siswa', 'tbl_nilai_tugas'
                     ];
                     if (in_array($t, $whitelist)) {
-                        // Bypass IF EXISTS as TRUNCATE TABLE doesn't support it in older MySQL versions easily, but it's safe to just run and suppress errors
-                        $q = @mysqli_query($conn, "TRUNCATE TABLE `$t`");
-                        if ($q) { $truncated++; } else { $failed++; }
+                        $check = mysqli_query($conn, "SHOW TABLES LIKE '$t'");
+                        if (mysqli_num_rows($check) > 0) {
+                            $q = mysqli_query($conn, "TRUNCATE TABLE `$t`");
+                            if ($q) { $truncated++; } else { $failed++; }
+                        } else {
+                            // Jika tabel belum ada di database, lewati saja tanpa error
+                        }
                     }
                 }
                 mysqli_query($conn, "SET FOREIGN_KEY_CHECKS=1");
