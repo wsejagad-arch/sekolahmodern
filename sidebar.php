@@ -6,7 +6,7 @@
   <a class="sidebar-brand d-flex align-items-center" href="home.php" style="text-decoration:none; padding: 16px 14px !important;">
     <div class="sidebar-brand-icon" style="width:40px; height:40px; min-width:40px; border-radius:50%; overflow:hidden; display:flex; align-items:center; justify-content:center; background:var(--school-secondary); box-shadow:0 3px 10px rgba(240,180,41,0.35);">
       <?php if (isset($lembaga) && !empty($lembaga['logo'])): ?>
-        <img src="img/<?= htmlspecialchars($lembaga['logo']); ?>" alt="Logo" width="28" height="28" style="width:28px; height:28px; object-fit:contain; display:block;">
+        <img src="<?= asset_url('img/' . htmlspecialchars($lembaga['logo'])); ?>" alt="Logo" width="28" height="28" style="width:28px; height:28px; object-fit:contain; display:block;">
       <?php else: ?>
         <i class="fas fa-graduation-cap" style="font-size:18px; color:#1a3c6e;"></i>
       <?php endif; ?>

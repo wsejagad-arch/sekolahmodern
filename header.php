@@ -26,11 +26,11 @@ $lembaga = data_lembaga();
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SIMANIS">
-  <link rel="apple-touch-icon" href="img/<?= htmlspecialchars($lembaga['logo'] ?? '6695f027d063a.png'); ?>">
-  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="<?= asset_url('img/' . htmlspecialchars($lembaga['logo'] ?? '6695f027d063a.png')); ?>">
+  <link rel="manifest" href="<?= asset_url('manifest.json'); ?>">
 
   <title><?= $lembaga['nmsekolah']; ?> - Sistem Manajemen Sekolah</title>
-  <link rel="icon" href="img/<?= $lembaga['logo']; ?>" type="image/x-icon">
+  <link rel="icon" href="<?= asset_url('img/' . $lembaga['logo']); ?>" type="image/x-icon">
 
   <script>
     // Register Service Worker for PWA installation
@@ -54,19 +54,19 @@ $lembaga = data_lembaga();
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
 
   <!-- Font Awesome -->
-  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link href="<?= asset_url('vendor/fontawesome-free/css/all.min.css'); ?>" rel="stylesheet" type="text/css">
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
   <!-- SB Admin 2 Template -->
-  <link href="css/sb-admin-2.min.css" rel="stylesheet">
+  <link href="<?= asset_url('css/sb-admin-2.min.css'); ?>" rel="stylesheet">
 
   <!-- DataTables -->
-  <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
-  <link href="css/responsive.bootstrap4.min.css" rel="stylesheet">
+  <link href="<?= asset_url('vendor/datatables/dataTables.bootstrap4.min.css'); ?>" rel="stylesheet">
+  <link href="<?= asset_url('css/responsive.bootstrap4.min.css'); ?>" rel="stylesheet">
 
   <!-- Professional School Theme -->
-  <link href="css/mycss.css" rel="stylesheet">
+  <link href="<?= asset_url('css/mycss.css'); ?>" rel="stylesheet">
 
   <!-- Fix untuk error 'exports is not defined' -->
   <script>
@@ -79,7 +79,7 @@ $lembaga = data_lembaga();
     }
   </script>
 
-  <script src="vendor/chart.js/Chart.min.js"></script>
+  <script src="<?= asset_url('vendor/chart.js/Chart.min.js'); ?>"></script>
 
   <!-- Global JS Variables untuk WebView APK -->
   <script>
@@ -98,6 +98,6 @@ $lembaga = data_lembaga();
 </head>
 
 <body id="page-top" data-user-id="<?= htmlspecialchars($id_user ?? '') ?>" data-no-induk="<?= htmlspecialchars($_SESSION['no_induk'] ?? '') ?>" data-role="<?= htmlspecialchars($hakakses ?? '') ?>">
-<script src="js/sweetalert2.all.min.js"></script>
+<script src="<?= asset_url('js/sweetalert2.all.min.js'); ?>"></script>
   <!-- Page Wrapper -->
   <div id="wrapper">

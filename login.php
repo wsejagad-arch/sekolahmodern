@@ -4,12 +4,17 @@ require_once __DIR__ . '/nocache.php';
 require_once __DIR__ . '/google_auth.php';
 
 // Redirect if already logged in
-if (isset($_SESSION['username']) && (is_admin() || is_guru() || is_siswa())) {
-    header('Location: home.php');
-    exit;
-} elseif (isset($_SESSION['username']) && is_admin_pusat()) {
-    header('Location: admin-pusat.php');
-    exit;
+if (isset($_SESSION['username'])) {
+    if (function_exists('is_admin_pusat') && is_admin_pusat()) {
+        header('Location: admin-pusat.php');
+        exit;
+    } elseif (function_exists('is_siswa') && is_siswa()) {
+        header('Location: ' . (function_exists('siswa_page') ? siswa_page('siswa') : 'index.php'));
+        exit;
+    } elseif (function_exists('is_admin') && (is_admin() || (function_exists('is_guru') && is_guru()))) {
+        header('Location: home.php');
+        exit;
+    }
 }
 
 

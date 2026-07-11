@@ -7,6 +7,10 @@ if (function_exists('is_admin_pusat') && is_admin_pusat()) {
   redirect('admin-pusat.php');
 }
 
+if (function_exists('is_siswa') && is_siswa()) {
+  redirect(function_exists('siswa_page') ? siswa_page('siswa') : 'index.php');
+}
+
 if (isset($_GET['page']) && $_GET['page'] === 'beranda') {
   header('Location: home.php');
   exit;

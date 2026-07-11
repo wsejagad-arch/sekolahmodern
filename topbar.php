@@ -10,7 +10,7 @@
   <!-- School Name & Logo (Topbar Left) -->
   <div class="d-none d-sm-flex align-items-center flex-grow-1 ml-md-3 ms-md-3 my-2 my-md-0">
     <?php if (isset($lembaga) && is_array($lembaga) && !empty($lembaga['logo'])): ?>
-      <img src="img/<?= htmlspecialchars($lembaga['logo']); ?>" width="38" height="38" class="mr-2" style="border-radius:8px; object-fit:contain; border:2px solid rgba(26,60,110,0.12);">
+      <img src="<?= asset_url('img/' . htmlspecialchars($lembaga['logo'])); ?>" width="38" height="38" class="mr-2" style="border-radius:8px; object-fit:contain; border:2px solid rgba(26,60,110,0.12);">
     <?php endif; ?>
     <div>
       <div style="font-size:15px; font-weight:800; color:#1a3c6e; line-height:1.2;">
@@ -70,7 +70,7 @@
           </div>
         </div>
         <div style="position:relative; display:inline-block;">
-          <img class="img-profile rounded-circle" src="img/foto-profil.png" width="38" height="38" style="object-fit:cover; border:2px solid #e2e8f0; width:38px; height:38px;">
+          <img class="img-profile rounded-circle" src="<?= asset_url('img/foto-profil.png'); ?>" width="38" height="38" style="object-fit:cover; border:2px solid #e2e8f0; width:38px; height:38px;">
           <span style="position:absolute; bottom:1px; right:1px; width:9px; height:9px; background:#16a34a; border:2px solid #fff; border-radius:50%; display:block;"></span>
         </div>
       </a>

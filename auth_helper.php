@@ -115,14 +115,23 @@ function require_admin()
             exit;
         }
 
+        // Redirect based on role instead of 403.php
+        if (is_guru()) {
+            $redirectUrl = 'home.php';
+        } elseif (is_siswa()) {
+            $redirectUrl = function_exists('siswa_page') ? siswa_page('siswa') : 'home.php';
+        } else {
+            $redirectUrl = login_required_url();
+        }
+
         // Check if headers already sent (due to sidebar output)
         if (!headers_sent()) {
-            header('Location: 403.php');
+            header('Location: ' . $redirectUrl);
             exit;
         } else {
             // Headers already sent, use JavaScript redirect
-            echo '<script>window.location.href="403.php";</script>';
-            echo '<noscript><meta http-equiv="refresh" content="0;url=403.php"></noscript>';
+            echo '<script>window.location.href="' . htmlspecialchars($redirectUrl, ENT_QUOTES, 'UTF-8') . '";</script>';
+            echo '<noscript><meta http-equiv="refresh" content="0;url=' . htmlspecialchars($redirectUrl, ENT_QUOTES, 'UTF-8') . '"></noscript>';
             exit;
         }
     }
