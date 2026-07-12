@@ -361,14 +361,14 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
                     <label class="form-label">Jam Mulai</label>
                     <div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true">
                         <input class="form-control" type="text" name="jam_mulai" value="<?= sj_h($selectedMulai); ?>" required readonly style="background-color: white; cursor: pointer;">
-                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                        <span class="input-group-text input-group-addon" style="cursor: pointer;"><i class="bi bi-clock"></i></span>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Jam Selesai</label>
                     <div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true">
                         <input class="form-control" type="text" name="jam_selesai" value="<?= sj_h($selectedSelesai); ?>" required readonly style="background-color: white; cursor: pointer;">
-                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                        <span class="input-group-text input-group-addon" style="cursor: pointer;"><i class="bi bi-clock"></i></span>
                     </div>
                 </div>
                 <div class="col-md-6 d-flex align-items-end">
@@ -448,8 +448,8 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/bootstrap-clockpicker.min.js"></script>
 <script>
 $(document).ready(function(){
-    // Initialize clockpicker directly on inputs so they open on click
-    $('input[name="jam_mulai"], input[name="jam_selesai"]').clockpicker({
+    // Initialize clockpicker on the wrapper to support addon click
+    $('.clockpicker').clockpicker({
         placement: 'bottom',
         align: 'left',
         autoclose: true,
@@ -462,10 +462,13 @@ $(document).ready(function(){
         }
     });
     
-    // Also allow clicking the icon to open it
+    // Also allow clicking the icon to open it (fallback for custom icons)
     $('.input-group-text').on('click', function(e){
         e.stopPropagation();
-        $(this).siblings('input').clockpicker('show');
+        var cp = $(this).closest('.clockpicker').data('clockpicker');
+        if (cp) {
+            cp.show();
+        }
     });
 });
 </script>
