@@ -175,17 +175,22 @@ $formatProfileValue = static function (string $column, $value): string {
   return htmlspecialchars((string)$value);
 };
 
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['_simpan_profil'])) {
-  $bolehEdit = ((int)$izinEdit === 1);
+$qSiswa = mysqli_query($conn, "SELECT * FROM tbl_siswa WHERE {$tenantSiswa} AND no_induk='$noIndukEsc' LIMIT 1");
+$siswa = ($qSiswa ? mysqli_fetch_assoc($qSiswa) : []) ?: [];
 
-  if (!$bolehEdit) {
+$izinEditGlobal = ((int)$izinEdit === 1);
+$izinEditSiswa = ((string)($siswa['izin_edit_profil'] ?? '0') === '1');
+$izinEdit = ($izinEditGlobal || $izinEditSiswa);
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['_simpan_profil'])) {
+  if (!$izinEdit) {
     $_SESSION['_profil_msg'] = 'Profil sedang dikunci admin. Data tidak dapat diubah.';
     $_SESSION['_profil_msg_type'] = 'danger';
     header('Location: profil.php');
     exit;
   }
 
-  $blockedColumns = ['no_induk', 'password', 'token', 'remember_token'];
+  $blockedColumns = ['password', 'token', 'remember_token'];
   $updateParts = [];
   foreach ($schemaCols as $field) {
     if (in_array($field, $blockedColumns, true)) {
@@ -199,7 +204,22 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['_simpan_pr
     $updateParts[] = "{$field}='{$safeValue}'";
   }
 
+  $newNoInduk = trim((string)($_POST['no_induk'] ?? ''));
+  if ($newNoInduk !== '' && $newNoInduk !== $noInduk) {
+      $cekKey = mysqli_query($conn, "SELECT no_induk FROM tbl_siswa WHERE no_induk='" . mysqli_real_escape_string($conn, $newNoInduk) . "' AND {$tenantSiswa}");
+      if (mysqli_num_rows($cekKey) > 0) {
+          $_SESSION['_profil_msg'] = 'Nomor Induk sudah digunakan oleh siswa lain.';
+          $_SESSION['_profil_msg_type'] = 'danger';
+          header('Location: profil.php');
+          exit;
+      }
+      mysqli_query($conn, "UPDATE tbl_pengguna SET username='" . mysqli_real_escape_string($conn, $newNoInduk) . "', no_induk='" . mysqli_real_escape_string($conn, $newNoInduk) . "' WHERE no_induk='$noIndukEsc'");
+  }
+
   if (!empty($updateParts) && @mysqli_query($conn, "UPDATE tbl_siswa SET " . implode(', ', $updateParts) . " WHERE {$tenantSiswa} AND no_induk='$noIndukEsc' LIMIT 1")) {
+    if ($newNoInduk !== '' && $newNoInduk !== $noInduk) {
+        $_SESSION['no_induk'] = $newNoInduk;
+    }
     $_SESSION['_profil_msg'] = 'Profil berhasil diperbarui.';
     $_SESSION['_profil_msg_type'] = 'success';
   } else {
@@ -211,12 +231,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['_simpan_pr
   exit;
 }
 
-$qSiswa = mysqli_query($conn, "SELECT * FROM tbl_siswa WHERE {$tenantSiswa} AND no_induk='$noIndukEsc' LIMIT 1");
-$siswa = ($qSiswa ? mysqli_fetch_assoc($qSiswa) : []) ?: [];
-
 $namaSiswa = $siswa['nama_siswa'] ?? $namaSiswa;
 $kelas = $siswa['kelas'] ?? $kelas;
-$izinEdit = ((int)$izinEdit === 1);
 
 $displayColumns = [];
 foreach ($siswa as $column => $value) {
@@ -790,7 +806,7 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
         <div class="row g-3">
           <div class="col-12">
             <label class="form-label-custom">Nomor Induk Siswa</label>
-            <input type="text" class="form-control form-control-app bg-light" value="<?= htmlspecialchars($noInduk) ?>" readonly>
+            <input type="text" name="no_induk" class="form-control form-control-app <?= $izinEdit ? '' : 'bg-light' ?>" value="<?= htmlspecialchars($noInduk) ?>" <?= $izinEdit ? '' : 'readonly' ?>>
           </div>
           <?php if ($hasColumn('nama_siswa')): ?>
             <div class="col-12">
@@ -805,7 +821,19 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
           <?php if ($hasColumn('kelas')): ?>
             <div class="col-md-6">
               <label class="form-label-custom">Kelas</label>
-              <input type="text" name="kelas" class="form-control form-control-app" value="<?= htmlspecialchars($siswa['kelas'] ?? '') ?>" <?= $izinEdit ? '' : 'readonly' ?> placeholder="Contoh: X IPA 1">
+              <?php if ($izinEdit): ?>
+                <?php
+                $qKelas = mysqli_query($conn, "SELECT kelas FROM tbl_kelas WHERE {$tenantSiswa} ORDER BY kelas ASC");
+                ?>
+                <select name="kelas" class="form-select form-control-app">
+                  <option value="">Pilih Kelas</option>
+                  <?php while ($rowKelas = mysqli_fetch_assoc($qKelas)): ?>
+                    <option value="<?= htmlspecialchars($rowKelas['kelas']) ?>" <?= ($siswa['kelas'] ?? '') === $rowKelas['kelas'] ? 'selected' : '' ?>><?= htmlspecialchars($rowKelas['kelas']) ?></option>
+                  <?php endwhile; ?>
+                </select>
+              <?php else: ?>
+                <input type="text" name="kelas" class="form-control form-control-app" value="<?= htmlspecialchars($siswa['kelas'] ?? '') ?>" readonly placeholder="Contoh: X IPA 1">
+              <?php endif; ?>
             </div>
           <?php endif; ?>
           <?php if ($hasColumn('status')): ?>
