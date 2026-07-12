@@ -360,15 +360,15 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
                 <div class="col-md-3">
                     <label class="form-label">Jam Mulai</label>
                     <div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true">
-                        <input class="form-control" type="text" name="jam_mulai" value="<?= sj_h($selectedMulai); ?>" required readonly style="background-color: white; cursor: pointer;">
-                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                        <input id="inp_jam_mulai" class="form-control" type="text" name="jam_mulai" value="<?= sj_h($selectedMulai); ?>" required readonly style="background-color: white; cursor: pointer;">
+                        <label class="input-group-text" for="inp_jam_mulai" style="cursor: pointer;"><i class="bi bi-clock" style="pointer-events: none;"></i></label>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Jam Selesai</label>
                     <div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true">
-                        <input class="form-control" type="text" name="jam_selesai" value="<?= sj_h($selectedSelesai); ?>" required readonly style="background-color: white; cursor: pointer;">
-                        <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                        <input id="inp_jam_selesai" class="form-control" type="text" name="jam_selesai" value="<?= sj_h($selectedSelesai); ?>" required readonly style="background-color: white; cursor: pointer;">
+                        <label class="input-group-text" for="inp_jam_selesai" style="cursor: pointer;"><i class="bi bi-clock" style="pointer-events: none;"></i></label>
                     </div>
                 </div>
                 <div class="col-md-6 d-flex align-items-end">
@@ -462,10 +462,22 @@ $(document).ready(function(){
         }
     });
     
-    // Also allow clicking the icon to open it
+    // Explicit manual toggle as a robust fallback
     $('.input-group-text').on('click', function(e){
+        e.preventDefault();
         e.stopPropagation();
-        $(this).siblings('input').clockpicker('show');
+        var $input = $(this).siblings('input');
+        var cp = $input.data('clockpicker');
+        if (cp) {
+            // Trigger native input behavior
+            $input.trigger('focus').trigger('click');
+            // Ensure popover is shown
+            setTimeout(function(){
+                if (!cp.isShown) {
+                    cp.show();
+                }
+            }, 10);
+        }
     });
 });
 </script>
