@@ -203,7 +203,6 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
     <title>Setting Jadwal - SIMANIS</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/bootstrap-clockpicker.min.css">
     <link rel="stylesheet" href="css/guru-desktop.css?v=<?= time() ?>">
     <style>
         body { margin:0; font-family:"Plus Jakarta Sans", system-ui, sans-serif; background:#ebf1f6; color:#0f172a; }
@@ -248,26 +247,6 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
         @media (max-width: 767px) {
             .app-shell { padding: 16px !important; margin-bottom: 60px; display: block !important; }
             .btn-green-desktop { display: none; }
-            
-            /* Center the clockpicker as a popup on mobile */
-            .clockpicker-popover {
-                position: fixed !important;
-                top: 50% !important;
-                left: 50% !important;
-                transform: translate(-50%, -50%) !important;
-                z-index: 9999 !important;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
-                border: none !important;
-                border-radius: 12px !important;
-            }
-            /* Add a backdrop */
-            body.clockpicker-open::before {
-                content: '';
-                position: fixed;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background: rgba(0,0,0,0.5);
-                z-index: 9998;
-            }
         }
 
         .form-control, .form-select { border-radius: 12px; border: 1px solid #e2e8f0; padding: 10px 14px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
@@ -359,16 +338,16 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Jam Mulai</label>
-                    <div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true">
-                        <input id="inp_jam_mulai" class="form-control" type="text" name="jam_mulai" value="<?= sj_h($selectedMulai); ?>" required readonly style="background-color: white; cursor: pointer;">
-                        <label class="input-group-text" for="inp_jam_mulai" style="cursor: pointer;"><i class="bi bi-clock" style="pointer-events: none;"></i></label>
+                    <div class="input-group">
+                        <input id="inp_jam_mulai" class="form-control" type="time" name="jam_mulai" value="<?= sj_h($selectedMulai); ?>" required style="background-color: white; cursor: pointer;">
+                        <label class="input-group-text" for="inp_jam_mulai" style="cursor: pointer;"><i class="bi bi-clock"></i></label>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Jam Selesai</label>
-                    <div class="input-group clockpicker" data-placement="bottom" data-align="top" data-autoclose="true">
-                        <input id="inp_jam_selesai" class="form-control" type="text" name="jam_selesai" value="<?= sj_h($selectedSelesai); ?>" required readonly style="background-color: white; cursor: pointer;">
-                        <label class="input-group-text" for="inp_jam_selesai" style="cursor: pointer;"><i class="bi bi-clock" style="pointer-events: none;"></i></label>
+                    <div class="input-group">
+                        <input id="inp_jam_selesai" class="form-control" type="time" name="jam_selesai" value="<?= sj_h($selectedSelesai); ?>" required style="background-color: white; cursor: pointer;">
+                        <label class="input-group-text" for="inp_jam_selesai" style="cursor: pointer;"><i class="bi bi-clock"></i></label>
                     </div>
                 </div>
                 <div class="col-md-6 d-flex align-items-end">
@@ -445,38 +424,17 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
 </nav>
 <?php include __DIR__ . '/guru_common_footer.php'; ?>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/bootstrap-clockpicker.min.js"></script>
 <script>
 $(document).ready(function(){
-    // Initialize clockpicker directly on inputs so they open on click
-    $('input[name="jam_mulai"], input[name="jam_selesai"]').clockpicker({
-        placement: 'bottom',
-        align: 'left',
-        autoclose: true,
-        'default': 'now',
-        beforeShow: function() {
-            $('body').addClass('clockpicker-open');
-        },
-        afterHide: function() {
-            $('body').removeClass('clockpicker-open');
-        }
-    });
-    
-    // Explicit manual toggle as a robust fallback
+    // Buka native time picker saat icon jam diklik (dukungan browser modern)
     $('.input-group-text').on('click', function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        var $input = $(this).siblings('input');
-        var cp = $input.data('clockpicker');
-        if (cp) {
-            // Trigger native input behavior
-            $input.trigger('focus').trigger('click');
-            // Ensure popover is shown
-            setTimeout(function(){
-                if (!cp.isShown) {
-                    cp.show();
-                }
-            }, 10);
+        var input = $(this).siblings('input')[0];
+        if (input && typeof input.showPicker === 'function') {
+            try {
+                input.showPicker();
+            } catch (err) {
+                // Ignore if showPicker fails (e.g. not triggered by user gesture)
+            }
         }
     });
 });
