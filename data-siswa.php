@@ -76,25 +76,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['global_tog
     }
 
     $izinBaruGlobal = ($_POST['izin_global_baru'] ?? '') === '1' ? '1' : '0';
-    $qToggle = @mysqli_query($conn, "UPDATE tbl_pengaturan SET nilai='$izinBaruGlobal' WHERE kunci='izin_edit_profil' AND {$tenantPengaturan}");
+    $qToggle = @mysqli_query($conn, "UPDATE tbl_pengaturan SET nilai='$izinBaruGlobal' WHERE kunci='izin_edit_profil' AND ({$tenantPengaturan} OR id_sekolah IS NULL OR id_sekolah=0)");
     if ($qToggle) {
         $_SESSION['_izin_edit_notice'] = $izinBaruGlobal === '1'
             ? 'Izin edit profil global berhasil dibuka. Semua siswa kini dapat mengedit profil.'
             : 'Izin edit profil global berhasil dikunci. Semua siswa kini tidak dapat mengedit profil.';
         $_SESSION['_izin_edit_notice_type'] = 'success';
-    } else {
-        $_SESSION['_izin_edit_notice'] = 'Gagal mengubah izin edit profil global.';
-        $_SESSION['_izin_edit_notice_type'] = 'danger';
+        
+        // Memastikan cache di refresh dengan me-reload halaman
+        header("Location: " . $returnUrl);
+        exit;
     }
-
-    ds_safe_redirect($returnUrl);
 }
 
 $izinEditNotice = $_SESSION['_izin_edit_notice'] ?? '';
 $izinEditNoticeType = $_SESSION['_izin_edit_notice_type'] ?? 'success';
 unset($_SESSION['_izin_edit_notice'], $_SESSION['_izin_edit_notice_type']);
 
-$qIzinGlobal = @mysqli_query($conn, "SELECT nilai FROM tbl_pengaturan WHERE kunci='izin_edit_profil' AND {$tenantPengaturan} LIMIT 1");
+$qIzinGlobal = @mysqli_query($conn, "SELECT nilai FROM tbl_pengaturan WHERE kunci='izin_edit_profil' AND ({$tenantPengaturan} OR id_sekolah IS NULL OR id_sekolah=0) ORDER BY id_sekolah DESC LIMIT 1");
 if ($qIzinGlobal && ($rIzinGlobal = mysqli_fetch_assoc($qIzinGlobal))) {
     $izinEditGlobal = ((string)($rIzinGlobal['nilai'] ?? '0') === '1') ? 1 : 0;
 }

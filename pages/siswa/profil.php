@@ -58,7 +58,7 @@ if (function_exists('mt_add_school_column') && $conn instanceof mysqli) {
 }
 @mysqli_query($conn, "INSERT IGNORE INTO tbl_pengaturan (kunci,nilai" . (strpos($tenantPengaturan, 'id_sekolah=') === 0 ? ",id_sekolah" : "") . ") VALUES ('izin_edit_profil','0'" . (strpos($tenantPengaturan, 'id_sekolah=') === 0 ? ",{$tenantId}" : "") . ")");
 
-$qIzinGlobal = @mysqli_query($conn, "SELECT nilai FROM tbl_pengaturan WHERE kunci='izin_edit_profil' AND {$tenantPengaturan} LIMIT 1");
+$qIzinGlobal = @mysqli_query($conn, "SELECT nilai FROM tbl_pengaturan WHERE kunci='izin_edit_profil' AND ({$tenantPengaturan} OR id_sekolah IS NULL OR id_sekolah=0) ORDER BY id_sekolah DESC LIMIT 1");
 $izinEdit = 0;
 if ($qIzinGlobal && ($rIzinGlobal = mysqli_fetch_assoc($qIzinGlobal))) {
   $izinEdit = ((string)($rIzinGlobal['nilai'] ?? '0') === '1') ? 1 : 0;
