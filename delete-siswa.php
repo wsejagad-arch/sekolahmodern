@@ -34,6 +34,11 @@ if (($_SESSION['hak_akses'] ?? 0) != 1) {
 include __DIR__ . '/koneksi.php';
 
 $id = trim($_REQUEST['no_induk'] ?? '');
+$returnUrl = isset($_GET['return_url']) ? 'home.php' . $_GET['return_url'] : 'home.php?page=data-siswa';
+// Ensure returnUrl is somewhat safe (only local redirects)
+if (!str_starts_with($returnUrl, 'home.php')) {
+    $returnUrl = 'home.php?page=data-siswa';
+}
 
 // Validasi parameter
 if ($id === '') {
@@ -42,7 +47,7 @@ if ($id === '') {
         echo json_encode(['success' => false, 'error' => 'Parameter no_induk tidak valid']);
         exit;
     }
-    echo '<script>alert("Parameter tidak valid");window.location="home.php?page=data-siswa";</script>';
+    echo '<script>alert("Parameter tidak valid");window.location="' . addslashes($returnUrl) . '";</script>';
     exit;
 }
 
@@ -56,7 +61,7 @@ if (!$cek || mysqli_num_rows($cek) === 0) {
         echo json_encode(['success' => false, 'error' => 'Data siswa tidak ditemukan']);
         exit;
     }
-    echo '<script>alert("Data siswa tidak ditemukan");window.location="home.php?page=data-siswa";</script>';
+    echo '<script>alert("Data siswa tidak ditemukan");window.location="' . addslashes($returnUrl) . '";</script>';
     exit;
 }
 $rowSiswa   = mysqli_fetch_assoc($cek);
@@ -81,7 +86,9 @@ if ($sqlHapus && mysqli_affected_rows($conn) > 0) {
         echo json_encode(['success' => true, 'message' => 'Data siswa berhasil dihapus']);
         exit;
     }
-    echo '<script>window.location="home.php?page=data-siswa&deleted=1";</script>';
+    // Append deleted=1 to returnUrl
+    $finalUrl = $returnUrl . (strpos($returnUrl, '?') !== false ? '&' : '?') . 'deleted=1';
+    echo '<script>window.location="' . addslashes($finalUrl) . '";</script>';
 } else {
     $errMsg = mysqli_error($conn);
     if ($wantJson) {
@@ -89,5 +96,5 @@ if ($sqlHapus && mysqli_affected_rows($conn) > 0) {
         echo json_encode(['success' => false, 'error' => 'Gagal menghapus data: ' . $errMsg]);
         exit;
     }
-    echo '<script>alert("Gagal menghapus data!");window.location="home.php?page=data-siswa";</script>';
+    echo '<script>alert("Gagal menghapus data!");window.location="' . addslashes($returnUrl) . '";</script>';
 }

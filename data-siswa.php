@@ -396,7 +396,8 @@ document.addEventListener('DOMContentLoaded', function(){
             confirmButtonColor: '#d33'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = '?page=hapus-siswa&no_induk=' + encodeURIComponent(noInduk);
+                var returnUrl = encodeURIComponent(window.location.search);
+                window.location.href = 'delete-siswa.php?no_induk=' + encodeURIComponent(noInduk) + '&return_url=' + returnUrl;
             }
         });
     });
