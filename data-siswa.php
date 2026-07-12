@@ -358,7 +358,7 @@ $activeFilterLabel = $kelasFilter !== '' ? $kelasFilter : 'Semua kelas';
                                         <a class="btn btn-sm btn-circle btn-primary" href="detail-profil-siswa.php?no_induk=<?= urlencode($data['no_induk']); ?>" title="Lihat Profil"><i class="fas fa-info"></i></a>
                                         <a class="btn btn-sm btn-circle btn-info" href="?page=edit-siswa&no_induk=<?= urlencode($data['no_induk']); ?>" title="Edit Data"><i class="fas fa-edit"></i></a>
                                         <button type="button" class="btn btn-sm btn-circle btn-danger"
-                                            onclick="hapusSiswa('<?= htmlspecialchars($data['no_induk'], ENT_QUOTES); ?>', '<?= htmlspecialchars($data['nama_siswa'], ENT_QUOTES); ?>')"
+                                            onclick='hapusSiswa(<?= htmlspecialchars(json_encode($data["no_induk"]), ENT_QUOTES); ?>, <?= htmlspecialchars(json_encode($data["nama_siswa"]), ENT_QUOTES); ?>)'
                                             title="Hapus Data">
                                             <i class="fas fa-trash"></i>
                                         </button>
