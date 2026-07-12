@@ -36,7 +36,7 @@ include __DIR__ . '/koneksi.php';
 $id = trim($_REQUEST['no_induk'] ?? '');
 $returnUrl = isset($_GET['return_url']) ? 'home.php' . $_GET['return_url'] : 'home.php?page=data-siswa';
 // Ensure returnUrl is somewhat safe (only local redirects)
-if (!str_starts_with($returnUrl, 'home.php')) {
+if (strpos($returnUrl, 'home.php') !== 0) {
     $returnUrl = 'home.php?page=data-siswa';
 }
 
