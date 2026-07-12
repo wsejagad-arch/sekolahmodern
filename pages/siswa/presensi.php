@@ -1331,6 +1331,18 @@ function konfirmasiButtonColor($opt)
                 }
             };
         })();
+
+        // Request camera permission automatically on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                // Immediately stop the stream after permission is granted
+                stream.getTracks().forEach(track => track.stop());
+                console.log('Camera permission granted automatically on page load.');
+            } catch (e) {
+                console.warn('Camera permission request on page load failed or denied:', e);
+            }
+        });
     </script>
 
 </body>
