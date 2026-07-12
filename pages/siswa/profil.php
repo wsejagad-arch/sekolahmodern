@@ -749,313 +749,229 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
   </section>
 
   <div class="container px-3 px-md-4 profile-form-wrap">
+<?php
+$tabs = [
+    'identitas' => [
+        'icon' => 'fa-user',
+        'title' => 'Identitas Pribadi',
+        'fields' => ['no_induk', 'nisn', 'nipd', 'nama_siswa', 'jk', 'tempat_lahir', 'tanggal_lahir', 'nik', 'agama', 'anak_ke', 'jml_saudara', 'berat_badan', 'tinggi_badan', 'lingkar_kepala']
+    ],
+    'sekolah' => [
+        'icon' => 'fa-graduation-cap',
+        'title' => 'Sekolah & Akademik',
+        'fields' => ['kelas', 'rombel', 'jabatan', 'status', 'sekolah_asal', 'no_peserta_ujian', 'no_seri_ijazah', 'skhun']
+    ],
+    'domisili' => [
+        'icon' => 'fa-map-marker-alt',
+        'title' => 'Domisili & Kontak',
+        'fields' => ['alamat', 'rt', 'rw', 'dusun', 'kelurahan', 'kecamatan', 'kode_pos', 'jenis_tinggal', 'alat_transportasi', 'jarak_rumah', 'telepon', 'hp', 'email', 'no_wa', 'lat', 'lng', 'lintang', 'bujur']
+    ],
+    'keluarga' => [
+        'icon' => 'fa-users',
+        'title' => 'Data Keluarga',
+        'fields' => [
+            'nama_darurat', 'no_darurat',
+            'ayah_nama', 'ayah_tahun_lahir', 'ayah_nik', 'ayah_pendidikan', 'ayah_pekerjaan', 'ayah_penghasilan',
+            'ibu_nama', 'ibu_tahun_lahir', 'ibu_nik', 'ibu_pendidikan', 'ibu_pekerjaan', 'ibu_penghasilan',
+            'wali_nama', 'wali_tahun_lahir', 'wali_pendidikan', 'wali_pekerjaan', 'wali_penghasilan'
+        ]
+    ],
+    'administrasi' => [
+        'icon' => 'fa-hand-holding-heart',
+        'title' => 'Bantuan & Admin',
+        'fields' => ['penerima_kps', 'no_kps', 'penerima_kip', 'nomor_kip', 'nama_kip', 'nomor_kks', 'layak_pip', 'alasan_layak_pip', 'kebutuhan_khusus', 'bank', 'no_rek']
+    ],
+    'tujuan' => [
+        'icon' => 'fa-bullseye',
+        'title' => 'Tujuan Mendatang',
+        'fields' => ['rencana_setelah_lulus', 'rencana_detail', 'minat_jurusan', 'bakat_minat', 'dukungan_dibutuhkan'],
+        'highlight' => true
+    ]
+];
+?>
     <form method="POST" action="" id="formProfil">
       <input type="hidden" name="_simpan_profil" value="1">
 
       <div class="alert <?= $izinEdit ? 'alert-info' : 'alert-warning' ?> border-0 shadow-sm mb-4 edit-status-banner">
-        <div class="status-icon bg-white text-<?= $izinEdit ? 'primary' : 'warning' ?>">
-          <i class="fas <?= $izinEdit ? 'fa-unlock' : 'fa-lock' ?>"></i>
-        </div>
-        <div class="status-copy">
-          <div class="status-title"><?= $izinEdit ? 'Mode edit aktif' : 'Profil sedang dikunci' ?></div>
-          <p class="status-text">
-            <?= $izinEdit ? 'Pastikan alamat, koordinat, dan nomor kontak sudah akurat sebelum disimpan.' : 'Admin sedang menutup akses edit profil. Data tetap bisa dilihat, tetapi tidak bisa diubah.' ?>
-          </p>
-        </div>
-      </div>
-
-      <?php if ($notifMsg !== ''): ?>
-        <div class="alert alert-<?= htmlspecialchars($notifType) ?> border-0 shadow-sm" style="border-radius:1rem;">
-          <?= htmlspecialchars($notifMsg) ?>
-        </div>
-      <?php endif; ?>
-
-      <!-- Minimalist Progress Bar -->
-      <div class="progress-container">
-        <div class="progress-header">
-          <h6 class="progress-title">
-            <i class="fas fa-chart-line text-primary"></i>
-            Kelengkapan Profil
-          </h6>
-          <span class="progress-percentage" id="completionPercentage">0%</span>
-        </div>
-
-        <div class="progress-bar-wrapper">
-          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-        </div>
-
-        <div class="progress-stats">
-          <div class="progress-stat">
-            <span class="progress-stat-number" id="filledFields">0</span>
-            <span class="progress-stat-label">Terisi</span>
-          </div>
-          <div class="progress-stat">
-            <span class="progress-stat-number" id="totalFields">0</span>
-            <span class="progress-stat-label">Total</span>
-          </div>
-
-          <div class="progress-stat">
-            <span class="progress-stat-number" id="emptyFields">0</span>
-            <span class="progress-stat-label">Kosong</span>
+        <div class="d-flex align-items-center">
+          <i class="fas <?= $izinEdit ? 'fa-unlock text-primary' : 'fa-lock text-warning' ?> fa-2x me-3"></i>
+          <div>
+            <h6 class="mb-1 fw-bold"><?= $izinEdit ? 'Mode Edit Terbuka' : 'Mode Edit Terkunci' ?></h6>
+            <p class="mb-0 small"><?= $izinEdit ? 'Anda dapat mengubah data profil Anda sekarang.' : 'Fitur edit profil saat ini sedang dikunci oleh admin.' ?></p>
           </div>
         </div>
       </div>
 
-      <div class="card-app p-4">
-        <div class="row g-3">
-          <div class="col-12">
-            <label class="form-label-custom">Nomor Induk Siswa</label>
-            <input type="text" name="no_induk" class="form-control form-control-app <?= $izinEdit ? '' : 'bg-light' ?>" value="<?= htmlspecialchars($noInduk) ?>" <?= $izinEdit ? '' : 'readonly' ?>>
-          </div>
-          <?php if ($hasColumn('nama_siswa')): ?>
-            <div class="col-12">
-              <label class="form-label-custom">Nama Siswa</label>
-              <input type="text" name="nama_siswa" class="form-control form-control-app" value="<?= htmlspecialchars($siswa['nama_siswa'] ?? '') ?>" <?= $izinEdit ? '' : 'readonly' ?> placeholder="Masukkan nama siswa">
-            </div>
-          <?php endif; ?>
-          <div class="col-12">
-            <label class="form-label-custom">Nomor Induk Siswa Nasional (NISN)</label>
-            <input type="text" name="nisn" class="form-control form-control-app" value="<?= htmlspecialchars($siswa['nisn'] ?? '') ?>" <?= $izinEdit ? '' : 'readonly' ?> placeholder="Input 10 digit NISN">
-          </div>
-          <?php if ($hasColumn('kelas')): ?>
-            <div class="col-md-6">
-              <label class="form-label-custom">Kelas</label>
-              <?php if ($izinEdit): ?>
-                <?php
-                $tenantKelas = function_exists('mt_column_exists') && $conn instanceof mysqli && mt_column_exists($conn, 'tbl_kelas', 'id_sekolah') ? "id_sekolah={$tenantId}" : "1=1";
-                $qKelas = mysqli_query($conn, "SELECT kelas FROM tbl_kelas WHERE {$tenantKelas} ORDER BY kelas ASC");
-                ?>
-                <select name="kelas" class="form-select form-control-app">
-                  <option value="">Pilih Kelas</option>
-                  <?php if ($qKelas) {
-                    while ($rowKelas = mysqli_fetch_assoc($qKelas)) { ?>
-                    <option value="<?= htmlspecialchars($rowKelas['kelas']) ?>" <?= ($siswa['kelas'] ?? '') === $rowKelas['kelas'] ? 'selected' : '' ?>><?= htmlspecialchars($rowKelas['kelas']) ?></option>
-                  <?php } } ?>
-                </select>
-              <?php else: ?>
-                <input type="text" name="kelas" class="form-control form-control-app" value="<?= htmlspecialchars($siswa['kelas'] ?? '') ?>" readonly placeholder="Contoh: X IPA 1">
-              <?php endif; ?>
-            </div>
-          <?php endif; ?>
-          <?php if ($hasColumn('status')): ?>
-            <div class="col-md-6">
-              <label class="form-label-custom">Status</label>
-              <input type="text" class="form-control form-control-app bg-light" value="<?= htmlspecialchars(ucwords((string)($siswa['status'] ?? ''))) ?>" readonly>
-              <input type="hidden" name="status" value="<?= htmlspecialchars((string)($siswa['status'] ?? '')) ?>">
-            </div>
-          <?php endif; ?>
-          <?php if ($hasColumn('jabatan')): ?>
-            <div class="col-12">
-              <label class="form-label-custom">Jabatan</label>
-              <input type="text" name="jabatan" class="form-control form-control-app" value="<?= htmlspecialchars($siswa['jabatan'] ?? '') ?>" <?= $izinEdit ? '' : 'readonly' ?> placeholder="Contoh: Ketua Kelas">
-            </div>
-          <?php endif; ?>
-        </div>
-      </div>
+      <!-- Tabs Navigation -->
+      <ul class="nav nav-pills mb-4 pb-2" id="profilTabs" role="tablist" style="overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; -webkit-overflow-scrolling: touch;">
+        <?php $isFirst = true; ?>
+        <?php foreach ($tabs as $id => $tab): ?>
+          <li class="nav-item me-2" role="presentation">
+            <button class="nav-link <?= $isFirst ? 'active' : '' ?> rounded-pill <?= isset($tab['highlight']) ? 'fw-bold border border-primary text-primary' : '' ?>" 
+                    id="tab-<?= $id ?>" data-bs-toggle="pill" data-bs-target="#content-<?= $id ?>" type="button" role="tab">
+              <i class="fas <?= $tab['icon'] ?> me-2"></i><?= $tab['title'] ?>
+            </button>
+          </li>
+          <?php $isFirst = false; ?>
+        <?php endforeach; ?>
+      </ul>
 
-      <div class="card-app p-4">
-        <div class="d-flex align-items-center mb-3">
-          <i class="fas fa-map-marker-alt text-primary me-2"></i>
-          <h6 class="mb-0 fw-bold">Lokasi Rumah</h6>
-        </div>
+      <!-- Tabs Content -->
+      <div class="tab-content bg-white p-4 rounded-4 shadow-sm mb-4 border" id="profilTabsContent">
+        <?php $isFirstContent = true; ?>
+        <?php foreach ($tabs as $id => $tab): ?>
+          <div class="tab-pane fade <?= $isFirstContent ? 'show active' : '' ?>" id="content-<?= $id ?>" role="tabpanel">
+            
+            <?php if (isset($tab['highlight'])): ?>
+              <div class="alert alert-primary border-0 bg-primary bg-opacity-10 mb-4 rounded-4">
+                <h6 class="fw-bold text-primary mb-1"><i class="fas fa-rocket me-2"></i>Pemetaan Masa Depan</h6>
+                <p class="small mb-0 text-primary">Data ini sangat penting bagi sekolah untuk memetakan dan mengarahkan rencana masa depan Anda setelah lulus. Pastikan diisi dengan sungguh-sungguh.</p>
+              </div>
+            <?php else: ?>
+              <h6 class="fw-bold mb-4 text-primary border-bottom pb-2"><i class="fas <?= $tab['icon'] ?> me-2"></i><?= $tab['title'] ?></h6>
+            <?php endif; ?>
 
-        <div class="mb-3">
-          <label class="form-label-custom">Alamat Lengkap</label>
-          <textarea name="alamat" id="alamat" class="form-control form-control-app" rows="3" <?= $izinEdit ? '' : 'readonly' ?> placeholder="Jl. Nama Jalan, No. Rumah..."><?= htmlspecialchars($siswa['alamat'] ?? '') ?></textarea>
-        </div>
-
-        <?php if ($izinEdit): ?>
-          <div class="mb-3">
-            <div class="location-search-row">
-              <input type="text" id="searchAlamat" class="form-control form-control-app flex-grow-1" placeholder="Cari desa/lokasi...">
-              <button type="button" id="btnSearchAlamat" class="btn btn-primary rounded-3"><i class="fas fa-search"></i></button>
-            </div>
-            <div class="profile-mobile-note">Pencarian lokasi lebih nyaman dipakai di layar besar, tetapi tetap bisa dijalankan di HP.</div>
-          </div>
-
-          <button type="button" id="btnGps" class="btn btn-outline-primary w-100 mb-3 py-2 rounded-3 fw-bold">
-            <i class="fas fa-crosshairs me-2" id="gpsIcon"></i> <span id="gpsLabel">Ambil Posisi Sekarang</span>
-          </button>
-        <?php endif; ?>
-
-        <div class="row g-2 mb-3">
-          <div class="col-6">
-            <input type="text" name="lat" id="lat" class="form-control form-control-app small bg-light" value="<?= htmlspecialchars($siswa['lat'] ?? '') ?>" placeholder="Lat" readonly>
-          </div>
-          <div class="col-6">
-            <input type="text" name="lng" id="lng" class="form-control form-control-app small bg-light" value="<?= htmlspecialchars($siswa['lng'] ?? '') ?>" placeholder="Lng" readonly>
-          </div>
-        </div>
-
-        <button type="button" onclick="toggleMapPanel()" class="btn btn-dark w-100 rounded-3 py-2 fw-bold">
-          <i class="fas fa-map me-2"></i> <span id="mapBtnLabel">Buka Panel Peta</span>
-        </button>
-
-        <div id="mapPanel" class="d-none mt-3">
-          <div class="map-container-app">
-            <iframe id="mapIframe" style="width:100%;height:100%;border:none;"></iframe>
-          </div>
-        </div>
-      </div>
-
-      <div class="card-app p-4">
-        <div class="d-flex align-items-center mb-3">
-          <i class="fab fa-whatsapp text-success me-2"></i>
-          <h6 class="mb-0 fw-bold">Informasi Kontak</h6>
-        </div>
-        <div class="mb-3">
-          <label class="form-label-custom">WhatsApp Siswa</label>
-          <div class="input-group">
-            <span class="input-group-text bg-white border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">+62</span>
-            <input type="tel" name="no_wa" class="form-control form-control-app border-start-0" value="<?= htmlspecialchars($siswa['no_wa'] ?? '') ?>" <?= $izinEdit ? '' : 'readonly' ?>>
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label-custom">Nama Wali (Darurat)</label>
-          <input type="text" name="nama_darurat" class="form-control form-control-app" value="<?= htmlspecialchars($siswa['nama_darurat'] ?? '') ?>" <?= $izinEdit ? '' : 'readonly' ?>>
-        </div>
-        <div class="mb-0">
-          <label class="form-label-custom">No. HP Wali</label>
-          <div class="input-group">
-            <span class="input-group-text bg-white border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">+62</span>
-            <input type="tel" name="no_darurat" class="form-control form-control-app border-start-0" value="<?= htmlspecialchars($siswa['no_darurat'] ?? '') ?>" <?= $izinEdit ? '' : 'readonly' ?>>
-          </div>
-        </div>
-      </div>
-
-      <div class="card-app p-4">
-        <div class="d-flex align-items-center mb-3">
-          <i class="fas fa-layer-group text-primary me-2"></i>
-          <h6 class="mb-0 fw-bold">Input Tambahan Data Siswa</h6>
-        </div>
-        <p class="small text-muted section-intro-text">Field dasar tetap ada di bagian atas. Bagian ini menampilkan kolom tambahan dari tabel siswa.</p>
-        <?php if (empty($editableGroups)): ?>
-          <div class="text-muted small">Tidak ada field tambahan yang perlu ditampilkan.</div>
-        <?php else: ?>
-          <div class="accordion" id="accordionInputTambahan">
-            <?php $groupIndex = 0; ?>
-            <?php foreach ($editableGroups as $groupName => $columns): ?>
-              <?php
-              $groupIndex++;
-              $headingId = 'headingInputTambahan' . $groupIndex;
-              $collapseId = 'collapseInputTambahan' . $groupIndex;
-              $showGroup = ($groupIndex === 1);
-              ?>
-              <div class="accordion-item profile-accordion-item">
-                <h2 class="accordion-header" id="<?= $headingId ?>">
-                  <button class="accordion-button <?= $showGroup ? '' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#<?= $collapseId ?>" aria-expanded="<?= $showGroup ? 'true' : 'false' ?>" aria-controls="<?= $collapseId ?>">
-                    <?= htmlspecialchars($groupName) ?>
-                    <span class="badge text-bg-light border accordion-field-count"><?= count($columns) ?> field</span>
-                  </button>
-                </h2>
-                <div id="<?= $collapseId ?>" class="accordion-collapse collapse <?= $showGroup ? 'show' : '' ?>" aria-labelledby="<?= $headingId ?>" data-bs-parent="#accordionInputTambahan">
-                  <div class="accordion-body pt-3">
-                    <div class="row g-3">
-                      <?php foreach ($columns as $column): ?>
-                        <div class="col-12 col-md-6">
-                          <label class="form-label-custom"><?= htmlspecialchars($labelForColumn($column)) ?></label>
-                          <?php if ($column === 'tanggal_lahir'): ?>
-                            <input type="date" name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" value="<?= htmlspecialchars((string)($siswa[$column] ?? '')) ?>" <?= $izinEdit ? '' : 'readonly' ?>>
-                          <?php elseif ($column === 'rencana_setelah_lulus'): ?>
-                            <?php
-                            $currentPlan = (string)($siswa[$column] ?? '');
-                            $planOptions = ['Kuliah', 'Kerja', 'Wirausaha', 'Kursus/Sertifikasi', 'Kedinasan/TNI/Polri', 'Belum Menentukan', 'Lainnya'];
-                            ?>
-                            <select name="<?= htmlspecialchars($column) ?>" class="form-select form-control-app" <?= $izinEdit ? '' : 'disabled' ?>>
-                              <option value="">Pilih rencana</option>
-                              <?php foreach ($planOptions as $planOption): ?>
-                                <option value="<?= htmlspecialchars($planOption) ?>" <?= $currentPlan === $planOption ? 'selected' : '' ?>><?= htmlspecialchars($planOption) ?></option>
-                              <?php endforeach; ?>
-                            </select>
-                            <?php if (!$izinEdit): ?>
-                              <input type="hidden" name="<?= htmlspecialchars($column) ?>" value="<?= htmlspecialchars($currentPlan) ?>">
-                            <?php endif; ?>
-                          <?php elseif ($column === 'alamat'): ?>
-                            <textarea name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" rows="3" <?= $izinEdit ? '' : 'readonly' ?>><?= htmlspecialchars((string)($siswa[$column] ?? '')) ?></textarea>
-                          <?php elseif (in_array($column, ['rencana_detail', 'bakat_minat', 'dukungan_dibutuhkan'], true)): ?>
-                            <textarea name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" rows="3" <?= $izinEdit ? '' : 'readonly' ?> placeholder="Tuliskan dengan singkat dan jelas"><?= htmlspecialchars((string)($siswa[$column] ?? '')) ?></textarea>
-                          <?php elseif (in_array($column, ['penerima_kps', 'penerima_kip', 'layak_pip', 'izin_edit_profil'], true)): ?>
-                            <select name="<?= htmlspecialchars($column) ?>" class="form-select form-control-app" <?= $izinEdit ? '' : 'disabled' ?>>
-                              <?php $boolValue = (string)($siswa[$column] ?? '0'); ?>
-                              <option value="0" <?= $boolValue === '0' ? 'selected' : '' ?>>0</option>
-                              <option value="1" <?= $boolValue === '1' ? 'selected' : '' ?>>1</option>
-                            </select>
-                            <?php if (!$izinEdit): ?>
-                              <input type="hidden" name="<?= htmlspecialchars($column) ?>" value="<?= htmlspecialchars($boolValue) ?>">
-                            <?php endif; ?>
-                          <?php else: ?>
-                            <input type="text" name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" value="<?= htmlspecialchars((string)($siswa[$column] ?? '')) ?>" <?= $izinEdit ? '' : 'readonly' ?>>
-                          <?php endif; ?>
-                        </div>
-                      <?php endforeach; ?>
+            <div class="row g-3">
+              <?php foreach ($tab['fields'] as $column): ?>
+                <?php if ($hasColumn($column)): ?>
+                  
+                  <?php if ($column === 'alamat'): ?>
+                    <div class="col-12">
+                      <label class="form-label-custom"><?= htmlspecialchars($labelForColumn($column)) ?></label>
+                      <textarea name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" rows="3" <?= $izinEdit ? '' : 'readonly' ?> placeholder="Masukkan alamat lengkap Anda"><?= htmlspecialchars((string)($siswa[$column] ?? '')) ?></textarea>
                     </div>
+                  <?php elseif (in_array($column, ['rencana_detail', 'bakat_minat', 'dukungan_dibutuhkan', 'minat_jurusan'], true)): ?>
+                    <div class="col-12">
+                      <label class="form-label-custom"><?= htmlspecialchars($labelForColumn($column)) ?></label>
+                      <textarea name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" rows="3" <?= $izinEdit ? '' : 'readonly' ?> placeholder="Tuliskan dengan detail..."><?= htmlspecialchars((string)($siswa[$column] ?? '')) ?></textarea>
+                    </div>
+                  <?php elseif ($column === 'tanggal_lahir'): ?>
+                    <div class="col-md-6">
+                      <label class="form-label-custom"><?= htmlspecialchars($labelForColumn($column)) ?></label>
+                      <input type="date" name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" value="<?= htmlspecialchars((string)($siswa[$column] ?? '')) ?>" <?= $izinEdit ? '' : 'readonly' ?>>
+                    </div>
+                  <?php elseif ($column === 'jk'): ?>
+                    <div class="col-md-6">
+                      <label class="form-label-custom">Jenis Kelamin</label>
+                      <select name="jk" class="form-select form-control-app" <?= $izinEdit ? '' : 'disabled' ?>>
+                        <option value="">Pilih</option>
+                        <option value="L" <?= ($siswa['jk'] ?? '') === 'L' ? 'selected' : '' ?>>Laki-laki</option>
+                        <option value="P" <?= ($siswa['jk'] ?? '') === 'P' ? 'selected' : '' ?>>Perempuan</option>
+                      </select>
+                      <?php if (!$izinEdit): ?>
+                        <input type="hidden" name="jk" value="<?= htmlspecialchars($siswa['jk'] ?? '') ?>">
+                      <?php endif; ?>
+                    </div>
+                  <?php elseif ($column === 'kelas'): ?>
+                    <div class="col-md-6">
+                      <label class="form-label-custom">Kelas</label>
+                      <?php if ($izinEdit): ?>
+                        <?php
+                        $tenantKelas = function_exists('mt_column_exists') && $conn instanceof mysqli && mt_column_exists($conn, 'tbl_kelas', 'id_sekolah') ? "id_sekolah={$tenantId}" : "1=1";
+                        $qKelas = @mysqli_query($conn, "SELECT kelas FROM tbl_kelas WHERE {$tenantKelas} ORDER BY kelas ASC");
+                        ?>
+                        <select name="kelas" class="form-select form-control-app">
+                          <option value="">Pilih Kelas</option>
+                          <?php if ($qKelas) {
+                            while ($rowKelas = mysqli_fetch_assoc($qKelas)) { ?>
+                            <option value="<?= htmlspecialchars($rowKelas['kelas']) ?>" <?= ($siswa['kelas'] ?? '') === $rowKelas['kelas'] ? 'selected' : '' ?>><?= htmlspecialchars($rowKelas['kelas']) ?></option>
+                          <?php } } ?>
+                        </select>
+                      <?php else: ?>
+                        <input type="text" name="kelas" class="form-control form-control-app" value="<?= htmlspecialchars($siswa['kelas'] ?? '') ?>" readonly placeholder="Contoh: X IPA 1">
+                      <?php endif; ?>
+                    </div>
+                  <?php elseif ($column === 'rencana_setelah_lulus'): ?>
+                    <div class="col-md-6">
+                      <label class="form-label-custom"><?= htmlspecialchars($labelForColumn($column)) ?></label>
+                      <?php
+                      $currentPlan = (string)($siswa[$column] ?? '');
+                      $planOptions = ['Kuliah', 'Kerja', 'Wirausaha', 'Kursus/Sertifikasi', 'Kedinasan/TNI/Polri', 'Belum Menentukan', 'Lainnya'];
+                      ?>
+                      <select name="<?= htmlspecialchars($column) ?>" class="form-select form-control-app" <?= $izinEdit ? '' : 'disabled' ?>>
+                        <option value="">Pilih rencana</option>
+                        <?php foreach ($planOptions as $planOption): ?>
+                          <option value="<?= htmlspecialchars($planOption) ?>" <?= $currentPlan === $planOption ? 'selected' : '' ?>><?= htmlspecialchars($planOption) ?></option>
+                        <?php endforeach; ?>
+                      </select>
+                      <?php if (!$izinEdit): ?>
+                        <input type="hidden" name="<?= htmlspecialchars($column) ?>" value="<?= htmlspecialchars($currentPlan) ?>">
+                      <?php endif; ?>
+                    </div>
+                  <?php elseif (in_array($column, ['penerima_kps', 'penerima_kip', 'layak_pip'], true)): ?>
+                    <div class="col-md-6">
+                      <label class="form-label-custom"><?= htmlspecialchars($labelForColumn($column)) ?></label>
+                      <?php $boolValue = (string)($siswa[$column] ?? '0'); ?>
+                      <select name="<?= htmlspecialchars($column) ?>" class="form-select form-control-app" <?= $izinEdit ? '' : 'disabled' ?>>
+                        <option value="0" <?= $boolValue === '0' ? 'selected' : '' ?>>Tidak</option>
+                        <option value="1" <?= $boolValue === '1' ? 'selected' : '' ?>>Ya</option>
+                      </select>
+                      <?php if (!$izinEdit): ?>
+                        <input type="hidden" name="<?= htmlspecialchars($column) ?>" value="<?= htmlspecialchars($boolValue) ?>">
+                      <?php endif; ?>
+                    </div>
+                  <?php elseif ($column === 'lat' || $column === 'lng'): ?>
+                    <div class="col-md-6">
+                      <label class="form-label-custom"><?= htmlspecialchars($labelForColumn($column)) ?></label>
+                      <input type="text" name="<?= htmlspecialchars($column) ?>" id="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" value="<?= htmlspecialchars((string)($siswa[$column] ?? '')) ?>" <?= $izinEdit ? '' : 'readonly' ?>>
+                    </div>
+                  <?php elseif ($column === 'no_wa' || $column === 'no_darurat' || $column === 'telepon' || $column === 'hp'): ?>
+                    <div class="col-md-6">
+                      <label class="form-label-custom"><?= htmlspecialchars($labelForColumn($column)) ?></label>
+                      <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0" style="border-radius: 0.75rem 0 0 0.75rem;">+62</span>
+                        <input type="tel" name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app border-start-0" value="<?= htmlspecialchars((string)($siswa[$column] ?? '')) ?>" <?= $izinEdit ? '' : 'readonly' ?>>
+                      </div>
+                    </div>
+                  <?php else: ?>
+                    <div class="col-md-6">
+                      <label class="form-label-custom"><?= htmlspecialchars($labelForColumn($column)) ?></label>
+                      <input type="text" name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" value="<?= htmlspecialchars((string)($siswa[$column] ?? '')) ?>" <?= $izinEdit ? '' : 'readonly' ?>>
+                    </div>
+                  <?php endif; ?>
+                  
+                <?php endif; ?>
+              <?php endforeach; ?>
+            </div>
+            
+            <?php if ($id === 'domisili'): ?>
+              <!-- Special Map Actions for Domisili -->
+              <div class="mt-4 p-3 bg-light rounded-3 border">
+                <h6 class="fw-bold mb-3"><i class="fas fa-map-marked-alt text-primary me-2"></i>Pengaturan Koordinat Peta</h6>
+                <div class="d-flex flex-wrap gap-2">
+                  <button type="button" class="btn btn-primary" id="btnGps" <?= $izinEdit ? '' : 'disabled' ?>>
+                    <i class="fas fa-crosshairs me-2"></i><span id="gpsLabel">Gunakan GPS Saat Ini</span>
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary" onclick="toggleMapPanel()">
+                    <i class="fas fa-map me-2"></i><span id="mapBtnLabel">Buka Panel Peta</span>
+                  </button>
+                </div>
+                <div id="mapPanel" class="mt-3 d-none">
+                  <div class="input-group mb-2">
+                    <input type="text" id="searchAlamat" class="form-control" placeholder="Cari nama jalan / daerah..." <?= $izinEdit ? '' : 'disabled' ?>>
+                    <button class="btn btn-primary" type="button" id="btnSearchAlamat" <?= $izinEdit ? '' : 'disabled' ?>><i class="fas fa-search"></i> Cari</button>
                   </div>
+                  <div class="ratio ratio-16x9 rounded overflow-hidden shadow-sm border">
+                    <iframe id="mapIframe" src="about:blank" width="100%" height="100%" style="border:0;" loading="lazy"></iframe>
+                  </div>
+                  <small class="text-muted mt-2 d-block"><i class="fas fa-info-circle me-1"></i>Peta dari OpenStreetMap. Gunakan fitur cari untuk mendapatkan koordinat kasar, lalu sesuaikan angka Latitude/Longitude jika perlu.</small>
                 </div>
               </div>
-            <?php endforeach; ?>
-          </div>
-        <?php endif; ?>
-      </div>
+            <?php endif; ?>
 
-      <div class="card-app p-4 mb-4">
-        <h6 class="mb-3 fw-bold">Ringkasan Lokasi dan Kontak</h6>
-        <div class="row g-3">
-          <div class="col-12 col-md-6">
-            <div class="border rounded-3 p-3 h-100">
-              <div class="form-label-custom mb-2">Alamat Lengkap</div>
-              <div><?= $formatProfileValue('alamat', $siswa['alamat'] ?? '') ?></div>
-            </div>
           </div>
-          <div class="col-12 col-md-6">
-            <div class="border rounded-3 p-3 h-100">
-              <div class="form-label-custom mb-2">Koordinat</div>
-              <div><?= htmlspecialchars((string)($siswa['lat'] ?? '')) ?>, <?= htmlspecialchars((string)($siswa['lng'] ?? '')) ?></div>
-            </div>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="border rounded-3 p-3 h-100">
-              <div class="form-label-custom mb-2">WhatsApp Siswa</div>
-              <div><?= $formatProfileValue('no_wa', $siswa['no_wa'] ?? '') ?></div>
-            </div>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="border rounded-3 p-3 h-100">
-              <div class="form-label-custom mb-2">Kontak Darurat</div>
-              <div><?= $formatProfileValue('nama_darurat', $siswa['nama_darurat'] ?? '') ?></div>
-              <div class="small text-muted"><?= $formatProfileValue('no_darurat', $siswa['no_darurat'] ?? '') ?></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card-app p-4 mb-4">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-          <div>
-            <h6 class="mb-1 fw-bold">Ubah Password Akun</h6>
-            <p class="small text-muted mb-0">Kelola password login siswa dari halaman terpisah yang aman.</p>
-          </div>
-          <a href="../../ubah-password.php" class="btn btn-outline-primary rounded-3 fw-bold">Buka Halaman Password</a>
-        </div>
-      </div>
-
-      <div class="card-app p-4 mb-4" style="border: 1px solid #fecaca; background-color: #fef2f2;">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-          <div>
-            <h6 class="mb-1 fw-bold text-danger"><i class="fas fa-exclamation-triangle me-1"></i> Hapus Data Akun</h6>
-            <p class="small text-danger mb-0">Ajukan penghapusan akun dan seluruh data profil Anda secara permanen dari sistem sesuai kebijakan Google Play.</p>
-          </div>
-          <a href="hapus-data.php" class="btn btn-danger rounded-3 fw-bold" onclick="return confirm('Apakah Anda yakin ingin mengajukan penghapusan seluruh data profil dan akun Anda? Tindakan ini tidak dapat dibatalkan.')">Hapus Data</a>
-        </div>
+          <?php $isFirstContent = false; ?>
+        <?php endforeach; ?>
       </div>
 
       <?php if ($izinEdit): ?>
         <button type="submit" class="fab-save">
-          <i class="fas fa-save"></i>
-          <span>Simpan Perubahan Profil</span>
+          <i class="fas fa-save me-2"></i>
+          <span>Simpan Profil</span>
         </button>
       <?php endif; ?>
-
     </form>
+
   </div>
 
   <?php 
