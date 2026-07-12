@@ -953,60 +953,41 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
                         <div class="col-12 col-md-6">
                           <label class="form-label-custom"><?= htmlspecialchars($labelForColumn($column)) ?></label>
                           <?php if ($column === 'tanggal_lahir'): ?>
-                            <input type="date" name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" value="<?= htmlspecialchars((string)($siswa[$column] ?? '')) ?>" <?= $izinEdit ? '' : 'readonly' ?>>
+                            <input type="date" name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" value="<?= htmlspecialchars((string)($siswa[$column] ?? '')) ?>">
                           <?php elseif ($column === 'agama'): ?>
                             <?php
                             $currentAgama = trim((string)($siswa[$column] ?? ''));
                             $agamaOptions = ['Islam', 'Hindu', 'Buddha', 'Kristen', 'Katolik', 'Lainnya'];
-                            $foundAgama = false;
-                            foreach ($agamaOptions as $opt) {
-                                if (strcasecmp($currentAgama, $opt) === 0) {
-                                    $foundAgama = true;
-                                    break;
-                                }
-                            }
-                            if ($currentAgama !== '' && !$foundAgama) {
-                                $agamaOptions[] = ucfirst(strtolower($currentAgama));
-                            }
                             ?>
-                            <select name="<?= htmlspecialchars($column) ?>" class="form-select form-control-app" <?= $izinEdit ? '' : 'disabled' ?>>
-                              <option value="">Pilih agama...</option>
+                            <select name="<?= htmlspecialchars($column) ?>" class="form-select form-control-app">
                               <?php foreach ($agamaOptions as $opt): ?>
-                                <option value="<?= htmlspecialchars($opt) ?>" <?= strcasecmp($currentAgama, $opt) === 0 ? 'selected' : '' ?>><?= htmlspecialchars($opt) ?></option>
+                                <option value="<?= $opt ?>" <?= $currentAgama === $opt ? 'selected' : '' ?>><?= $opt ?></option>
                               <?php endforeach; ?>
                             </select>
-                            <?php if (!$izinEdit): ?>
-                              <input type="hidden" name="<?= htmlspecialchars($column) ?>" value="<?= htmlspecialchars($currentAgama) ?>">
-                            <?php endif; ?>
                           <?php elseif ($column === 'rencana_setelah_lulus'): ?>
                             <?php
-                            $currentPlan = (string)($siswa[$column] ?? '');
-                            $planOptions = ['Kuliah', 'Kerja', 'Wirausaha', 'Kursus/Sertifikasi', 'Kedinasan/TNI/Polri', 'Belum Menentukan', 'Lainnya'];
+                            $currentPlan = trim((string)($siswa[$column] ?? ''));
+                            $planOptions = ['Kuliah', 'Kerja', 'Wirausaha', 'Lainnya'];
                             ?>
-                            <select name="<?= htmlspecialchars($column) ?>" class="form-select form-control-app" <?= $izinEdit ? '' : 'disabled' ?>>
-                              <option value="">Pilih rencana</option>
-                              <?php foreach ($planOptions as $planOption): ?>
-                                <option value="<?= htmlspecialchars($planOption) ?>" <?= $currentPlan === $planOption ? 'selected' : '' ?>><?= htmlspecialchars($planOption) ?></option>
+                            <select name="<?= htmlspecialchars($column) ?>" class="form-select form-control-app">
+                              <?php foreach ($planOptions as $opt): ?>
+                                <option value="<?= $opt ?>" <?= $currentPlan === $opt ? 'selected' : '' ?>><?= $opt ?></option>
                               <?php endforeach; ?>
                             </select>
-                            <?php if (!$izinEdit): ?>
-                              <input type="hidden" name="<?= htmlspecialchars($column) ?>" value="<?= htmlspecialchars($currentPlan) ?>">
-                            <?php endif; ?>
                           <?php elseif ($column === 'alamat'): ?>
-                            <textarea name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" rows="3" <?= $izinEdit ? '' : 'readonly' ?>><?= htmlspecialchars((string)($siswa[$column] ?? '')) ?></textarea>
+                            <textarea name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" rows="3"><?= htmlspecialchars((string)($siswa[$column] ?? '')) ?></textarea>
                           <?php elseif (in_array($column, ['rencana_detail', 'bakat_minat', 'dukungan_dibutuhkan'], true)): ?>
-                            <textarea name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" rows="3" <?= $izinEdit ? '' : 'readonly' ?> placeholder="Tuliskan dengan singkat dan jelas"><?= htmlspecialchars((string)($siswa[$column] ?? '')) ?></textarea>
+                            <textarea name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" rows="3" placeholder="Tuliskan dengan singkat dan jelas"><?= htmlspecialchars((string)($siswa[$column] ?? '')) ?></textarea>
                           <?php elseif (in_array($column, ['penerima_kps', 'penerima_kip', 'layak_pip', 'izin_edit_profil'], true)): ?>
-                            <select name="<?= htmlspecialchars($column) ?>" class="form-select form-control-app" <?= $izinEdit ? '' : 'disabled' ?>>
-                              <?php $boolValue = (string)($siswa[$column] ?? '0'); ?>
-                              <option value="0" <?= $boolValue === '0' ? 'selected' : '' ?>>0</option>
-                              <option value="1" <?= $boolValue === '1' ? 'selected' : '' ?>>1</option>
+                            <?php
+                            $boolValue = (string)($siswa[$column] ?? '0');
+                            ?>
+                            <select name="<?= htmlspecialchars($column) ?>" class="form-select form-control-app">
+                              <option value="0" <?= $boolValue === '0' ? 'selected' : '' ?>>Tidak</option>
+                              <option value="1" <?= $boolValue === '1' ? 'selected' : '' ?>>Ya</option>
                             </select>
-                            <?php if (!$izinEdit): ?>
-                              <input type="hidden" name="<?= htmlspecialchars($column) ?>" value="<?= htmlspecialchars($boolValue) ?>">
-                            <?php endif; ?>
                           <?php else: ?>
-                            <input type="text" name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" value="<?= htmlspecialchars((string)($siswa[$column] ?? '')) ?>" <?= $izinEdit ? '' : 'readonly' ?>>
+                            <input type="text" name="<?= htmlspecialchars($column) ?>" class="form-control form-control-app" value="<?= htmlspecialchars((string)($siswa[$column] ?? '')) ?>">
                           <?php endif; ?>
                         </div>
                       <?php endforeach; ?>
