@@ -175,15 +175,10 @@ $formatProfileValue = static function (string $column, $value): string {
   return htmlspecialchars((string)$value);
 };
 
-$qSiswa = mysqli_query($conn, "SELECT * FROM tbl_siswa WHERE {$tenantSiswa} AND no_induk='$noIndukEsc' LIMIT 1");
-$siswa = ($qSiswa ? mysqli_fetch_assoc($qSiswa) : []) ?: [];
-
-$izinEditGlobal = ((int)$izinEdit === 1);
-$izinEditSiswa = ((string)($siswa['izin_edit_profil'] ?? '0') === '1');
-$izinEdit = ($izinEditGlobal || $izinEditSiswa);
-
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['_simpan_profil'])) {
-  if (!$izinEdit) {
+  $bolehEdit = ((int)$izinEdit === 1);
+
+  if (!$bolehEdit) {
     $_SESSION['_profil_msg'] = 'Profil sedang dikunci admin. Data tidak dapat diubah.';
     $_SESSION['_profil_msg_type'] = 'danger';
     header('Location: profil.php');
@@ -231,8 +226,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['_simpan_pr
   exit;
 }
 
+$qSiswa = mysqli_query($conn, "SELECT * FROM tbl_siswa WHERE {$tenantSiswa} AND no_induk='$noIndukEsc' LIMIT 1");
+$siswa = ($qSiswa ? mysqli_fetch_assoc($qSiswa) : []) ?: [];
+
 $namaSiswa = $siswa['nama_siswa'] ?? $namaSiswa;
 $kelas = $siswa['kelas'] ?? $kelas;
+$izinEdit = ((int)$izinEdit === 1);
 
 $displayColumns = [];
 foreach ($siswa as $column => $value) {
@@ -257,7 +256,7 @@ $existingInputCols = [
 ];
 $additionalEditableColumns = [];
 foreach ($displayColumns as $column) {
-  if ($column === 'no_induk' || in_array($column, $existingInputCols, true)) {
+  if ($column === 'no_induk' || in_array($column, $existingInputCols, true) || in_array($column, ['id_sekolah', 'izin_edit_profil', 'id_pengguna', 'role'], true)) {
     continue;
   }
   $additionalEditableColumns[] = $column;
