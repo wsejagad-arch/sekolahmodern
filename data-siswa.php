@@ -357,13 +357,15 @@ $activeFilterLabel = $kelasFilter !== '' ? $kelasFilter : 'Semua kelas';
                                     <td class="text-center align-middle">
                                         <a class="btn btn-sm btn-circle btn-primary" href="detail-profil-siswa.php?no_induk=<?= urlencode($data['no_induk']); ?>" title="Lihat Profil"><i class="fas fa-info"></i></a>
                                         <a class="btn btn-sm btn-circle btn-info" href="?page=edit-siswa&no_induk=<?= urlencode($data['no_induk']); ?>" title="Edit Data"><i class="fas fa-edit"></i></a>
-                                        <button type="button" class="btn btn-sm btn-circle btn-danger"
-                                            data-id="<?= htmlspecialchars($data['no_induk'], ENT_QUOTES); ?>"
-                                            data-nama="<?= htmlspecialchars($data['nama_siswa'], ENT_QUOTES); ?>"
-                                            onclick="hapusSiswa(this.getAttribute('data-id'), this.getAttribute('data-nama'))"
-                                            title="Hapus Data">
+                                        <?php
+                                            $return_url_siswa = '?page=data-siswa&kelas=' . urlencode($kelasFilter) . '&nama=' . urlencode($namaFilter) . '&wali=' . urlencode($waliFilter);
+                                        ?>
+                                        <a href="delete-siswa.php?no_induk=<?= urlencode($data['no_induk']); ?>&return_url=<?= urlencode($return_url_siswa); ?>"
+                                           class="btn btn-sm btn-circle btn-danger"
+                                           title="Hapus Data"
+                                           onclick="return confirm('Yakin ingin menghapus data siswa <?= htmlspecialchars($data['nama_siswa'], ENT_QUOTES); ?> (NIS: <?= htmlspecialchars($data['no_induk'], ENT_QUOTES); ?>)? Semua data terkait akan ikut terhapus!');">
                                             <i class="fas fa-trash"></i>
-                                        </button>
+                                        </a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -375,21 +377,4 @@ $activeFilterLabel = $kelasFilter !== '' ? $kelasFilter : 'Semua kelas';
     </div>
 </div>
 
-<script>
-function hapusSiswa(noInduk, nama) {
-    Swal.fire({
-        title: 'Hapus Siswa?',
-        html: 'Jika dihapus, semua data terkait <strong>' + nama + '</strong> akan dihapus.<br><small>NIS: ' + noInduk + '</small>',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, Hapus',
-        cancelButtonText: 'Batal',
-        confirmButtonColor: '#d33'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            var returnUrl = encodeURIComponent(window.location.search);
-            window.location.href = 'delete-siswa.php?no_induk=' + encodeURIComponent(noInduk) + '&return_url=' + returnUrl;
-        }
-    });
-}
-</script>
+
