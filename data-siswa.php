@@ -357,9 +357,8 @@ $activeFilterLabel = $kelasFilter !== '' ? $kelasFilter : 'Semua kelas';
                                     <td class="text-center align-middle">
                                         <a class="btn btn-sm btn-circle btn-primary" href="detail-profil-siswa.php?no_induk=<?= urlencode($data['no_induk']); ?>" title="Lihat Profil"><i class="fas fa-info"></i></a>
                                         <a class="btn btn-sm btn-circle btn-info" href="?page=edit-siswa&no_induk=<?= urlencode($data['no_induk']); ?>" title="Edit Data"><i class="fas fa-edit"></i></a>
-                                        <button type="button" class="btn btn-sm btn-circle btn-danger btn-delete-siswa"
-                                            data-no-induk="<?= htmlspecialchars($data['no_induk'], ENT_QUOTES); ?>"
-                                            data-nama="<?= htmlspecialchars($data['nama_siswa'], ENT_QUOTES); ?>"
+                                        <button type="button" class="btn btn-sm btn-circle btn-danger"
+                                            onclick="hapusSiswa('<?= htmlspecialchars($data['no_induk'], ENT_QUOTES); ?>', '<?= htmlspecialchars($data['nama_siswa'], ENT_QUOTES); ?>')"
                                             title="Hapus Data">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -375,31 +374,20 @@ $activeFilterLabel = $kelasFilter !== '' ? $kelasFilter : 'Semua kelas';
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function(){
-    var table = document.getElementById('dataTable');
-    if (!table) return;
-
-    table.addEventListener('click', function(e){
-        var btn = e.target.closest('.btn-delete-siswa');
-        if (!btn) return;
-
-        var noInduk = btn.getAttribute('data-no-induk');
-        var nama    = btn.getAttribute('data-nama');
-
-        Swal.fire({
-            title: 'Hapus Siswa?',
-            html: 'Jika dihapus, semua data terkait <strong>' + nama + '</strong> akan dihapus.<br><small>NIS: ' + noInduk + '</small>',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Hapus',
-            cancelButtonText: 'Batal',
-            confirmButtonColor: '#d33'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                var returnUrl = encodeURIComponent(window.location.search);
-                window.location.href = 'delete-siswa.php?no_induk=' + encodeURIComponent(noInduk) + '&return_url=' + returnUrl;
-            }
-        });
+function hapusSiswa(noInduk, nama) {
+    Swal.fire({
+        title: 'Hapus Siswa?',
+        html: 'Jika dihapus, semua data terkait <strong>' + nama + '</strong> akan dihapus.<br><small>NIS: ' + noInduk + '</small>',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#d33'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var returnUrl = encodeURIComponent(window.location.search);
+            window.location.href = 'delete-siswa.php?no_induk=' + encodeURIComponent(noInduk) + '&return_url=' + returnUrl;
+        }
     });
-});
+}
 </script>
