@@ -822,13 +822,15 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
               <label class="form-label-custom">Kelas</label>
               <?php if ($izinEdit): ?>
                 <?php
-                $qKelas = mysqli_query($conn, "SELECT kelas FROM tbl_kelas WHERE {$tenantSiswa} ORDER BY kelas ASC");
+                $tenantKelas = function_exists('mt_column_exists') && $conn instanceof mysqli && mt_column_exists($conn, 'tbl_kelas', 'id_sekolah') ? "id_sekolah={$tenantId}" : "1=1";
+                $qKelas = mysqli_query($conn, "SELECT kelas FROM tbl_kelas WHERE {$tenantKelas} ORDER BY kelas ASC");
                 ?>
                 <select name="kelas" class="form-select form-control-app">
                   <option value="">Pilih Kelas</option>
-                  <?php while ($rowKelas = mysqli_fetch_assoc($qKelas)): ?>
+                  <?php if ($qKelas) {
+                    while ($rowKelas = mysqli_fetch_assoc($qKelas)) { ?>
                     <option value="<?= htmlspecialchars($rowKelas['kelas']) ?>" <?= ($siswa['kelas'] ?? '') === $rowKelas['kelas'] ? 'selected' : '' ?>><?= htmlspecialchars($rowKelas['kelas']) ?></option>
-                  <?php endwhile; ?>
+                  <?php } } ?>
                 </select>
               <?php else: ?>
                 <input type="text" name="kelas" class="form-control form-control-app" value="<?= htmlspecialchars($siswa['kelas'] ?? '') ?>" readonly placeholder="Contoh: X IPA 1">
