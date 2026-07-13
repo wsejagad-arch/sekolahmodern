@@ -805,12 +805,12 @@ $tabs = [
       </div>
 
       <!-- Tabs Navigation -->
-      <ul class="nav nav-pills mb-4 pb-2" id="profilTabs" role="tablist" style="overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; -webkit-overflow-scrolling: touch;">
+      <ul class="nav nav-pills mb-4 pb-2" id="profilTabs" role="tablist" style="overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; -webkit-overflow-scrolling: touch; position: relative; z-index: 9999;">
         <?php $isFirst = true; ?>
         <?php foreach ($tabs as $id => $tab): ?>
           <li class="nav-item me-2" role="presentation">
             <a class="nav-link <?= $isFirst ? 'active' : '' ?> rounded-pill <?= isset($tab['highlight']) ? 'fw-bold border border-primary text-primary' : '' ?>" 
-               id="tab-<?= $id ?>" data-bs-toggle="pill" href="#content-<?= $id ?>" role="tab" style="cursor:pointer; display:inline-block;">
+               id="tab-<?= $id ?>" href="#content-<?= $id ?>" role="tab" style="cursor:pointer; display:inline-block;">
               <i class="fas <?= $tab['icon'] ?> me-2"></i><?= $tab['title'] ?>
             </a>
           </li>
