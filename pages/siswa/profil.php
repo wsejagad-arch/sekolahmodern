@@ -379,6 +379,8 @@ unset($_SESSION['_profil_msg'], $_SESSION['_profil_msg_type']);
       max-width: 980px;
       margin: 0 auto;
       margin-top: 1rem;
+      position: relative;
+      z-index: 10;
     }
 
     .section-intro-text {
