@@ -765,7 +765,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 <!-- Rekap Sholat (Guru Agama) -->
                 <?php if ($isGuruAgama): ?>
                     <a href="/pages/guru/rekapan-sholat.php" class="action-btn-modern success-hover">
-                        <div class="icon-wrap"><i class="bi bi-mosque"></i></div>
+                        <div class="icon-wrap"><i class="fas fa-praying-hands"></i></div>
                         <span>Rekap Sholat</span>
                     </a>
                 <?php endif; ?>
@@ -1442,7 +1442,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         <!-- Rekap Sholat (Guru Agama) -->
         <?php if ($isGuruAgama): ?>
             <a href="/pages/guru/rekapan-sholat.php" class="quick-item">
-                <i class="bi bi-mosque" style="color:var(--green)"></i>
+                <i class="fas fa-praying-hands" style="color:var(--green); font-size: 24px;"></i>
                 <span>Rekap<br>Sholat</span>
             </a>
         <?php endif; ?>

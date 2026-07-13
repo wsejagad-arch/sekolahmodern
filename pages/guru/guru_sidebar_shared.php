@@ -36,7 +36,7 @@ $lembaga = $lembaga ?? (function_exists('data_lembaga') ? data_lembaga() : []);
         }
         if ($isGuruAgama):
         ?>
-        <a href="<?= $prefix ?>rekapan-sholat" class="<?= ($current_page === 'rekapan-sholat') ? 'active' : '' ?>"><i class="bi bi-mosque"></i> Rekapan Sholat</a>
+        <a href="<?= $prefix ?>rekapan-sholat" class="<?= ($current_page === 'rekapan-sholat') ? 'active' : '' ?>"><i class="fas fa-praying-hands"></i> Rekapan Sholat</a>
         <?php endif; ?>
 
         <a href="<?= $prefix ?>ekinerja" class="<?= ($current_page === 'ekinerja') ? 'active' : '' ?>"><i class="bi bi-speedometer2"></i> e-Kinerja</a>

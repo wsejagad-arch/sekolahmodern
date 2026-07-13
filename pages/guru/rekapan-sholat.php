@@ -40,8 +40,8 @@ $lembaga = function_exists('data_lembaga') ? data_lembaga() : [];
 $bulanFilter = isset($_GET['bulan']) ? $_GET['bulan'] : date('Y-m');
 $kelasFilter = isset($_GET['kelas']) ? $_GET['kelas'] : '';
 
-// Data kelas untuk dropdown
-$qKelas = @mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_kelas WHERE id_sekolah=$idSekolahGuru AND kelas <> '' ORDER BY kelas ASC");
+// Data kelas untuk dropdown (Hanya kelas yang diampu oleh Guru Agama tersebut)
+$qKelas = @mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_mapel_ampu WHERE no_induk='$nipGuruEsc' AND id_sekolah=$idSekolahGuru AND kelas <> '' AND (LOWER(nama_mapel) LIKE '%agama%' OR LOWER(nama_mapel) LIKE '%pabp%' OR LOWER(nama_mapel) LIKE '%papb%' OR LOWER(nama_mapel) LIKE '%pa bp%' OR LOWER(nama_mapel) LIKE '%pai%') ORDER BY kelas ASC");
 
 $rekapan = [];
 if (!empty($kelasFilter)) {
