@@ -70,18 +70,21 @@ function kihs_habits(): array
     ];
 }
 
-function kihs_prayers(string $agama): array
+function kihs_prayers(string $agama, bool $hideDzuhur = false, bool $hideJumat = false): array
 {
     $agama = strtolower(trim($agama));
     if (strpos($agama, 'islam') !== false) {
         $p = [
             'subuh' => ['label' => 'Subuh', 'start' => '04:00', 'end' => '05:59'],
-            'dzuhur' => ['label' => 'Dzuhur', 'start' => '11:30', 'end' => '13:30'],
-            'ashar' => ['label' => 'Ashar', 'start' => '14:30', 'end' => '17:30'],
-            'maghrib' => ['label' => 'Maghrib', 'start' => '17:30', 'end' => '19:00'],
-            'isya' => ['label' => 'Isya', 'start' => '19:00', 'end' => '03:59'],
         ];
-        if (date('N') == 5) {
+        if (!$hideDzuhur) {
+            $p['dzuhur'] = ['label' => 'Dzuhur', 'start' => '11:30', 'end' => '13:30'];
+        }
+        $p['ashar'] = ['label' => 'Ashar', 'start' => '14:30', 'end' => '17:30'];
+        $p['maghrib'] = ['label' => 'Maghrib', 'start' => '17:30', 'end' => '19:00'];
+        $p['isya'] = ['label' => 'Isya', 'start' => '19:00', 'end' => '03:59'];
+        
+        if (date('N') == 5 && !$hideJumat) {
             $p['jumat'] = ['label' => 'Jumat', 'start' => '11:30', 'end' => '13:30'];
         }
         return $p;
@@ -106,6 +109,29 @@ function kihs_prayers(string $agama): array
 
 kihs_create_table($conn);
 
+// ── Cek Pengaturan Sholat Sekolah ─────────────────────────────────────────────
+$sholatSettings = [];
+$qSholatCfg = @mysqli_query($conn, "SELECT kunci, nilai FROM tbl_app_config WHERE kunci IN (
+    'sholat_dzuhur_active', 'sholat_dzuhur_days',
+    'sholat_jumat_active', 'sholat_jumat_days'
+)");
+if ($qSholatCfg) {
+    while ($rCfg = mysqli_fetch_assoc($qSholatCfg)) {
+        $sholatSettings[$rCfg['kunci']] = $rCfg['nilai'];
+    }
+}
+$isDzuhurActive = ($sholatSettings['sholat_dzuhur_active'] ?? '0') === '1';
+$isJumatActive = ($sholatSettings['sholat_jumat_active'] ?? '0') === '1';
+$dzDays = json_decode($sholatSettings['sholat_dzuhur_days'] ?? '[]', true) ?: [];
+$jmDays = json_decode($sholatSettings['sholat_jumat_days'] ?? '[]', true) ?: [];
+
+$hariIndoMap = [1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu', 4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu', 7 => 'Minggu'];
+$hariIniIndo = $hariIndoMap[date('N')];
+
+$hideDzuhur = ($isDzuhurActive && in_array($hariIniIndo, $dzDays));
+$hideJumat = ($isJumatActive && in_array($hariIniIndo, $jmDays));
+// ──────────────────────────────────────────────────────────────────────────────
+
 $nis = (string)$_SESSION['no_induk'];
 $nisEsc = mysqli_real_escape_string($conn, $nis);
 $agamaSelect = kihs_column_exists($conn, 'tbl_siswa', 'agama') ? 'agama' : "'' AS agama";
@@ -120,7 +146,7 @@ $isKatolik = strpos($agama, 'katolik') !== false;
 $today = date('Y-m-d');
 $month = date('Y-m');
 $habits = kihs_habits();
-$prayers = kihs_prayers($agama);
+$prayers = kihs_prayers($agama, $hideDzuhur, $hideJumat);
 $done = [];
 $qDone = @mysqli_query($conn, "SELECT habit_key, prayer_key, submitted_at, score, timeliness_status, photo_path FROM tbl_7kih_jurnal WHERE no_induk='$nisEsc' AND tanggal='$today'");
 while ($qDone && ($row = mysqli_fetch_assoc($qDone))) {

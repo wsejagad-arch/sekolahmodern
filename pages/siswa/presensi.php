@@ -126,6 +126,45 @@ if ($tblSettingChk && mysqli_num_rows($tblSettingChk) > 0) {
     }
 }
 
+// ── Pengaturan Sholat Sekolah ──────────────────────────────────────────────────
+$sholatSettings = [];
+$qSholatCfg = @mysqli_query($conn, "SELECT kunci, nilai FROM tbl_app_config WHERE kunci IN (
+    'sholat_dzuhur_active', 'sholat_dzuhur_start', 'sholat_dzuhur_end', 'sholat_dzuhur_days',
+    'sholat_jumat_active', 'sholat_jumat_start', 'sholat_jumat_end', 'sholat_jumat_days',
+    '7kih_mushola_locations'
+)");
+if ($qSholatCfg) {
+    while ($rCfg = mysqli_fetch_assoc($qSholatCfg)) {
+        $sholatSettings[$rCfg['kunci']] = $rCfg['nilai'];
+    }
+}
+$isDzuhurActive = ($sholatSettings['sholat_dzuhur_active'] ?? '0') === '1';
+$isJumatActive = ($sholatSettings['sholat_jumat_active'] ?? '0') === '1';
+$dzDays = json_decode($sholatSettings['sholat_dzuhur_days'] ?? '[]', true) ?: [];
+$jmDays = json_decode($sholatSettings['sholat_jumat_days'] ?? '[]', true) ?: [];
+
+$nowTime = date('H:i');
+$hariIni = htmlspecialchars($hariIndo); // Sudah ada dari atas
+
+// Cek apakah hari dan jam ini valid untuk sholat
+$canAbsenDzuhur = false;
+$canAbsenJumat = false;
+
+if ($isDzuhurActive && in_array($hariIni, $dzDays)) {
+    $dzStart = $sholatSettings['sholat_dzuhur_start'] ?? '11:45';
+    $dzEnd = $sholatSettings['sholat_dzuhur_end'] ?? '13:30';
+    if ($nowTime >= $dzStart && $nowTime <= $dzEnd) {
+        $canAbsenDzuhur = true;
+    }
+}
+if ($isJumatActive && in_array($hariIni, $jmDays)) {
+    $jmStart = $sholatSettings['sholat_jumat_start'] ?? '11:45';
+    $jmEnd = $sholatSettings['sholat_jumat_end'] ?? '13:30';
+    if ($nowTime >= $jmStart && $nowTime <= $jmEnd) {
+        $canAbsenJumat = true;
+    }
+}
+
 $nis        = $_SESSION['no_induk'];
 $kelas      = $_SESSION['kelas'];
 $namaSiswa  = $_SESSION['nama_siswa'] ?? 'Siswa';
@@ -143,12 +182,24 @@ if ($qIzin && mysqli_num_rows($qIzin) > 0) {
     $izinHariIni = mysqli_fetch_assoc($qIzin);
 }
 
-// ── Cek apakah siswa adalah ketua kelas ─────────────────────────────────────
+// Cek apakah siswa adalah ketua kelas
 $isKetuaKelas = false;
 $_jabQ = @mysqli_query($conn, "SELECT jabatan FROM tbl_siswa WHERE {$tenantSiswa} AND no_induk='$nisEscJadwal' LIMIT 1");
 if ($_jabQ && ($jr = mysqli_fetch_assoc($_jabQ))) {
     $isKetuaKelas = ($jr['jabatan'] === 'Ketua Kelas');
     $_SESSION['jabatan'] = $jr['jabatan'] ?? 'Siswa';
+}
+
+// Cek apakah sudah absen sholat Dzuhur/Jumat hari ini
+$sudahAbsenDzuhur = false;
+$sudahAbsenJumat = false;
+
+$qCekSholat = @mysqli_query($conn, "SELECT jenis_sholat FROM tbl_absen_sholat WHERE no_induk='$nisEscJadwal' AND tanggal='$tglHariIni'");
+if ($qCekSholat) {
+    while ($rs = mysqli_fetch_assoc($qCekSholat)) {
+        if ($rs['jenis_sholat'] === 'Dzuhur') $sudahAbsenDzuhur = true;
+        if ($rs['jenis_sholat'] === 'Jumat') $sudahAbsenJumat = true;
+    }
 }
 
 // ── Fetch konfirmasi hari ini (hanya ketua kelas) ─────────────────────────────
@@ -602,6 +653,56 @@ function konfirmasiButtonColor($opt)
             <?php endif; ?>
         </div>
 
+        <!-- ── PRESENSI SHOLAT SEKOLAH ─────────────────────────────────────────── -->
+        <?php if (($canAbsenDzuhur && !$sudahAbsenDzuhur) || ($canAbsenJumat && !$sudahAbsenJumat) || $sudahAbsenDzuhur || $sudahAbsenJumat): ?>
+        <div class="mb-5 bg-white border border-teal-100 rounded-xl p-4 shadow-sm card-shadow">
+            <h2 class="text-xs font-bold text-teal-600 uppercase tracking-wide mb-1 flex items-center gap-2">
+                <i class="fas fa-mosque"></i> Presensi Sholat Sekolah
+            </h2>
+            <p class="text-[11px] text-teal-600/70 mb-4">Catat kehadiran sholat berjamaah di sekolah hari ini.</p>
+            
+            <div class="space-y-3">
+                <?php if ($canAbsenDzuhur || $sudahAbsenDzuhur): ?>
+                <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+                    <div>
+                        <p class="text-sm font-bold text-gray-800">Sholat Dzuhur</p>
+                        <p class="text-[11px] text-gray-500 mt-0.5"><i class="fas fa-clock mr-1"></i><?= $sholatSettings['sholat_dzuhur_start'] ?? '11:45' ?> - <?= $sholatSettings['sholat_dzuhur_end'] ?? '13:30' ?></p>
+                    </div>
+                    <?php if ($sudahAbsenDzuhur): ?>
+                        <span class="text-[11px] font-semibold px-3 py-1 rounded-full bg-teal-100 text-teal-700">
+                            <i class="fas fa-check-circle mr-1"></i> Sudah Absen
+                        </span>
+                    <?php else: ?>
+                        <button type="button" class="btn-absen-sholat text-[12px] font-semibold px-4 py-1.5 rounded-lg text-white bg-teal-500 hover:bg-teal-600 shadow-sm transition-all"
+                            onclick="openCameraForSholat('Dzuhur')">
+                            <i class="fas fa-fingerprint mr-1.5"></i>Absen Dzuhur
+                        </button>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($canAbsenJumat || $sudahAbsenJumat): ?>
+                <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+                    <div>
+                        <p class="text-sm font-bold text-gray-800">Sholat Jumat</p>
+                        <p class="text-[11px] text-gray-500 mt-0.5"><i class="fas fa-clock mr-1"></i><?= $sholatSettings['sholat_jumat_start'] ?? '11:45' ?> - <?= $sholatSettings['sholat_jumat_end'] ?? '13:30' ?></p>
+                    </div>
+                    <?php if ($sudahAbsenJumat): ?>
+                        <span class="text-[11px] font-semibold px-3 py-1 rounded-full bg-teal-100 text-teal-700">
+                            <i class="fas fa-check-circle mr-1"></i> Sudah Absen
+                        </span>
+                    <?php else: ?>
+                        <button type="button" class="btn-absen-sholat text-[12px] font-semibold px-4 py-1.5 rounded-lg text-white bg-teal-500 hover:bg-teal-600 shadow-sm transition-all"
+                            onclick="openCameraForSholat('Jumat')">
+                            <i class="fas fa-fingerprint mr-1.5"></i>Absen Jumat
+                        </button>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- ── KONFIRMASI KEHADIRAN GURU (Ketua Kelas) ─────────────────────── -->
         <?php if ($isKetuaKelas): ?>
             <div class="mb-5 bg-white border border-amber-100 rounded-xl p-4 shadow-sm card-shadow">
@@ -902,9 +1003,11 @@ function konfirmasiButtonColor($opt)
             // ── Konfigurasi ────────────────────────────────────────────────────────────────
             const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
             const API_ABSEN = '../../api/absen_siswa.php';
+            const API_SHOLAT = '../../api/absen_sholat.php';
             const SCHOOL_LAT = <?= $presensiSetting['lat'] ?>;
             const SCHOOL_LNG = <?= $presensiSetting['lng'] ?>;
             const RADIUS_M = <?= $presensiSetting['radius_m'] ?>;
+            const MUSHOLA_LOCS = <?= json_encode(json_decode($sholatSettings['7kih_mushola_locations'] ?? '[]', true) ?: []) ?>;
 
             // ── State ──────────────────────────────────────────────────────────────────────
             let currentMapelId = null;
@@ -912,6 +1015,7 @@ function konfirmasiButtonColor($opt)
             let currentJamMulai = '';
             let currentJamSelesai = '';
             let currentIsLast = false;
+            let currentSholatType = null;
             let stream = null;
             let detectionTimer = null;
             let modelsLoaded = false;
@@ -1103,14 +1207,47 @@ function konfirmasiButtonColor($opt)
                             lat: pos.coords.latitude,
                             lng: pos.coords.longitude
                         };
-                        const dist = haversine(userCoords.lat, userCoords.lng, SCHOOL_LAT, SCHOOL_LNG);
-                        if (dist <= RADIUS_M) {
-                            gpsOk = true;
+                        
+                        if (currentSholatType) {
+                            // Cek dengan lokasi mushola (bisa lebih dari satu)
+                            if (!MUSHOLA_LOCS || MUSHOLA_LOCS.length === 0) {
+                                modalMsg.innerHTML = `<span class="text-red-500"><i class="fas fa-exclamation-triangle mr-1"></i>Lokasi mushola belum diatur oleh Admin.</span>`;
+                                return;
+                            }
+                            
+                            let closestDist = Infinity;
+                            let closestName = '';
+                            let maxRad = 50;
+                            
+                            MUSHOLA_LOCS.forEach(function(m) {
+                                const dist = haversine(userCoords.lat, userCoords.lng, m.lat, m.lng);
+                                if (dist < closestDist) {
+                                    closestDist = dist;
+                                    closestName = m.nama;
+                                    maxRad = m.radius || 50;
+                                }
+                            });
+                            
+                            if (closestDist <= maxRad) {
+                                gpsOk = true;
+                                modalMsg.innerHTML = `<span class="text-teal-600"><i class="fas fa-map-marker-alt mr-1"></i>Lokasi Valid (${closestName})</span>`;
+                            } else {
+                                const distKm = (closestDist / 1000).toFixed(2);
+                                const radKm = (maxRad / 1000).toFixed(2);
+                                modalMsg.innerHTML = `<span class="text-red-500"><i class="fas fa-map-marker-alt mr-1"></i>Terlalu jauh dari ${closestName}: ${distKm} km (maks ${radKm} km)</span>`;
+                            }
                         } else {
-                            const distKm = (dist / 1000).toFixed(1);
-                            const radKm = (RADIUS_M / 1000).toFixed(1);
-                            modalMsg.innerHTML = `<span class="text-red-500"><i class="fas fa-map-marker-alt mr-1"></i>Lokasi terlalu jauh: ${distKm} km (maks ${radKm} km)</span>`;
+                            // Presensi biasa (kelas)
+                            const dist = haversine(userCoords.lat, userCoords.lng, SCHOOL_LAT, SCHOOL_LNG);
+                            if (dist <= RADIUS_M) {
+                                gpsOk = true;
+                            } else {
+                                const distKm = (dist / 1000).toFixed(1);
+                                const radKm = (RADIUS_M / 1000).toFixed(1);
+                                modalMsg.innerHTML = `<span class="text-red-500"><i class="fas fa-map-marker-alt mr-1"></i>Lokasi terlalu jauh: ${distKm} km (maks ${radKm} km)</span>`;
+                            }
                         }
+                        
                         updateKonfirmBtn();
                     },
                     function(err) {
@@ -1122,13 +1259,65 @@ function konfirmasiButtonColor($opt)
                 );
             }
 
-            // ── Open camera ────────────────────────────────────────────────────────────────
+            // ── Open camera for Sholat ───────────────────────────────────────────────────────
+            window.openCameraForSholat = async function(sholatType) {
+                currentMapelId = null;
+                currentSholatType = sholatType;
+
+                videoEl = document.getElementById('previewVideo');
+                canvasEl = document.getElementById('faceCanvas');
+                ovalEl = document.getElementById('ovalGuide');
+                statusEl = document.getElementById('faceStatus');
+                btnKonfirm = document.getElementById('btnAbsenKonfirm');
+                modalMsg = document.getElementById('modalMsg');
+                cameraModal = document.getElementById('cameraModal');
+
+                document.getElementById('cameraSubtitle').textContent = 'Presensi Sholat ' + sholatType;
+                modalMsg.innerHTML = '<span class="text-gray-500 text-xs">Pastikan Anda berada di area Mushola/Masjid sekolah.</span>';
+
+                faceOk = false;
+                gpsOk = false;
+                userCoords = null;
+                updateKonfirmBtn();
+                cameraModal.classList.add('open');
+
+                // Load models 
+                statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Memuat model face detection…';
+                try {
+                    await ensureModels();
+                } catch (e) {
+                    statusEl.innerHTML = '<span class="text-red-500">Gagal memuat model: ' + e.message + '</span>';
+                    return;
+                }
+
+                // Start camera
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'user', width: 480, height: 360 }
+                    });
+                    videoEl.srcObject = stream;
+                    await videoEl.play();
+                } catch (e) {
+                    statusEl.innerHTML = '<span class="text-red-500"><i class="fas fa-times-circle mr-1"></i>Kamera tidak tersedia: ' + e.message + '</span>';
+                    return;
+                }
+
+                // Start detection loop
+                detectionTimer = setTimeout(detectionLoop, 500);
+
+                // GPS simultaneously
+                statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Mendeteksi wajah & GPS…';
+                checkGPS();
+            };
+
+            // ── Open camera for mapel ──────────────────────────────────────────────────────
             window.openCameraForMapel = async function(idMapel, namaMapel, jamMulai, jamSelesai, isLast) {
                 currentMapelId = idMapel;
                 currentMapelNm = namaMapel;
                 currentJamMulai = jamMulai || '';
                 currentJamSelesai = jamSelesai || '';
                 currentIsLast = isLast || false;
+                currentSholatType = null; // Reset sholat type
 
                 videoEl = document.getElementById('previewVideo');
                 canvasEl = document.getElementById('faceCanvas');
@@ -1229,12 +1418,20 @@ function konfirmasiButtonColor($opt)
                     modalMsg.innerHTML = '';
 
                     const fd = new FormData();
-                    fd.append('id_mapel', currentMapelId);
+                    
+                    let targetAPI = API_ABSEN;
+                    if (currentSholatType) {
+                        targetAPI = API_SHOLAT;
+                        fd.append('jenis_sholat', currentSholatType);
+                    } else {
+                        fd.append('id_mapel', currentMapelId);
+                    }
+                    
                     fd.append('lat', userCoords.lat);
                     fd.append('lng', userCoords.lng);
 
                     try {
-                        const res = await fetch(API_ABSEN, {
+                        const res = await fetch(targetAPI, {
                             method: 'POST',
                             body: fd
                         });

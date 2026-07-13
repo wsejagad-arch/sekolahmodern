@@ -67,6 +67,20 @@ function run_auto_migrations($conn) {
         dan tambahkan koma ( , ) di akhir baris, seperti contoh di atas.
         ======================================================================
         */
+        
+        "CREATE TABLE IF NOT EXISTS `tbl_absen_sholat` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `no_induk` varchar(50) NOT NULL,
+            `jenis_sholat` enum('Dzuhur','Jumat') NOT NULL,
+            `tanggal` date NOT NULL,
+            `waktu` time NOT NULL,
+            `lat` varchar(100) DEFAULT NULL,
+            `lng` varchar(100) DEFAULT NULL,
+            `status_lokasi` varchar(100) DEFAULT 'Valid',
+            `id_sekolah` int(11) DEFAULT 1,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `uniq_absen_sholat` (`no_induk`, `jenis_sholat`, `tanggal`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
     ];
 
     // Eksekusi setiap migrasi secara diam-diam (suppress errors)

@@ -244,6 +244,7 @@
         <a class="collapse-item" href="home.php?page=setting"><i class="fas fa-school text-info mr-1" style="font-size:11px"></i>Data Sekolah</a>
         <a class="collapse-item" href="home.php?page=setting#geminiApiKey"><i class="fas fa-key text-warning mr-1" style="font-size:11px"></i>Setting API Key</a>
         <a class="collapse-item" href="home.php?page=presensi-settings"><i class="fas fa-user-clock text-secondary mr-1" style="font-size:11px"></i>Pengaturan Presensi</a>
+        <a class="collapse-item" href="home.php?page=setting-sholat"><i class="fas fa-mosque text-success mr-1" style="font-size:11px"></i>Pengaturan Sholat</a>
         <a class="collapse-item" href="google-oauth-settings.php"><i class="fab fa-google text-danger mr-1" style="font-size:11px"></i>Login Gmail</a>
         <a class="collapse-item" href="pengaturan-wa.php"><i class="fab fa-whatsapp text-success mr-1" style="font-size:11px"></i>Notifikasi WhatsApp</a>
         <a class="collapse-item" href="home.php?page=broadcast-wa"><i class="fas fa-bullhorn text-primary mr-1" style="font-size:11px"></i>Broadcast WA</a>
@@ -456,6 +457,7 @@
       'cetak-log': 'collapseLog',
       'clear-cache': 'collapseLog',
       'setting': 'collapseSetting',
+      'setting-sholat': 'collapseSetting',
       'presensi-settings': 'collapseSetting',
       'broadcast-wa': 'collapseSetting',
       'reset-semester': 'collapseSetting',

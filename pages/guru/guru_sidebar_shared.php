@@ -22,6 +22,23 @@ $lembaga = $lembaga ?? (function_exists('data_lembaga') ? data_lembaga() : []);
         <a href="<?= $prefix ?>nilai" class="<?= ($current_page === 'nilai') ? 'active' : '' ?>"><i class="bi bi-journal-check"></i> Nilai & Tugas</a>
         <a href="<?= $prefix ?>materi" class="<?= ($current_page === 'materi') ? 'active' : '' ?>"><i class="bi bi-book"></i> Materi</a>
         <a href="<?= $prefix ?>laporan-kelas" class="<?= ($current_page === 'laporan-kelas') ? 'active' : '' ?>"><i class="bi bi-cpu"></i> Laporan & AI</a>
+        
+        <?php
+        $isGuruAgama = false;
+        if (isset($conn) && isset($_SESSION['no_induk'])) {
+            $nipGuru = $_SESSION['no_induk'];
+            $nipGuruEsc = mysqli_real_escape_string($conn, $nipGuru);
+            $idSekolahGuru = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
+            $qGuruAgama = @mysqli_query($conn, "SELECT COUNT(*) as c FROM tbl_mapel_ampu WHERE no_induk='$nipGuruEsc' AND id_sekolah=$idSekolahGuru AND LOWER(nama_mapel) LIKE '%agama%'");
+            if ($qGuruAgama && $r = mysqli_fetch_assoc($qGuruAgama)) {
+                if ((int)$r['c'] > 0) $isGuruAgama = true;
+            }
+        }
+        if ($isGuruAgama):
+        ?>
+        <a href="<?= $prefix ?>rekapan-sholat" class="<?= ($current_page === 'rekapan-sholat') ? 'active' : '' ?>"><i class="bi bi-mosque"></i> Rekapan Sholat</a>
+        <?php endif; ?>
+
         <a href="<?= $prefix ?>ekinerja" class="<?= ($current_page === 'ekinerja') ? 'active' : '' ?>"><i class="bi bi-speedometer2"></i> e-Kinerja</a>
         <a href="<?= $prefix ?>profil-guru" class="<?= ($current_page === 'profil-guru') ? 'active' : '' ?>"><i class="bi bi-gear"></i> Pengaturan</a>
         <a href="<?= $img_prefix ?>privacy-policy.php" target="_blank"><i class="bi bi-shield-check"></i> Kebijakan Privasi</a>
