@@ -267,9 +267,27 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inisialisasi peta
     function initMap() {
         map = L.map('map').setView([defaultLat, defaultLng], 16);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        
+        // Peta Standar (OpenStreetMap)
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
-        }).addTo(map);
+        });
+        
+        // Peta Satelit (Google Maps Hybrid)
+        const satelliteLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            attribution: '© Google Maps',
+            maxZoom: 20
+        });
+
+        // Tampilkan default
+        satelliteLayer.addTo(map);
+
+        // Control Panel
+        const baseMaps = {
+            "Satelit": satelliteLayer,
+            "Peta Standar": osmLayer
+        };
+        L.control.layers(baseMaps).addTo(map);
 
         map.on('click', function(e) {
             if (activeRow) {
