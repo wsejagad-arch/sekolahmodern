@@ -77,6 +77,31 @@ function sj_has_conflict(mysqli $conn, string $nip, string $hari, string $mulai,
     return false;
 }
 
+function sj_class_has_conflict(mysqli $conn, string $kelas, string $hari, string $mulai, string $selesai, int $excludeId = 0)
+{
+    $kelasEsc = mysqli_real_escape_string($conn, $kelas);
+    $hariEsc = mysqli_real_escape_string($conn, $hari);
+    $mulaiEsc = mysqli_real_escape_string($conn, $mulai);
+    $selesaiEsc = mysqli_real_escape_string($conn, $selesai);
+    $excludeSql = $excludeId > 0 ? "AND m.id_mapel <> $excludeId" : '';
+    
+    $q = @mysqli_query($conn, "
+        SELECT m.id_mapel, m.kelas, g.nama_guru
+        FROM tbl_mapel_ampu m
+        LEFT JOIN tbl_guru g ON m.no_induk = g.no_induk
+        WHERE m.kelas='$kelasEsc'
+          AND m.hari='$hariEsc'
+          $excludeSql
+          AND m.jam_mulai < '$selesaiEsc'
+          AND m.jam_selesai > '$mulaiEsc'
+        LIMIT 1
+    ");
+    if ($q && mysqli_num_rows($q) > 0) {
+        return mysqli_fetch_assoc($q);
+    }
+    return false;
+}
+
 sj_create_or_upgrade_table($conn);
 
 $nip = (string)$_SESSION['no_induk'];
@@ -113,6 +138,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $flashType = 'danger';
         } elseif ($conflict = sj_has_conflict($conn, $nip, $hari, $jamMulai, $jamSelesai, $action === 'update' ? $id : 0)) {
             $flash = 'Jadwal bentrok dengan jadwal Anda sendiri di kelas ' . $conflict['kelas'] . '.';
+            $flashType = 'danger';
+        } elseif ($classConflict = sj_class_has_conflict($conn, $kelas, $hari, $jamMulai, $jamSelesai, $action === 'update' ? $id : 0)) {
+            $flash = 'Jadwal bentrok! Kelas ' . $kelas . ' sudah digunakan oleh guru ' . ($classConflict['nama_guru'] ?? 'lain') . ' pada waktu tersebut.';
             $flashType = 'danger';
         } else {
             $mapelEsc = mysqli_real_escape_string($conn, $namaMapel);
