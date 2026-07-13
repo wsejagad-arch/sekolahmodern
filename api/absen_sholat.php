@@ -53,6 +53,24 @@ if ($sisLat === null || $sisLng === null) jsonOut(['success' => false, 'message'
 $tglHariIni = date('Y-m-d');
 $waktuAbsen = date('H:i:s');
 
+// ── Cek dan buat tabel tbl_absen_sholat jika belum ada ────────────────────────
+$qCheckTable = @mysqli_query($conn, "SHOW TABLES LIKE 'tbl_absen_sholat'");
+if (!$qCheckTable || mysqli_num_rows($qCheckTable) == 0) {
+    $createTable = "CREATE TABLE tbl_absen_sholat (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        id_sekolah INT DEFAULT 1,
+        no_induk VARCHAR(25) NOT NULL,
+        tanggal DATE NOT NULL,
+        jenis_sholat ENUM('Dzuhur','Jumat') NOT NULL,
+        waktu_absen TIME NOT NULL,
+        lat DOUBLE NOT NULL,
+        lng DOUBLE NOT NULL,
+        status VARCHAR(50) DEFAULT 'Hadir',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )";
+    @mysqli_query($conn, $createTable);
+}
+
 // ── Cek apakah sudah absen hari ini ────────────────────────────────────────────
 $qCek = mysqli_query($conn, "SELECT id FROM tbl_absen_sholat WHERE id_sekolah={$tenantId} AND no_induk='" . mysqli_real_escape_string($conn, $nis) . "' AND tanggal='$tglHariIni' AND jenis_sholat='$jenisSholat'");
 if ($qCek && mysqli_num_rows($qCek) > 0) {
