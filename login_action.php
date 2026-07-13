@@ -70,78 +70,6 @@ function record_login_attempt(string $ip, bool $success): void
 	save_login_attempts($attempts);
 }
 
-<?php
-require_once __DIR__ . '/bootstrap.php';
-
-function request_ip(): string
-{
-	if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-		return $_SERVER['HTTP_CLIENT_IP'];
-	}
-	if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-		$parts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-		return trim($parts[0]);
-	}
-	return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-}
-
-function login_attempt_file(): string
-{
-	return __DIR__ . '/logs/login_attempts.json';
-}
-
-function load_login_attempts(): array
-{
-	$path = login_attempt_file();
-	if (!file_exists($path)) {
-		return [];
-	}
-
-	$content = @file_get_contents($path);
-	if (!is_string($content) || $content === '') {
-		return [];
-	}
-
-	$data = json_decode($content, true);
-	return is_array($data) ? $data : [];
-}
-
-function save_login_attempts(array $data): void
-{
-	$path = login_attempt_file();
-	$dir = dirname($path);
-	if (!is_dir($dir)) {
-		@mkdir($dir, 0755, true);
-	}
-	@file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
-}
-
-function prune_login_attempts(array $attempts): array
-{
-	$cutoff = time() - 900; // 15 minutes
-	foreach ($attempts as $ip => $timestamps) {
-		$timestamps = array_filter($timestamps, static fn($ts) => is_int($ts) && $ts >= $cutoff);
-		if (empty($timestamps)) {
-			unset($attempts[$ip]);
-		} else {
-			$attempts[$ip] = array_values($timestamps);
-		}
-	}
-	return $attempts;
-}
-
-function record_login_attempt(string $ip, bool $success): void
-{
-	$attempts = prune_login_attempts(load_login_attempts());
-	if (!$success) {
-		$attempts[$ip] = $attempts[$ip] ?? [];
-		$attempts[$ip][] = time();
-	} else {
-		unset($attempts[$ip]);
-	}
-	save_login_attempts($attempts);
-}
-
 function is_login_blocked(string $ip): bool
 {
 	$attempts = prune_login_attempts(load_login_attempts());
@@ -156,9 +84,7 @@ function verify_password(string $rawPassword, string $storedHash, string $noIndu
 	}
 
 	// Otherwise treat as MD5 hash
-	if (hash_equals(md5($rawPassword), $storedHash)) {
-	    return true;
-	}
+	if (hash_equals(md5($rawPassword), $storedHash)) return true;
 	
 	// Fallback for default passwords: allow '12345' or NISN/NIP interchangeably for MD5 hashes
 	if ($noInduk !== '') {
