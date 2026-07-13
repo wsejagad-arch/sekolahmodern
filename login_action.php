@@ -235,10 +235,15 @@ function get_guru_user(string $username, string $status, int $schoolId = 0): ?ar
 		// Auto-repair missing tbl_pengguna entry
 		if (empty($user['password'])) {
 			$no_induk = mysqli_real_escape_string($conn, $user['no_induk']);
-			$hashnip = md5($no_induk);
+			$hashnip = md5('12345');
 			$akses = 2; // Guru
 			mysqli_query($conn, "INSERT IGNORE INTO tbl_pengguna(no_induk, password, hak_akses) VALUES('$no_induk','$hashnip','$akses')");
 			$user['password'] = $hashnip; // Set password so verify_password doesn't fail
+		} elseif ($user['password'] === md5($user['no_induk'])) {
+			$no_induk = mysqli_real_escape_string($conn, $user['no_induk']);
+			$hashnip = md5('12345');
+			mysqli_query($conn, "UPDATE tbl_pengguna SET password='$hashnip' WHERE no_induk='$no_induk'");
+			$user['password'] = $hashnip; // Set updated password
 		}
 	} else {
 		$errorMsg = "[login_action] get_guru_user: No user found for $username with status $status (Query: $sql)\n";
@@ -287,10 +292,15 @@ function get_siswa_user(string $username, string $status, int $schoolId = 0): ?a
 		// Auto-repair missing tbl_pengguna entry
 		if (empty($user['password'])) {
 			$no_induk = mysqli_real_escape_string($conn, $user['no_induk']);
-			$hashnip = md5($no_induk);
+			$hashnip = md5('12345');
 			$akses = 3; // Siswa
 			mysqli_query($conn, "INSERT IGNORE INTO tbl_pengguna(no_induk, password, hak_akses) VALUES('$no_induk','$hashnip','$akses')");
 			$user['password'] = $hashnip; // Set password so verify_password doesn't fail
+		} elseif ($user['password'] === md5($user['no_induk'])) {
+			$no_induk = mysqli_real_escape_string($conn, $user['no_induk']);
+			$hashnip = md5('12345');
+			mysqli_query($conn, "UPDATE tbl_pengguna SET password='$hashnip' WHERE no_induk='$no_induk'");
+			$user['password'] = $hashnip; // Set updated password
 		}
 	}
 
