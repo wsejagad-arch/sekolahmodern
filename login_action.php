@@ -70,13 +70,85 @@ function record_login_attempt(string $ip, bool $success): void
 	save_login_attempts($attempts);
 }
 
+<?php
+require_once __DIR__ . '/bootstrap.php';
+
+function request_ip(): string
+{
+	if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+		return $_SERVER['HTTP_CLIENT_IP'];
+	}
+	if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+		$parts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+		return trim($parts[0]);
+	}
+	return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+}
+
+function login_attempt_file(): string
+{
+	return __DIR__ . '/logs/login_attempts.json';
+}
+
+function load_login_attempts(): array
+{
+	$path = login_attempt_file();
+	if (!file_exists($path)) {
+		return [];
+	}
+
+	$content = @file_get_contents($path);
+	if (!is_string($content) || $content === '') {
+		return [];
+	}
+
+	$data = json_decode($content, true);
+	return is_array($data) ? $data : [];
+}
+
+function save_login_attempts(array $data): void
+{
+	$path = login_attempt_file();
+	$dir = dirname($path);
+	if (!is_dir($dir)) {
+		@mkdir($dir, 0755, true);
+	}
+	@file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
+}
+
+function prune_login_attempts(array $attempts): array
+{
+	$cutoff = time() - 900; // 15 minutes
+	foreach ($attempts as $ip => $timestamps) {
+		$timestamps = array_filter($timestamps, static fn($ts) => is_int($ts) && $ts >= $cutoff);
+		if (empty($timestamps)) {
+			unset($attempts[$ip]);
+		} else {
+			$attempts[$ip] = array_values($timestamps);
+		}
+	}
+	return $attempts;
+}
+
+function record_login_attempt(string $ip, bool $success): void
+{
+	$attempts = prune_login_attempts(load_login_attempts());
+	if (!$success) {
+		$attempts[$ip] = $attempts[$ip] ?? [];
+		$attempts[$ip][] = time();
+	} else {
+		unset($attempts[$ip]);
+	}
+	save_login_attempts($attempts);
+}
+
 function is_login_blocked(string $ip): bool
 {
 	$attempts = prune_login_attempts(load_login_attempts());
 	return isset($attempts[$ip]) && count($attempts[$ip]) >= 50;
 }
 
-function verify_password(string $rawPassword, string $storedHash): bool
+function verify_password(string $rawPassword, string $storedHash, string $noInduk = ''): bool
 {
 	// Check if hash is bcrypt format (starts with $2a$, $2b$, or $2y$)
 	if (preg_match('/^\$2[aby]\$/', $storedHash)) {
@@ -84,7 +156,17 @@ function verify_password(string $rawPassword, string $storedHash): bool
 	}
 
 	// Otherwise treat as MD5 hash
-	return hash_equals(md5($rawPassword), $storedHash);
+	if (hash_equals(md5($rawPassword), $storedHash)) {
+	    return true;
+	}
+	
+	// Fallback for default passwords: allow '12345' or NISN/NIP interchangeably for MD5 hashes
+	if ($noInduk !== '') {
+	    if ($rawPassword === '12345' && hash_equals(md5($noInduk), $storedHash)) return true;
+	    if ($rawPassword === $noInduk && hash_equals(md5('12345'), $storedHash)) return true;
+	}
+	
+	return false;
 }
 
 function normalize_redirect_url(string $url): string
@@ -239,11 +321,6 @@ function get_guru_user(string $username, string $status, int $schoolId = 0): ?ar
 			$akses = 2; // Guru
 			mysqli_query($conn, "INSERT IGNORE INTO tbl_pengguna(no_induk, password, hak_akses) VALUES('$no_induk','$hashnip','$akses')");
 			$user['password'] = $hashnip; // Set password so verify_password doesn't fail
-		} elseif ($user['password'] === md5($user['no_induk'])) {
-			$no_induk = mysqli_real_escape_string($conn, $user['no_induk']);
-			$hashnip = md5('12345');
-			mysqli_query($conn, "UPDATE tbl_pengguna SET password='$hashnip' WHERE no_induk='$no_induk'");
-			$user['password'] = $hashnip; // Set updated password
 		}
 	} else {
 		$errorMsg = "[login_action] get_guru_user: No user found for $username with status $status (Query: $sql)\n";
@@ -296,11 +373,6 @@ function get_siswa_user(string $username, string $status, int $schoolId = 0): ?a
 			$akses = 3; // Siswa
 			mysqli_query($conn, "INSERT IGNORE INTO tbl_pengguna(no_induk, password, hak_akses) VALUES('$no_induk','$hashnip','$akses')");
 			$user['password'] = $hashnip; // Set password so verify_password doesn't fail
-		} elseif ($user['password'] === md5($user['no_induk'])) {
-			$no_induk = mysqli_real_escape_string($conn, $user['no_induk']);
-			$hashnip = md5('12345');
-			mysqli_query($conn, "UPDATE tbl_pengguna SET password='$hashnip' WHERE no_induk='$no_induk'");
-			$user['password'] = $hashnip; // Set updated password
 		}
 	}
 
@@ -422,11 +494,11 @@ if ($akses === 'auto' || $akses === '') {
 		'admin_password_hash' => $user ? substr($user['password'], 0, 20) : 'N/A',
 	];
 	if ($user) {
-		$debug_admin['password_verify_result'] = verify_password($passwordRaw, $user['password']);
+		$debug_admin['password_verify_result'] = verify_password($passwordRaw, $user['password'], $user['no_induk'] ?? '');
 	}
 	@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug_admin) . "\n", FILE_APPEND | LOCK_EX);
 
-	if ($user && verify_password($passwordRaw, $user['password'])) {
+	if ($user && verify_password($passwordRaw, $user['password'], $user['no_induk'] ?? '')) {
 		$debug = ['msg' => 'admin_login_success', 'username' => $username];
 		@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug) . "\n", FILE_APPEND | LOCK_EX);
 		set_admin_session($user);
@@ -448,12 +520,12 @@ if ($akses === 'auto' || $akses === '') {
 		'guru_status' => $guru ? ($guru['status'] ?? 'N/A') : 'N/A'
 	];
 	if ($guru) {
-		$debug_guru['password_verify_result'] = verify_password($passwordRaw, $guru['password']);
+		$debug_guru['password_verify_result'] = verify_password($passwordRaw, $guru['password'], $guru['no_induk'] ?? '');
 		$debug_guru['password_empty_check'] = $passwordRaw === '';
 	}
 	@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug_guru) . "\n", FILE_APPEND | LOCK_EX);
 
-	if ($guru && ($passwordRaw === '' || verify_password($passwordRaw, $guru['password']))) {
+	if ($guru && ($passwordRaw === '' || verify_password($passwordRaw, $guru['password'], $guru['no_induk'] ?? ''))) {
 		$debug = ['msg' => 'guru_login_success', 'username' => $username];
 		@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug) . "\n", FILE_APPEND | LOCK_EX);
 		set_guru_session($guru);
@@ -473,11 +545,11 @@ if ($akses === 'auto' || $akses === '') {
 		'siswa_status' => $siswa ? ($siswa['status'] ?? 'N/A') : 'N/A'
 	];
 	if ($siswa) {
-		$debug_siswa['password_verify_result'] = verify_password($passwordRaw, $siswa['password']);
+		$debug_siswa['password_verify_result'] = verify_password($passwordRaw, $siswa['password'], $siswa['no_induk'] ?? '');
 	}
 	@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug_siswa) . "\n", FILE_APPEND | LOCK_EX);
 
-	if ($siswa && verify_password($passwordRaw, $siswa['password'])) {
+	if ($siswa && verify_password($passwordRaw, $siswa['password'], $siswa['no_induk'] ?? '')) {
 		$debug = ['msg' => 'siswa_login_success', 'username' => $username];
 		@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug) . "\n", FILE_APPEND | LOCK_EX);
 		set_siswa_session($siswa);
@@ -501,11 +573,11 @@ if ($akses == 1) {
 		'admin_password_hash' => $user ? substr($user['password'], 0, 20) : 'N/A'
 	];
 	if ($user) {
-		$debug['password_verify_result'] = verify_password($passwordRaw, $user['password']);
+		$debug['password_verify_result'] = verify_password($passwordRaw, $user['password'], $user['no_induk'] ?? '');
 	}
 	@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug) . "\n", FILE_APPEND | LOCK_EX);
 
-	if ($user && verify_password($passwordRaw, $user['password'])) {
+	if ($user && verify_password($passwordRaw, $user['password'], $user['no_induk'] ?? '')) {
 		$debug2 = ['msg' => 'admin_specific_success', 'username' => $username];
 		@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug2) . "\n", FILE_APPEND | LOCK_EX);
 		set_admin_session($user);
@@ -530,12 +602,12 @@ if ($akses == 1) {
 		'guru_password_hash' => $guru ? substr($guru['password'], 0, 20) : 'N/A'
 	];
 	if ($guru) {
-		$debug['password_verify_result'] = verify_password($passwordRaw, $guru['password']);
+		$debug['password_verify_result'] = verify_password($passwordRaw, $guru['password'], $guru['no_induk'] ?? '');
 		$debug['password_empty'] = $passwordRaw === '';
 	}
 	@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug) . "\n", FILE_APPEND | LOCK_EX);
 
-	if ($guru && ($passwordRaw === '' || verify_password($passwordRaw, $guru['password']))) {
+	if ($guru && ($passwordRaw === '' || verify_password($passwordRaw, $guru['password'], $guru['no_induk'] ?? ''))) {
 		$debug2 = ['msg' => 'guru_specific_success', 'username' => $username];
 		@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug2) . "\n", FILE_APPEND | LOCK_EX);
 		set_guru_session($guru);
@@ -558,11 +630,11 @@ if ($akses == 1) {
 		'siswa_password_hash' => $siswa ? substr($siswa['password'], 0, 20) : 'N/A'
 	];
 	if ($siswa) {
-		$debug['password_verify_result'] = verify_password($passwordRaw, $siswa['password']);
+		$debug['password_verify_result'] = verify_password($passwordRaw, $siswa['password'], $siswa['no_induk'] ?? '');
 	}
 	@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug) . "\n", FILE_APPEND | LOCK_EX);
 
-	if ($siswa && verify_password($passwordRaw, $siswa['password'])) {
+	if ($siswa && verify_password($passwordRaw, $siswa['password'], $siswa['no_induk'] ?? '')) {
 		$debug2 = ['msg' => 'siswa_specific_success', 'username' => $username];
 		@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug2) . "\n", FILE_APPEND | LOCK_EX);
 		set_siswa_session($siswa);
