@@ -181,6 +181,17 @@ $hariOptions = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
             <div class="card-body">
                 <p class="text-muted small">Tambahkan koordinat (Latitude & Longitude) mushola sekolah. Siswa harus berada di dalam radius ini untuk bisa mengirim absensi Sholat Dzuhur dan Jumat. Klik pada peta untuk memperbarui titik koordinat baris yang sedang aktif.</p>
                 
+                <!-- Search Box -->
+                <div class="mb-3">
+                    <div class="input-group">
+                        <input type="text" id="map-search-input" class="form-control" placeholder="Cari nama kota, daerah, atau nama tempat...">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" id="btn-map-search"><i class="fas fa-search"></i> Cari Lokasi</button>
+                        </div>
+                    </div>
+                    <small id="map-search-status" class="text-muted"></small>
+                </div>
+
                 <div id="map" style="height: 400px; border-radius: 8px; z-index: 1;" class="mb-4 shadow-sm border"></div>
 
                 <div id="mushola-container">
@@ -276,6 +287,39 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(updateMapMarkers, 500);
     }
     
+    // Pencarian Lokasi
+    document.getElementById('btn-map-search').addEventListener('click', doSearch);
+    document.getElementById('map-search-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Mencegah form tersubmit
+            doSearch();
+        }
+    });
+
+    function doSearch() {
+        const query = document.getElementById('map-search-input').value.trim();
+        if (!query) return;
+
+        const status = document.getElementById('map-search-status');
+        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mencari...';
+
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    map.setView([lat, lon], 16);
+                    status.innerHTML = `<span class="text-success"><i class="fas fa-check"></i> Ditemukan: ${data[0].display_name}</span>`;
+                } else {
+                    status.innerHTML = '<span class="text-danger"><i class="fas fa-times"></i> Lokasi tidak ditemukan.</span>';
+                }
+            })
+            .catch(err => {
+                status.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Terjadi kesalahan saat mencari.</span>';
+            });
+    }
+
     function updateMapMarkers() {
         if (!map) return;
         // Bersihkan marker lama
