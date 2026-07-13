@@ -220,7 +220,7 @@ function get_guru_user(string $username, string $status, int $schoolId = 0): ?ar
 	$codeSelect = mt_table_exists($conn, 'tbl_sekolah') ? ", COALESCE(sk.kode_sekolah, 'DEFAULT') AS kode_sekolah" : ", 'DEFAULT' AS kode_sekolah";
 	$schoolWhere = '';
 	if ($schoolId > 0 && mt_column_exists($conn, 'tbl_guru', 'id_sekolah')) {
-		$schoolWhere = " AND g.id_sekolah=$schoolId";
+		$schoolWhere = " AND (g.id_sekolah=$schoolId OR g.id_sekolah IS NULL OR g.id_sekolah=0)";
 	}
 	
 	$statusFilter = " g.status = '$s' ";
@@ -233,7 +233,8 @@ function get_guru_user(string $username, string $status, int $schoolId = 0): ?ar
 			FROM tbl_guru g 
 			LEFT JOIN tbl_pengguna p ON g.no_induk = p.no_induk 
 			$schoolJoin
-			WHERE (g.no_induk = '$u' OR g.nama_guru LIKE '%$u%') AND $statusFilter $schoolWhere LIMIT 1";
+			WHERE (TRIM(g.no_induk) = '$u' OR g.nama_guru LIKE '%$u%') AND $statusFilter $schoolWhere 
+			ORDER BY g.status ASC, g.no_induk DESC LIMIT 1";
 			
 	$result = mysqli_query($conn, $sql);
 	if (!$result) {
@@ -277,7 +278,7 @@ function get_siswa_user(string $username, string $status, int $schoolId = 0): ?a
 	$codeSelect = mt_table_exists($conn, 'tbl_sekolah') ? ", COALESCE(sk.kode_sekolah, 'DEFAULT') AS kode_sekolah" : ", 'DEFAULT' AS kode_sekolah";
 	$schoolWhere = '';
 	if ($schoolId > 0 && mt_column_exists($conn, 'tbl_siswa', 'id_sekolah')) {
-		$schoolWhere = " AND s.id_sekolah=$schoolId";
+		$schoolWhere = " AND (s.id_sekolah=$schoolId OR s.id_sekolah IS NULL OR s.id_sekolah=0)";
 	}
 
 	$statusFilter = " s.status = '$s' ";
@@ -290,7 +291,8 @@ function get_siswa_user(string $username, string $status, int $schoolId = 0): ?a
 			FROM tbl_siswa s 
 			LEFT JOIN tbl_pengguna p ON s.no_induk = p.no_induk 
 			$schoolJoin
-			WHERE (s.no_induk = '$u' OR s.nama_siswa LIKE '%$u%') AND $statusFilter $schoolWhere LIMIT 1";
+			WHERE (TRIM(s.no_induk) = '$u' OR s.nama_siswa LIKE '%$u%') AND $statusFilter $schoolWhere 
+			ORDER BY s.status ASC, s.no_induk DESC LIMIT 1";
 
 	$result = mysqli_query($conn, $sql);
 	if (!$result) {
