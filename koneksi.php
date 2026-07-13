@@ -133,6 +133,11 @@ try {
     $conn = null;
 }
 
+if (!$conn) {
+    http_response_code(503);
+    die("<!doctype html><html lang='id'><head><meta charset='utf-8'><title>Gangguan Database</title><style>body { font-family: system-ui, sans-serif; background: #f8fafc; color: #1e293b; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; } .error-box { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; max-width: 500px; } h2 { color: #dc2626; margin-top:0; } p { color: #64748b; line-height: 1.5; }</style></head><body><div class='error-box'><h2>Oops! Database Tidak Merespons</h2><p>Sistem saat ini tidak dapat terhubung ke database. Hal ini biasanya terjadi karena proses pemeliharaan atau beban server tinggi. Silakan muat ulang halaman ini beberapa saat lagi.</p></div></body></html>");
+}
+
 // === AUTO-ALPA & AUTO-EXPIRE IZIN ===
 // Cek izin yang belum divalidasi dan sudah lewat hari
 if ($conn instanceof mysqli) {
