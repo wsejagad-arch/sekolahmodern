@@ -153,7 +153,7 @@ if ($checkPelTable && mysqli_num_rows($checkPelTable) > 0) {
 // Cek apakah guru mengampu mata pelajaran agama
 $isGuruAgama = false;
 $idSekolahGuru = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
-$qGuruAgama = @mysqli_query($conn, "SELECT COUNT(*) as c FROM tbl_mapel_ampu WHERE no_induk='$nip' AND id_sekolah=$idSekolahGuru AND (LOWER(nama_mapel) LIKE '%agama%' OR LOWER(nama_mapel) LIKE '%pabp%' OR LOWER(nama_mapel) LIKE '%pai%')");
+$qGuruAgama = @mysqli_query($conn, "SELECT COUNT(*) as c FROM tbl_mapel_ampu WHERE no_induk='$nipEsc' AND id_sekolah=$idSekolahGuru AND (LOWER(nama_mapel) LIKE '%agama%' OR LOWER(nama_mapel) LIKE '%pabp%' OR LOWER(nama_mapel) LIKE '%papb%' OR LOWER(nama_mapel) LIKE '%pa bp%' OR LOWER(nama_mapel) LIKE '%pai%')");
 if ($qGuruAgama && $r = mysqli_fetch_assoc($qGuruAgama)) {
     if ((int)$r['c'] > 0) $isGuruAgama = true;
 }
