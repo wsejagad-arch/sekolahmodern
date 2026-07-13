@@ -100,7 +100,7 @@ $status = $row['status'];
 				}
 				?>
 
-				&nbsp;<span><a class="btn btn-sm btn-circle btn-danger" href="delete-all-jadwal.php?id=<?= $id; ?>&noinduk=<?= $noinduk; ?>" onclick="return confirm('Yakin mau mengosongkan jadwal guru ini? semua jadwal dan materi yang diupload akan dihapus dari sistem!');"><i class="fas fa-trash" title="Kosongkan Jadwal"></i></a></span>
+				&nbsp;<span><a class="btn btn-sm btn-circle btn-danger" href="<?= asset_url('delete-all-jadwal.php') ?>?id=<?= $id; ?>&noinduk=<?= $noinduk; ?>" onclick="return confirm('Yakin mau mengosongkan jadwal guru ini? semua jadwal dan materi yang diupload akan dihapus dari sistem!');"><i class="fas fa-trash" title="Kosongkan Jadwal"></i></a></span>
 			</h4>
 		</div>
 
@@ -136,7 +136,7 @@ $status = $row['status'];
 								<td><?= $data['jam_mulai']; ?></td>
 								<td><?= $data['jam_selesai']; ?></td>
 								<td><?= $data['thn_ajaran']; ?></td>
-								<td class="text-center"><a class="btn btn-sm btn-circle btn-info" href="?page=edit-mapel-guru&id_mapel=<?= $data['id_mapel']; ?>&id=<?= $id; ?>&no_induk=<?= $nip; ?>"><i class="fas fa-edit" title="Edit Mata Pelajaran"></i></a>&nbsp;<a class="btn btn-sm btn-circle btn-danger" href="delete-mapel-guru.php?id=<?= $id; ?>&id_mapel=<?= $data['id_mapel']; ?>&no_induk=<?= $data['no_induk']; ?>" onclick="return confirm('Yakin mau menghapus jadwal mapel <?= $data['nama_mapel']; ?> dari Guru ini?');"><i class="fas fa-trash" title="Hapus"></i></a></td>
+								<td class="text-center"><a class="btn btn-sm btn-circle btn-info" href="?page=edit-mapel-guru&id_mapel=<?= $data['id_mapel']; ?>&id=<?= $id; ?>&no_induk=<?= $nip; ?>"><i class="fas fa-edit" title="Edit Mata Pelajaran"></i></a>&nbsp;<a class="btn btn-sm btn-circle btn-danger" href="<?= asset_url('delete-mapel-guru.php') ?>?id=<?= $id; ?>&id_mapel=<?= $data['id_mapel']; ?>&no_induk=<?= $data['no_induk']; ?>" onclick="return confirm('Yakin mau menghapus jadwal mapel <?= $data['nama_mapel']; ?> dari Guru ini?');"><i class="fas fa-trash" title="Hapus"></i></a></td>
 							</tr>
 						<?php
 							// ini penutup while 

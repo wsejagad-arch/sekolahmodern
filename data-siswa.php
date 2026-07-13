@@ -213,7 +213,7 @@ $activeFilterLabel = $kelasFilter !== '' ? $kelasFilter : 'Semua kelas';
             <a href="?page=tambah-siswa" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                 <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Data
             </a>
-            <a href="export-siswa.php" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm">
+            <a href="<?= asset_url('export-siswa.php') ?>" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm">
                 <i class="fas fa-file-excel fa-sm text-white-50"></i> Export Data
             </a>
             <a href="?page=import-siswa" class="d-none d-sm-inline-block btn btn-sm btn-warning shadow-sm">
@@ -354,12 +354,12 @@ $activeFilterLabel = $kelasFilter !== '' ? $kelasFilter : 'Semua kelas';
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-center align-middle">
-                                        <a class="btn btn-sm btn-circle btn-primary" href="detail-profil-siswa.php?no_induk=<?= urlencode($data['no_induk']); ?>" title="Lihat Profil"><i class="fas fa-info"></i></a>
+                                        <a class="btn btn-sm btn-circle btn-primary" href="<?= asset_url('detail-profil-siswa.php') ?>?no_induk=<?= urlencode($data['no_induk']); ?>" title="Lihat Profil"><i class="fas fa-info"></i></a>
                                         <a class="btn btn-sm btn-circle btn-info" href="?page=edit-siswa&no_induk=<?= urlencode($data['no_induk']); ?>" title="Edit Data"><i class="fas fa-edit"></i></a>
                                         <?php
                                             $return_url_siswa = '?page=data-siswa&kelas=' . urlencode($kelasFilter) . '&nama=' . urlencode($namaFilter) . '&wali=' . urlencode($waliFilter);
                                         ?>
-                                        <a href="delete-siswa.php?no_induk=<?= urlencode($data['no_induk']); ?>&return_url=<?= urlencode($return_url_siswa); ?>"
+                                        <a href="<?= asset_url('delete-siswa.php') ?>?no_induk=<?= urlencode($data['no_induk']); ?>&return_url=<?= urlencode($return_url_siswa); ?>"
                                            class="btn btn-sm btn-circle btn-danger"
                                            title="Hapus Data"
                                            onclick="return confirm('Yakin ingin menghapus data siswa <?= htmlspecialchars($data['nama_siswa'], ENT_QUOTES); ?> (NIS: <?= htmlspecialchars($data['no_induk'], ENT_QUOTES); ?>)? Semua data terkait akan ikut terhapus!');">

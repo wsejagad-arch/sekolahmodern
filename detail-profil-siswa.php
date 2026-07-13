@@ -462,7 +462,7 @@ foreach ($editableFields as $field => $meta) {
 
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
                 <div class="d-flex align-items-center gap-2">
-                    <a href="home.php?page=data-siswa" class="btn btn-sm btn-outline-secondary rounded-pill">
+                    <a href="<?= asset_url('home.php') ?>?page=data-siswa" class="btn btn-sm btn-outline-secondary rounded-pill">
                         <i class="fas fa-arrow-left me-1"></i> Kembali
                     </a>
                     <h5 class="mb-0 fw-bold text-dark">Detail Profil Siswa</h5>
@@ -553,7 +553,7 @@ foreach ($editableFields as $field => $meta) {
                             <button type="submit" class="btn btn-primary rounded-pill px-4">
                                 <i class="fas fa-save me-1"></i> Simpan Perubahan
                             </button>
-                            <a href="detail-profil-siswa.php?no_induk=<?php echo urlencode($noInduk); ?>" class="btn btn-outline-secondary rounded-pill px-4">
+                            <a href="<?= asset_url('detail-profil-siswa.php') ?>?no_induk=<?php echo urlencode($noInduk); ?>" class="btn btn-outline-secondary rounded-pill px-4">
                                 Batal
                             </a>
                         </div>
