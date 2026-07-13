@@ -215,11 +215,12 @@ function get_guru_user(string $username, string $status, int $schoolId = 0): ?ar
 		$schoolWhere = " AND g.id_sekolah=$schoolId";
 	}
 	
+	// Use LEFT JOIN to find guru even if tbl_pengguna record is missing
 	$sql = "SELECT g.no_induk, g.nama_guru, g.status_kepegawaian, p.password $schoolSelect $codeSelect
 			FROM tbl_guru g 
-			JOIN tbl_pengguna p ON g.no_induk = p.no_induk 
+			LEFT JOIN tbl_pengguna p ON g.no_induk = p.no_induk 
 			$schoolJoin
-			WHERE p.no_induk = '$u' AND g.status = '$s'$schoolWhere LIMIT 1";
+			WHERE (g.no_induk = '$u' OR g.nama_guru LIKE '%$u%') AND g.status = '$s'$schoolWhere LIMIT 1";
 			
 	$result = mysqli_query($conn, $sql);
 	if (!$result) {
@@ -230,7 +231,16 @@ function get_guru_user(string $username, string $status, int $schoolId = 0): ?ar
 
 	$user = mysqli_fetch_assoc($result);
 	
-	if (!$user) {
+	if ($user) {
+		// Auto-repair missing tbl_pengguna entry
+		if (empty($user['password'])) {
+			$no_induk = mysqli_real_escape_string($conn, $user['no_induk']);
+			$hashnip = md5($no_induk);
+			$akses = 2; // Guru
+			mysqli_query($conn, "INSERT IGNORE INTO tbl_pengguna(no_induk, password, hak_akses) VALUES('$no_induk','$hashnip','$akses')");
+			$user['password'] = $hashnip; // Set password so verify_password doesn't fail
+		}
+	} else {
 		$errorMsg = "[login_action] get_guru_user: No user found for $username with status $status (Query: $sql)\n";
 		@file_put_contents($debugLog, $errorMsg, FILE_APPEND | LOCK_EX);
 	}
@@ -257,11 +267,12 @@ function get_siswa_user(string $username, string $status, int $schoolId = 0): ?a
 		$schoolWhere = " AND s.id_sekolah=$schoolId";
 	}
 
+	// Use LEFT JOIN to find siswa even if tbl_pengguna record is missing
 	$sql = "SELECT s.no_induk, s.nama_siswa, s.kelas, s.jabatan, p.hak_akses, p.password $schoolSelect $codeSelect
 			FROM tbl_siswa s 
-			JOIN tbl_pengguna p ON s.no_induk = p.no_induk 
+			LEFT JOIN tbl_pengguna p ON s.no_induk = p.no_induk 
 			$schoolJoin
-			WHERE s.no_induk = '$u' AND s.status = '$s'$schoolWhere LIMIT 1";
+			WHERE (s.no_induk = '$u' OR s.nama_siswa LIKE '%$u%') AND s.status = '$s'$schoolWhere LIMIT 1";
 
 	$result = mysqli_query($conn, $sql);
 	if (!$result) {
@@ -271,6 +282,18 @@ function get_siswa_user(string $username, string $status, int $schoolId = 0): ?a
 	}
 
 	$user = mysqli_fetch_assoc($result);
+	
+	if ($user) {
+		// Auto-repair missing tbl_pengguna entry
+		if (empty($user['password'])) {
+			$no_induk = mysqli_real_escape_string($conn, $user['no_induk']);
+			$hashnip = md5($no_induk);
+			$akses = 3; // Siswa
+			mysqli_query($conn, "INSERT IGNORE INTO tbl_pengguna(no_induk, password, hak_akses) VALUES('$no_induk','$hashnip','$akses')");
+			$user['password'] = $hashnip; // Set password so verify_password doesn't fail
+		}
+	}
+
 	return $user ?: null;
 }
 
