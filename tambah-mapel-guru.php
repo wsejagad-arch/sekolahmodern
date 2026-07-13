@@ -32,25 +32,27 @@ if (isset($_POST['submit'])) {
 		);
 	  
 	  // ambil data dari database untk pengecekan bentrok jadwal
-	  $query = mysqli_query($conn, "SELECT hari, jam_mulai, jam_selesai, kelas FROM tbl_mapel_ampu");
+	  $query = mysqli_query($conn, "SELECT m.hari, m.jam_mulai, m.jam_selesai, m.kelas, g.nama_guru FROM tbl_mapel_ampu m LEFT JOIN tbl_guru g ON m.no_induk = g.no_induk");
 	  $jadwal_lama = array();
 	  while ($row = mysqli_fetch_assoc($query)) {
 		  $jadwal_lama[] = array(
 			'hari' => $row['hari'],
 			'jam_mulai' => $row['jam_mulai'],
 			'jam_selesai' => $row['jam_selesai'],
-			'kelas' => $row['kelas']
+			'kelas' => $row['kelas'],
+			'nama_guru' => $row['nama_guru'] ?? 'Guru Lain'
 		  );
 		}
 		
 	  // ambil data dari database untk pengecekan bentrok jadwal dengan nip yang diinput
-	  $queryybs = mysqli_query($conn, "SELECT hari, jam_mulai, jam_selesai FROM tbl_mapel_ampu WHERE no_induk='$noinduk'");
+	  $queryybs = mysqli_query($conn, "SELECT hari, jam_mulai, jam_selesai, kelas FROM tbl_mapel_ampu WHERE no_induk='$noinduk'");
 	  $jadwal_ybs = array();
 	  while ($row = mysqli_fetch_assoc($queryybs)) {
 		  $jadwal_ybs[] = array(
 		    'hari' => $row['hari'],
 			'jam_mulai' => $row['jam_mulai'],
-			'jam_selesai' => $row['jam_selesai']
+			'jam_selesai' => $row['jam_selesai'],
+			'kelas' => $row['kelas']
 		  );
 		}
       
@@ -58,7 +60,7 @@ if (isset($_POST['submit'])) {
 	  $cekybs = cek_jadwal_ybs($jadwal_baru, $jadwal_ybs);
 	  $cekbentrok = cek_jadwal_bentrok($jadwal_baru, $jadwal_lama);
 	  $cek = mapel_ampu($noinduk, $namamapel, $hari, $kelas, $thnajaran);
-	  if($cek == True && $cekbentrok == True && $cekybs == True) {
+	  if($cek == True && $cekbentrok === True && $cekybs === True) {
 		mysqli_query($conn, "INSERT INTO tbl_mapel_ampu(id_guru, no_induk, nama_mapel, hari, jam_mulai, jam_selesai, kelas, thn_ajaran) VALUES('$id', '$noinduk','$namamapel', '$hari','$mulai','$selesai','$kelas','$thnajaran')");
 		mysqli_query($conn, "INSERT INTO tbl_log (waktu, isi_log) VALUES ('$tglskr','$isilog')");
 		
@@ -74,10 +76,10 @@ if (isset($_POST['submit'])) {
 				  window.location.href = "?page=detail-guru&id=<?= $id; ?>&no_induk=<?= $noinduk; ?>";
 			  })
 		</script>
-	<?php } else if($cekbentrok == False) { ?>
-		<script>Swal.fire('Gagal', 'Jadwal hari <?= $hari; ?> antara pukul <?= $mulai; ?> s.d <?= $selesai; ?> di kelas <?= $kelas; ?> sudah ada!', 'error')</script>
-	<?php } else if($cekybs == False) { ?>
-		<script>Swal.fire('Gagal', 'Jadwal hari <?= $hari; ?> antara pukul <?= $mulai; ?> s.d <?= $selesai; ?> sudah ada untuk guru ini!', 'error')</script>
+	<?php } else if(is_array($cekbentrok)) { ?>
+		<script>Swal.fire('Gagal', 'Jadwal hari <?= $hari; ?> antara pukul <?= $mulai; ?> s.d <?= $selesai; ?> di kelas <?= $kelas; ?> bentrok dengan jadwal <?= $cekbentrok['nama_guru']; ?>!', 'error')</script>
+	<?php } else if(is_array($cekybs)) { ?>
+		<script>Swal.fire('Gagal', 'Jadwal hari <?= $hari; ?> antara pukul <?= $mulai; ?> s.d <?= $selesai; ?> bentrok dengan jadwal Anda sendiri di kelas <?= $cekybs['kelas']; ?>!', 'error')</script>
 	<?php } else { ?>
 		<script>Swal.fire('Gagal', 'Mapel <?= $namamapel; ?> di kelas <?= $kelas; ?> untuk jadwal hari <?= $hari; ?> sudah terdaftar untuk Guru ini!', 'error')</script>
 	<?php }

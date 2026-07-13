@@ -224,13 +224,13 @@ function cek_jadwal_bentrok($jadwal_baru, $jadwal_lama)
 			$jam_selesai_lama = strtotime($jadwal['jam_selesai']);
 
 			if ($jam_mulai_baru >= $jam_mulai_lama && $jam_mulai_baru < $jam_selesai_lama) {
-				return False;
+				return $jadwal;
 			}
 			if ($jam_selesai_baru > $jam_mulai_lama && $jam_selesai_baru <= $jam_selesai_lama) {
-				return False;
+				return $jadwal;
 			}
 			if ($jam_mulai_baru <= $jam_mulai_lama && $jam_selesai_baru >= $jam_selesai_lama) {
-				return False;
+				return $jadwal;
 			}
 		}
 	}
@@ -248,13 +248,13 @@ function cek_jadwal_ybs($jadwal_baru, $jadwal_ybs)
 			$jam_selesai_lama = strtotime($jadwal['jam_selesai']);
 
 			if ($jam_mulai_baru >= $jam_mulai_lama && $jam_mulai_baru < $jam_selesai_lama) {
-				return False;
+				return $jadwal;
 			}
 			if ($jam_selesai_baru > $jam_mulai_lama && $jam_selesai_baru <= $jam_selesai_lama) {
-				return False;
+				return $jadwal;
 			}
 			if ($jam_mulai_baru <= $jam_mulai_lama && $jam_selesai_baru >= $jam_selesai_lama) {
-				return False;
+				return $jadwal;
 			}
 		}
 	}

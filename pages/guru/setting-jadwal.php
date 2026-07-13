@@ -54,7 +54,7 @@ function sj_time_value(string $value): string
     return $value . ':00';
 }
 
-function sj_has_conflict(mysqli $conn, string $nip, string $hari, string $mulai, string $selesai, int $excludeId = 0): bool
+function sj_has_conflict(mysqli $conn, string $nip, string $hari, string $mulai, string $selesai, int $excludeId = 0)
 {
     $nipEsc = mysqli_real_escape_string($conn, $nip);
     $hariEsc = mysqli_real_escape_string($conn, $hari);
@@ -62,7 +62,7 @@ function sj_has_conflict(mysqli $conn, string $nip, string $hari, string $mulai,
     $selesaiEsc = mysqli_real_escape_string($conn, $selesai);
     $excludeSql = $excludeId > 0 ? "AND id_mapel <> $excludeId" : '';
     $q = @mysqli_query($conn, "
-        SELECT id_mapel
+        SELECT id_mapel, kelas
         FROM tbl_mapel_ampu
         WHERE no_induk='$nipEsc'
           AND hari='$hariEsc'
@@ -71,7 +71,10 @@ function sj_has_conflict(mysqli $conn, string $nip, string $hari, string $mulai,
           AND jam_selesai > '$mulaiEsc'
         LIMIT 1
     ");
-    return $q && mysqli_num_rows($q) > 0;
+    if ($q && mysqli_num_rows($q) > 0) {
+        return mysqli_fetch_assoc($q);
+    }
+    return false;
 }
 
 sj_create_or_upgrade_table($conn);
@@ -108,8 +111,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (strtotime($jamMulai) >= strtotime($jamSelesai)) {
             $flash = 'Jam selesai harus lebih besar dari jam mulai.';
             $flashType = 'danger';
-        } elseif (sj_has_conflict($conn, $nip, $hari, $jamMulai, $jamSelesai, $action === 'update' ? $id : 0)) {
-            $flash = 'Jadwal bentrok dengan jadwal Anda yang sudah ada pada hari tersebut.';
+        } elseif ($conflict = sj_has_conflict($conn, $nip, $hari, $jamMulai, $jamSelesai, $action === 'update' ? $id : 0)) {
+            $flash = 'Jadwal bentrok dengan jadwal Anda sendiri di kelas ' . $conflict['kelas'] . '.';
             $flashType = 'danger';
         } else {
             $mapelEsc = mysqli_real_escape_string($conn, $namaMapel);

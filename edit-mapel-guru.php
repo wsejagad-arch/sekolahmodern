@@ -28,19 +28,33 @@ if (isset($_POST['submit'])) {
 		);
 	  
 	  // ambil data dari database untk pengecekan bentrok jadwal
-	  $query = mysqli_query($conn, "SELECT hari, jam_mulai, jam_selesai, kelas FROM tbl_mapel_ampu WHERE id_mapel != '$idmapel'");
+	  $query = mysqli_query($conn, "SELECT m.hari, m.jam_mulai, m.jam_selesai, m.kelas, g.nama_guru FROM tbl_mapel_ampu m LEFT JOIN tbl_guru g ON m.no_induk = g.no_induk WHERE m.id_mapel != '$idmapel'");
 	  $jadwal_lama = array();
 	  while ($row = mysqli_fetch_assoc($query)) {
 		  $jadwal_lama[] = array(
 			'hari' => $row['hari'],
 			'jam_mulai' => $row['jam_mulai'],
 			'jam_selesai' => $row['jam_selesai'],
-			'kelas' => $row['kelas']
+			'kelas' => $row['kelas'],
+			'nama_guru' => $row['nama_guru'] ?? 'Guru Lain'
 		  );
 		}
 		
+	  // ambil data dari database untk pengecekan bentrok jadwal dengan nip yang diinput
+	  $queryybs = mysqli_query($conn, "SELECT hari, jam_mulai, jam_selesai, kelas FROM tbl_mapel_ampu WHERE no_induk='$noinduk' AND id_mapel != '$idmapel'");
+	  $jadwal_ybs = array();
+	  while ($row = mysqli_fetch_assoc($queryybs)) {
+		  $jadwal_ybs[] = array(
+		    'hari' => $row['hari'],
+			'jam_mulai' => $row['jam_mulai'],
+			'jam_selesai' => $row['jam_selesai'],
+			'kelas' => $row['kelas']
+		  );
+	  }
+		
+	  $cekybs = cek_jadwal_ybs($jadwal_baru, $jadwal_ybs);
 	  $cekbentrok = cek_jadwal_bentrok($jadwal_baru, $jadwal_lama);
-	  if($cekbentrok == True) {
+	  if($cekbentrok === True && $cekybs === True) {
 		$update = mysqli_query($conn, "UPDATE tbl_mapel_ampu SET hari='$hari', jam_mulai='$mulai', jam_selesai='$selesai', kelas='$kelas', thn_ajaran='$thnajaran' WHERE id_mapel='$idmapel'");
 		?>
 		<script>
@@ -54,6 +68,10 @@ if (isset($_POST['submit'])) {
 				  window.location.href = "?page=detail-guru&id=<?= $id; ?>&no_induk=<?= $noinduk; ?>";
 			  })
 		</script>
+	<?php } else if(is_array($cekbentrok)) { ?>
+		<script>Swal.fire('Gagal', 'Jadwal hari <?= $hari; ?> antara pukul <?= $mulai; ?> s.d <?= $selesai; ?> di kelas <?= $kelas; ?> bentrok dengan jadwal <?= $cekbentrok['nama_guru']; ?>!', 'error')</script>
+	<?php } else if(is_array($cekybs)) { ?>
+		<script>Swal.fire('Gagal', 'Jadwal hari <?= $hari; ?> antara pukul <?= $mulai; ?> s.d <?= $selesai; ?> bentrok dengan jadwal Anda sendiri di kelas <?= $cekybs['kelas']; ?>!', 'error')</script>
 	<?php } else { ?>
 		<script>Swal.fire('Gagal', 'Jadwal hari <?= $hari; ?> antara pukul <?= $mulai; ?> s.d <?= $selesai; ?> di kelas <?= $kelas; ?> sudah ada!', 'error')</script>
 	<?php }
