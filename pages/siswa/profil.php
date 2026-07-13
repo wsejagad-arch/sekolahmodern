@@ -809,10 +809,10 @@ $tabs = [
         <?php $isFirst = true; ?>
         <?php foreach ($tabs as $id => $tab): ?>
           <li class="nav-item me-2" role="presentation">
-            <button class="nav-link <?= $isFirst ? 'active' : '' ?> rounded-pill <?= isset($tab['highlight']) ? 'fw-bold border border-primary text-primary' : '' ?>" 
-                    id="tab-<?= $id ?>" data-bs-toggle="pill" data-bs-target="#content-<?= $id ?>" type="button" role="tab">
+            <a class="nav-link <?= $isFirst ? 'active' : '' ?> rounded-pill <?= isset($tab['highlight']) ? 'fw-bold border border-primary text-primary' : '' ?>" 
+               id="tab-<?= $id ?>" data-bs-toggle="pill" href="#content-<?= $id ?>" role="tab" style="cursor:pointer; display:inline-block;">
               <i class="fas <?= $tab['icon'] ?> me-2"></i><?= $tab['title'] ?>
-            </button>
+            </a>
           </li>
           <?php $isFirst = false; ?>
         <?php endforeach; ?>
@@ -1331,6 +1331,32 @@ $tabs = [
           }
         });
       }
+
+      // Manual fallback for tabs
+      const tabLinks = document.querySelectorAll('#profilTabs .nav-link');
+      tabLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          // Remove active from all tabs
+          tabLinks.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Hide all content
+          const allPanes = document.querySelectorAll('#profilTabsContent .tab-pane');
+          allPanes.forEach(pane => {
+            pane.classList.remove('show', 'active');
+          });
+          
+          // Show target content
+          const targetId = this.getAttribute('href');
+          if (targetId) {
+            const targetPane = document.querySelector(targetId);
+            if (targetPane) {
+              targetPane.classList.add('show', 'active');
+            }
+          }
+        });
+      });
     });
 
     // Logika tambahan untuk animasi smooth
