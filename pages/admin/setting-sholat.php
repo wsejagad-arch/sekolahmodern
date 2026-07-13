@@ -89,6 +89,10 @@ $musholas = json_decode($currentSettings['7kih_mushola_locations'] ?? '[]', true
 $hariOptions = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 ?>
 
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-3">
         <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-mosque text-success"></i> Pengaturan Presensi Sholat</h1>
@@ -175,26 +179,28 @@ $hariOptions = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
                 <h6 class="m-0 font-weight-bold text-info"><i class="fas fa-map-marker-alt"></i> Lokasi Mushola/Masjid Sekolah (Untuk Validasi GPS)</h6>
             </div>
             <div class="card-body">
-                <p class="text-muted small">Tambahkan koordinat (Latitude & Longitude) mushola sekolah. Siswa harus berada di dalam radius ini untuk bisa mengirim absensi Sholat Dzuhur dan Jumat.</p>
+                <p class="text-muted small">Tambahkan koordinat (Latitude & Longitude) mushola sekolah. Siswa harus berada di dalam radius ini untuk bisa mengirim absensi Sholat Dzuhur dan Jumat. Klik pada peta untuk memperbarui titik koordinat baris yang sedang aktif.</p>
                 
+                <div id="map" style="height: 400px; border-radius: 8px; z-index: 1;" class="mb-4 shadow-sm border"></div>
+
                 <div id="mushola-container">
                     <?php if (empty($musholas)): ?>
                         <div class="row mb-3 mushola-row">
                             <div class="col-md-3">
                                 <label>Nama Tempat</label>
-                                <input type="text" name="nama_mushola[]" class="form-control" placeholder="Masjid Raya" required>
+                                <input type="text" name="nama_mushola[]" class="form-control map-input-name" placeholder="Masjid Raya" required>
                             </div>
                             <div class="col-md-3">
-                                <label>Latitude</label>
-                                <input type="text" name="lat[]" class="form-control" placeholder="-6.200000" required>
+                                <label>Latitude <button type="button" class="btn btn-xs btn-outline-info btn-pick" title="Pilih di peta" style="padding:0 5px;"><i class="fas fa-crosshairs"></i></button></label>
+                                <input type="text" name="lat[]" class="form-control map-input-lat" placeholder="-6.200000" required>
                             </div>
                             <div class="col-md-3">
                                 <label>Longitude</label>
-                                <input type="text" name="lng[]" class="form-control" placeholder="106.816666" required>
+                                <input type="text" name="lng[]" class="form-control map-input-lng" placeholder="106.816666" required>
                             </div>
                             <div class="col-md-2">
                                 <label>Radius (m)</label>
-                                <input type="number" name="radius[]" class="form-control" value="50" required>
+                                <input type="number" name="radius[]" class="form-control map-input-rad" value="50" required>
                             </div>
                             <div class="col-md-1 d-flex align-items-end">
                                 <button type="button" class="btn btn-danger btn-remove" style="display:none;"><i class="fas fa-trash"></i></button>
@@ -205,19 +211,19 @@ $hariOptions = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
                             <div class="row mb-3 mushola-row">
                                 <div class="col-md-3">
                                     <label>Nama Tempat</label>
-                                    <input type="text" name="nama_mushola[]" class="form-control" value="<?= htmlspecialchars($m['nama'] ?? '') ?>" required>
+                                    <input type="text" name="nama_mushola[]" class="form-control map-input-name" value="<?= htmlspecialchars($m['nama'] ?? '') ?>" required>
                                 </div>
                                 <div class="col-md-3">
-                                    <label>Latitude</label>
-                                    <input type="text" name="lat[]" class="form-control" value="<?= htmlspecialchars($m['lat']) ?>" required>
+                                    <label>Latitude <button type="button" class="btn btn-xs btn-outline-info btn-pick" title="Pilih di peta" style="padding:0 5px;"><i class="fas fa-crosshairs"></i></button></label>
+                                    <input type="text" name="lat[]" class="form-control map-input-lat" value="<?= htmlspecialchars($m['lat']) ?>" required>
                                 </div>
                                 <div class="col-md-3">
                                     <label>Longitude</label>
-                                    <input type="text" name="lng[]" class="form-control" value="<?= htmlspecialchars($m['lng']) ?>" required>
+                                    <input type="text" name="lng[]" class="form-control map-input-lng" value="<?= htmlspecialchars($m['lng']) ?>" required>
                                 </div>
                                 <div class="col-md-2">
                                     <label>Radius (m)</label>
-                                    <input type="number" name="radius[]" class="form-control" value="<?= htmlspecialchars($m['radius'] ?? 50) ?>" required>
+                                    <input type="number" name="radius[]" class="form-control map-input-rad" value="<?= htmlspecialchars($m['radius'] ?? 50) ?>" required>
                                 </div>
                                 <div class="col-md-1 d-flex align-items-end">
                                     <button type="button" class="btn btn-danger btn-remove"><i class="fas fa-trash"></i></button>
@@ -240,6 +246,76 @@ $hariOptions = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('mushola-container');
+    let map = null;
+    let markers = [];
+    let circles = [];
+    let activeRow = null;
+    let defaultLat = -6.7656;
+    let defaultLng = 108.3891;
+    
+    // Inisialisasi peta
+    function initMap() {
+        map = L.map('map').setView([defaultLat, defaultLng], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        map.on('click', function(e) {
+            if (activeRow) {
+                const latInput = activeRow.querySelector('.map-input-lat');
+                const lngInput = activeRow.querySelector('.map-input-lng');
+                latInput.value = e.latlng.lat.toFixed(6);
+                lngInput.value = e.latlng.lng.toFixed(6);
+                updateMapMarkers();
+            } else {
+                alert('Silakan klik ikon "Target/Crosshair" di salah satu baris terlebih dahulu untuk memilih titik.');
+            }
+        });
+        
+        // Paskan view ke lokasi awal (jika ada)
+        setTimeout(updateMapMarkers, 500);
+    }
+    
+    function updateMapMarkers() {
+        if (!map) return;
+        // Bersihkan marker lama
+        markers.forEach(m => map.removeLayer(m));
+        circles.forEach(c => map.removeLayer(c));
+        markers = [];
+        circles = [];
+        
+        const rows = container.querySelectorAll('.mushola-row');
+        let bounds = L.latLngBounds();
+        let hasValidCoords = false;
+        
+        rows.forEach((row, i) => {
+            const name = row.querySelector('.map-input-name').value || `Mushola ${i+1}`;
+            const lat = parseFloat(row.querySelector('.map-input-lat').value);
+            const lng = parseFloat(row.querySelector('.map-input-lng').value);
+            const rad = parseFloat(row.querySelector('.map-input-rad').value) || 50;
+            
+            if (!isNaN(lat) && !isNaN(lng)) {
+                hasValidCoords = true;
+                const latlng = [lat, lng];
+                bounds.extend(latlng);
+                
+                const marker = L.marker(latlng).addTo(map).bindPopup(`<b>${name}</b>`);
+                const circle = L.circle(latlng, {
+                    color: '#28a745',
+                    fillColor: '#28a745',
+                    fillOpacity: 0.2,
+                    radius: rad
+                }).addTo(map);
+                
+                markers.push(marker);
+                circles.push(circle);
+            }
+        });
+        
+        if (hasValidCoords) {
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 18 });
+        }
+    }
     
     function toggleRemoveButtons() {
         const rows = container.querySelectorAll('.mushola-row');
@@ -259,17 +335,48 @@ document.addEventListener('DOMContentLoaded', function() {
         newRow.querySelectorAll('input').forEach(input => {
             if (input.name !== 'radius[]') input.value = '';
         });
+        
+        // Bersihkan status aktif
+        newRow.classList.remove('bg-light', 'border', 'border-info');
+        
         container.appendChild(newRow);
         toggleRemoveButtons();
+        
+        // Langsung jadikan row baru aktif untuk diisi dari peta
+        setActiveRow(newRow);
     });
 
     container.addEventListener('click', function(e) {
         if (e.target.closest('.btn-remove')) {
             e.target.closest('.mushola-row').remove();
             toggleRemoveButtons();
+            updateMapMarkers();
+        } else if (e.target.closest('.btn-pick')) {
+            setActiveRow(e.target.closest('.mushola-row'));
+        }
+    });
+    
+    container.addEventListener('input', function(e) {
+        if (e.target.classList.contains('map-input-lat') || e.target.classList.contains('map-input-lng') || e.target.classList.contains('map-input-rad') || e.target.classList.contains('map-input-name')) {
+            updateMapMarkers();
         }
     });
 
+    function setActiveRow(row) {
+        // Hapus styling aktif dari semua row
+        container.querySelectorAll('.mushola-row').forEach(r => {
+            r.classList.remove('bg-light', 'border-left-info', 'shadow-sm');
+            r.style.borderLeft = '';
+        });
+        
+        activeRow = row;
+        activeRow.classList.add('bg-light', 'shadow-sm');
+        activeRow.style.borderLeft = '4px solid #36b9cc';
+        
+        alert('Baris terpilih! Silakan klik di atas peta untuk mengatur titik lokasinya.');
+    }
+
     toggleRemoveButtons();
+    initMap();
 });
 </script>
