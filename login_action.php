@@ -223,12 +223,17 @@ function get_guru_user(string $username, string $status, int $schoolId = 0): ?ar
 		$schoolWhere = " AND g.id_sekolah=$schoolId";
 	}
 	
+	$statusFilter = " g.status = '$s' ";
+	if (strcasecmp($s, 'Aktif') === 0) {
+		$statusFilter = " (g.status = '$s' OR g.status = 'aktif' OR g.status IS NULL OR g.status = '') ";
+	}
+
 	// Use LEFT JOIN to find guru even if tbl_pengguna record is missing
 	$sql = "SELECT g.no_induk, g.nama_guru, g.status_kepegawaian, p.password $schoolSelect $codeSelect
 			FROM tbl_guru g 
 			LEFT JOIN tbl_pengguna p ON g.no_induk = p.no_induk 
 			$schoolJoin
-			WHERE (g.no_induk = '$u' OR g.nama_guru LIKE '%$u%') AND g.status = '$s'$schoolWhere LIMIT 1";
+			WHERE (g.no_induk = '$u' OR g.nama_guru LIKE '%$u%') AND $statusFilter $schoolWhere LIMIT 1";
 			
 	$result = mysqli_query($conn, $sql);
 	if (!$result) {
@@ -275,12 +280,17 @@ function get_siswa_user(string $username, string $status, int $schoolId = 0): ?a
 		$schoolWhere = " AND s.id_sekolah=$schoolId";
 	}
 
+	$statusFilter = " s.status = '$s' ";
+	if (strcasecmp($s, 'Aktif') === 0) {
+		$statusFilter = " (s.status = '$s' OR s.status = 'aktif' OR s.status IS NULL OR s.status = '') ";
+	}
+
 	// Use LEFT JOIN to find siswa even if tbl_pengguna record is missing
 	$sql = "SELECT s.no_induk, s.nama_siswa, s.kelas, s.jabatan, p.hak_akses, p.password $schoolSelect $codeSelect
 			FROM tbl_siswa s 
 			LEFT JOIN tbl_pengguna p ON s.no_induk = p.no_induk 
 			$schoolJoin
-			WHERE (s.no_induk = '$u' OR s.nama_siswa LIKE '%$u%') AND s.status = '$s'$schoolWhere LIMIT 1";
+			WHERE (s.no_induk = '$u' OR s.nama_siswa LIKE '%$u%') AND $statusFilter $schoolWhere LIMIT 1";
 
 	$result = mysqli_query($conn, $sql);
 	if (!$result) {
