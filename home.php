@@ -148,6 +148,9 @@ include "sidebar.php";
         case 'lihatuser':
           include "user.php";
           break;
+        case 'setting-sholat':
+          include "pages/admin/setting-sholat.php";
+          break;
         case 'user-online':
           include "pages/admin/user-online.php";
           break;
