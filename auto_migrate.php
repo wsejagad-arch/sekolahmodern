@@ -57,7 +57,7 @@ function run_auto_migrations($conn) {
             `status_baca` int(1) DEFAULT 0,
             `tanggal` datetime DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (`id_notif`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;"
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
         
         /* 
         ======================================================================
