@@ -150,6 +150,14 @@ if ($checkPelTable && mysqli_num_rows($checkPelTable) > 0) {
     $hasPelanggaranTable = true;
 }
 
+// Cek apakah guru mengampu mata pelajaran agama
+$isGuruAgama = false;
+$idSekolahGuru = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
+$qGuruAgama = @mysqli_query($conn, "SELECT COUNT(*) as c FROM tbl_mapel_ampu WHERE no_induk='$nip' AND id_sekolah=$idSekolahGuru AND (LOWER(nama_mapel) LIKE '%agama%' OR LOWER(nama_mapel) LIKE '%pabp%' OR LOWER(nama_mapel) LIKE '%pai%')");
+if ($qGuruAgama && $r = mysqli_fetch_assoc($qGuruAgama)) {
+    if ((int)$r['c'] > 0) $isGuruAgama = true;
+}
+
 // Kumpulkan semua kelas yang relevan untuk guru ini:
 // 1. Kelas yang menjadi wali kelas (sudah ada di $waliKelasList)
 // 2. Kelas yang diampu sebagai guru mapel ($kelasAmpu)
@@ -751,6 +759,14 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     <a href="/pages/guru/walikelas.php" class="action-btn-modern primary-hover">
                         <div class="icon-wrap"><i class="bi bi-person-vcard-fill"></i></div>
                         <span>Wali Kelas</span>
+                    </a>
+                <?php endif; ?>
+
+                <!-- Rekap Sholat (Guru Agama) -->
+                <?php if ($isGuruAgama): ?>
+                    <a href="/pages/guru/rekapan-sholat.php" class="action-btn-modern success-hover">
+                        <div class="icon-wrap"><i class="bi bi-mosque"></i></div>
+                        <span>Rekap Sholat</span>
                     </a>
                 <?php endif; ?>
 
@@ -1420,6 +1436,14 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             <a href="/pages/guru/walikelas.php" class="quick-item">
                 <i class="bi bi-person-vcard-fill" style="color:var(--blue)"></i>
                 <span>Wali<br>Kelas</span>
+            </a>
+        <?php endif; ?>
+
+        <!-- Rekap Sholat (Guru Agama) -->
+        <?php if ($isGuruAgama): ?>
+            <a href="/pages/guru/rekapan-sholat.php" class="quick-item">
+                <i class="bi bi-mosque" style="color:var(--green)"></i>
+                <span>Rekap<br>Sholat</span>
             </a>
         <?php endif; ?>
 
