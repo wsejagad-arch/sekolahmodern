@@ -210,6 +210,11 @@ $activeFilterLabel = $kelasFilter !== '' ? $kelasFilter : 'Semua kelas';
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800">Data Siswa</h1>
         <div>
+            <?php if ($kelasFilter !== '' && !empty($rows)): ?>
+            <button type="button" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm mr-1" data-toggle="modal" data-target="#modalNaikKelasMassal">
+                <i class="fas fa-level-up-alt fa-sm text-white-50"></i> Naik Kelas Massal
+            </button>
+            <?php endif; ?>
             <a href="?page=tambah-siswa" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                 <i class="fas fa-plus fa-sm text-white-50"></i> Tambah Data
             </a>
@@ -354,6 +359,7 @@ $activeFilterLabel = $kelasFilter !== '' ? $kelasFilter : 'Semua kelas';
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-center align-middle">
+                                        <button type="button" class="btn btn-sm btn-circle btn-success btn-naik-kelas" data-toggle="modal" data-target="#modalNaikKelasIndividu" data-noinduk="<?= htmlspecialchars($data['no_induk']); ?>" data-nama="<?= htmlspecialchars($data['nama_siswa'], ENT_QUOTES); ?>" title="Naik Kelas/Pindah Kelas"><i class="fas fa-level-up-alt"></i></button>
                                         <a class="btn btn-sm btn-circle btn-primary" href="<?= asset_url('detail-profil-siswa.php') ?>?no_induk=<?= urlencode($data['no_induk']); ?>" title="Lihat Profil"><i class="fas fa-info"></i></a>
                                         <a class="btn btn-sm btn-circle btn-info" href="?page=edit-siswa&no_induk=<?= urlencode($data['no_induk']); ?>" title="Edit Data"><i class="fas fa-edit"></i></a>
                                         <?php
@@ -376,4 +382,89 @@ $activeFilterLabel = $kelasFilter !== '' ? $kelasFilter : 'Semua kelas';
     </div>
 </div>
 
+<!-- Modal Naik Kelas Massal -->
+<?php if ($kelasFilter !== '' && !empty($rows)): ?>
+<div class="modal fade" id="modalNaikKelasMassal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <form action="proses-naik-kelas.php" method="POST">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Naik Kelas Massal</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="aksi" value="massal">
+          <input type="hidden" name="kelas_asal" value="<?= htmlspecialchars($kelasFilter); ?>">
+          <input type="hidden" name="return_url" value="home.php?page=data-siswa&kelas=<?= urlencode($kelasFilter); ?>">
+          <p>Anda akan memindahkan semua siswa di kelas <strong><?= htmlspecialchars($kelasFilter); ?></strong> (Total: <?= (int)$totalRows; ?> siswa) ke kelas baru.</p>
+          <div class="form-group">
+              <label>Pilih Kelas Tujuan:</label>
+              <select name="kelas_tujuan" class="form-control" required>
+                  <option value="">-- Pilih Kelas --</option>
+                  <?php foreach ($kelasOptions as $kelasItem): ?>
+                      <?php if($kelasItem['kelas'] !== $kelasFilter): ?>
+                      <option value="<?= htmlspecialchars($kelasItem['kelas']); ?>"><?= htmlspecialchars($kelasItem['kelas']); ?></option>
+                      <?php endif; ?>
+                  <?php endforeach; ?>
+              </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-info">Proses Pindah Kelas</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<?php endif; ?>
 
+<!-- Modal Naik Kelas Individu -->
+<div class="modal fade" id="modalNaikKelasIndividu" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <form action="proses-naik-kelas.php" method="POST">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Pindah/Naik Kelas Siswa</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="aksi" value="individu">
+          <input type="hidden" name="no_induk" id="nk_no_induk">
+          <input type="hidden" name="return_url" value="home.php?page=data-siswa&kelas=<?= urlencode($kelasFilter); ?>">
+          <p>Pindahkan siswa <strong id="nk_nama_siswa"></strong> ke kelas:</p>
+          <div class="form-group">
+              <select name="kelas_tujuan" class="form-control" required>
+                  <option value="">-- Pilih Kelas --</option>
+                  <?php foreach ($kelasOptions as $kelasItem): ?>
+                      <option value="<?= htmlspecialchars($kelasItem['kelas']); ?>"><?= htmlspecialchars($kelasItem['kelas']); ?></option>
+                  <?php endforeach; ?>
+              </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-success">Proses Pindah</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var btns = document.querySelectorAll('.btn-naik-kelas');
+    btns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var noInduk = this.getAttribute('data-noinduk');
+            var namaSiswa = this.getAttribute('data-nama');
+            document.getElementById('nk_no_induk').value = noInduk;
+            document.getElementById('nk_nama_siswa').textContent = namaSiswa;
+        });
+    });
+});
+</script>

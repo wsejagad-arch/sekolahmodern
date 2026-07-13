@@ -219,7 +219,7 @@ if ($action === 'load_monitoring') {
                                         <select name="new_kelas" class="form-control form-control-sm" required style="border-radius:8px; min-width:180px;">
                                             <option value="">-- Pilih Kelas --</option>
                                             <?php
-                                            $qAllKls = mysqli_query($conn, "SELECT kelas FROM tbl_kelas WHERE id_sekolah=$idSekolah ORDER BY kelas");
+                                            $qAllKls = mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_kelas WHERE id_sekolah=$idSekolah ORDER BY kelas");
                                             while($k = mysqli_fetch_assoc($qAllKls)) {
                                                 if (!in_array($k['kelas'], $ampuh_classes)) {
                                                     echo "<option value='".htmlspecialchars($k['kelas'])."'>".htmlspecialchars($k['kelas'])."</option>";

@@ -283,6 +283,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             nk_write_log($conn, $adminNama . ' melakukan aksi individu (tabel) pada ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' ke target ' . $targetClass);
             $notifType = 'success';
             $notifMsg = 'Berhasil memindahkan siswa ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' ke kelas ' . $targetClass . '. Data diperbarui: ' . $updated;
+        } elseif ($mode === 'clean_kelas') {
+            // Bersihkan kelas ganda dan alumni
+            $q1 = mysqli_query($conn, "UPDATE tbl_siswa SET kelas = NULL WHERE status IN ('Lulus', 'Alumni') AND kelas IS NOT NULL");
+            $affected_alumni = mysqli_affected_rows($conn);
+
+            $q2 = mysqli_query($conn, "
+                SELECT kelas, id_sekolah, COUNT(*) as c, MIN(id) as min_id 
+                FROM tbl_kelas 
+                WHERE id_sekolah = $tenantId
+                GROUP BY kelas, id_sekolah 
+                HAVING c > 1
+            ");
+            $deleted_kelas = 0;
+            if ($q2) {
+                while($r = mysqli_fetch_assoc($q2)) {
+                    $kelasEsc = mysqli_real_escape_string($conn, $r['kelas']);
+                    $min_id = (int) $r['min_id'];
+                    $q_del = mysqli_query($conn, "DELETE FROM tbl_kelas WHERE kelas='$kelasEsc' AND id_sekolah=$tenantId AND id != $min_id");
+                    if ($q_del) {
+                        $deleted_kelas += mysqli_affected_rows($conn);
+                    }
+                }
+            }
+            nk_write_log($conn, $adminNama . ' membersihkan kelas ganda dan mereset kelas alumni.');
+            $notifType = 'success';
+            $notifMsg = "Berhasil mereset $affected_alumni kelas alumni dan menghapus $deleted_kelas kelas ganda.";
         } else {
             throw new Exception('Mode kenaikan kelas tidak valid.');
         }
@@ -351,7 +377,13 @@ ksort($studentsByClass, SORT_NATURAL | SORT_FLAG_CASE);
 <div class="container-fluid">
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 mb-0 text-gray-800"><i class="fas fa-level-up-alt text-primary mr-2"></i>Naik Kelas Siswa</h1>
-        <a href="?page=data-siswa" class="btn btn-sm btn-secondary"><i class="fas fa-arrow-left mr-1"></i>Kembali ke Data Siswa</a>
+        <div class="d-flex gap-2">
+            <form method="post" onsubmit="return confirm('Bersihkan kelas ganda dan reset kelas alumni?');" class="mr-2">
+                <input type="hidden" name="mode" value="clean_kelas">
+                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-broom mr-1"></i>Bersihkan Kelas Ganda</button>
+            </form>
+            <a href="?page=data-siswa" class="btn btn-sm btn-secondary"><i class="fas fa-arrow-left mr-1"></i>Kembali</a>
+        </div>
     </div>
 
     <div class="row mb-3">

@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Fetch Data
 $gurus = mysqli_query($conn, "SELECT no_induk, nama_guru FROM tbl_guru WHERE status='Aktif' AND id_sekolah=$idSekolah ORDER BY nama_guru");
-$kelases = mysqli_query($conn, "SELECT kelas FROM tbl_kelas WHERE id_sekolah=$idSekolah ORDER BY kelas");
+$kelases = mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_kelas WHERE id_sekolah=$idSekolah ORDER BY kelas");
 
 // Mappings grouped by guru
 $mappings = mysqli_query($conn, "
