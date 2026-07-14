@@ -690,3 +690,61 @@
 
 
 
+
+.progress-card-modern {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 16px 20px;
+    min-width: 300px;
+    z-index: 2;
+}
+.progress-header-modern {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+.progress-header-modern .icon-circle {
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; color: #fff;
+}
+.progress-header-modern .title { font-weight: 600; font-size: 0.95rem; color: #fff; }
+.progress-header-modern .pct-badge {
+    background: #fff; color: #1e3a8a;
+    font-weight: 800; font-size: 0.8rem;
+    padding: 4px 10px; border-radius: 20px;
+}
+.progress-track-modern {
+    height: 8px; background: rgba(255,255,255,0.2);
+    border-radius: 6px; overflow: hidden; margin-bottom: 16px;
+}
+.progress-fill-modern {
+    height: 100%; background: #4ade80;
+    border-radius: 6px; transition: width 0.5s ease;
+}
+.progress-footer-modern {
+    display: flex; justify-content: space-between; align-items: center;
+}
+.progress-footer-modern .footer-text {
+    font-size: 0.85rem; color: rgba(255,255,255,0.9); font-weight: 500;
+}
+.avatar-stack {
+    display: flex; align-items: center;
+}
+.avatar-stack .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid #1e3a8a;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700; color: #fff;
+    margin-left: -8px;
+    position: relative;
+}
+.avatar-stack .avatar:first-child { margin-left: 0; }
+.avatar-stack .avatar.more {
+    background-color: rgba(255,255,255,0.2);
+    color: #fff;
+}

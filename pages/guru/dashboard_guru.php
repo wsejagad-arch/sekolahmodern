@@ -640,16 +640,27 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 </div>
                 
                 <?php if ($totalJadwalHari > 0): ?>
-                    <div class="banner-progress-glass">
-                        <div class="progress-header">
-                            <span>Progress Jurnal Harian</span>
-                            <span class="progress-pct"><?= $jurnalPercentage ?>%</span>
+                    <div class="progress-card-modern">
+                        <div class="progress-header-modern">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div class="icon-circle"><i class="bi bi-journal-text"></i></div>
+                                <span class="title">Progress Jurnal Harian</span>
+                            </div>
+                            <span class="pct-badge"><?= $jurnalPercentage ?>%</span>
                         </div>
-                        <div class="progress-track-glass">
-                            <div class="progress-fill-glow" style="width: <?= $jurnalPercentage ?>%;"></div>
+                        <div class="progress-track-modern">
+                            <div class="progress-fill-modern" style="width: <?= $jurnalPercentage ?>%;"></div>
                         </div>
-                        <div class="progress-footer">
-                            <?= $filledJurnalCount ?> dari <?= $totalJadwalHari ?> kelas terselesaikan
+                        <div class="progress-footer-modern">
+                            <div class="footer-text">
+                                <?= $filledJurnalCount ?> dari <?= $totalJadwalHari ?> kelas terselesaikan
+                            </div>
+                            <div class="avatar-stack">
+                                <div class="avatar" style="background-color: #fca5a5;">S</div>
+                                <div class="avatar" style="background-color: #6ee7b7;">I</div>
+                                <div class="avatar" style="background-color: #93c5fd;">S</div>
+                                <div class="avatar more">+<?= max(1, $totalJadwalHari) ?></div>
+                            </div>
                         </div>
                     </div>
                 <?php endif; ?>
