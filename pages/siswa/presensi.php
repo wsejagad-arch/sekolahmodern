@@ -1266,7 +1266,15 @@ function konfirmasiButtonColor($opt)
                         updateKonfirmBtn();
                     },
                     function(err) {
-                        modalMsg.innerHTML = '<span class="text-red-400"><i class="fas fa-exclamation-triangle mr-1"></i>Gagal mendapatkan GPS: ' + err.message + '</span>';
+                        let errMsg = err.message;
+                        if (err.code === 1) {
+                            errMsg = "Akses lokasi ditolak! Izinkan lokasi di pengaturan browser/HP Anda.";
+                        } else if (err.code === 2) {
+                            errMsg = "Sinyal GPS tidak ditemukan. Pastikan GPS/Lokasi HP aktif.";
+                        } else if (err.code === 3) {
+                            errMsg = "Waktu pencarian lokasi habis. Coba klik Refresh Lokasi.";
+                        }
+                        modalMsg.innerHTML = '<span class="text-red-400 text-[11px] font-bold block mt-1"><i class="fas fa-exclamation-triangle mr-1"></i>Gagal GPS: ' + errMsg + '</span>';
                     }, {
                         enableHighAccuracy: true,
                         timeout: 15000,
