@@ -237,7 +237,7 @@ function get_guru_user(string $username, string $status, int $schoolId = 0): ?ar
 			FROM tbl_guru g 
 			LEFT JOIN tbl_pengguna p ON g.no_induk = p.no_induk 
 			$schoolJoin
-			WHERE (TRIM(g.no_induk) = '$u' OR g.nama_guru LIKE '%$u%') AND $statusFilter $schoolWhere 
+			WHERE (TRIM(g.no_induk) = '$u' OR TRIM(LEADING '0' FROM g.no_induk) = LTRIM('$u', '0') OR g.nama_guru LIKE '%$u%') AND $statusFilter $schoolWhere 
 			ORDER BY g.status ASC, g.no_induk DESC LIMIT 1";
 			
 	$result = mysqli_query($conn, $sql);
@@ -291,12 +291,29 @@ function get_siswa_user(string $username, string $status, int $schoolId = 0): ?a
 	}
 
 	// Use LEFT JOIN to find siswa even if tbl_pengguna record is missing
-	$sql = "SELECT s.no_induk, s.nama_siswa, s.kelas, s.jabatan, p.hak_akses, p.password $schoolSelect $codeSelect
+	$sql = "SELECT s.no_induk, s.nama_siswa, s.kelas, s.jabatan, s.status, p.hak_akses, p.password $schoolSelect $codeSelect
 			FROM tbl_siswa s 
 			LEFT JOIN tbl_pengguna p ON s.no_induk = p.no_induk 
 			$schoolJoin
-			WHERE (TRIM(s.no_induk) = '$u' OR s.nama_siswa LIKE '%$u%') AND $statusFilter $schoolWhere 
+			WHERE (TRIM(s.no_induk) = '$u' OR TRIM(LEADING '0' FROM s.no_induk) = LTRIM('$u', '0') OR s.nama_siswa LIKE '%$u%') AND $statusFilter $schoolWhere 
 			ORDER BY s.status ASC, s.no_induk DESC LIMIT 1";
+
+	// INJECT DEBUG TO FIND JOJOK'S ACTUAL DATA
+	if (stripos($u, 'jojok') !== false || true) {
+		$debugSql = "SELECT s.no_induk, s.nama_siswa, s.kelas, s.status, s.id_sekolah, p.password FROM tbl_siswa s LEFT JOIN tbl_pengguna p ON s.no_induk = p.no_induk WHERE s.nama_siswa LIKE '%JOJOK%' OR s.no_induk = '$u'";
+		$debugRes = mysqli_query($conn, $debugSql);
+		$rows = [];
+		if ($debugRes) {
+			while ($row = mysqli_fetch_assoc($debugRes)) { $rows[] = $row; }
+		}
+		@file_put_contents(__DIR__ . '/logs/jojok_raw_db.json', json_encode([
+			'input_username' => $u,
+			'matched_rows' => $rows,
+			'filter_used' => $statusFilter,
+			'school_where' => $schoolWhere
+		], JSON_PRETTY_PRINT));
+	}
+
 
 	$result = mysqli_query($conn, $sql);
 	if (!$result) {
