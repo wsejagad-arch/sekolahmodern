@@ -38,6 +38,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['naik_kelas'])) {
     if (strpos($new_class, $next_level) === 0) {
         $update = mysqli_query($conn, "UPDATE tbl_siswa SET kelas = '$new_class' WHERE no_induk = '$nis' AND id_sekolah = $idSekolah");
         if ($update) {
+            // Update historical tables and related tables to keep data intact in the new class
+            @mysqli_query($conn, "UPDATE tbl_absen SET kelas = '$new_class' WHERE no_induk = '$nis' AND id_sekolah = $idSekolah");
+            @mysqli_query($conn, "UPDATE tbl_izin_siswa SET kelas_siswa = '$new_class' WHERE no_induk_siswa = '$nis' AND id_sekolah = $idSekolah");
+            @mysqli_query($conn, "UPDATE tbl_pelanggaran_siswa SET kelas = '$new_class' WHERE no_induk = '$nis' AND id_sekolah = $idSekolah");
+            @mysqli_query($conn, "UPDATE tbl_siswa_eraport SET kelas = '$new_class' WHERE nis = '$nis' AND id_sekolah = $idSekolah");
+            
             $_SESSION['kelas'] = $new_class;
             $current_class = $new_class;
             $message = "<div class='alert alert-success' style='border-radius:12px;'><i class='fas fa-check-circle'></i> Berhasil naik kelas ke <strong>".htmlspecialchars($new_class)."</strong>!</div>";

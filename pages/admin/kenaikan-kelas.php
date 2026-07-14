@@ -74,6 +74,24 @@ function nk_write_log($conn, $message)
     @mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES ('$now', '$safeMessage')");
 }
 
+function nk_cascade_class_update($conn, $tujuanEsc, $asalEsc = null, $noIndukEsc = null)
+{
+    $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
+    $tenantFilter = function_exists('mt_column_exists') && mt_column_exists($conn, 'tbl_siswa', 'id_sekolah') ? " AND id_sekolah={$tenantId}" : "";
+    
+    if ($noIndukEsc !== null) {
+        @mysqli_query($conn, "UPDATE tbl_absen SET kelas = '$tujuanEsc' WHERE no_induk = '$noIndukEsc' {$tenantFilter}");
+        @mysqli_query($conn, "UPDATE tbl_izin_siswa SET kelas_siswa = '$tujuanEsc' WHERE no_induk_siswa = '$noIndukEsc' " . str_replace("id_sekolah", "id_sekolah", $tenantFilter));
+        @mysqli_query($conn, "UPDATE tbl_pelanggaran_siswa SET kelas = '$tujuanEsc' WHERE no_induk = '$noIndukEsc' {$tenantFilter}");
+        @mysqli_query($conn, "UPDATE tbl_siswa_eraport SET kelas = '$tujuanEsc' WHERE nis = '$noIndukEsc' {$tenantFilter}");
+    } elseif ($asalEsc !== null) {
+        @mysqli_query($conn, "UPDATE tbl_absen SET kelas = '$tujuanEsc' WHERE kelas = '$asalEsc' {$tenantFilter}");
+        @mysqli_query($conn, "UPDATE tbl_izin_siswa SET kelas_siswa = '$tujuanEsc' WHERE kelas_siswa = '$asalEsc' " . str_replace("id_sekolah", "id_sekolah", $tenantFilter));
+        @mysqli_query($conn, "UPDATE tbl_pelanggaran_siswa SET kelas = '$tujuanEsc' WHERE kelas = '$asalEsc' {$tenantFilter}");
+        @mysqli_query($conn, "UPDATE tbl_siswa_eraport SET kelas = '$tujuanEsc' WHERE kelas = '$asalEsc' {$tenantFilter}");
+    }
+}
+
 function nk_graduate_student($conn, $no_induk, $tenantId)
 {
     $noIndukEsc = nk_esc($conn, $no_induk);
@@ -144,6 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$q) {
                     throw new Exception('Gagal memproses kelas ' . $asal . ': ' . mysqli_error($conn));
                 }
+                nk_cascade_class_update($conn, $tujuanEsc, $asalEsc);
                 $totalUpdated += mysqli_affected_rows($conn);
             }
 
@@ -189,6 +208,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$q) {
                 throw new Exception('Gagal memindahkan siswa per kelas: ' . mysqli_error($conn));
             }
+            
+            nk_cascade_class_update($conn, $targetEsc, $sourceEsc);
 
             $updated = mysqli_affected_rows($conn);
             nk_write_log($conn, $adminNama . ' memindahkan kelas ' . $sourceClass . ' ke ' . $targetClass . ', total siswa: ' . $updated);
@@ -230,6 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$q) {
                     throw new Exception('Gagal memindahkan siswa: ' . mysqli_error($conn));
                 }
+                nk_cascade_class_update($conn, $targetEsc, null, $noIndukEsc);
                 $updated = mysqli_affected_rows($conn);
                 $notifMsg = 'Berhasil memindahkan siswa ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' ke kelas ' . $targetClass . '. Data diperbarui: ' . $updated;
             }
@@ -274,8 +296,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $q = mysqli_query($conn, "UPDATE tbl_siswa SET $setSql WHERE no_induk = '$noIndukEsc'");
                 if (!$q) {
-                    throw new Exception('Gagal memindahkan siswa: ' . mysqli_error($conn));
+                    throw new Exception('Gagal memindahkan siswa (tabel): ' . mysqli_error($conn));
                 }
+                nk_cascade_class_update($conn, $targetEsc, null, $noIndukEsc);
                 $updated = mysqli_affected_rows($conn);
                 $notifMsg = 'Berhasil memindahkan siswa ' . ($rowSiswa['nama_siswa'] ?? $noInduk) . ' ke kelas ' . $targetClass . '. Data diperbarui: ' . $updated;
             }

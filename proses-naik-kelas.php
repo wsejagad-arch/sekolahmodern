@@ -51,6 +51,12 @@ if ($aksi === 'massal') {
     $update = mysqli_query($conn, $query);
 
     if ($update) {
+        // Update historical tables and related tables to keep data intact in the new class
+        @mysqli_query($conn, "UPDATE tbl_absen SET kelas = '$kelasTujuanEsc' WHERE kelas = '$kelasAsalEsc' {$tenantSiswa}");
+        @mysqli_query($conn, "UPDATE tbl_izin_siswa SET kelas_siswa = '$kelasTujuanEsc' WHERE kelas_siswa = '$kelasAsalEsc' " . str_replace("id_sekolah", "id_sekolah", $tenantSiswa));
+        @mysqli_query($conn, "UPDATE tbl_pelanggaran_siswa SET kelas = '$kelasTujuanEsc' WHERE kelas = '$kelasAsalEsc' {$tenantSiswa}");
+        @mysqli_query($conn, "UPDATE tbl_siswa_eraport SET kelas = '$kelasTujuanEsc' WHERE kelas = '$kelasAsalEsc' {$tenantSiswa}");
+        
         $jml = mysqli_affected_rows($conn);
         $isilog = mysqli_real_escape_string($conn, "$namaAdmin memindahkan $jml siswa dari kelas $kelas_asal ke $kelas_tujuan");
         mysqli_query($conn, "INSERT INTO tbl_log (waktu, isi_log) VALUES ('$tglskr', '$isilog')");
@@ -74,6 +80,12 @@ if ($aksi === 'massal') {
     $update = mysqli_query($conn, $query);
 
     if ($update) {
+        // Update historical tables and related tables to keep data intact in the new class
+        @mysqli_query($conn, "UPDATE tbl_absen SET kelas = '$kelasTujuanEsc' WHERE no_induk = '$noIndukEsc' {$tenantSiswa}");
+        @mysqli_query($conn, "UPDATE tbl_izin_siswa SET kelas_siswa = '$kelasTujuanEsc' WHERE no_induk_siswa = '$noIndukEsc' " . str_replace("id_sekolah", "id_sekolah", $tenantSiswa));
+        @mysqli_query($conn, "UPDATE tbl_pelanggaran_siswa SET kelas = '$kelasTujuanEsc' WHERE no_induk = '$noIndukEsc' {$tenantSiswa}");
+        @mysqli_query($conn, "UPDATE tbl_siswa_eraport SET kelas = '$kelasTujuanEsc' WHERE nis = '$noIndukEsc' {$tenantSiswa}");
+        
         $isilog = mysqli_real_escape_string($conn, "$namaAdmin memindahkan siswa NIS $no_induk ke kelas $kelas_tujuan");
         mysqli_query($conn, "INSERT INTO tbl_log (waktu, isi_log) VALUES ('$tglskr', '$isilog')");
         

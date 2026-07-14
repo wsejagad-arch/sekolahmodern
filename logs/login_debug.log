@@ -325,3 +325,5 @@
 {"msg":"guru_check","username":"198808072022211011","guru_found":true,"guru_password_hash":"827ccb0eea8a706c4c34","guru_status":"N\/A","password_verify_result":true,"password_empty_check":false}
 {"msg":"guru_login_success","username":"198808072022211011"}
 [koneksi_local.php] Connection failed: The requested address is not valid in its context (Tried hosts: 127.0.0.1, localhost, ::1, User: root, DB: sijurnal, Port: 3306)
+{"timestamp":"2026-07-14 07:51:01","ip":"unknown","post_keys":[],"username":"MISSING","password_length":0,"hak_akses":"MISSING"}
+{"error":"csrf_mismatch","timestamp":"2026-07-14 07:51:01","session_token":"NOT_SET","post_token":""}
