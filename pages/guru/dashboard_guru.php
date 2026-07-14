@@ -936,7 +936,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                             <div class="timeline-dot"></div>
                             <div class="content-col">
                                 <strong><?= htmlspecialchars($j['nama_mapel']) ?></strong>
-                                <span>Kelas <?= htmlspecialchars($j['kelas']) ?></span>
+                                <span><i class="bi bi-easel2" style="font-size: 0.8rem; margin-right: 4px;"></i> Kelas <?= htmlspecialchars($j['kelas']) ?></span>
                             </div>
                         </div>
                     <?php endforeach; ?>
