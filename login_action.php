@@ -232,12 +232,13 @@ function get_guru_user(string $username, string $status, int $schoolId = 0): ?ar
 		$statusFilter = " (g.status = '$s' OR g.status = 'aktif' OR g.status IS NULL OR g.status = '') ";
 	}
 
+	$u_no_zeros = mysqli_real_escape_string($conn, ltrim($username, '0'));
 	// Use LEFT JOIN to find guru even if tbl_pengguna record is missing
 	$sql = "SELECT g.no_induk, g.nama_guru, g.status_kepegawaian, p.password $schoolSelect $codeSelect
 			FROM tbl_guru g 
 			LEFT JOIN tbl_pengguna p ON g.no_induk = p.no_induk 
 			$schoolJoin
-			WHERE (TRIM(g.no_induk) = '$u' OR TRIM(LEADING '0' FROM g.no_induk) = LTRIM('$u', '0') OR g.nama_guru LIKE '%$u%') AND $statusFilter $schoolWhere 
+			WHERE (TRIM(g.no_induk) = '$u' OR TRIM(LEADING '0' FROM g.no_induk) = '$u_no_zeros' OR g.nama_guru LIKE '%$u%') AND $statusFilter $schoolWhere 
 			ORDER BY g.status ASC, g.no_induk DESC LIMIT 1";
 			
 	$result = mysqli_query($conn, $sql);
