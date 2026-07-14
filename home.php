@@ -460,7 +460,7 @@ include "sidebar.php";
         <!-- Kartu ucapan selamat datang -->
         <div class="col-md-12 mb-4">
           <div class="card border-0 shadow-sm" style="border-radius:18px; background:#fff; overflow:hidden;">
-            <div style="height:5px; background:linear-gradient(90deg,#1a3c6e,#0ea5e9,#8b5cf6,#ec4899);"></div>
+            <div style="height:5px; background:#ffffff;"></div>
             <div class="card-body py-4 px-4">
               <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap:12px;">
                 <div>
@@ -500,7 +500,7 @@ include "sidebar.php";
                   </p>
                 </div>
                 <div style="display:flex; align-items:center; gap:10px;">
-                  <div style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#1a3c6e,#0ea5e9); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 14px rgba(14,165,233,0.3);">
+                  <div style="width:56px; height:56px; border-radius:50%; background:#ffffff; display:flex; align-items:center; justify-content:center; ">
                     <i class="fas fa-school" style="font-size:24px; color:#fff;"></i>
                   </div>
                 </div>
@@ -512,7 +512,7 @@ include "sidebar.php";
         <?php if ((int)($_SESSION['hak_akses'] ?? 0) === 2): ?>
         <div class="col-md-12 mb-4">
           <div class="card border-0 shadow-sm" style="border-radius:18px; background:#fff; overflow:hidden;">
-            <div style="height:5px; background:linear-gradient(90deg,#0f766e,#14b8a6,#22c55e);"></div>
+            <div style="height:5px; background:#ffffff;"></div>
             <div class="card-body py-3 px-4">
               <div style="font-size:12px; font-weight:800; color:#0f766e; letter-spacing:0.8px; text-transform:uppercase; margin-bottom:10px;">Aksi Cepat Dasbor Guru</div>
               <div class="d-flex flex-wrap" style="gap:10px;">
@@ -545,7 +545,7 @@ include "sidebar.php";
         <?php if ((int)($_SESSION['hak_akses'] ?? 0) === 1): ?>
         <div class="col-md-12 mb-4">
           <div class="card border-0 shadow-sm" style="border-radius:18px; background:#fff; overflow:hidden;">
-            <div style="height:5px; background:linear-gradient(90deg,#be123c,#ef4444,#f59e0b);"></div>
+            <div style="height:5px; background:#ffffff;"></div>
             <div class="card-body py-3 px-4">
               <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:10px;">
                 <div>
@@ -563,7 +563,7 @@ include "sidebar.php";
                 <?php endif; ?>
                 <?php foreach ($aduanDashboardRows as $aduanDash): ?>
                   <div class="col-lg-6 mb-3">
-                    <div class="p-3" style="border:1px solid #fee2e2; border-radius:14px; background:linear-gradient(135deg,#fff1f2,#ffffff); height:100%;">
+                    <div class="p-3" style="border:1px solid #fee2e2; border-radius:14px; background:#ffffff; height:100%;">
                       <div class="d-flex justify-content-between align-items-start" style="gap:10px;">
                         <div>
                           <div style="font-size:11px;color:#be123c;font-weight:800;"><?= htmlspecialchars($aduanDash['kode_aduan']); ?> • <?= htmlspecialchars(strtoupper($aduanDash['prioritas'])); ?></div>
@@ -588,7 +588,7 @@ include "sidebar.php";
 
         <div class="col-md-12 mb-4">
           <div class="card border-0 shadow-sm" style="border-radius:18px; background:#fff; overflow:hidden;">
-            <div style="height:5px; background:linear-gradient(90deg,#0f766e,#14b8a6,#22c55e);"></div>
+            <div style="height:5px; background:#ffffff;"></div>
             <div class="card-body py-3 px-4">
               <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:10px;">
                 <div>
@@ -609,7 +609,7 @@ include "sidebar.php";
                   $unitPalette = agenda_unit_palette((string)$agendaItem['dibuat_unit']);
                   ?>
                   <div class="col-lg-6 mb-3" style="opacity:0; transform:translateY(8px); animation:agendaHomeCardIn .45s ease forwards; animation-delay:<?= (int)$indexAgendaHome * 70; ?>ms;">
-                    <div class="p-3" style="border:1px solid #ccfbf1; border-radius:14px; background:linear-gradient(135deg,#f0fdfa,#ffffff); height:100%;">
+                    <div class="p-3" style="border:1px solid #ccfbf1; border-radius:14px; background:#ffffff; height:100%;">
                       <div class="d-flex justify-content-between align-items-start" style="gap:10px;">
                         <div>
                           <div style="font-size:13px; font-weight:800; color:#0f172a;"><?= htmlspecialchars($agendaItem['judul']); ?></div>
@@ -637,9 +637,9 @@ include "sidebar.php";
                   </div>
                 <?php endforeach; ?>
               </div>
-              <div id="agendaHomeEmpty" class="mt-3 p-3" style="border:1px solid #99f6e4; border-radius:14px; color:#475569; background:linear-gradient(135deg,#ffffff,#f0fdfa); box-shadow:0 10px 24px -18px rgba(15,118,110,.7); <?= empty($agendaItemsHome) ? '' : 'display:none;'; ?>">
+              <div id="agendaHomeEmpty" class="mt-3 p-3" style="border:1px solid #99f6e4; border-radius:14px; color:#475569; background:#ffffff;  <?= empty($agendaItemsHome) ? '' : 'display:none;'; ?>">
                 <div class="d-flex align-items-start" style="gap:12px;">
-                  <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg,#14b8a6,#0ea5e9); color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 20px -15px rgba(14,165,233,.9); flex-shrink:0;">
+                  <div style="width:42px; height:42px; border-radius:12px; background:#ffffff; color:#fff; display:flex; align-items:center; justify-content:center;  flex-shrink:0;">
                     <i class="fas fa-calendar-day"></i>
                   </div>
                   <div>
@@ -668,7 +668,7 @@ include "sidebar.php";
 
         <div class="row mx-auto mb-4">
           <div class="col-12">
-            <div class="card border-0 shadow-sm position-relative" style="border-radius:24px; overflow:hidden; background:linear-gradient(135deg,#0f172a 0%,#1d4ed8 52%,#7c3aed 100%); color:#fff;">
+            <div class="card border-0 shadow-sm position-relative" style="border-radius:24px; overflow:hidden; background:#ffffff; color:#fff;">
               <div style="position:absolute; inset:0; background:
                 radial-gradient(circle at 12% 18%, rgba(255,255,255,.15), transparent 22%),
                 radial-gradient(circle at 88% 24%, rgba(255,255,255,.18), transparent 18%),
@@ -710,8 +710,8 @@ include "sidebar.php";
                   </div>
 
                   <div style="flex:0 0 360px; max-width:100%;">
-                    <div style="height:100%; border-radius:22px; background:rgba(255,255,255,.96); color:#0f172a; box-shadow:0 22px 50px rgba(15,23,42,.22); overflow:hidden; position:relative;">
-                      <div style="height:10px; background:linear-gradient(90deg,#f59e0b,#ef4444,#8b5cf6);"></div>
+                    <div style="height:100%; border-radius:22px; background:rgba(255,255,255,.96); color:#0f172a;  overflow:hidden; position:relative;">
+                      <div style="height:10px; background:#ffffff;"></div>
                       <div style="padding:24px 22px 22px; position:relative;">
                         <div style="position:absolute; top:-24px; right:-24px; width:120px; height:120px; border-radius:50%; background:radial-gradient(circle, rgba(30,64,175,.12), rgba(30,64,175,0) 65%);"></div>
                         <div style="text-align:center; padding-bottom:14px; border-bottom:1px solid #e2e8f0; margin-bottom:14px;">
@@ -720,7 +720,7 @@ include "sidebar.php";
                         </div>
 
                         <div style="text-align:center; margin-bottom:16px;">
-                          <div style="width:74px; height:74px; margin:0 auto 12px; border-radius:22px; background:#f8fafc; border:1px solid #dbeafe; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 24px -18px rgba(79,70,229,.55);">
+                          <div style="width:74px; height:74px; margin:0 auto 12px; border-radius:22px; background:#f8fafc; border:1px solid #dbeafe; display:flex; align-items:center; justify-content:center; ">
                             <i class="fas fa-user-graduate" style="font-size:26px; color:#4f46e5;"></i>
                           </div>
                           <div style="font-size:12px; color:#64748b; font-weight:800; text-transform:uppercase; letter-spacing:1px;">Nama Siswa</div>
@@ -758,7 +758,7 @@ include "sidebar.php";
 
                         <div style="padding:12px 14px; border-radius:16px; background:#f8fafc; border:1px solid #dbeafe; font-size:13px; color:#334155; line-height:1.55;">
                           <?= htmlspecialchars($lembaga['nmsekolah'] ?? 'Sekolah'); ?> menampilkan poster ringkas ini sebagai apresiasi kehadiran siswa paling disiplin pada periode berjalan.
-                          <div style="margin-top:8px; display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:linear-gradient(135deg,#eff6ff,#f8fafc); border:1px solid #bfdbfe; color:#1d4ed8; font-size:12px; font-weight:800;">
+                          <div style="margin-top:8px; display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background:#ffffff; border:1px solid #bfdbfe; color:#1d4ed8; font-size:12px; font-weight:800;">
                             <i class="fas fa-check-circle" style="font-size:11px;"></i>
                             @sman1sumber.rembang
                           </div>
@@ -774,7 +774,7 @@ include "sidebar.php";
 
         <div class="row mx-auto mb-4">
           <div class="col-12">
-            <div class="card border-0 shadow-sm" style="border-radius:24px; background:linear-gradient(135deg,#ffffff 0%,#f8fafc 100%); overflow:hidden;">
+            <div class="card border-0 shadow-sm" style="border-radius:24px; background:#ffffff; overflow:hidden;">
               <div class="card-body p-4 p-lg-5">
                 <div class="d-flex flex-column flex-lg-row align-items-start justify-content-between mb-4" style="gap:12px;">
                   <div>
@@ -795,7 +795,7 @@ include "sidebar.php";
 
                 <div class="row">
                   <div class="col-lg-6 mb-4 mb-lg-0">
-                    <div style="height:100%; padding:18px; border-radius:22px; background:linear-gradient(135deg,#f0fdf4,#ffffff); border:1px solid #bbf7d0;">
+                    <div style="height:100%; padding:18px; border-radius:22px; background:#ffffff; border:1px solid #bbf7d0;">
                       <div class="d-flex align-items-center mb-3" style="gap:10px;">
                         <div style="width:42px; height:42px; border-radius:14px; background:#ecfdf5; border:1px solid #bbf7d0; display:flex; align-items:center; justify-content:center; color:#16a34a; flex-shrink:0;">
                           <i class="fas fa-user-check"></i>
@@ -808,7 +808,7 @@ include "sidebar.php";
 
                       <?php if (!empty($posterApresiasiTanpaAlpha)): ?>
                         <?php foreach ($posterApresiasiTanpaAlpha as $index => $item): ?>
-                          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-radius:16px; background:#ffffff; border:1px solid #dcfce7; margin-bottom:10px; box-shadow:0 8px 20px -16px rgba(22,163,74,.4);">
+                          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-radius:16px; background:#ffffff; border:1px solid #dcfce7; margin-bottom:10px; ">
                             <div style="display:flex; align-items:center; gap:12px; min-width:0;">
                               <div style="width:42px; height:42px; border-radius:14px; background:#ecfdf5; border:1px solid #bbf7d0; display:flex; align-items:center; justify-content:center; color:#16a34a; font-size:15px; font-weight:900; flex-shrink:0;">
                                 <?= $index + 1; ?>
@@ -834,7 +834,7 @@ include "sidebar.php";
                   </div>
 
                   <div class="col-lg-6">
-                    <div style="height:100%; padding:18px; border-radius:22px; background:linear-gradient(135deg,#eff6ff,#ffffff); border:1px solid #bfdbfe;">
+                    <div style="height:100%; padding:18px; border-radius:22px; background:#ffffff; border:1px solid #bfdbfe;">
                       <div class="d-flex align-items-center mb-3" style="gap:10px;">
                         <div style="width:42px; height:42px; border-radius:14px; background:#eff6ff; border:1px solid #bfdbfe; display:flex; align-items:center; justify-content:center; color:#1d4ed8; flex-shrink:0;">
                           <i class="fas fa-heartbeat"></i>
@@ -847,7 +847,7 @@ include "sidebar.php";
 
                       <?php if (!empty($posterApresiasiTersehat)): ?>
                         <?php foreach ($posterApresiasiTersehat as $index => $item): ?>
-                          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-radius:16px; background:#ffffff; border:1px solid #dbeafe; margin-bottom:10px; box-shadow:0 8px 20px -16px rgba(29,78,216,.38);">
+                          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-radius:16px; background:#ffffff; border:1px solid #dbeafe; margin-bottom:10px; ">
                             <div style="display:flex; align-items:center; gap:12px; min-width:0;">
                               <div style="width:42px; height:42px; border-radius:14px; background:#eff6ff; border:1px solid #bfdbfe; display:flex; align-items:center; justify-content:center; color:#1d4ed8; font-size:15px; font-weight:900; flex-shrink:0;">
                                 <?= $index + 1; ?>
@@ -889,7 +889,7 @@ include "sidebar.php";
                   </div>
                   <div style="font-size:11px; color:#94a3b8; margin-top:4px;">Tenaga pengajar terdaftar</div>
                 </div>
-                <div style="width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg,#dbeafe,#bfdbfe); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <div style="width:48px; height:48px; border-radius:12px; background:#ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                   <i class="fas fa-chalkboard-teacher" style="font-size:20px; color:#3b82f6;"></i>
                 </div>
               </div>
@@ -909,7 +909,7 @@ include "sidebar.php";
                   </div>
                   <div style="font-size:11px; color:#94a3b8; margin-top:4px;">Mata pelajaran aktif</div>
                 </div>
-                <div style="width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg,#d1fae5,#a7f3d0); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <div style="width:48px; height:48px; border-radius:12px; background:#ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                   <i class="fas fa-book-open" style="font-size:20px; color:#10b981;"></i>
                 </div>
               </div>
@@ -929,7 +929,7 @@ include "sidebar.php";
                   </div>
                   <div style="font-size:11px; color:#94a3b8; margin-top:4px;">Akun admin aktif</div>
                 </div>
-                <div style="width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg,#fee2e2,#fecaca); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <div style="width:48px; height:48px; border-radius:12px; background:#ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                   <i class="fas fa-users" style="font-size:20px; color:#ef4444;"></i>
                 </div>
               </div>
@@ -949,7 +949,7 @@ include "sidebar.php";
                   </div>
                   <div style="font-size:11px; color:#94a3b8; margin-top:4px;">Peserta didik terdaftar</div>
                 </div>
-                <div style="width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg,#ede9fe,#ddd6fe); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <div style="width:48px; height:48px; border-radius:12px; background:#ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                   <i class="fas fa-user-graduate" style="font-size:20px; color:#6366f1;"></i>
                 </div>
               </div>
@@ -969,7 +969,7 @@ include "sidebar.php";
                   </div>
                   <div style="font-size:11px; color:#94a3b8; margin-top:4px;">Rombongan belajar aktif</div>
                 </div>
-                <div style="width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg,#fef3c7,#fde68a); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <div style="width:48px; height:48px; border-radius:12px; background:#ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                   <i class="fas fa-chalkboard" style="font-size:20px; color:#f59e0b;"></i>
                 </div>
               </div>
@@ -1048,7 +1048,7 @@ include "sidebar.php";
         <!-- Grafik Perkembangan Jurnal -->
         <div class="col-lg-8 mb-4">
           <div class="card border-0 shadow" style="border-radius: 20px; overflow: hidden;">
-            <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-header border-0 py-3" style="background: #ffffff;">
               <h6 class="m-0 font-weight-bold text-white">
                 <i class="fas fa-chart-line me-2"></i>Perkembangan Pengisian Jurnal
               </h6>
@@ -1064,7 +1064,7 @@ include "sidebar.php";
         <!-- Status Kepegawaian Guru -->
         <div class="col-lg-4 mb-4">
           <div class="card border-0 shadow" style="border-radius: 20px; overflow: hidden;">
-            <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+            <div class="card-header border-0 py-3" style="background: #ffffff;">
               <h6 class="m-0 font-weight-bold text-white">
                 <i class="fas fa-chart-pie me-2"></i>Status Kepegawaian
               </h6>
@@ -1083,7 +1083,7 @@ include "sidebar.php";
         <!-- Kehadiran Siswa per Kelas -->
         <div class="col-lg-6 mb-4">
           <div class="card border-0 shadow" style="border-radius: 20px; overflow: hidden;">
-            <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="card-header border-0 py-3" style="background: #ffffff;">
               <h6 class="m-0 font-weight-bold text-white">
                 <i class="fas fa-chart-bar me-2"></i>Tingkat Kehadiran Siswa
               </h6>
@@ -1099,7 +1099,7 @@ include "sidebar.php";
         <!-- Aktivitas Guru -->
         <div class="col-lg-6 mb-4">
           <div class="card border-0 shadow" style="border-radius: 20px; overflow: hidden;">
-            <div class="card-header border-0 py-3" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="card-header border-0 py-3" style="background: #ffffff;">
               <h6 class="m-0 font-weight-bold text-white">
                 <i class="fas fa-chart-area me-2"></i>Aktivitas Guru
               </h6>
@@ -1116,7 +1116,7 @@ include "sidebar.php";
       <!-- Summary Stats -->
       <div class="row mx-auto mb-4">
         <div class="col-12">
-          <div class="card border-0 shadow" style="border-radius: 20px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+          <div class="card border-0 shadow" style="border-radius: 20px; background: #ffffff;">
             <div class="card-body p-4">
               <div class="row text-center">
                 <div class="col-md-3 mb-3 mb-md-0">
@@ -1646,7 +1646,7 @@ include "sidebar.php";
         const targetAt = escapeHtml(item.target_at || '');
 
         return `<div class="col-lg-6 mb-3" style="opacity:0; transform:translateY(8px); animation:agendaHomeCardIn .45s ease forwards; animation-delay:${idx * 70}ms;">
-                  <div class="p-3" style="border:1px solid #ccfbf1; border-radius:14px; background:linear-gradient(135deg,#f0fdfa,#ffffff); height:100%;">
+                  <div class="p-3" style="border:1px solid #ccfbf1; border-radius:14px; background:#ffffff; height:100%;">
                     <div class="d-flex justify-content-between align-items-start" style="gap:10px;">
                       <div>
                         <div style="font-size:13px; font-weight:800; color:#0f172a;">${title}</div>
@@ -1722,3 +1722,4 @@ include "sidebar.php";
   </script>
 
   <?php include "footer.php"; ?>
+

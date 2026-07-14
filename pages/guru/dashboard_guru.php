@@ -634,7 +634,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     <?php if ($totalNotifCount > 0): ?><span style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#ef4444;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:800;"><?= min($totalNotifCount, 9) ?></span><?php endif; ?>
                 </div>
                 <!-- Notif Dropdown -->
-                <div id="notifDropdownDesktop" class="topbar-dropdown" style="position:absolute;top:50px;right:0;width:320px;background:#fff;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.2);max-height:400px;overflow-y:auto;z-index:1000;display:none;" onclick="event.stopPropagation()">
+                <div id="notifDropdownDesktop" class="topbar-dropdown" style="position:absolute;top:50px;right:0;width:320px;background:#fff;border-radius:12px;max-height:400px;overflow-y:auto;z-index:1000;display:none;" onclick="event.stopPropagation()">
                     <div style="padding:14px;border-bottom:1px solid #f1f5f9;font-weight:700;font-size:0.95rem;color:#1e293b;">Notifikasi</div>
                     <?php if ($totalNotifCount > 0): ?>
                         <?php foreach ($guru_all_notifications as $notif): ?>
@@ -1228,7 +1228,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             width: 320px;
             background: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+            
             border: 1px solid rgba(0, 0, 0, 0.05);
             z-index: 9999;
             display: none;
@@ -1585,7 +1585,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                                 $mapelJadwal = (string)($j['nama_mapel'] ?? '');
                                 $isJurnalTerisi = isset($jurnalStatusByMapel[$idMapel]);
                             ?>
-                                <div class="premium-card d-flex flex-column" style="padding: 18px; border-radius: 16px; border-left: 4px solid <?= $isJurnalTerisi ? '#10b981' : '#f59e0b'; ?>; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
+                                <div class="premium-card d-flex flex-column" style="padding: 18px; border-radius: 16px; border-left: 4px solid <?= $isJurnalTerisi ? '#10b981' : '#f59e0b'; ?>; background: #fff; ">
                                     <div class="d-flex justify-content-between align-items-start mb-3">
                                         <div>
                                             <h6 class="mb-1" style="font-weight: 700; color: #0f172a; font-size: 15px; display: flex; align-items: center; gap: 8px;">
@@ -1611,7 +1611,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                                     
                                     <div class="d-flex align-items-center" style="gap: 10px; margin-top: 4px;">
                                         <button class="btn btn-open-schedule-journal flex-grow-1" type="button" data-id="<?= $idMapel; ?>" 
-                                                style="background: <?= $isJurnalTerisi ? '#10b981' : 'linear-gradient(135deg, #3b82f6, #2563eb)'; ?>; color: #fff; border-radius: 12px; padding: 10px 0; border: none; font-weight: 600; font-size: 13px; box-shadow: 0 4px 12px <?= $isJurnalTerisi ? 'rgba(16,185,129,0.25)' : 'rgba(37,99,235,0.25)'; ?>; transition: all 0.2s;">
+                                                style="background: <?= $isJurnalTerisi ? '#10b981' : '#3b82f6'; ?>; color: #fff; border-radius: 12px; padding: 10px 0; border: none; font-weight: 600; font-size: 13px;  ?>; transition: all 0.2s;">
                                             <i class="bi <?= $isJurnalTerisi ? 'bi-journal-text' : 'bi-journal-plus'; ?> me-1"></i> <?= $isJurnalTerisi ? 'Lihat/Edit Jurnal' : 'Input Jurnal'; ?>
                                         </button>
                                         <a class="btn d-flex align-items-center justify-content-center" href="inputnilai?getDetail=<?= $idMapel; ?>" 
@@ -1648,7 +1648,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
     <div class="journal-modal-backdrop" id="notifPanelModal" aria-hidden="true">
         <div class="journal-modal" role="dialog" aria-modal="true" aria-labelledby="notifPanelTitle" style="max-height: 85vh; width: min(100%, 460px);">
-            <div class="journal-modal-head" style="background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%); color: #fff; padding: 16px 20px;">
+            <div class="journal-modal-head" style="background: #4f46e5; color: #fff; padding: 16px 20px;">
                 <div>
                     <h5 id="notifPanelTitle" style="color:#fff; font-size:16px; font-weight:600; margin:0;"><i class="bi bi-bell-fill me-2"></i> Notifikasi & Tindak Lanjut</h5>
                     <p style="color:rgba(255,255,255,0.8); font-size:11px; margin:4px 0 0 0;">Informasi penting hari ini.</p>
@@ -1660,7 +1660,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
                     <!-- ADUAN SISWA: Hanya tampil untuk Tim Aduan yang ditugaskan admin -->
                     <?php if ($isTimAduan): ?>
-                        <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(220, 38, 38, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                        <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(220, 38, 38, 0.15); padding: 14px; ">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <span style="font-size: 11.5px; font-weight: 700; color: #dc2626; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
                                     <i class="bi bi-shield-fill-exclamation"></i> Aduan Siswa
@@ -1699,7 +1699,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
                     <!-- 1. SISWA BUTUH PENDAMPINGAN (wali kelas + guru mapel) -->
                     <?php if (!empty($pendampinganKelasAll)): ?>
-                        <div class="notif-card" id="notifPendampinganCard" style="background: #fff; border-radius: 16px; border: 1px solid rgba(239, 68, 68, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                        <div class="notif-card" id="notifPendampinganCard" style="background: #fff; border-radius: 16px; border: 1px solid rgba(239, 68, 68, 0.15); padding: 14px; ">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <span style="font-size: 11.5px; font-weight: 700; color: #ef4444; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
                                     <i class="bi bi-heart-pulse-fill"></i> Siswa Butuh Pendampingan
@@ -1717,7 +1717,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                                         <?php $grpId = 'pendamp-grp-' . preg_replace('/[^a-zA-Z0-9]/', '_', $kelasGrp); ?>
                                         <!-- Header Kelas - bisa diklik -->
                                         <div class="pendamp-kelas-header" data-target="<?= $grpId ?>"
-                                            style="display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; background: linear-gradient(135deg, #fef2f2, #fff5f5); border-radius: 10px; border: 1px solid rgba(239,68,68,0.18); cursor: pointer; user-select: none;">
+                                            style="display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; background: #fef2f2; border-radius: 10px; border: 1px solid rgba(239,68,68,0.18); cursor: pointer; user-select: none;">
                                             <span style="font-size: 12px; font-weight: 700; color: #dc2626; display: inline-flex; align-items: center; gap: 7px;">
                                                 <i class="bi bi-people-fill"></i>
                                                 Kelas <?= htmlspecialchars($kelasGrp) ?>
@@ -1760,7 +1760,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
                     <!-- 2. JURNAL BELUM TERISI: hidden jika tidak ada jadwal hari ini -->
                     <?php if ($totalJadwalHari > 0): ?>
-                        <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(245, 158, 11, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                        <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(245, 158, 11, 0.15); padding: 14px; ">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <span style="font-size: 11.5px; font-weight: 700; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
                                     <i class="bi bi-journal-x"></i> Jurnal Belum Terisi
@@ -1788,7 +1788,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     <?php endif; /* end totalJadwalHari */ ?>
 
                     <?php if ($nextJadwal !== null): ?>
-                        <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(59, 130, 246, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                        <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(59, 130, 246, 0.15); padding: 14px; ">
                             <div style="margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
                                 <span style="font-size: 11.5px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
                                     <i class="bi bi-calendar-event"></i> Jadwal Berikutnya
@@ -1807,7 +1807,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
                     <!-- 4. PENGUMUMAN ADMIN: hidden jika tidak ada pengumuman -->
                     <?php if ($announcementCount > 0): ?>
-                        <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(124, 58, 237, 0.15); padding: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); margin-bottom: 8px;">
+                        <div class="notif-card" style="background: #fff; border-radius: 16px; border: 1px solid rgba(124, 58, 237, 0.15); padding: 14px;  margin-bottom: 8px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <span style="font-size: 11.5px; font-weight: 700; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
                                     <i class="bi bi-megaphone-fill"></i> Pengumuman dari Admin
@@ -1835,7 +1835,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
     <div class="journal-modal-backdrop" id="guruWaliModal" aria-hidden="true">
         <div class="journal-modal" role="dialog" aria-modal="true" aria-labelledby="guruWaliTitle" style="max-height: 88vh; width: min(100%, 520px);">
-            <div class="journal-modal-head" style="background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); color: #fff; padding: 16px 20px;">
+            <div class="journal-modal-head" style="background: #0f766e; color: #fff; padding: 16px 20px;">
                 <div>
                     <h5 id="guruWaliTitle" style="color:#fff; font-size:16px; font-weight:700; margin:0;"><i class="bi bi-person-workspace me-2"></i>Guru Wali</h5>
                     <p style="color:rgba(255,255,255,0.85); font-size:11px; margin:4px 0 0 0;">Tambahkan siswa yang menjadi binaan pribadi Anda.</p>
@@ -1844,7 +1844,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
             </div>
             <div class="journal-modal-body" style="padding: 16px; background: #f8fafc;">
                 <div style="display:grid; grid-template-columns:1fr; gap:12px;">
-                    <a href="guru-wali-siswa" style="display:flex; align-items:center; gap:14px; padding:16px; background:#fff; border:1px solid rgba(20,184,166,.18); border-radius:18px; text-decoration:none; box-shadow:0 10px 24px rgba(15,23,42,.06);">
+                    <a href="guru-wali-siswa" style="display:flex; align-items:center; gap:14px; padding:16px; background:#fff; border:1px solid rgba(20,184,166,.18); border-radius:18px; text-decoration:none; ">
                         <span style="width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:#ccfbf1; color:#0f766e; font-size:25px; flex:0 0 auto;"><i class="bi bi-person-plus-fill"></i></span>
                         <span style="min-width:0;">
                             <strong style="display:block; color:#0f172a; font-size:15px;">Tambah Siswa</strong>
@@ -1852,7 +1852,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         </span>
                         <i class="bi bi-chevron-right" style="margin-left:auto; color:#94a3b8;"></i>
                     </a>
-                    <a href="guru-wali-jurnal" style="display:flex; align-items:center; gap:14px; padding:16px; background:#fff; border:1px solid rgba(67,56,202,.18); border-radius:18px; text-decoration:none; box-shadow:0 10px 24px rgba(15,23,42,.06);">
+                    <a href="guru-wali-jurnal" style="display:flex; align-items:center; gap:14px; padding:16px; background:#fff; border:1px solid rgba(67,56,202,.18); border-radius:18px; text-decoration:none; ">
                         <span style="width:52px; height:52px; border-radius:16px; display:grid; place-items:center; background:#e0e7ff; color:#4338ca; font-size:25px; flex:0 0 auto;"><i class="bi bi-journal-text"></i></span>
                         <span style="min-width:0;">
                             <strong style="display:block; color:#0f172a; font-size:15px;">Jurnal Pendampingan</strong>
@@ -1868,7 +1868,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                         </div>
                     <?php endif; ?>
 
-                    <form method="post" id="guruWaliForm" style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:14px; box-shadow:0 8px 20px rgba(15,23,42,.05);">
+                    <form method="post" id="guruWaliForm" style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:14px; ">
                         <input type="hidden" name="guru_wali_action" value="add">
                         <div class="mb-3">
                             <label class="form-label" for="kelasBinaan" style="font-size:11px; font-weight:800; color:#475569; text-transform:uppercase;">Pilih Kelas</label>
@@ -1930,7 +1930,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                             <span style="background:#e0e7ff; color:#4338ca; font-size:10px; font-weight:800; padding:3px 8px; border-radius:999px;"><?= count($guruWaliJurnal); ?> catatan</span>
                         </div>
 
-                        <form method="post" style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:14px; box-shadow:0 8px 20px rgba(15,23,42,.05);">
+                        <form method="post" style="background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:14px; ">
                             <input type="hidden" name="guru_wali_action" value="journal_add">
                             <div class="row g-2">
                                 <div class="col-12 col-md-7">
@@ -2020,7 +2020,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 
     <div class="journal-modal-backdrop" id="pelanggaranModal" aria-hidden="true">
         <div class="journal-modal" style="max-width:620px;">
-            <div class="journal-modal-head" style="background:linear-gradient(135deg,#dc2626,#991b1b); color:#fff;">
+            <div class="journal-modal-head" style="background:#dc2626; color:#fff;">
                 <div>
                     <h3 style="margin:0; color:#fff;"><i class="bi bi-exclamation-triangle-fill me-2"></i>Catat Pelanggaran Siswa</h3>
                     <p style="margin:4px 0 0; color:rgba(255,255,255,.78); font-size:12px;">Pilih siswa, kategori, jenis pelanggaran, dan tindak lanjut.</p>
@@ -2543,3 +2543,5 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         })();
     </script>
 </div>
+
+
