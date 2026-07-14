@@ -121,8 +121,8 @@ if (isset($_GET['ajax'])) {
         $sumber_id = "$tahun-$bulan";
         $nama_file = "Jurnal Mengajar - " . $namaGuru . " - " . $label . " " . $tahun . ".pdf";
         
-        // Query tbl_jurnal
-        $qJurnal = mysqli_query($conn, "SELECT * FROM tbl_jurnal WHERE no_induk='$nipEsc' AND MONTH(tanggal) = '$bulan' AND YEAR(tanggal) = '$tahun' ORDER BY tanggal ASC");
+        // Query tbl_materi
+        $qJurnal = mysqli_query($conn, "SELECT * FROM tbl_materi WHERE no_induk='$nipEsc' AND MONTH(tanggal) = '$bulan' AND YEAR(tanggal) = '$tahun' ORDER BY tanggal ASC");
         
         $nmSekolah = htmlspecialchars($lembaga['nmsekolah'] ?? 'SMA NEGERI 1 SUMBER');
         $alSekolah = htmlspecialchars($lembaga['alamat'] ?? 'Jl. Raya Sumber No. 123, Sumber, Probolinggo');
@@ -150,10 +150,10 @@ if (isset($_GET['ajax'])) {
         if ($qJurnal && mysqli_num_rows($qJurnal) > 0) {
             while ($rj = mysqli_fetch_assoc($qJurnal)) {
                 $tgl = date('d/m/Y', strtotime($rj['tanggal']));
-                $kls = htmlspecialchars($rj['kelas']);
-                $mpl = htmlspecialchars($rj['mapel']);
-                $mat = htmlspecialchars($rj['jurnal']);
-                $ket = htmlspecialchars($rj['catatan']);
+                $kls = htmlspecialchars($rj['kelas'] ?? '');
+                $mpl = htmlspecialchars($rj['nama_mapel'] ?? '');
+                $mat = htmlspecialchars($rj['materi'] ?? '');
+                $ket = htmlspecialchars($rj['kegiatan'] ?? '') . ' ' . htmlspecialchars($rj['keterangan'] ?? '');
                 $html .= '<tr><td>'.$no.'</td><td>'.$tgl.'</td><td>'.$kls.'</td><td>'.$mpl.'</td><td>'.$mat.'</td><td>'.$ket.'</td></tr>';
                 $no++;
             }
@@ -1430,7 +1430,7 @@ window.openFolder = function(folderName) {
                     <td><i class="bi bi-file-earmark-text text-primary me-2"></i> ${f.file_name}</td>
                     <td>${f.uploaded_at}</td>
                     <td class="text-end">
-                        <a href="../../${f.file_path}" target="_blank" class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-eye"></i></a>
+                        <a href="../../buka_file.php?f=${btoaUrlSafe(f.file_path)}" target="_blank" class="btn btn-sm btn-outline-primary me-1"><i class="bi bi-eye"></i></a>
                         <form method="post" class="d-inline" onsubmit="return confirm('Yakin hapus file ini?');">
                             <input type="hidden" name="action_sertifikat" value="hapus">
                             <input type="hidden" name="id_sertifikat" value="${f.id}">
@@ -1695,7 +1695,7 @@ window.loadPerangkatDrive = function() {
                             if (file.tipe_dokumen === 'perangkat_file' && file.data_json) {
                                 try {
                                     let j = JSON.parse(file.data_json);
-                                    viewLink = `<a href="../../${j.file_path}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:12px;"><i class="bi bi-eye"></i> Lihat</a>`;
+                                    viewLink = `<a href="../../buka_file.php?f=${btoaUrlSafe(j.file_path)}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:12px;"><i class="bi bi-eye"></i> Lihat</a>`;
                                 } catch(e) {}
                             }
                             let iconClass = 'bi-file-earmark-text text-primary';
@@ -1857,7 +1857,7 @@ window.loadSupervisiDrive = function(folderId = 'root', folderName = '') {
                     `;
                 } else {
                     let icon = item.tipe_dok === 'supervisi_report' ? 'bi-file-earmark-code text-teal' : 'bi-file-earmark-pdf-fill text-danger';
-                    let link = item.path ? '../../' + item.path : '#';
+                    let link = item.path ? '../../buka_file.php?f=' + btoaUrlSafe(item.path) : '#';
                     let target = item.path ? 'target="_blank"' : '';
                     html += `
                         <div class="col-md-3 drive-item" data-id="${item.id}" data-type="supervisi_file" data-name="${item.nama}">
@@ -2334,6 +2334,9 @@ window.shareSupervisi = function() {
 <!-- General E-Kinerja Functions -->
 
 <script>
+    function btoaUrlSafe(str) {
+        return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
 window.copyShareLink = function(token) {
     const path = window.location.origin + '/lihat_berkas.php?token=' + token;
     navigator.clipboard.writeText(path);
@@ -2389,6 +2392,9 @@ if (is_file(__DIR__ . '/guru_common_footer.php')) {
 </div>
 
 <script>
+    function btoaUrlSafe(str) {
+        return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
 let currentCtxItem = null;
 
 $(document).on('contextmenu', '.drive-item', function(e) {
@@ -2468,3 +2474,5 @@ $('#ctxDelete').on('click', function(e) {
 </div> <!-- End app-shell -->
 </body>
 </html>
+
+
