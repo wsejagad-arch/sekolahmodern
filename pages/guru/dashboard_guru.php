@@ -923,17 +923,33 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     </div>
                 <?php else: ?>
                     <?php
-                    $tIndex = 0;
+                    $nextFound = false;
                     foreach ($jadwalHariIni as $j):
-                        $isCurrent = ($tIndex == 0); // Mark first class as active timeline
-                        $tIndex++;
+                        $idMapel = (int)($j['id_mapel'] ?? 0);
+                        $isJurnalTerisi = isset($jurnalStatusByMapel[$idMapel]);
+                        
+                        $statusClass = '';
+                        if ($isJurnalTerisi) {
+                            $statusClass = 'completed';
+                        } else {
+                            if (!$nextFound) {
+                                $statusClass = 'active'; // Berkedip (pulse)
+                                $nextFound = true;
+                            } else {
+                                $statusClass = '';
+                            }
+                        }
                     ?>
-                        <div class="timeline-item-modern <?= $isCurrent ? 'active' : '' ?>">
+                        <div class="timeline-item-modern <?= $statusClass ?>">
                             <div class="time-col">
                                 <span class="time-start"><?= substr($j['jam_mulai'], 0, 5) ?></span>
                                 <span class="time-end"><?= substr($j['jam_selesai'], 0, 5) ?></span>
                             </div>
-                            <div class="timeline-dot"></div>
+                            <div class="timeline-dot">
+                                <?php if ($isJurnalTerisi): ?>
+                                    <i class="bi bi-check" style="color:white; font-size: 1rem; line-height: 1;"></i>
+                                <?php endif; ?>
+                            </div>
                             <div class="content-col">
                                 <strong><?= htmlspecialchars($j['nama_mapel']) ?></strong>
                                 <span><i class="bi bi-easel2" style="font-size: 0.8rem; margin-right: 4px;"></i> Kelas <?= htmlspecialchars($j['kelas']) ?></span>
