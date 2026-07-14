@@ -82,14 +82,17 @@ if ($isLocal && file_exists(__DIR__ . '/koneksi_local.php')) {
     if (isset($conn) && $conn instanceof mysqli) {
         require_once __DIR__ . '/multi_tenant.php';
         mt_bootstrap($conn);
-        require_once __DIR__ . '/auto_migrate.php';
-        run_auto_migrations($conn);
+        if (!file_exists(__DIR__ . '/.migrated')) {
+            require_once __DIR__ . '/auto_migrate.php';
+            run_auto_migrations($conn);
+            @file_put_contents(__DIR__ . '/.migrated', '1');
+        }
     }
     return;
 }
 
 // Database configuration untuk hosting
-$host = 'localhost';
+$host = '127.0.0.1';
 $port = 3306;
 $user = '';
 $password = '';
@@ -106,7 +109,7 @@ if (file_exists(__DIR__ . '/config.hosting.php')) {
     }
 } else {
     // Fallback legacy (isi via config.hosting.php di production)
-    $host = 'localhost';
+    $host = '127.0.0.1';
     $port = 3306;
     $user = 'smasumb1_simanis1';
     $password = 'W@hyu1234!';
@@ -125,8 +128,11 @@ try {
         mysqli_set_charset($conn, 'utf8');
         require_once __DIR__ . '/multi_tenant.php';
         mt_bootstrap($conn);
-        require_once __DIR__ . '/auto_migrate.php';
-        run_auto_migrations($conn);
+        if (!file_exists(__DIR__ . '/.migrated')) {
+            require_once __DIR__ . '/auto_migrate.php';
+            run_auto_migrations($conn);
+            @file_put_contents(__DIR__ . '/.migrated', '1');
+        }
     }
 } catch (Throwable $e) {
     error_log('[koneksi.php] MySQL exception: ' . $e->getMessage());
@@ -139,21 +145,26 @@ if (!$conn) {
 }
 
 // === AUTO-ALPA & AUTO-EXPIRE IZIN ===
-// Cek izin yang belum divalidasi dan sudah lewat hari
+// Cek izin yang belum divalidasi dan sudah lewat hari (Jalankan maksimal 1x sehari)
 if ($conn instanceof mysqli) {
     $today_alpa = date('Y-m-d');
-    $qExpired = mysqli_query($conn, "SELECT id_izin, no_induk_siswa, kelas_siswa FROM tbl_izin_siswa WHERE tanggal_izin < '$today_alpa' AND status_izin IN ('Menunggu', 'Menunggu Validasi')");
-    if ($qExpired && mysqli_num_rows($qExpired) > 0) {
-        while ($rowExp = mysqli_fetch_assoc($qExpired)) {
-            $id_izin_exp = $rowExp['id_izin'];
-            $nis_exp = $rowExp['no_induk_siswa'];
-            $kelas_exp = $rowExp['kelas_siswa'];
-            
-            // Ubah status jadi Ditolak (Auto-Alpa)
-            mysqli_query($conn, "UPDATE tbl_izin_siswa SET status_izin = 'Ditolak (Auto-Alpa)', validasi_wali_kelas = 'Ditolak', validasi_guru_bk = 'Ditolak' WHERE id_izin = '$id_izin_exp'");
-            
-            // Ambil mapel hari ini untuk siswa tsb
-            // (Sistem kompleks, untuk saat ini cukup tandai di izinnya)
+    $lock_file = __DIR__ . '/.alpa_' . $today_alpa;
+    if (!file_exists($lock_file)) {
+        $qExpired = mysqli_query($conn, "SELECT id_izin, no_induk_siswa, kelas_siswa FROM tbl_izin_siswa WHERE tanggal_izin < '$today_alpa' AND status_izin IN ('Menunggu', 'Menunggu Validasi')");
+        if ($qExpired && mysqli_num_rows($qExpired) > 0) {
+            while ($rowExp = mysqli_fetch_assoc($qExpired)) {
+                $id_izin_exp = $rowExp['id_izin'];
+                $nis_exp = $rowExp['no_induk_siswa'];
+                $kelas_exp = $rowExp['kelas_siswa'];
+                
+                // Ubah status jadi Ditolak (Auto-Alpa)
+                mysqli_query($conn, "UPDATE tbl_izin_siswa SET status_izin = 'Ditolak (Auto-Alpa)', validasi_wali_kelas = 'Ditolak', validasi_guru_bk = 'Ditolak' WHERE id_izin = '$id_izin_exp'");
+            }
         }
+        @file_put_contents($lock_file, '1');
+        // Hapus file lock hari sebelumnya agar tidak menumpuk
+        $yesterday_alpa = date('Y-m-d', strtotime('-1 day'));
+        @unlink(__DIR__ . '/.alpa_' . $yesterday_alpa);
     }
 }
+
