@@ -1012,7 +1012,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         }
     }
 </style>
-<div class="mobile-only-layout app-shell" style="padding-top: 0 !important; margin-top: 0 !important; background-color: #f8fafc; background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px); background-size: 16px 16px; min-height: 100vh;">
+<div class="mobile-only-layout app-shell" style="padding-top: 0 !important; margin-top: 0 !important; background-color: #ffffff; min-height: 100vh;">
     <!-- HEADER -->
     <header class="hero-header" style="padding-top: 10px !important; margin-top: 0 !important; justify-content: space-between; align-items: center;">
         <a href="profil-guru" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; flex: 1;">
@@ -1067,7 +1067,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     </div>
                 </div>
             </div>
-            <a href="../../logout.php" onclick="return confirm('Apakah Anda yakin ingin keluar?');" class="notif-btn" style="text-decoration: none; color: var(--red); border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.05);" title="Keluar">
+            <a href="../../logout.php" onclick="return confirm('Apakah Anda yakin ingin keluar?');" class="notif-btn flat-icon-btn" style="text-decoration: none; color: var(--red); border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.05);" title="Keluar">
                 <i class="bi bi-box-arrow-right"></i>
             </a>
         </div>
@@ -1089,7 +1089,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         }
         ?>
         <?php if ($runningPanel !== null): ?>
-            <div id="kbm-box" class="kbm-mobile-card <?= $hasRunningSchedule ? 'is-live' : 'is-idle'; ?>" <?= $runningTarget !== '' ? 'data-target="' . htmlspecialchars($runningTarget, ENT_QUOTES, 'UTF-8') . '"' : ''; ?> style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.2);">
+            <div id="kbm-box" class="kbm-mobile-card <?= $hasRunningSchedule ? 'is-live' : 'is-idle'; ?>" <?= $runningTarget !== '' ? 'data-target="' . htmlspecialchars($runningTarget, ENT_QUOTES, 'UTF-8') . '"' : ''; ?> style="background: rgba(255,255,255,0.15); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.2);">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center; flex-shrink: 0;">
                         <i class="bi <?= $hasRunningSchedule ? 'bi-broadcast-pin text-warning' : 'bi-calendar2-week text-white'; ?>" style="font-size: 24px;"></i>
@@ -1097,7 +1097,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     <div style="flex: 1; min-width: 0;">
                         <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; color: <?= $hasRunningSchedule ? '#fcd34d' : 'rgba(255,255,255,0.9)'; ?>;">
                             <?php if($hasRunningSchedule): ?>
-                               <span style="width:6px; height:6px; border-radius:50%; background:#fcd34d; animation: pulse-live 1.5s infinite;"></span>
+                               <span style="width:6px; height:6px; border-radius:50%; background:#fcd34d;"></span>
                             <?php endif; ?>
                             <?= htmlspecialchars($runningKickerLabel, ENT_QUOTES, 'UTF-8'); ?>
                         </div>
@@ -1119,13 +1119,6 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     <strong id="kbm-timer" style="font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 0.5px;">--:--:--</strong>
                 </div>
             </div>
-            <style>
-            @keyframes pulse-live {
-                0% { transform: scale(1); opacity: 1; }
-                50% { transform: scale(1.5); opacity: 0.5; }
-                100% { transform: scale(1); opacity: 1; }
-            }
-            </style>
         <?php endif; ?>
 
         <!-- Bottom Section: Metrics Grid -->
@@ -1198,9 +1191,9 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         <article class="panel-card">
             <h2>Input Jurnal Mengajar</h2>
             <div class="input-body">
-                <div style="width: 80px; height: 80px; border-radius: 24px; background: linear-gradient(135deg, #8b5cf6, #4f46e5); margin: 0 auto 16px; display: grid; place-items: center; color: #fff; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3); position: relative;">
+                <div style="width: 80px; height: 80px; border-radius: 24px; background: #4f46e5; margin: 0 auto 16px; display: grid; place-items: center; color: #fff; position: relative;">
                     <i class="bi bi-journal-text" style="font-size: 40px;"></i>
-                    <div style="position: absolute; bottom: -5px; right: -5px; width: 30px; height: 30px; border-radius: 10px; background: #fff; color: #4f46e5; display: grid; place-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <div style="position: absolute; bottom: -5px; right: -5px; width: 30px; height: 30px; border-radius: 10px; background: #fff; color: #4f46e5; display: grid; place-items: center; border: 1px solid #e2e8f0;">
                         <i class="bi bi-pencil-fill" style="font-size: 14px;"></i>
                     </div>
                 </div>
@@ -1213,8 +1206,8 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
     <?php if (($isWaliKelas || $isGuruBK) && $pendingIzinCount > 0): ?>
         <!-- BANNER IZIN PENDING -->
         <a href="/pages/guru/validasi-izin.php" style="text-decoration:none; display:block; margin-bottom:14px;">
-            <div style="background:linear-gradient(135deg,#dc2626,#b91c1c); color:#fff; border-radius:16px; padding:14px 18px; display:flex; align-items:center; gap:14px; box-shadow:0 8px 24px rgba(220,38,38,.3); animation:pendingPulse 2s ease-in-out infinite;">
-                <div style="width:48px; height:48px; background:rgba(255,255,255,.2); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <div style="background:#fef2f2; color:#b91c1c; border-radius:12px; padding:14px 18px; display:flex; align-items:center; gap:14px; border:1px solid #f87171;">
+                <div style="width:48px; height:48px; background:rgba(220,38,38,.1); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                     <i class="bi bi-patch-exclamation-fill" style="font-size:26px;"></i>
                 </div>
                 <div style="flex:1; min-width:0;">
@@ -1232,17 +1225,6 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         </a>
     <?php endif; ?>
     <style>
-        @keyframes pendingPulse {
-
-            0%,
-            100% {
-                box-shadow: 0 8px 24px rgba(220, 38, 38, .3);
-            }
-
-            50% {
-                box-shadow: 0 8px 36px rgba(220, 38, 38, .6);
-            }
-        }
 
         .notif-dropdown {
             position: absolute;
