@@ -970,6 +970,15 @@ function konfirmasiButtonColor($opt)
             <div id="faceStatus" class="mt-4 text-center text-sm font-medium text-gray-500 bg-gray-50 rounded-lg py-2">
                 <i class="fas fa-spinner fa-spin mr-1 text-blue-500"></i>Memuat model deteksi…
             </div>
+            
+            <div class="mt-2 flex gap-2 justify-center">
+                <button type="button" onclick="centerLocation()" class="flex-1 px-2 py-1.5 text-[11px] font-bold text-blue-700 bg-blue-100 border border-blue-200 rounded-lg shadow-sm hover:bg-blue-200 transition-colors">
+                    <i class="fas fa-sync-alt mr-1"></i>Refresh Lokasi
+                </button>
+                <button type="button" onclick="viewMap()" class="flex-1 px-2 py-1.5 text-[11px] font-bold text-teal-700 bg-teal-100 border border-teal-200 rounded-lg shadow-sm hover:bg-teal-200 transition-colors">
+                    <i class="fas fa-map-marked-alt mr-1"></i>Lihat Peta
+                </button>
+            </div>
 
             <!-- Petunjuk -->
             <ul class="mt-3 text-[11px] text-gray-500 list-none space-y-1 bg-blue-50/50 p-3 rounded-lg border border-blue-100">
@@ -1194,13 +1203,18 @@ function konfirmasiButtonColor($opt)
             }
 
             // ── GPS check ─────────────────────────────────────────────────────────────────
-            function checkGPS() {
+            function checkGPS(force = false) {
                 gpsOk = false;
                 updateKonfirmBtn();
                 if (!navigator.geolocation) {
                     statusEl.innerHTML = '<span class="text-red-500"><i class="fas fa-times-circle mr-1"></i>Browser tidak mendukung GPS</span>';
                     return;
                 }
+                
+                if (force) {
+                    modalMsg.innerHTML = '<span class="text-blue-500"><i class="fas fa-spinner fa-spin mr-1"></i>Memperbarui lokasi GPS...</span>';
+                }
+
                 navigator.geolocation.getCurrentPosition(
                     function(pos) {
                         userCoords = {
@@ -1241,9 +1255,10 @@ function konfirmasiButtonColor($opt)
                             const dist = haversine(userCoords.lat, userCoords.lng, SCHOOL_LAT, SCHOOL_LNG);
                             if (dist <= RADIUS_M) {
                                 gpsOk = true;
+                                if (force) modalMsg.innerHTML = `<span class="text-teal-600"><i class="fas fa-check-circle mr-1"></i>Lokasi berhasil diperbarui dan Valid!</span>`;
                             } else {
-                                const distKm = (dist / 1000).toFixed(1);
-                                const radKm = (RADIUS_M / 1000).toFixed(1);
+                                const distKm = (dist / 1000).toFixed(2);
+                                const radKm = (RADIUS_M / 1000).toFixed(2);
                                 modalMsg.innerHTML = `<span class="text-red-500"><i class="fas fa-map-marker-alt mr-1"></i>Lokasi terlalu jauh: ${distKm} km (maks ${radKm} km)</span>`;
                             }
                         }
@@ -1253,11 +1268,24 @@ function konfirmasiButtonColor($opt)
                     function(err) {
                         modalMsg.innerHTML = '<span class="text-red-400"><i class="fas fa-exclamation-triangle mr-1"></i>Gagal mendapatkan GPS: ' + err.message + '</span>';
                     }, {
-                        timeout: 10000,
-                        maximumAge: 60000
+                        enableHighAccuracy: true,
+                        timeout: 15000,
+                        maximumAge: 0
                     }
                 );
             }
+            
+            window.centerLocation = function() {
+                checkGPS(true);
+            };
+            
+            window.viewMap = function() {
+                if (userCoords) {
+                    window.open('https://www.google.com/maps?q=' + userCoords.lat + ',' + userCoords.lng, '_blank');
+                } else {
+                    alert('Lokasi belum ditemukan! Silakan klik Refresh Lokasi terlebih dahulu.');
+                }
+            };
 
             // ── Open camera for Sholat ───────────────────────────────────────────────────────
             window.openCameraForSholat = async function(sholatType) {
