@@ -389,15 +389,14 @@ if (is_login_blocked($ip)) {
 
 $csrfToken = $_POST['csrf_token'] ?? '';
 if (!verify_csrf_token($csrfToken)) {
-	$debugCsrf = [
+	$debug = [
 		'error' => 'csrf_mismatch',
 		'timestamp' => date('Y-m-d H:i:s'),
 		'session_token' => $_SESSION['csrf_token'] ?? 'NOT_SET',
 		'post_token' => $csrfToken
 	];
-	@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debugCsrf) . "\n", FILE_APPEND | LOCK_EX);
-	record_login_attempt($ip, false);
-	redirect_login_failure('login.php');
+	@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug) . "\n", FILE_APPEND | LOCK_EX);
+	die("DEBUG_FAIL_CSRF: Token mismatch. Session: " . ($_SESSION['csrf_token'] ?? 'NOT_SET') . " POST: $csrfToken");
 }
 
 if (!is_database_available()) {
@@ -519,10 +518,14 @@ if ($akses === 'auto' || $akses === '') {
 		redirect_login_success(siswa_page('siswa'));
 	}
 
-	$debug = ['msg' => 'auto_login_failed', 'username' => $username, 'timestamp' => date('Y-m-d H:i:s')];
+	$debug = [
+		'msg' => 'auto_login_failed',
+		'username' => $username,
+		'timestamp' => date('Y-m-d H:i:s')
+	];
 	@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug) . "\n", FILE_APPEND | LOCK_EX);
-	record_login_attempt($ip, false);
-	redirect_login_failure('login.php');
+	
+	die("DEBUG_FAIL: Username: $username, Admin check: " . (isset($user) ? 'tried' : 'skip') . ", Guru check: " . (isset($guru) ? 'tried' : 'skip') . ", Siswa check: " . (isset($siswa) ? 'tried' : 'skip') . ", DB Conn: " . ($conn ? 'OK' : 'NULL'));
 }
 
 if ($akses == 1) {
