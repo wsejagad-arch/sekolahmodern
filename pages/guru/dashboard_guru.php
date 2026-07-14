@@ -690,12 +690,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 </div>
             </div>
             
-            <!-- Modern Abstract Background Shapes -->
-            <div class="banner-shapes">
-                <div class="shape shape-1"></div>
-                <div class="shape shape-2"></div>
-                <div class="shape shape-3"></div>
-            </div>
+
         </div>
 
         <!-- Quick Actions (Redesigned) -->
