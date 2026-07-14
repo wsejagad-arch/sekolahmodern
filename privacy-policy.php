@@ -81,7 +81,7 @@
 <body>
 
 <div class="container-pp">
-    <a href="javascript:history.back()" class="back-btn"><i class="bi bi-arrow-left"></i> Kembali / Back</a>
+    <a href="javascript:void(0);" onclick="if(window.history.length > 1 && document.referrer != '') { window.history.back(); } else { window.location.href = 'index.php'; }" class="back-btn"><i class="bi bi-arrow-left"></i> Kembali / Back</a>
     
     <h1>Privacy Policy <br><span style="font-size: 1.25rem; font-weight: 600; color: #64748b;">(Kebijakan Privasi)</span></h1>
     
