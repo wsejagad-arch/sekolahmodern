@@ -696,6 +696,7 @@
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 16px;
     padding: 16px 20px;
+    margin: 24px 0;
     min-width: 300px;
     z-index: 2;
 }
