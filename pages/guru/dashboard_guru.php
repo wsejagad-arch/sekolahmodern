@@ -597,30 +597,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
 </style>
 
 <!-- DESKTOP SIDEBAR -->
-<aside class="desktop-sidebar">
-    <div class="desktop-logo">
-        <img src="../../img/<?= htmlspecialchars($lembaga['logo']) ?>" alt="Logo">
-        <span>SIMANIS</span>
-    </div>
-    <nav class="desktop-nav">
-        <a href="../../home.php" class="nav-item"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
-        <a href="setting-jadwal.php" class="nav-item"><i class="bi bi-calendar3"></i><span>Kelas Saya</span></a>
-        <a href="data-siswa.php" class="nav-item"><i class="bi bi-people"></i><span>Data Siswa</span></a>
-        <a href="nilai.php" class="nav-item"><i class="bi bi-journal-check"></i><span>Nilai & Tugas</span></a>
-        <a href="materi.php" class="nav-item"><i class="bi bi-book"></i><span>Materi</span></a>
-        <a href="laporan-kelas.php" class="nav-item"><i class="bi bi-cpu"></i><span>Laporan & AI</span></a>
-        <a href="ekinerja.php" class="nav-item"><i class="bi bi-speedometer2"></i><span>e-Kinerja</span></a>
-        <?php if ($isWaliKelas || $isGuruBK): ?>
-            <a href="validasi-izin.php" class="nav-item"><i class="bi bi-patch-check-fill"></i><span>Validasi Izin</span></a>
-        <?php endif; ?>
-        <a href="profil-guru.php" class="nav-item"><i class="bi bi-gear"></i><span>Pengaturan</span></a>
-    </nav>
-    <div class="desktop-logout-wrap">
-        <a href="../../logout.php" class="btn-desktop-logout" onclick="return confirm('Yakin mau logout?');">
-            <i class="bi bi-box-arrow-left"></i> Logout
-        </a>
-    </div>
-</aside>
+<?php include 'guru_sidebar_shared.php'; ?>
 <div class="app-shell" id="desktopAppShell">
 
     <!-- MAIN CENTER COLUMN -->
