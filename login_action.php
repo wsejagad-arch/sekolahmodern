@@ -291,12 +291,13 @@ function get_siswa_user(string $username, string $status, int $schoolId = 0): ?a
 		$statusFilter = " (s.status = '$s' OR s.status = 'aktif' OR s.status IS NULL OR s.status = '') ";
 	}
 
+	$u_no_zeros = mysqli_real_escape_string($conn, ltrim($username, '0'));
 	// Use LEFT JOIN to find siswa even if tbl_pengguna record is missing
 	$sql = "SELECT s.no_induk, s.nama_siswa, s.kelas, s.jabatan, s.status, p.hak_akses, p.password $schoolSelect $codeSelect
 			FROM tbl_siswa s 
 			LEFT JOIN tbl_pengguna p ON s.no_induk = p.no_induk 
 			$schoolJoin
-			WHERE (TRIM(s.no_induk) = '$u' OR TRIM(LEADING '0' FROM s.no_induk) = LTRIM('$u', '0') OR s.nama_siswa LIKE '%$u%') AND $statusFilter $schoolWhere 
+			WHERE (TRIM(s.no_induk) = '$u' OR TRIM(LEADING '0' FROM s.no_induk) = '$u_no_zeros' OR s.nama_siswa LIKE '%$u%') AND $statusFilter $schoolWhere 
 			ORDER BY s.status ASC, s.no_induk DESC LIMIT 1";
 
 	// INJECT DEBUG TO FIND JOJOK'S ACTUAL DATA
