@@ -665,7 +665,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     </div>
                 <?php endif; ?>
 
-                <div class="banner-actions">
+                <div class="banner-actions mt-4">
                     <?php if ($unfilledJurnalCount > 0 && !empty($unfilledJadwal)): ?>
                         <a href="javascript:void(0)" onclick="openInputJurnal(<?= $unfilledJadwal[0]['id_mapel'] ?>)" class="btn-premium-primary">
                             <i class="bi bi-pencil-square"></i> Input Jurnal Sekarang
