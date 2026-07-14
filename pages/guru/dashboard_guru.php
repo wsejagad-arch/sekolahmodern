@@ -1496,9 +1496,19 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     <?php foreach ($jadwalHariIni as $idx => $j):
                         $colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
                         $color = $colors[$idx % count($colors)];
+                        
+                        $idMapel = (int)($j['id_mapel'] ?? 0);
+                        $isJurnalTerisi = isset($jurnalStatusByMapel[$idMapel]);
+                        if ($isJurnalTerisi) {
+                            $color = '#10B981'; // green color for completed
+                        }
                     ?>
                         <div class="timeline-item">
-                            <div class="timeline-dot" style="--dot-color: <?= $color ?>"></div>
+                            <div class="timeline-dot" style="--dot-color: <?= $color ?>; <?= $isJurnalTerisi ? 'display:flex; align-items:center; justify-content:center; width:14px; height:14px; left:-22px;' : '' ?>">
+                                <?php if ($isJurnalTerisi): ?>
+                                    <i class="bi bi-check" style="color:white; font-size:12px;"></i>
+                                <?php endif; ?>
+                            </div>
                             <div class="tm-time">
                                 <strong><?= substr($j['jam_mulai'], 0, 5) ?></strong>
                                 <span style="display:block; font-size:9px;"><?= substr($j['jam_selesai'], 0, 5) ?></span>
@@ -2547,5 +2557,6 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         })();
     </script>
 </div>
+
 
 
