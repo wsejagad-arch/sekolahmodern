@@ -300,22 +300,6 @@ function get_siswa_user(string $username, string $status, int $schoolId = 0): ?a
 			WHERE (TRIM(s.no_induk) = '$u' OR TRIM(LEADING '0' FROM s.no_induk) = '$u_no_zeros' OR s.nama_siswa LIKE '%$u%') AND $statusFilter $schoolWhere 
 			ORDER BY s.status ASC, s.no_induk DESC LIMIT 1";
 
-	// INJECT DEBUG TO FIND JOJOK'S ACTUAL DATA
-	if (stripos($u, 'jojok') !== false || true) {
-		$debugSql = "SELECT s.no_induk, s.nama_siswa, s.kelas, s.status, s.id_sekolah, p.password FROM tbl_siswa s LEFT JOIN tbl_pengguna p ON s.no_induk = p.no_induk WHERE s.nama_siswa LIKE '%JOJOK%' OR s.no_induk = '$u'";
-		$debugRes = mysqli_query($conn, $debugSql);
-		$rows = [];
-		if ($debugRes) {
-			while ($row = mysqli_fetch_assoc($debugRes)) { $rows[] = $row; }
-		}
-		@file_put_contents(__DIR__ . '/logs/jojok_raw_db.json', json_encode([
-			'input_username' => $u,
-			'matched_rows' => $rows,
-			'filter_used' => $statusFilter,
-			'school_where' => $schoolWhere
-		], JSON_PRETTY_PRINT));
-	}
-
 
 	$result = mysqli_query($conn, $sql);
 	if (!$result) {
@@ -525,7 +509,8 @@ if ($akses === 'auto' || $akses === '') {
 	];
 	@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug) . "\n", FILE_APPEND | LOCK_EX);
 	
-	die("DEBUG_FAIL: Username: $username, Admin check: " . (isset($user) ? 'tried' : 'skip') . ", Guru check: " . (isset($guru) ? 'tried' : 'skip') . ", Siswa check: " . (isset($siswa) ? 'tried' : 'skip') . ", DB Conn: " . ($conn ? 'OK' : 'NULL'));
+	record_login_attempt($ip, false);
+	redirect_login_failure('login.php');
 }
 
 if ($akses == 1) {
