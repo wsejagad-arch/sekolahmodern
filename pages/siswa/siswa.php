@@ -1040,7 +1040,7 @@ $notif_count = count($all_notifications);
       ['name' => 'Nilai',       'icon' => 'fa-chart-bar',           'color' => 'bg-green',  'link' => '#'],
       ['name' => 'Medsos',      'icon' => 'fa-hashtag',             'color' => 'bg-indigo', 'link' => 'medsos.php'],
     ];
-    if (preg_match('/^(X|XI|10|11)\b/i', $studentClass)) {
+    if (preg_match('/\b(X|XI|10|11)\b/i', $studentClass)) {
         $menus[] = ['name' => 'Naik Kelas', 'icon' => 'fa-level-up-alt', 'color' => 'bg-orange', 'link' => 'naik-kelas.php'];
     }
     ?>

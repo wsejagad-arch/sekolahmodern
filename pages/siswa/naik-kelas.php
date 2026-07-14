@@ -15,16 +15,16 @@ $nis = $_SESSION['no_induk'];
 $current_class = $_SESSION['kelas'];
 
 // Hanya izinkan kelas X atau XI
-if (!preg_match('/^(X|XI|10|11)\b/i', $current_class)) {
+if (!preg_match('/\b(X|XI|10|11)\b/i', $current_class)) {
     echo "<script>alert('Akses Ditolak. Halaman ini hanya untuk siswa kelas X atau XI.'); window.location='siswa.php';</script>";
     exit;
 }
 
 // Tentukan tingkat kelas selanjutnya
 $next_level = '';
-if (preg_match('/^(X|10)\b/i', $current_class)) {
+if (preg_match('/\b(X|10)\b/i', $current_class)) {
     $next_level = 'XI';
-} else if (preg_match('/^(XI|11)\b/i', $current_class)) {
+} else if (preg_match('/\b(XI|11)\b/i', $current_class)) {
     $next_level = 'XII';
 }
 
@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['naik_kelas'])) {
 // Ambil daftar kelas yang sesuai tingkat berikutnya
 $available_classes = [];
 if ($next_level) {
-    $q_kelas = mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_kelas WHERE id_sekolah = $idSekolah AND kelas LIKE '$next_level %' OR kelas = '$next_level' ORDER BY kelas");
+    $q_kelas = mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_kelas WHERE id_sekolah = $idSekolah AND (kelas LIKE '$next_level %' OR kelas = '$next_level') ORDER BY kelas");
     if ($q_kelas) {
         while($r = mysqli_fetch_assoc($q_kelas)) {
             $available_classes[] = $r['kelas'];
