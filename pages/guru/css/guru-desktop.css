@@ -27,9 +27,9 @@
 
     /* Redefine App Shell */
     .app-shell {
-        margin-left: 270px !important; /* 240px sidebar + 30px gap */
-        padding: 40px !important;
-        max-width: calc(100% - 270px) !important;
+        margin-left: 270px; /* 240px sidebar + 30px gap */
+        padding: 40px;
+        max-width: calc(100% - 270px);
         min-height: 100vh;
         border-radius: 0;
         background: transparent;
@@ -666,24 +666,24 @@
 /* Responsive for medium screens (1024px and below) */
 @media (min-width: 768px) and (max-width: 1024px) {
     #content-wrapper {
-        background: transparent !important;
+        background: transparent;
     }
     .desktop-sidebar {
         width: 280px !important;
     }
     .app-shell {
-        margin-left: 310px !important; /* 280px sidebar + 30px gap */
-        padding: 40px !important;
-        max-width: calc(100% - 310px) !important;
-        grid-template-columns: 1fr 260px !important;
-        gap: 14px !important;
+        margin-left: 310px; /* 280px sidebar + 30px gap */
+        padding: 40px;
+        max-width: calc(100% - 310px);
+        grid-template-columns: 1fr 260px;
+        gap: 14px;
     }
     .stats-row-grid-modern {
         grid-template-columns: 1fr !important;
     }
     .quick-actions-modern-grid {
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
-        gap: 12px !important;
+        gap: 12px;
     }
 }
 
@@ -696,24 +696,26 @@
         width: 320px !important;
     }
     .app-shell {
-        margin-left: 350px !important; /* 320px sidebar + 30px gap */
-        padding: 40px !important;
-        max-width: calc(100% - 350px) !important;
-        grid-template-columns: 1.2fr 360px !important;
-        gap: 28px !important;
+        margin-left: 350px; /* 320px sidebar + 30px gap */
+        padding: 40px;
+        max-width: calc(100% - 350px);
+        grid-template-columns: 1.2fr 360px;
+        gap: 28px;
     }
 }
 
 /* Hide desktop elements on mobile */
 @media (max-width: 767px) {
     .desktop-sidebar, .desktop-topbar-wrapper, #desktopAppShell .desktop-center-column, #desktopAppShell .desktop-right-column {
-        display: none !important;
+        display: none;
     }
-    .premium-card { padding: 16px !important; border-radius: 16px !important; }
+    .premium-card { padding: 16px; border-radius: 16px !important; }
     .welcome-banner-premium { padding: 20px 16px !important; border-radius: 16px !important; }
     .welcome-banner-premium h2 { font-size: 1.5rem !important; }
-    .app-shell { padding: 12px !important; }
+    .app-shell { padding: 12px; }
     .card-title-modern { font-size: 1rem !important; }
     .card-header-flex { flex-wrap: wrap; gap: 8px; }
 }
+
+
 
