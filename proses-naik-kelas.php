@@ -47,7 +47,7 @@ if ($aksi === 'massal') {
     $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
     $tenantSiswa = function_exists('mt_column_exists') && mt_column_exists($conn, 'tbl_siswa', 'id_sekolah') ? " AND id_sekolah={$tenantId}" : "";
 
-    $query = "UPDATE tbl_siswa SET kelas = '$kelasTujuanEsc' WHERE kelas = '$kelasAsalEsc' AND status = 'Aktif' {$tenantSiswa}";
+    $query = "UPDATE tbl_siswa SET kelas = '$kelasTujuanEsc', rombel_saat_ini = '$kelasTujuanEsc', nama_kelas = '$kelasTujuanEsc' WHERE kelas = '$kelasAsalEsc' AND status = 'Aktif' {$tenantSiswa}";
     $update = mysqli_query($conn, $query);
 
     if ($update) {
@@ -76,7 +76,7 @@ if ($aksi === 'massal') {
     $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
     $tenantSiswa = function_exists('mt_column_exists') && mt_column_exists($conn, 'tbl_siswa', 'id_sekolah') ? " AND id_sekolah={$tenantId}" : "";
 
-    $query = "UPDATE tbl_siswa SET kelas = '$kelasTujuanEsc' WHERE no_induk = '$noIndukEsc' {$tenantSiswa}";
+    $query = "UPDATE tbl_siswa SET kelas = '$kelasTujuanEsc', rombel_saat_ini = '$kelasTujuanEsc', nama_kelas = '$kelasTujuanEsc' WHERE no_induk = '$noIndukEsc' {$tenantSiswa}";
     $update = mysqli_query($conn, $query);
 
     if ($update) {

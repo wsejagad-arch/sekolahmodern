@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['naik_kelas'])) {
     
     // Validasi kelas baru apakah sesuai tingkatnya
     if (strpos($new_class, $next_level) === 0) {
-        $update = mysqli_query($conn, "UPDATE tbl_siswa SET kelas = '$new_class' WHERE no_induk = '$nis' AND id_sekolah = $idSekolah");
+        $update = mysqli_query($conn, "UPDATE tbl_siswa SET kelas = '$new_class', rombel_saat_ini = '$new_class', nama_kelas = '$new_class' WHERE no_induk = '$nis' AND id_sekolah = $idSekolah");
         if ($update) {
             // Update historical tables and related tables to keep data intact in the new class
             @mysqli_query($conn, "UPDATE tbl_absen SET kelas = '$new_class' WHERE no_induk = '$nis' AND id_sekolah = $idSekolah");
