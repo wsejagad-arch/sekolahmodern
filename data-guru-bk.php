@@ -202,11 +202,14 @@ if($res_kelas){
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Select2 Initialization
     if(typeof $ !== 'undefined' && $.fn.select2) {
         $('.select2').select2({
             width: '100%'
         });
+    }
 
+    if(typeof $ !== 'undefined') {
         // Update selected classes text when checkboxes change
         function updateSelectedClasses() {
             var selected = [];
@@ -227,23 +230,29 @@ document.addEventListener('DOMContentLoaded', function() {
             var id = $(this).data('id');
             var nama = $(this).data('nama');
             
-            Swal.fire({
-                title: 'Hapus Guru BK?',
-                html: 'Yakin ingin menghapus <strong>' + nama + '</strong> dari daftar Guru BK? Seluruh kelas yang didampingi akan dilepas.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#e74a3b',
-                cancelButtonColor: '#858796',
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Hapus Guru BK?',
+                    html: 'Yakin ingin menghapus <strong>' + nama + '</strong> dari daftar Guru BK? Seluruh kelas yang didampingi akan dilepas.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e74a3b',
+                    cancelButtonColor: '#858796',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = 'home.php?page=data-guru-bk&hapus_bk=' + encodeURIComponent(id);
+                    }
+                });
+            } else {
+                if (confirm('Yakin ingin menghapus ' + nama + '?')) {
                     window.location.href = 'home.php?page=data-guru-bk&hapus_bk=' + encodeURIComponent(id);
                 }
-            });
+            }
         });
     } else {
-        console.error("Select2 or jQuery is not loaded properly.");
+        console.error("jQuery is not loaded properly.");
     }
 });
 </script>
