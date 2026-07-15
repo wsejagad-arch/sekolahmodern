@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         $('.class-checkbox').on('change', updateSelectedClasses);
 
-        $('.btn-hapus').click(function(e) {
+        $(document).on('click', '.btn-hapus', function(e) {
             e.preventDefault();
             var id = $(this).data('id');
             var nama = $(this).data('nama');
