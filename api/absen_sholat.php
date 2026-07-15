@@ -56,18 +56,18 @@ $waktuAbsen = date('H:i:s');
 // ── Cek dan buat tabel tbl_absen_sholat jika belum ada ────────────────────────
 $qCheckTable = @mysqli_query($conn, "SHOW TABLES LIKE 'tbl_absen_sholat'");
 if (!$qCheckTable || mysqli_num_rows($qCheckTable) == 0) {
-    $createTable = "CREATE TABLE tbl_absen_sholat (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        id_sekolah INT DEFAULT 1,
-        no_induk VARCHAR(25) NOT NULL,
-        tanggal DATE NOT NULL,
-        jenis_sholat ENUM('Dzuhur','Jumat') NOT NULL,
-        waktu_absen TIME NOT NULL,
-        lat DOUBLE NOT NULL,
-        lng DOUBLE NOT NULL,
-        status VARCHAR(50) DEFAULT 'Hadir',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )";
+    $createTable = "CREATE TABLE IF NOT EXISTS tbl_absen_sholat (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        no_induk varchar(50) NOT NULL,
+        jenis_sholat enum('Dzuhur','Jumat') NOT NULL,
+        tanggal date NOT NULL,
+        waktu time NOT NULL,
+        lat varchar(100) DEFAULT NULL,
+        lng varchar(100) DEFAULT NULL,
+        status_lokasi varchar(100) DEFAULT 'Valid',
+        id_sekolah int(11) DEFAULT 1,
+        PRIMARY KEY (id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
     @mysqli_query($conn, $createTable);
 }
 
@@ -84,7 +84,7 @@ $latEsc = mysqli_real_escape_string($conn, $sisLat);
 $lngEsc = mysqli_real_escape_string($conn, $sisLng);
 $nisEsc = mysqli_real_escape_string($conn, $nis);
 
-$queryInsert = "INSERT INTO tbl_absen_sholat (id_sekolah, no_induk, tanggal, jenis_sholat, waktu_absen, lat, lng, status) 
+$queryInsert = "INSERT INTO tbl_absen_sholat (id_sekolah, no_induk, tanggal, jenis_sholat, waktu, lat, lng, status_lokasi) 
                 VALUES ({$tenantId}, '$nisEsc', '$tglHariIni', '$jenisSholat', '$waktuAbsen', '$latEsc', '$lngEsc', '$statusAbsen')";
 
 if (mysqli_query($conn, $queryInsert)) {

@@ -53,7 +53,7 @@ if (!empty($kelasFilter)) {
     
     // Ambil sholat sekolah
     $sholatSekolah = [];
-    $qSekolah = @mysqli_query($conn, "SELECT no_induk, type, COUNT(*) as cnt FROM tbl_absen_sholat WHERE DATE(created_at) LIKE '$blnEsc%' AND status='hadir' GROUP BY no_induk, type");
+    $qSekolah = @mysqli_query($conn, "SELECT no_induk, jenis_sholat as type, COUNT(*) as cnt FROM tbl_absen_sholat WHERE tanggal LIKE '$blnEsc%' AND LOWER(status_lokasi)='hadir' GROUP BY no_induk, jenis_sholat");
     if ($qSekolah) {
         while ($rs = mysqli_fetch_assoc($qSekolah)) {
             $sholatSekolah[$rs['no_induk']][$rs['type']] = $rs['cnt'];
