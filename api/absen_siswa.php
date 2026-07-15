@@ -149,7 +149,7 @@ $nipGuru    = $mapelRow['no_induk_guru'];
 // ── Tentukan status: Hadir atau Telat ─────────────────────────────────────────
 $jamMulai    = $mapelRow['jam_mulai'] ?? '00:00:00';   // e.g. "07:00:00"
 $waktuIni    = date('H:i:s');                          // jam server saat ini
-$statusAbsen = (strtotime($waktuIni) > strtotime($jamMulai)) ? 'Telat' : 'Hadir';
+$statusAbsen = (strtotime($waktuIni) > strtotime($jamMulai)) ? 'H/T' : 'Hadir';
 
 // ── Validasi jam terakhir (absen pulang) ──────────────────────────────────────
 // Cek apakah mapel ini adalah jam paling akhir untuk kelas tsb hari ini
@@ -167,17 +167,6 @@ $isLastPeriod = ((int)($rLastChk['cnt'] ?? 0) === 0);
 if ($isLastPeriod) {
     // Absen pulang: hanya boleh antara jam_selesai s/d 23:59
     $batasMax = '23:59:59';
-    // UNTUK PENGETESAN: Hapus blokir jam_selesai
-    /*
-    if (strtotime($waktuIni) < strtotime($jamSelesaiMapel)) {
-        jsonOut([
-            'success' => false,
-            'message' => 'Belum waktunya absen pulang. Tersedia mulai '
-                         . date('H:i', strtotime($jamSelesaiMapel)) . ' WIB',
-            'kode'    => 'BELUM_WAKTUNYA',
-        ]);
-    }
-    */
     if (strtotime($waktuIni) > strtotime($batasMax)) {
         jsonOut([
             'success' => false,
@@ -217,7 +206,7 @@ if ($qCek && mysqli_num_rows($qCek) > 0) {
     }
 
     $updRes = mysqli_query($conn,
-        "UPDATE tbl_absen SET status = '$statusAbsen', no_induk_guru = '".mysqli_real_escape_string($conn, $nipGuru)."',
+        "UPDATE tbl_absen SET status = '$statusAbsen', status_akhir = '$statusAbsen', no_induk_guru = '".mysqli_real_escape_string($conn, $nipGuru)."',
          sumber = 'siswa'
          WHERE {$tenantAbsen} AND id = '$idAbsen'"
     );
@@ -225,7 +214,7 @@ if ($qCek && mysqli_num_rows($qCek) > 0) {
         if (function_exists('notif_trigger_presensi')) {
             notif_trigger_presensi($conn, $nisEsc, $statusAbsen);
         }
-        jsonOut(['success' => true, 'message' => ($statusAbsen === 'Telat' ? '⚠️ Presensi diperbarui: TERLAMBAT — ' : 'Presensi berhasil diperbarui: ') . $namaMapel, 'status' => 'updated', 'status_absen' => $statusAbsen]);
+        jsonOut(['success' => true, 'message' => ($statusAbsen === 'H/T' ? '⚠️ Presensi diperbarui: TERLAMBAT — ' : 'Presensi berhasil diperbarui: ') . $namaMapel, 'status' => 'updated', 'status_absen' => $statusAbsen]);
     } else {
         jsonOut(['success' => false, 'message' => 'Gagal memperbarui presensi: ' . mysqli_error($conn)], 500);
     }
@@ -235,25 +224,25 @@ if ($qCek && mysqli_num_rows($qCek) > 0) {
     $namaMapelEsc = mysqli_real_escape_string($conn, $namaMapel);
 
     $insRes = mysqli_query($conn,
-        "INSERT INTO tbl_absen (tanggal, kelas, id_mapel, no_induk_guru, no_induk, status, sumber)
-         VALUES ('$tglEsc', '$kelasEsc', '$idMapelEsc', '$nipGuruEsc', '$nisEsc', '$statusAbsen', 'siswa')"
+        "INSERT INTO tbl_absen (tanggal, kelas, id_mapel, no_induk_guru, no_induk, status, status_akhir, sumber)
+         VALUES ('$tglEsc', '$kelasEsc', '$idMapelEsc', '$nipGuruEsc', '$nisEsc', '$statusAbsen', '$statusAbsen', 'siswa')"
     );
     if ($insRes) {
         if (function_exists('notif_trigger_presensi')) {
             notif_trigger_presensi($conn, $nisEsc, $statusAbsen);
         }
-        jsonOut(['success' => true, 'message' => ($statusAbsen === 'Telat' ? '⚠️ Presensi tercatat TERLAMBAT: ' : 'Presensi berhasil: ') . $namaMapel, 'status' => 'inserted', 'status_absen' => $statusAbsen]);
+        jsonOut(['success' => true, 'message' => ($statusAbsen === 'H/T' ? '⚠️ Presensi tercatat TERLAMBAT: ' : 'Presensi berhasil: ') . $namaMapel, 'status' => 'inserted', 'status_absen' => $statusAbsen]);
     } else {
         // Mungkin kolom sumber belum ada, coba ulang tanpa sumber
         $insRes2 = mysqli_query($conn,
-            "INSERT INTO tbl_absen (tanggal, kelas, id_mapel, no_induk_guru, no_induk, status)
-             VALUES ('$tglEsc', '$kelasEsc', '$idMapelEsc', '$nipGuruEsc', '$nisEsc', '$statusAbsen')"
+            "INSERT INTO tbl_absen (tanggal, kelas, id_mapel, no_induk_guru, no_induk, status, status_akhir)
+             VALUES ('$tglEsc', '$kelasEsc', '$idMapelEsc', '$nipGuruEsc', '$nisEsc', '$statusAbsen', '$statusAbsen')"
         );
         if ($insRes2) {
             if (function_exists('notif_trigger_presensi')) {
                 notif_trigger_presensi($conn, $nisEsc, $statusAbsen);
             }
-            jsonOut(['success' => true, 'message' => ($statusAbsen === 'Telat' ? '⚠️ Presensi tercatat TERLAMBAT: ' : 'Presensi berhasil: ') . $namaMapel, 'status' => 'inserted', 'status_absen' => $statusAbsen]);
+            jsonOut(['success' => true, 'message' => ($statusAbsen === 'H/T' ? '⚠️ Presensi tercatat TERLAMBAT: ' : 'Presensi berhasil: ') . $namaMapel, 'status' => 'inserted', 'status_absen' => $statusAbsen]);
         } else {
             jsonOut(['success' => false, 'message' => 'Gagal menyimpan presensi: ' . mysqli_error($conn)], 500);
         }

@@ -219,6 +219,22 @@ $existingKeterangan = $existingKeterangan ?? '';
             $kelas = isset($dat['kelas']) ? $dat['kelas'] : '';
             if ($kelas !== '') {
                 $kelas_escaped = mysqli_real_escape_string($conn, $kelas);
+                
+                // Cari data siswa yang sudah "Telat" / "H/T" di mapel lain hari ini
+                $siswaTelatHariIni = [];
+                $qTelat = @mysqli_query($conn, "
+                    SELECT DISTINCT no_induk 
+                    FROM tbl_absen 
+                    WHERE tanggal = '$tglskr_escaped' 
+                      AND kelas = '$kelas_escaped'
+                      AND (status_guru = 'Telat' OR status_guru = 'H/T' OR status = 'Telat' OR status = 'H/T')
+                ");
+                if ($qTelat) {
+                    while ($rt = mysqli_fetch_assoc($qTelat)) {
+                        $siswaTelatHariIni[$rt['no_induk']] = true;
+                    }
+                }
+                
                 $queryS = "SELECT no_induk, nama_siswa FROM tbl_siswa WHERE kelas = '$kelas_escaped' AND status='Aktif' ORDER BY nama_siswa ASC";
                 $siswaQuery = mysqli_query($conn, $queryS);
 
@@ -236,16 +252,26 @@ $existingKeterangan = $existingKeterangan ?? '';
                           <tbody>";
                     while($s = mysqli_fetch_assoc($siswaQuery)) {
                         $nis = $s['no_induk'];
+                        
+                        // Ambil status_guru existing, tapi karena kode lama pakai status, kita utamakan status_guru kalau ada.
+                        // (Dalam existingAbsen di atas belum mengambil status_guru, jadi default statusSiswa masih dari 'status' yg lama).
                         $statusSiswa = strtolower(trim((string)($existingAbsen[$nis] ?? '')));
                         if ($statusSiswa === 'izin') {
                             $statusSiswa = 'ijin';
                         }
+                        
+                        // Jika belum ada inputan untuk mapel ini, dan siswa sudah telat di mapel sebelumnya
+                        if ($statusSiswa === '' && isset($siswaTelatHariIni[$nis])) {
+                            $statusSiswa = 'telat';
+                        }
+                        
                         $checkedHadir = $statusSiswa === 'hadir' ? ' checked' : '';
                         $checkedIjin = $statusSiswa === 'ijin' ? ' checked' : '';
                         $checkedSakit = $statusSiswa === 'sakit' ? ' checked' : '';
                         $checkedDispen = $statusSiswa === 'dispen' ? ' checked' : '';
                         $checkedAlpha = $statusSiswa === 'alpha' ? ' checked' : '';
-                        $checkedTelat = $statusSiswa === 'telat' ? ' checked' : '';
+                        $checkedTelat = ($statusSiswa === 'telat' || $statusSiswa === 'h/t') ? ' checked' : '';
+                        
                         echo "<tr>
                                 <td class='col-nama'>" . htmlspecialchars($s['nama_siswa']) . "</td>
                                 <td class='col-radio'><input class='absen-radio' type='radio' data-letter='h' name='absen[".$nis."]' value='Hadir'".$checkedHadir."></td>

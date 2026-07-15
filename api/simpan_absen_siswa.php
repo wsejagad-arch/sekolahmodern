@@ -47,7 +47,7 @@ if(mysqli_num_rows($cek) > 0){
 
 // insert
 $waktu = date('Y-m-d H:i:s');
-$ins = mysqli_query($conn, "INSERT INTO tbl_absen (no_induk, kelas, tanggal, status, lat, lng) VALUES ('$no_induk', '$kelas', '$waktu', 'Hadir', '$lat', '$lng')");
+$ins = mysqli_query($conn, "INSERT INTO tbl_absen (no_induk, kelas, tanggal, status, status_akhir, lat, lng) VALUES ('$no_induk', '$kelas', '$waktu', 'Hadir', 'Hadir', '$lat', '$lng')");
 if($ins){
     if (function_exists('notif_trigger_presensi')) {
         notif_trigger_presensi($conn, $no_induk, 'Hadir', $waktu);

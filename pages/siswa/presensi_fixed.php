@@ -126,16 +126,80 @@ if ($tblSettingChk && mysqli_num_rows($tblSettingChk) > 0) {
     }
 }
 
+// ── Pengaturan Sholat Sekolah ──────────────────────────────────────────────────
+$sholatSettings = [];
+$qSholatCfg = @mysqli_query($conn, "SELECT kunci, nilai FROM tbl_app_config WHERE kunci IN (
+    'sholat_dzuhur_active', 'sholat_dzuhur_start', 'sholat_dzuhur_end', 'sholat_dzuhur_days',
+    'sholat_jumat_active', 'sholat_jumat_start', 'sholat_jumat_end', 'sholat_jumat_days',
+    '7kih_mushola_locations'
+)");
+if ($qSholatCfg) {
+    while ($rCfg = mysqli_fetch_assoc($qSholatCfg)) {
+        $sholatSettings[$rCfg['kunci']] = $rCfg['nilai'];
+    }
+}
+$isDzuhurActive = ($sholatSettings['sholat_dzuhur_active'] ?? '0') === '1';
+$isJumatActive = ($sholatSettings['sholat_jumat_active'] ?? '0') === '1';
+$dzDays = json_decode($sholatSettings['sholat_dzuhur_days'] ?? '[]', true) ?: [];
+$jmDays = json_decode($sholatSettings['sholat_jumat_days'] ?? '[]', true) ?: [];
+
+$nowTime = date('H:i');
+$hariIni = htmlspecialchars($hariIndo); // Sudah ada dari atas
+
+// Cek apakah hari dan jam ini valid untuk sholat
+$canAbsenDzuhur = false;
+$canAbsenJumat = false;
+
+if ($isDzuhurActive && in_array($hariIni, $dzDays)) {
+    $dzStart = $sholatSettings['sholat_dzuhur_start'] ?? '11:45';
+    $dzEnd = $sholatSettings['sholat_dzuhur_end'] ?? '13:30';
+    if ($nowTime >= $dzStart && $nowTime <= $dzEnd) {
+        $canAbsenDzuhur = true;
+    }
+}
+if ($isJumatActive && in_array($hariIni, $jmDays)) {
+    $jmStart = $sholatSettings['sholat_jumat_start'] ?? '11:45';
+    $jmEnd = $sholatSettings['sholat_jumat_end'] ?? '13:30';
+    if ($nowTime >= $jmStart && $nowTime <= $jmEnd) {
+        $canAbsenJumat = true;
+    }
+}
+
 $nis        = $_SESSION['no_induk'];
 $kelas      = $_SESSION['kelas'];
 $namaSiswa  = $_SESSION['nama_siswa'] ?? 'Siswa';
 
-// ── Cek apakah siswa adalah ketua kelas ─────────────────────────────────────
+// ── Cek apakah siswa punya izin Disetujui Penuh untuk hari ini ──────────────
+$izinHariIni = null;
+$nisEscIzin = mysqli_real_escape_string($conn, $nis);
+$qIzin = mysqli_query($conn, "SELECT id_izin, kategori_pengajuan, jenis_izin, detail_izin, validator_wali_kelas, validator_guru_bk 
+                               FROM tbl_izin_siswa 
+                               WHERE no_induk_siswa = '$nisEscIzin' 
+                                 AND tanggal_izin = '$tglHariIni' 
+                                 AND status_izin IN ('Disetujui Penuh','Disetujui') 
+                               LIMIT 1");
+if ($qIzin && mysqli_num_rows($qIzin) > 0) {
+    $izinHariIni = mysqli_fetch_assoc($qIzin);
+}
+
+// Cek apakah siswa adalah ketua kelas
 $isKetuaKelas = false;
 $_jabQ = @mysqli_query($conn, "SELECT jabatan FROM tbl_siswa WHERE {$tenantSiswa} AND no_induk='$nisEscJadwal' LIMIT 1");
 if ($_jabQ && ($jr = mysqli_fetch_assoc($_jabQ))) {
     $isKetuaKelas = ($jr['jabatan'] === 'Ketua Kelas');
     $_SESSION['jabatan'] = $jr['jabatan'] ?? 'Siswa';
+}
+
+// Cek apakah sudah absen sholat Dzuhur/Jumat hari ini
+$sudahAbsenDzuhur = false;
+$sudahAbsenJumat = false;
+
+$qCekSholat = @mysqli_query($conn, "SELECT jenis_sholat FROM tbl_absen_sholat WHERE no_induk='$nisEscJadwal' AND tanggal='$tglHariIni'");
+if ($qCekSholat) {
+    while ($rs = mysqli_fetch_assoc($qCekSholat)) {
+        if ($rs['jenis_sholat'] === 'Dzuhur') $sudahAbsenDzuhur = true;
+        if ($rs['jenis_sholat'] === 'Jumat') $sudahAbsenJumat = true;
+    }
 }
 
 // ── Fetch konfirmasi hari ini (hanya ketua kelas) ─────────────────────────────
@@ -168,37 +232,15 @@ $bulanEsc = mysqli_real_escape_string($conn, $bulan);
 $tblChk    = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_absen'");
 $tblExists = ($tblChk && mysqli_num_rows($tblChk) > 0);
 
-// ── Ringkasan ────────────────────────────────────────────────────────────────
 $summary = ['Hadir' => 0, 'Ijin' => 0, 'Sakit' => 0, 'Dispen' => 0, 'Alpha' => 0];
-if ($tblExists) {
-    $qSum = mysqli_query(
-        $conn,
-        "SELECT status, COUNT(*) AS jml
-         FROM tbl_absen
-         WHERE {$tenantAbsen}
-           AND no_induk='$nisEsc'
-           AND kelas='$klsEsc'
-           AND DATE_FORMAT(tanggal,'%Y-%m')='$bulanEsc'
-         GROUP BY status"
-    );
-    if ($qSum) {
-        while ($r = mysqli_fetch_assoc($qSum)) {
-            foreach (array_keys($summary) as $k) {
-                if (strcasecmp($k, $r['status']) === 0) {
-                    $summary[$k] = (int)$r['jml'];
-                }
-            }
-        }
-    }
-}
-$totalPertemuan = array_sum($summary);
 
-// ── Detail ───────────────────────────────────────────────────────────────────
+// ── Detail & Hitung Summary ──────────────────────────────────────────────────
 $detailList = [];
+$rekapHarian = [];
 if ($tblExists) {
     $qDet = mysqli_query(
         $conn,
-        "SELECT a.tanggal, ma.nama_mapel, ma.jam_mulai, ma.jam_selesai, g.nama_guru, a.status
+        "SELECT a.tanggal, ma.nama_mapel, ma.jam_mulai, ma.jam_selesai, g.nama_guru, a.status, a.status_akhir, a.sumber, a.status_guru
          FROM tbl_absen a
          LEFT JOIN tbl_mapel_ampu ma ON a.id_mapel = ma.id_mapel
          LEFT JOIN tbl_guru g ON ma.no_induk = g.no_induk
@@ -213,9 +255,98 @@ if ($tblExists) {
     if ($qDet) {
         while ($row = mysqli_fetch_assoc($qDet)) {
             $detailList[] = $row;
+            $tgl = $row['tanggal'];
+            if (!isset($rekapHarian[$tgl])) {
+                $rekapHarian[$tgl] = [
+                    'mapel' => [],
+                    'materi' => [],
+                    'kegiatan' => [],
+                    'status_siswa' => [],
+                    'status_guru' => [],
+                    'status_akhir' => []
+                ];
+            }
+            
+            $stSiswa = trim($row['status']);
+            $sumber = trim($row['sumber'] ?? '');
+            if (empty($stSiswa) || $sumber === 'guru') {
+                $hurufSiswa = '-'; // If empty or from teacher, student didn't input
+            } else {
+                $stLow = strtolower($stSiswa);
+                if ($stLow == 'hadir') $hurufSiswa = 'H';
+                elseif ($stLow == 'h/t' || $stLow == 'telat') $hurufSiswa = 'H/T';
+                elseif ($stLow == 'ijin' || $stLow == 'izin') $hurufSiswa = 'I';
+                elseif ($stLow == 'sakit') $hurufSiswa = 'S';
+                elseif ($stLow == 'dispen' || $stLow == 'dispensasi') $hurufSiswa = 'D';
+                else $hurufSiswa = strtoupper(substr($stSiswa, 0, 1));
+            }
+
+            $stGuru = trim($row['status_guru'] ?? '');
+            if (empty($stGuru)) {
+                $hurufGuru = '-';
+            } else {
+                $stGuruLow = strtolower($stGuru);
+                if ($stGuruLow == 'hadir') $hurufGuru = 'H';
+                elseif ($stGuruLow == 'h/t' || $stGuruLow == 'telat') $hurufGuru = 'H/T';
+                elseif ($stGuruLow == 'ijin' || $stGuruLow == 'izin') $hurufGuru = 'I';
+                elseif ($stGuruLow == 'sakit') $hurufGuru = 'S';
+                elseif ($stGuruLow == 'dispen' || $stGuruLow == 'dispensasi') $hurufGuru = 'D';
+                else $hurufGuru = strtoupper(substr($stGuru, 0, 1));
+            }
+            
+            $stAkhir = trim($row['status_akhir'] ?? $row['status']);
+            $stAkhirLow = strtolower($stAkhir);
+            if (empty($stAkhir)) $hurufAkhir = 'A/BA';
+            elseif ($stAkhirLow == 'hadir') $hurufAkhir = 'H';
+            elseif ($stAkhirLow == 'h/t' || $stAkhirLow == 'telat') $hurufAkhir = 'H/T';
+            elseif ($stAkhirLow == 'ijin' || $stAkhirLow == 'izin') $hurufAkhir = 'I';
+            elseif ($stAkhirLow == 'sakit') $hurufAkhir = 'S';
+            elseif ($stAkhirLow == 'dispen' || $stAkhirLow == 'dispensasi') $hurufAkhir = 'D';
+            else $hurufAkhir = strtoupper(substr($stAkhir, 0, 1));
+
+            $rekapHarian[$tgl]['mapel'][] = $row['nama_mapel'];
+            $rekapHarian[$tgl]['materi'][] = $row['materi'] ?? '-';
+            $rekapHarian[$tgl]['kegiatan'][] = $row['kegiatan'] ?? '-';
+            $rekapHarian[$tgl]['status_siswa'][] = $hurufSiswa;
+            $rekapHarian[$tgl]['status_guru'][] = $hurufGuru;
+            $rekapHarian[$tgl]['status_akhir'][] = $hurufAkhir;
         }
     }
+    
+    // Hitung summary dari hasil rekap harian
+    foreach ($rekapHarian as $tgl => $d) {
+        $counts = array_count_values($d['status_akhir']);
+        $hadir = $counts['H'] ?? 0;
+        $total = count($d['status_akhir']);
+        $nonHadir = $total - $hadir;
+        
+        $ket = 'A';
+        if (isset($counts['H/T']) && $counts['H/T'] > 0) { $ket = 'H/T'; } 
+        elseif (isset($counts['I']) && $counts['I'] > 0) { $ket = 'I'; }
+        elseif (isset($counts['S']) && $counts['S'] > 0) { $ket = 'S'; }
+        elseif (isset($counts['D']) && $counts['D'] > 0) { $ket = 'D'; }
+        else {
+            if ($hadir > $nonHadir) { $ket = 'H'; } 
+            else {
+                $maxC = 0; $maxS = 'A';
+                foreach ($counts as $s => $c) {
+                    if ($s != 'H' && $c > $maxC) { $maxC = $c; $maxS = $s; }
+                }
+                $ket = $maxS;
+            }
+        }
+        
+        if ($ket == 'H' || $ket == 'H/T') $summary['Hadir']++;
+        elseif ($ket == 'I') $summary['Ijin']++;
+        elseif ($ket == 'S') $summary['Sakit']++;
+        elseif ($ket == 'D') $summary['Dispen']++;
+        else $summary['Alpha']++;
+        
+        // Simpan Ket Akhir Harian ke array agar tidak perlu dihitung ulang di view
+        $rekapHarian[$tgl]['ket_harian'] = $ket;
+    }
 }
+$totalPertemuan = array_sum($summary);
 
 // ── Daftar bulan untuk dropdown ───────────────────────────────────────────────
 $bulanList = [];
@@ -484,16 +615,38 @@ function konfirmasiButtonColor($opt)
     <div class="w-full max-w-4xl mx-auto px-4 sm:px-6 relative z-20">
         
         <!-- PRESENSI MANDIRI CARD -->
-        <div class="mb-5 bg-white border border-gray-100 rounded-xl p-4 shadow-sm card-shadow">
-            <h2 class="text-xs font-bold text-blue-600 uppercase tracking-wider mb-4 flex items-center">
-                <i class="fas fa-calendar-check mr-2 text-blue-500 text-sm"></i> PRESENSI MANDIRI — <?= strtoupper(htmlspecialchars($hariIndo)) ?>, <?= strtoupper(tgl_indo($tglHariIni)) ?>
+        <div class="mb-5 bg-white border <?= $izinHariIni ? 'border-green-200' : 'border-gray-100' ?> rounded-xl p-4 shadow-sm card-shadow">
+            <h2 class="text-xs font-bold <?= $izinHariIni ? 'text-green-600' : 'text-blue-600' ?> uppercase tracking-wider mb-4 flex items-center">
+                <i class="fas <?= $izinHariIni ? 'fa-check-circle' : 'fa-calendar-check' ?> mr-2 <?= $izinHariIni ? 'text-green-500' : 'text-blue-500' ?> text-sm"></i> 
+                <?= $izinHariIni ? 'PRESENSI TIDAK DIPERLUKAN' : 'PRESENSI MANDIRI' ?> — <?= strtoupper(htmlspecialchars($hariIndo)) ?>, <?= strtoupper(tgl_indo($tglHariIni)) ?>
             </h2>
 
-            <?php if (empty($jadwalHariIni)): ?>
+            <?php if ($izinHariIni): ?>
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 text-green-600 text-xl mt-0.5">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-green-900 mb-1">Anda memiliki izin yang sudah disetujui penuh</p>
+                            <div class="text-xs text-green-800 space-y-0.5">
+                                <p><strong>Kategori:</strong> <?= htmlspecialchars($izinHariIni['kategori_pengajuan']) ?></p>
+                                <p><strong>Jenis:</strong> <?= htmlspecialchars($izinHariIni['jenis_izin']) ?></p>
+                                <?php if (!empty($izinHariIni['detail_izin'])): ?>
+                                <p><strong>Keterangan:</strong> <?= htmlspecialchars($izinHariIni['detail_izin']) ?></p>
+                                <?php endif; ?>
+                                <p class="mt-2"><strong>Persetujuan:</strong> Wali Kelas ✓ | Guru BK ✓</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php elseif (empty($jadwalHariIni)): ?>
                 <div class="text-center py-6">
                     <p class="text-sm text-gray-500"><i class="fas fa-bed mr-2 text-gray-300"></i>Tidak ada jadwal pelajaran hari ini.</p>
                 </div>
-            <?php else: ?>
+            <?php endif; ?>
+            
+            <?php if (!$izinHariIni && !empty($jadwalHariIni)): ?>
                 <?php
                 $lastMapelId = null;
                 $_maxSel = '';
@@ -564,6 +717,56 @@ function konfirmasiButtonColor($opt)
                 </div>
             <?php endif; ?>
         </div>
+
+        <!-- ── PRESENSI SHOLAT SEKOLAH ─────────────────────────────────────────── -->
+        <?php if (($canAbsenDzuhur && !$sudahAbsenDzuhur) || ($canAbsenJumat && !$sudahAbsenJumat) || $sudahAbsenDzuhur || $sudahAbsenJumat): ?>
+        <div class="mb-5 bg-white border border-teal-100 rounded-xl p-4 shadow-sm card-shadow">
+            <h2 class="text-xs font-bold text-teal-600 uppercase tracking-wide mb-1 flex items-center gap-2">
+                <i class="fas fa-mosque"></i> Presensi Sholat Sekolah
+            </h2>
+            <p class="text-[11px] text-teal-600/70 mb-4">Catat kehadiran sholat berjamaah di sekolah hari ini.</p>
+            
+            <div class="space-y-3">
+                <?php if ($canAbsenDzuhur || $sudahAbsenDzuhur): ?>
+                <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+                    <div>
+                        <p class="text-sm font-bold text-gray-800">Sholat Dzuhur</p>
+                        <p class="text-[11px] text-gray-500 mt-0.5"><i class="fas fa-clock mr-1"></i><?= $sholatSettings['sholat_dzuhur_start'] ?? '11:45' ?> - <?= $sholatSettings['sholat_dzuhur_end'] ?? '13:30' ?></p>
+                    </div>
+                    <?php if ($sudahAbsenDzuhur): ?>
+                        <span class="text-[11px] font-semibold px-3 py-1 rounded-full bg-teal-100 text-teal-700">
+                            <i class="fas fa-check-circle mr-1"></i> Sudah Absen
+                        </span>
+                    <?php else: ?>
+                        <button type="button" class="btn-absen-sholat text-[12px] font-semibold px-4 py-1.5 rounded-lg text-white bg-teal-500 hover:bg-teal-600 shadow-sm transition-all"
+                            onclick="openCameraForSholat('Dzuhur')">
+                            <i class="fas fa-fingerprint mr-1.5"></i>Absen Dzuhur
+                        </button>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
+                <?php if ($canAbsenJumat || $sudahAbsenJumat): ?>
+                <div class="flex items-center justify-between border-t border-gray-100 pt-3">
+                    <div>
+                        <p class="text-sm font-bold text-gray-800">Sholat Jumat</p>
+                        <p class="text-[11px] text-gray-500 mt-0.5"><i class="fas fa-clock mr-1"></i><?= $sholatSettings['sholat_jumat_start'] ?? '11:45' ?> - <?= $sholatSettings['sholat_jumat_end'] ?? '13:30' ?></p>
+                    </div>
+                    <?php if ($sudahAbsenJumat): ?>
+                        <span class="text-[11px] font-semibold px-3 py-1 rounded-full bg-teal-100 text-teal-700">
+                            <i class="fas fa-check-circle mr-1"></i> Sudah Absen
+                        </span>
+                    <?php else: ?>
+                        <button type="button" class="btn-absen-sholat text-[12px] font-semibold px-4 py-1.5 rounded-lg text-white bg-teal-500 hover:bg-teal-600 shadow-sm transition-all"
+                            onclick="openCameraForSholat('Jumat')">
+                            <i class="fas fa-fingerprint mr-1.5"></i>Absen Jumat
+                        </button>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- ── KONFIRMASI KEHADIRAN GURU (Ketua Kelas) ─────────────────────── -->
         <?php if ($isKetuaKelas): ?>
@@ -664,22 +867,36 @@ function konfirmasiButtonColor($opt)
                         <i class="fas fa-chart-pie mr-2 text-blue-500 text-sm"></i> REKAP — <?= strtoupper(bulanIndo($bulan)) ?>
                     </h2>
                     
-                    <div class="space-y-3 mb-4">
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="flex items-center gap-2 text-gray-600 font-medium"><div class="w-2.5 h-2.5 rounded-full bg-green-500"></div> Hadir</span>
-                            <span class="font-bold text-gray-800"><?= $summary['Hadir'] ?></span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="flex items-center gap-2 text-gray-600 font-medium"><div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div> Ijin</span>
-                            <span class="font-bold text-gray-800"><?= $summary['Ijin'] ?></span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="flex items-center gap-2 text-gray-600 font-medium"><div class="w-2.5 h-2.5 rounded-full bg-red-500"></div> Alpha</span>
-                            <span class="font-bold text-gray-800"><?= $summary['Alpha'] ?></span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="flex items-center gap-2 text-gray-600 font-medium"><div class="w-2.5 h-2.5 rounded-full bg-blue-500"></div> Sakit/Dispen</span>
-                            <span class="font-bold text-gray-800"><?= $summary['Sakit'] + $summary['Dispen'] ?></span>
+                    <div class="mb-4 overflow-hidden">
+                        <div class="grid grid-cols-4 gap-3 min-w-full">
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center min-w-0">
+                                <div class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-green-100 text-green-700 mb-3 mx-auto">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500 break-words">Hadir</div>
+                                <div class="mt-2 text-xl font-extrabold text-slate-900"><?= $summary['Hadir'] ?></div>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center min-w-0">
+                                <div class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-yellow-100 text-yellow-700 mb-3 mx-auto">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500 break-words">Ijin</div>
+                                <div class="mt-2 text-xl font-extrabold text-slate-900"><?= $summary['Ijin'] ?></div>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center min-w-0">
+                                <div class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-red-100 text-red-700 mb-3 mx-auto">
+                                    <i class="fas fa-user-slash"></i>
+                                </div>
+                                <div class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500 break-words">Alpha</div>
+                                <div class="mt-2 text-xl font-extrabold text-slate-900"><?= $summary['Alpha'] ?></div>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center min-w-0">
+                                <div class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-blue-100 text-blue-700 mb-3 mx-auto">
+                                    <i class="fas fa-heartbeat"></i>
+                                </div>
+                                <div class="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-500 break-words">Sakit/Dispen</div>
+                                <div class="mt-2 text-xl font-extrabold text-slate-900"><?= $summary['Sakit'] + $summary['Dispen'] ?></div>
+                            </div>
                         </div>
                     </div>
 
@@ -717,70 +934,41 @@ function konfirmasiButtonColor($opt)
                                         <th class="py-2 px-3">No</th>
                                         <th class="py-2 px-3 whitespace-nowrap">Hari/Tgl</th>
                                         <th class="py-2 px-3">Mata Pelajaran</th>
-                                        <th class="py-2 px-3 text-center">Status</th>
-                                        <th class="py-2 px-3 text-center whitespace-nowrap">Ket Akhir</th>
+                                        <th class="py-2 px-3">Materi</th>
+                                        <th class="py-2 px-3">Kegiatan</th>
+                                        <th class="py-2 px-3 text-center">Ket Guru</th>
+                                        <th class="py-2 px-3 text-center">Ket Siswa</th>
+                                        <th class="py-2 px-3 text-center">Status Akhir</th>
+                                        <th class="py-2 px-3 text-center whitespace-nowrap">Rekap Harian</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
                                     <?php
-                                    $rekapHarian = [];
-                                    foreach ($detailList as $row) {
-                                        $tgl = $row['tanggal'];
-                                        if (!isset($rekapHarian[$tgl])) {
-                                            $rekapHarian[$tgl] = [
-                                                'mapel' => [],
-                                                'status' => [],
-                                                'last_status' => ''
-                                            ];
-                                        }
-                                        $st = strtolower(trim($row['status']));
-                                        $huruf = 'A';
-                                        if ($st == 'hadir') $huruf = 'H';
-                                        elseif ($st == 'ijin' || $st == 'izin') $huruf = 'I';
-                                        elseif ($st == 'sakit') $huruf = 'S';
-                                        elseif ($st == 'dispen' || $st == 'dispensasi') $huruf = 'D';
-                                        else $huruf = strtoupper(substr($st, 0, 1));
-                                        
-                                        $rekapHarian[$tgl]['mapel'][] = $row['nama_mapel'];
-                                        $rekapHarian[$tgl]['status'][] = $huruf;
-                                        $rekapHarian[$tgl]['last_status'] = $huruf;
-                                    }
-
                                     $no = 1;
                                     foreach ($rekapHarian as $tgl => $d):
-                                        $counts = array_count_values($d['status']);
-                                        $hadir = $counts['H'] ?? 0;
-                                        $total = count($d['status']);
-                                        $nonHadir = $total - $hadir;
-                                        
-                                        $ket = 'A';
-                                        if ($hadir > $nonHadir) {
-                                            $ket = 'H';
-                                        } elseif ($hadir == $nonHadir) {
-                                            $ket = $d['last_status'];
-                                        } else {
-                                            $maxC = 0; $maxS = 'A';
-                                            foreach ($counts as $s => $c) {
-                                                if ($s != 'H' && $c > $maxC) {
-                                                    $maxC = $c; $maxS = $s;
-                                                }
-                                            }
-                                            $ket = $maxS;
-                                        }
-
+                                        $ket = $d['ket_harian'];
                                         $hariTgl = function_exists('tgl_indo') ? tgl_indo($tgl) : date('d M Y', strtotime($tgl));
-                                        $mapelStr = implode('<br>', $d['mapel']);
-                                        $statusStr = implode('<br>', $d['status']);
+                                        $mapelStr = implode('<br><br>', $d['mapel']);
+                                        $materiStr = implode('<br><br>', $d['materi']);
+                                        $kegiatanStr = implode('<br><br>', $d['kegiatan']);
+                                        $statusGuruStr = implode('<br><br>', $d['status_guru']);
+                                        $statusSiswaStr = implode('<br><br>', $d['status_siswa']);
+                                        $statusAkhirStr = implode('<br><br>', $d['status_akhir']);
                                         
                                         $badgeKet = 'bg-red-100 text-red-700';
                                         if ($ket == 'H') $badgeKet = 'bg-green-100 text-green-700';
+                                        elseif ($ket == 'H/T') $badgeKet = 'bg-yellow-200 text-yellow-800';
                                         elseif (in_array($ket, ['I','S','D'])) $badgeKet = 'bg-yellow-100 text-yellow-700';
                                     ?>
                                     <tr>
                                         <td class="py-2 px-3 align-top font-bold text-gray-500"><?= $no++ ?></td>
                                         <td class="py-2 px-3 align-top whitespace-nowrap font-bold text-[11px] text-gray-800"><?= htmlspecialchars($hariTgl) ?></td>
                                         <td class="py-2 px-3 align-top text-[11px] leading-relaxed text-gray-600"><?= $mapelStr ?></td>
-                                        <td class="py-2 px-3 align-top text-[11px] text-center font-black leading-relaxed"><?= $statusStr ?></td>
+                                        <td class="py-2 px-3 align-top text-[11px] leading-relaxed text-gray-600"><?= $materiStr ?></td>
+                                        <td class="py-2 px-3 align-top text-[11px] leading-relaxed text-gray-600"><?= $kegiatanStr ?></td>
+                                        <td class="py-2 px-3 align-top text-[11px] text-center font-black leading-relaxed"><?= $statusGuruStr ?></td>
+                                        <td class="py-2 px-3 align-top text-[11px] text-center font-black leading-relaxed"><?= $statusSiswaStr ?></td>
+                                        <td class="py-2 px-3 align-top text-[11px] text-center font-black leading-relaxed"><?= $statusAkhirStr ?></td>
                                         <td class="py-2 px-3 align-middle text-center">
                                             <span class="inline-block px-3 py-1 rounded-full text-[11px] font-black <?= $badgeKet ?>">
                                                 <?= $ket ?>
@@ -818,6 +1006,15 @@ function konfirmasiButtonColor($opt)
             <div id="faceStatus" class="mt-4 text-center text-sm font-medium text-gray-500 bg-gray-50 rounded-lg py-2">
                 <i class="fas fa-spinner fa-spin mr-1 text-blue-500"></i>Memuat model deteksi…
             </div>
+            
+            <div class="mt-2 flex gap-2 justify-center">
+                <button type="button" onclick="centerLocation()" class="flex-1 px-2 py-1.5 text-[11px] font-bold text-blue-700 bg-blue-100 border border-blue-200 rounded-lg shadow-sm hover:bg-blue-200 transition-colors">
+                    <i class="fas fa-sync-alt mr-1"></i>Refresh Lokasi
+                </button>
+                <button type="button" onclick="viewMap()" class="flex-1 px-2 py-1.5 text-[11px] font-bold text-teal-700 bg-teal-100 border border-teal-200 rounded-lg shadow-sm hover:bg-teal-200 transition-colors">
+                    <i class="fas fa-map-marked-alt mr-1"></i>Lihat Peta
+                </button>
+            </div>
 
             <!-- Petunjuk -->
             <ul class="mt-3 text-[11px] text-gray-500 list-none space-y-1 bg-blue-50/50 p-3 rounded-lg border border-blue-100">
@@ -851,9 +1048,11 @@ function konfirmasiButtonColor($opt)
             // ── Konfigurasi ────────────────────────────────────────────────────────────────
             const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
             const API_ABSEN = '../../api/absen_siswa.php';
+            const API_SHOLAT = '../../api/absen_sholat.php';
             const SCHOOL_LAT = <?= $presensiSetting['lat'] ?>;
             const SCHOOL_LNG = <?= $presensiSetting['lng'] ?>;
             const RADIUS_M = <?= $presensiSetting['radius_m'] ?>;
+            const MUSHOLA_LOCS = <?= json_encode(json_decode($sholatSettings['7kih_mushola_locations'] ?? '[]', true) ?: []) ?>;
 
             // ── State ──────────────────────────────────────────────────────────────────────
             let currentMapelId = null;
@@ -861,6 +1060,7 @@ function konfirmasiButtonColor($opt)
             let currentJamMulai = '';
             let currentJamSelesai = '';
             let currentIsLast = false;
+            let currentSholatType = null;
             let stream = null;
             let detectionTimer = null;
             let modelsLoaded = false;
@@ -888,7 +1088,7 @@ function konfirmasiButtonColor($opt)
             function updateTimeIndicators() {
                 const now = new Date();
                 const batas = new Date();
-                batas.setHours(19, 0, 0, 0);
+                batas.setHours(23, 59, 59, 0);
 
                 document.querySelectorAll('.btn-absen-mandiri').forEach(function(btn) {
                     const id = btn.getAttribute('data-idmapel');
@@ -899,27 +1099,11 @@ function konfirmasiButtonColor($opt)
                     if (!ind) return;
 
                     if (isLast) {
-                        // ── Jam terakhir: window mulai jam_selesai s/d 19:00 ─────────────
-                        const selesai = parseJam(js);
-                        if (!selesai) return;
-                        if (now < selesai) {
-                            btn.disabled = true;
-                            btn.classList.add('opacity-50', 'cursor-not-allowed');
-                            btn.classList.remove('hover:bg-blue-600');
-                            const sisaMnt = Math.max(0, Math.round((selesai - now) / 60000));
-                            ind.innerHTML = '<span style="color:#92400e;font-size:10px"><i class="fas fa-door-closed mr-1"></i>Pulang mulai ' +
-                                (js.substring(0, 5)) + ' (' + sisaMnt + ' mnt lagi)</span>';
-                        } else if (now > batas) {
-                            btn.disabled = true;
-                            btn.classList.add('opacity-50', 'cursor-not-allowed');
-                            btn.classList.remove('hover:bg-blue-600');
-                            ind.innerHTML = '<span style="color:#9ca3af;font-size:10px"><i class="fas fa-times-circle mr-1"></i>Waktu absen berakhir</span>';
-                        } else {
-                            btn.disabled = false;
-                            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                            btn.classList.add('hover:bg-blue-600');
-                            ind.innerHTML = '<span style="color:#166534;font-size:10px"><i class="fas fa-sign-out-alt mr-1"></i>Sedia hingga 19:00</span>';
-                        }
+                        // ── Jam terakhir: Bebas absen pulang kapan saja untuk pengetesan ─────────────
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        btn.classList.add('hover:bg-blue-600');
+                        ind.innerHTML = '<span style="color:#166534;font-size:10px"><i class="fas fa-sign-out-alt mr-1"></i>Sedia Absen Pulang Kapan Saja</span>';
                     } else {
                         // ── Bukan jam terakhir: logika Hadir/Telat biasa ─────────────────
                         if (!jm) return;
@@ -1055,45 +1239,157 @@ function konfirmasiButtonColor($opt)
             }
 
             // ── GPS check ─────────────────────────────────────────────────────────────────
-            function checkGPS() {
+            function checkGPS(force = false) {
                 gpsOk = false;
                 updateKonfirmBtn();
                 if (!navigator.geolocation) {
                     statusEl.innerHTML = '<span class="text-red-500"><i class="fas fa-times-circle mr-1"></i>Browser tidak mendukung GPS</span>';
                     return;
                 }
+                
+                if (force) {
+                    modalMsg.innerHTML = '<span class="text-blue-500"><i class="fas fa-spinner fa-spin mr-1"></i>Memperbarui lokasi GPS...</span>';
+                }
+
                 navigator.geolocation.getCurrentPosition(
                     function(pos) {
                         userCoords = {
                             lat: pos.coords.latitude,
                             lng: pos.coords.longitude
                         };
-                        const dist = haversine(userCoords.lat, userCoords.lng, SCHOOL_LAT, SCHOOL_LNG);
-                        if (dist <= RADIUS_M) {
-                            gpsOk = true;
+                        
+                        if (currentSholatType) {
+                            // Cek dengan lokasi mushola (bisa lebih dari satu)
+                            if (!MUSHOLA_LOCS || MUSHOLA_LOCS.length === 0) {
+                                modalMsg.innerHTML = `<span class="text-red-500"><i class="fas fa-exclamation-triangle mr-1"></i>Lokasi mushola belum diatur oleh Admin.</span>`;
+                                return;
+                            }
+                            
+                            let closestDist = Infinity;
+                            let closestName = '';
+                            let maxRad = 50;
+                            
+                            MUSHOLA_LOCS.forEach(function(m) {
+                                const dist = haversine(userCoords.lat, userCoords.lng, m.lat, m.lng);
+                                if (dist < closestDist) {
+                                    closestDist = dist;
+                                    closestName = m.nama;
+                                    maxRad = m.radius || 50;
+                                }
+                            });
+                            
+                            if (closestDist <= maxRad) {
+                                gpsOk = true;
+                                modalMsg.innerHTML = `<span class="text-teal-600"><i class="fas fa-map-marker-alt mr-1"></i>Lokasi Valid (${closestName})</span>`;
+                            } else {
+                                const distKm = (closestDist / 1000).toFixed(2);
+                                const radKm = (maxRad / 1000).toFixed(2);
+                                modalMsg.innerHTML = `<span class="text-red-500"><i class="fas fa-map-marker-alt mr-1"></i>Terlalu jauh dari ${closestName}: ${distKm} km (maks ${radKm} km)</span>`;
+                            }
                         } else {
-                            const distKm = (dist / 1000).toFixed(1);
-                            const radKm = (RADIUS_M / 1000).toFixed(1);
-                            modalMsg.innerHTML = `<span class="text-red-500"><i class="fas fa-map-marker-alt mr-1"></i>Lokasi terlalu jauh: ${distKm} km (maks ${radKm} km)</span>`;
+                            // Presensi biasa (kelas)
+                            const dist = haversine(userCoords.lat, userCoords.lng, SCHOOL_LAT, SCHOOL_LNG);
+                            if (dist <= RADIUS_M) {
+                                gpsOk = true;
+                                if (force) modalMsg.innerHTML = `<span class="text-teal-600"><i class="fas fa-check-circle mr-1"></i>Lokasi berhasil diperbarui dan Valid!</span>`;
+                            } else {
+                                const distKm = (dist / 1000).toFixed(2);
+                                const radKm = (RADIUS_M / 1000).toFixed(2);
+                                modalMsg.innerHTML = `<span class="text-red-500"><i class="fas fa-map-marker-alt mr-1"></i>Lokasi terlalu jauh: ${distKm} km (maks ${radKm} km)</span>`;
+                            }
                         }
+                        
                         updateKonfirmBtn();
                     },
                     function(err) {
-                        modalMsg.innerHTML = '<span class="text-red-400"><i class="fas fa-exclamation-triangle mr-1"></i>Gagal mendapatkan GPS: ' + err.message + '</span>';
+                        let errMsg = err.message;
+                        if (err.code === 1) {
+                            errMsg = "Akses lokasi ditolak! Izinkan lokasi di pengaturan browser/HP Anda.";
+                        } else if (err.code === 2) {
+                            errMsg = "Sinyal GPS tidak ditemukan. Pastikan GPS/Lokasi HP aktif.";
+                        } else if (err.code === 3) {
+                            errMsg = "Waktu pencarian lokasi habis. Coba klik Refresh Lokasi.";
+                        }
+                        modalMsg.innerHTML = '<span class="text-red-400 text-[11px] font-bold block mt-1"><i class="fas fa-exclamation-triangle mr-1"></i>Gagal GPS: ' + errMsg + '</span>';
                     }, {
-                        timeout: 10000,
-                        maximumAge: 60000
+                        enableHighAccuracy: true,
+                        timeout: 15000,
+                        maximumAge: 0
                     }
                 );
             }
+            
+            window.centerLocation = function() {
+                checkGPS(true);
+            };
+            
+            window.viewMap = function() {
+                if (userCoords) {
+                    window.open('https://www.google.com/maps?q=' + userCoords.lat + ',' + userCoords.lng, '_blank');
+                } else {
+                    alert('Lokasi belum ditemukan! Silakan klik Refresh Lokasi terlebih dahulu.');
+                }
+            };
 
-            // ── Open camera ────────────────────────────────────────────────────────────────
+            // ── Open camera for Sholat ───────────────────────────────────────────────────────
+            window.openCameraForSholat = async function(sholatType) {
+                currentMapelId = null;
+                currentSholatType = sholatType;
+
+                videoEl = document.getElementById('previewVideo');
+                canvasEl = document.getElementById('faceCanvas');
+                ovalEl = document.getElementById('ovalGuide');
+                statusEl = document.getElementById('faceStatus');
+                btnKonfirm = document.getElementById('btnAbsenKonfirm');
+                modalMsg = document.getElementById('modalMsg');
+                cameraModal = document.getElementById('cameraModal');
+
+                document.getElementById('cameraSubtitle').textContent = 'Presensi Sholat ' + sholatType;
+                modalMsg.innerHTML = '<span class="text-gray-500 text-xs">Pastikan Anda berada di area Mushola/Masjid sekolah.</span>';
+
+                faceOk = false;
+                gpsOk = false;
+                userCoords = null;
+                updateKonfirmBtn();
+                cameraModal.classList.add('open');
+
+                // Load models 
+                statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Memuat model face detection…';
+                try {
+                    await ensureModels();
+                } catch (e) {
+                    statusEl.innerHTML = '<span class="text-red-500">Gagal memuat model: ' + e.message + '</span>';
+                    return;
+                }
+
+                // Start camera
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'user', width: 480, height: 360 }
+                    });
+                    videoEl.srcObject = stream;
+                    await videoEl.play();
+                } catch (e) {
+                    statusEl.innerHTML = '<span class="text-red-500"><i class="fas fa-times-circle mr-1"></i>Kamera tidak tersedia: ' + e.message + '</span>';
+                    return;
+                }
+
+                // Start detection loop
+                detectionTimer = setTimeout(detectionLoop, 500);
+
+                // GPS simultaneously
+                statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Mendeteksi wajah & GPS…';
+                checkGPS();
+            };
+
+            // ── Open camera for mapel ──────────────────────────────────────────────────────
             window.openCameraForMapel = async function(idMapel, namaMapel, jamMulai, jamSelesai, isLast) {
                 currentMapelId = idMapel;
                 currentMapelNm = namaMapel;
                 currentJamMulai = jamMulai || '';
                 currentJamSelesai = jamSelesai || '';
                 currentIsLast = isLast || false;
+                currentSholatType = null; // Reset sholat type
 
                 videoEl = document.getElementById('previewVideo');
                 canvasEl = document.getElementById('faceCanvas');
@@ -1109,20 +1405,10 @@ function konfirmasiButtonColor($opt)
                 (function renderModalTimeMsg() {
                     const now = new Date();
                     const batas = new Date();
-                    batas.setHours(19, 0, 0, 0);
+                    batas.setHours(23, 59, 59, 0);
                     if (isLast && jamSelesai) {
-                        const selesai = parseJam(jamSelesai);
-                        if (now < selesai) {
-                            modalMsg.innerHTML = '<span style="color:#92400e;background:#fef3c7;border:1px solid #f59e0b;border-radius:.5rem;padding:4px 10px;display:inline-block;font-size:11px;">' +
-                                '<i class="fas fa-door-closed mr-1"></i>Belum waktunya pulang — absen tersedia mulai <strong>' +
-                                jamSelesai.substring(0, 5) + ' WIB</strong></span>';
-                        } else if (now > batas) {
-                            modalMsg.innerHTML = '<span style="color:#991b1b;background:#fee2e2;border:1px solid #fca5a5;border-radius:.5rem;padding:4px 10px;display:inline-block;font-size:11px;">' +
-                                '<i class="fas fa-times-circle mr-1"></i>Waktu absen pulang sudah berakhir (batas <strong>19:00 WIB</strong>)</span>';
-                        } else {
-                            modalMsg.innerHTML = '<span style="color:#166534;background:#dcfce7;border:1px solid #86efac;border-radius:.5rem;padding:4px 10px;display:inline-block;font-size:11px;">' +
-                                '<i class="fas fa-sign-out-alt mr-1"></i>Absen pulang — berlaku hingga <strong>19:00 WIB</strong></span>';
-                        }
+                        modalMsg.innerHTML = '<span style="color:#166534;background:#dcfce7;border:1px solid #86efac;border-radius:.5rem;padding:4px 10px;display:inline-block;font-size:11px;">' +
+                            '<i class="fas fa-sign-out-alt mr-1"></i>Sedia Absen Pulang Kapan Saja (Mode Tes)</span>';
                     } else if (jamMulai) {
                         const late = isTelat(jamMulai);
                         if (late) {
@@ -1204,12 +1490,20 @@ function konfirmasiButtonColor($opt)
                     modalMsg.innerHTML = '';
 
                     const fd = new FormData();
-                    fd.append('id_mapel', currentMapelId);
+                    
+                    let targetAPI = API_ABSEN;
+                    if (currentSholatType) {
+                        targetAPI = API_SHOLAT;
+                        fd.append('jenis_sholat', currentSholatType);
+                    } else {
+                        fd.append('id_mapel', currentMapelId);
+                    }
+                    
                     fd.append('lat', userCoords.lat);
                     fd.append('lng', userCoords.lng);
 
                     try {
-                        const res = await fetch(API_ABSEN, {
+                        const res = await fetch(targetAPI, {
                             method: 'POST',
                             body: fd
                         });
@@ -1306,6 +1600,18 @@ function konfirmasiButtonColor($opt)
                 }
             };
         })();
+
+        // Request camera permission automatically on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                // Immediately stop the stream after permission is granted
+                stream.getTracks().forEach(track => track.stop());
+                console.log('Camera permission granted automatically on page load.');
+            } catch (e) {
+                console.warn('Camera permission request on page load failed or denied:', e);
+            }
+        });
     </script>
 
 </body>

@@ -101,4 +101,9 @@ function run_auto_migrations($conn) {
     // Menambahkan kolom password_plain khusus untuk melihat password user non-admin
     @mysqli_query($conn, "ALTER TABLE `tbl_user` ADD COLUMN `password_plain` VARCHAR(255) DEFAULT ''");
     @mysqli_query($conn, "ALTER TABLE `tbl_pengguna` ADD COLUMN `password_plain` VARCHAR(255) DEFAULT ''");
+    
+    // Penambahan kolom baru untuk presensi (Update Juli 2026)
+    @mysqli_query($conn, "ALTER TABLE `tbl_absen` MODIFY COLUMN `status` VARCHAR(50) DEFAULT NULL");
+    @mysqli_query($conn, "ALTER TABLE `tbl_absen` ADD COLUMN `status_guru` VARCHAR(50) DEFAULT NULL");
+    @mysqli_query($conn, "ALTER TABLE `tbl_absen` ADD COLUMN `status_akhir` VARCHAR(50) DEFAULT NULL");
 }

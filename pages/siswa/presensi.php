@@ -232,39 +232,15 @@ $bulanEsc = mysqli_real_escape_string($conn, $bulan);
 $tblChk    = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_absen'");
 $tblExists = ($tblChk && mysqli_num_rows($tblChk) > 0);
 
-// ── Ringkasan ────────────────────────────────────────────────────────────────
 $summary = ['Hadir' => 0, 'Ijin' => 0, 'Sakit' => 0, 'Dispen' => 0, 'Alpha' => 0];
-if ($tblExists) {
-    $qSum = mysqli_query(
-        $conn,
-        "SELECT
-            SUM(CASE WHEN LOWER(TRIM(status)) IN ('hadir','telat') THEN 1 ELSE 0 END) AS hadir,
-            SUM(CASE WHEN LOWER(TRIM(status)) IN ('ijin','izin') THEN 1 ELSE 0 END) AS ijin,
-            SUM(CASE WHEN LOWER(TRIM(status)) = 'sakit' THEN 1 ELSE 0 END) AS sakit,
-            SUM(CASE WHEN LOWER(TRIM(status)) IN ('dispen','dispensasi') THEN 1 ELSE 0 END) AS dispen,
-            SUM(CASE WHEN LOWER(TRIM(status)) = 'alpha' THEN 1 ELSE 0 END) AS alpha
-         FROM tbl_absen
-         WHERE {$tenantAbsen}
-           AND no_induk='$nisEsc'
-           AND kelas='$klsEsc'
-           AND DATE_FORMAT(tanggal,'%Y-%m')='$bulanEsc'"
-    );
-    if ($qSum && ($row = mysqli_fetch_assoc($qSum))) {
-        $summary['Hadir'] = (int)$row['hadir'];
-        $summary['Ijin'] = (int)$row['ijin'];
-        $summary['Sakit'] = (int)$row['sakit'];
-        $summary['Dispen'] = (int)$row['dispen'];
-        $summary['Alpha'] = (int)$row['alpha'];
-    }
-}
-$totalPertemuan = array_sum($summary);
 
-// ── Detail ───────────────────────────────────────────────────────────────────
+// ── Detail & Hitung Summary ──────────────────────────────────────────────────
 $detailList = [];
+$rekapHarian = [];
 if ($tblExists) {
     $qDet = mysqli_query(
         $conn,
-        "SELECT a.tanggal, ma.nama_mapel, ma.jam_mulai, ma.jam_selesai, g.nama_guru, a.status
+        "SELECT a.tanggal, ma.nama_mapel, ma.jam_mulai, ma.jam_selesai, g.nama_guru, a.status, a.status_akhir, a.sumber, a.status_guru
          FROM tbl_absen a
          LEFT JOIN tbl_mapel_ampu ma ON a.id_mapel = ma.id_mapel
          LEFT JOIN tbl_guru g ON ma.no_induk = g.no_induk
@@ -279,9 +255,98 @@ if ($tblExists) {
     if ($qDet) {
         while ($row = mysqli_fetch_assoc($qDet)) {
             $detailList[] = $row;
+            $tgl = $row['tanggal'];
+            if (!isset($rekapHarian[$tgl])) {
+                $rekapHarian[$tgl] = [
+                    'mapel' => [],
+                    'materi' => [],
+                    'kegiatan' => [],
+                    'status_siswa' => [],
+                    'status_guru' => [],
+                    'status_akhir' => []
+                ];
+            }
+            
+            $stSiswa = trim($row['status']);
+            $sumber = trim($row['sumber'] ?? '');
+            if (empty($stSiswa) || $sumber === 'guru') {
+                $hurufSiswa = '-'; // If empty or from teacher, student didn't input
+            } else {
+                $stLow = strtolower($stSiswa);
+                if ($stLow == 'hadir') $hurufSiswa = 'H';
+                elseif ($stLow == 'h/t' || $stLow == 'telat') $hurufSiswa = 'H/T';
+                elseif ($stLow == 'ijin' || $stLow == 'izin') $hurufSiswa = 'I';
+                elseif ($stLow == 'sakit') $hurufSiswa = 'S';
+                elseif ($stLow == 'dispen' || $stLow == 'dispensasi') $hurufSiswa = 'D';
+                else $hurufSiswa = strtoupper(substr($stSiswa, 0, 1));
+            }
+
+            $stGuru = trim($row['status_guru'] ?? '');
+            if (empty($stGuru)) {
+                $hurufGuru = '-';
+            } else {
+                $stGuruLow = strtolower($stGuru);
+                if ($stGuruLow == 'hadir') $hurufGuru = 'H';
+                elseif ($stGuruLow == 'h/t' || $stGuruLow == 'telat') $hurufGuru = 'H/T';
+                elseif ($stGuruLow == 'ijin' || $stGuruLow == 'izin') $hurufGuru = 'I';
+                elseif ($stGuruLow == 'sakit') $hurufGuru = 'S';
+                elseif ($stGuruLow == 'dispen' || $stGuruLow == 'dispensasi') $hurufGuru = 'D';
+                else $hurufGuru = strtoupper(substr($stGuru, 0, 1));
+            }
+            
+            $stAkhir = trim($row['status_akhir'] ?? $row['status']);
+            $stAkhirLow = strtolower($stAkhir);
+            if (empty($stAkhir)) $hurufAkhir = 'A/BA';
+            elseif ($stAkhirLow == 'hadir') $hurufAkhir = 'H';
+            elseif ($stAkhirLow == 'h/t' || $stAkhirLow == 'telat') $hurufAkhir = 'H/T';
+            elseif ($stAkhirLow == 'ijin' || $stAkhirLow == 'izin') $hurufAkhir = 'I';
+            elseif ($stAkhirLow == 'sakit') $hurufAkhir = 'S';
+            elseif ($stAkhirLow == 'dispen' || $stAkhirLow == 'dispensasi') $hurufAkhir = 'D';
+            else $hurufAkhir = strtoupper(substr($stAkhir, 0, 1));
+
+            $rekapHarian[$tgl]['mapel'][] = $row['nama_mapel'];
+            $rekapHarian[$tgl]['materi'][] = $row['materi'] ?? '-';
+            $rekapHarian[$tgl]['kegiatan'][] = $row['kegiatan'] ?? '-';
+            $rekapHarian[$tgl]['status_siswa'][] = $hurufSiswa;
+            $rekapHarian[$tgl]['status_guru'][] = $hurufGuru;
+            $rekapHarian[$tgl]['status_akhir'][] = $hurufAkhir;
         }
     }
+    
+    // Hitung summary dari hasil rekap harian
+    foreach ($rekapHarian as $tgl => $d) {
+        $counts = array_count_values($d['status_akhir']);
+        $hadir = $counts['H'] ?? 0;
+        $total = count($d['status_akhir']);
+        $nonHadir = $total - $hadir;
+        
+        $ket = 'A';
+        if (isset($counts['H/T']) && $counts['H/T'] > 0) { $ket = 'H/T'; } 
+        elseif (isset($counts['I']) && $counts['I'] > 0) { $ket = 'I'; }
+        elseif (isset($counts['S']) && $counts['S'] > 0) { $ket = 'S'; }
+        elseif (isset($counts['D']) && $counts['D'] > 0) { $ket = 'D'; }
+        else {
+            if ($hadir > $nonHadir) { $ket = 'H'; } 
+            else {
+                $maxC = 0; $maxS = 'A';
+                foreach ($counts as $s => $c) {
+                    if ($s != 'H' && $c > $maxC) { $maxC = $c; $maxS = $s; }
+                }
+                $ket = $maxS;
+            }
+        }
+        
+        if ($ket == 'H' || $ket == 'H/T') $summary['Hadir']++;
+        elseif ($ket == 'I') $summary['Ijin']++;
+        elseif ($ket == 'S') $summary['Sakit']++;
+        elseif ($ket == 'D') $summary['Dispen']++;
+        else $summary['Alpha']++;
+        
+        // Simpan Ket Akhir Harian ke array agar tidak perlu dihitung ulang di view
+        $rekapHarian[$tgl]['ket_harian'] = $ket;
+    }
 }
+$totalPertemuan = array_sum($summary);
 
 // ── Daftar bulan untuk dropdown ───────────────────────────────────────────────
 $bulanList = [];
@@ -869,70 +934,41 @@ function konfirmasiButtonColor($opt)
                                         <th class="py-2 px-3">No</th>
                                         <th class="py-2 px-3 whitespace-nowrap">Hari/Tgl</th>
                                         <th class="py-2 px-3">Mata Pelajaran</th>
-                                        <th class="py-2 px-3 text-center">Status</th>
-                                        <th class="py-2 px-3 text-center whitespace-nowrap">Ket Akhir</th>
+                                        <th class="py-2 px-3">Materi</th>
+                                        <th class="py-2 px-3">Kegiatan</th>
+                                        <th class="py-2 px-3 text-center">Ket Guru</th>
+                                        <th class="py-2 px-3 text-center">Ket Siswa</th>
+                                        <th class="py-2 px-3 text-center">Status Akhir</th>
+                                        <th class="py-2 px-3 text-center whitespace-nowrap">Rekap Harian</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
                                     <?php
-                                    $rekapHarian = [];
-                                    foreach ($detailList as $row) {
-                                        $tgl = $row['tanggal'];
-                                        if (!isset($rekapHarian[$tgl])) {
-                                            $rekapHarian[$tgl] = [
-                                                'mapel' => [],
-                                                'status' => [],
-                                                'last_status' => ''
-                                            ];
-                                        }
-                                        $st = strtolower(trim($row['status']));
-                                        $huruf = 'A';
-                                        if ($st == 'hadir') $huruf = 'H';
-                                        elseif ($st == 'ijin' || $st == 'izin') $huruf = 'I';
-                                        elseif ($st == 'sakit') $huruf = 'S';
-                                        elseif ($st == 'dispen' || $st == 'dispensasi') $huruf = 'D';
-                                        else $huruf = strtoupper(substr($st, 0, 1));
-                                        
-                                        $rekapHarian[$tgl]['mapel'][] = $row['nama_mapel'];
-                                        $rekapHarian[$tgl]['status'][] = $huruf;
-                                        $rekapHarian[$tgl]['last_status'] = $huruf;
-                                    }
-
                                     $no = 1;
                                     foreach ($rekapHarian as $tgl => $d):
-                                        $counts = array_count_values($d['status']);
-                                        $hadir = $counts['H'] ?? 0;
-                                        $total = count($d['status']);
-                                        $nonHadir = $total - $hadir;
-                                        
-                                        $ket = 'A';
-                                        if ($hadir > $nonHadir) {
-                                            $ket = 'H';
-                                        } elseif ($hadir == $nonHadir) {
-                                            $ket = $d['last_status'];
-                                        } else {
-                                            $maxC = 0; $maxS = 'A';
-                                            foreach ($counts as $s => $c) {
-                                                if ($s != 'H' && $c > $maxC) {
-                                                    $maxC = $c; $maxS = $s;
-                                                }
-                                            }
-                                            $ket = $maxS;
-                                        }
-
+                                        $ket = $d['ket_harian'];
                                         $hariTgl = function_exists('tgl_indo') ? tgl_indo($tgl) : date('d M Y', strtotime($tgl));
-                                        $mapelStr = implode('<br>', $d['mapel']);
-                                        $statusStr = implode('<br>', $d['status']);
+                                        $mapelStr = implode('<br><br>', $d['mapel']);
+                                        $materiStr = implode('<br><br>', $d['materi']);
+                                        $kegiatanStr = implode('<br><br>', $d['kegiatan']);
+                                        $statusGuruStr = implode('<br><br>', $d['status_guru']);
+                                        $statusSiswaStr = implode('<br><br>', $d['status_siswa']);
+                                        $statusAkhirStr = implode('<br><br>', $d['status_akhir']);
                                         
                                         $badgeKet = 'bg-red-100 text-red-700';
                                         if ($ket == 'H') $badgeKet = 'bg-green-100 text-green-700';
+                                        elseif ($ket == 'H/T') $badgeKet = 'bg-yellow-200 text-yellow-800';
                                         elseif (in_array($ket, ['I','S','D'])) $badgeKet = 'bg-yellow-100 text-yellow-700';
                                     ?>
                                     <tr>
                                         <td class="py-2 px-3 align-top font-bold text-gray-500"><?= $no++ ?></td>
                                         <td class="py-2 px-3 align-top whitespace-nowrap font-bold text-[11px] text-gray-800"><?= htmlspecialchars($hariTgl) ?></td>
                                         <td class="py-2 px-3 align-top text-[11px] leading-relaxed text-gray-600"><?= $mapelStr ?></td>
-                                        <td class="py-2 px-3 align-top text-[11px] text-center font-black leading-relaxed"><?= $statusStr ?></td>
+                                        <td class="py-2 px-3 align-top text-[11px] leading-relaxed text-gray-600"><?= $materiStr ?></td>
+                                        <td class="py-2 px-3 align-top text-[11px] leading-relaxed text-gray-600"><?= $kegiatanStr ?></td>
+                                        <td class="py-2 px-3 align-top text-[11px] text-center font-black leading-relaxed"><?= $statusGuruStr ?></td>
+                                        <td class="py-2 px-3 align-top text-[11px] text-center font-black leading-relaxed"><?= $statusSiswaStr ?></td>
+                                        <td class="py-2 px-3 align-top text-[11px] text-center font-black leading-relaxed"><?= $statusAkhirStr ?></td>
                                         <td class="py-2 px-3 align-middle text-center">
                                             <span class="inline-block px-3 py-1 rounded-full text-[11px] font-black <?= $badgeKet ?>">
                                                 <?= $ket ?>
