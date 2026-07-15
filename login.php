@@ -502,6 +502,8 @@ $googleErrorMessages = [
                     <div class="alert alert-danger">Silakan login terlebih dahulu untuk melanjutkan.</div>
                 <?php elseif (isset($_GET['db_error'])): ?>
                     <div class="alert alert-danger">Database tidak tersambung. Jalankan server dengan PHP XAMPP, lalu coba login lagi.</div>
+                <?php elseif (isset($_GET['csrf_error'])): ?>
+                    <div class="alert alert-danger">Sesi Anda telah berakhir atau tidak valid. Silakan coba login kembali.</div>
                 <?php elseif (isset($_GET['gagallogin'])): ?>
                     <div class="alert alert-danger">Username atau password tidak sesuai.</div>
                 <?php elseif (isset($_GET['google_error'])): ?>

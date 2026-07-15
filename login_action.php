@@ -379,8 +379,10 @@ if (!verify_csrf_token($csrfToken)) {
 		'session_token' => $_SESSION['csrf_token'] ?? 'NOT_SET',
 		'post_token' => $csrfToken
 	];
+	$sessionId = session_id();
+	$debug['session_id'] = $sessionId;
 	@file_put_contents(__DIR__ . '/logs/login_debug.log', json_encode($debug) . "\n", FILE_APPEND | LOCK_EX);
-	die("DEBUG_FAIL_CSRF: Token mismatch. Session: " . ($_SESSION['csrf_token'] ?? 'NOT_SET') . " POST: $csrfToken");
+	redirect_login_failure('login.php?csrf_error');
 }
 
 if (!is_database_available()) {
