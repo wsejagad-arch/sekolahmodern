@@ -9,4 +9,6 @@ return [
     'user'     => 'nama_user_database',
     'password' => 'password_database',
     'database' => 'nama_database',
+    // Set 'persistent' => false jika hosting tidak mengizinkan koneksi persistent (p:)
+    'persistent' => true,
 ];

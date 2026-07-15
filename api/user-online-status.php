@@ -4,6 +4,9 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../bootstrap.php';
 require_admin_ajax();
 
+// Bebaskan session lock agar request lain bisa jalan paralel
+session_write_close();
+
 if (function_exists('online_status_ensure_table')) {
     online_status_ensure_table($conn);
 }

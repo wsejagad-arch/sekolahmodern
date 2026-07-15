@@ -48,3 +48,58 @@ RewriteRule ^pages/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=public&page=$1 
         Deny from all
     </FilesMatch>
 </IfModule>
+
+# ======================================================================
+# OPTIMASI HIGH CONCURRENCY: KOMPRESI & CACHING
+# ======================================================================
+
+# 1. Mengaktifkan Kompresi GZIP / DEFLATE
+<IfModule mod_deflate.c>
+    # Kompres file HTML, teks, CSS, XML, Javascript, dan JSON
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# 2. Mengaktifkan Browser Caching (Menghindari Server Load Berlebih)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Default cache: 1 bulan
+    ExpiresDefault "access plus 1 month"
+    
+    # CSS dan JS cache 1 minggu (karena mungkin ada update)
+    ExpiresByType text/css "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType application/x-javascript "access plus 1 week"
+    
+    # Gambar cache 1 bulan
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    
+    # Font cache 1 tahun (font jarang berubah)
+    ExpiresByType application/vnd.ms-fontobject "access plus 1 year"
+    ExpiresByType application/x-font-ttf "access plus 1 year"
+    ExpiresByType application/x-font-opentype "access plus 1 year"
+    ExpiresByType application/x-font-woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+# Menonaktifkan ETag agar browser hanya bergantung pada Expires dan Cache-Control
+# Ini membantu meringankan beban server pada cluster/shared hosting
+<IfModule mod_headers.c>
+    Header unset ETag
+    Header set Cache-Control "max-age=604800, public" "expr=%{CONTENT_TYPE} =~ m#text/css|application/javascript|image/.*|font/.*#i"
+</IfModule>

@@ -2,6 +2,7 @@
 header('Content-Type: application/json');
 
 session_start();
+session_write_close();
 include '../koneksi.php';
 require_once __DIR__ . '/../agenda_helper.php';
 

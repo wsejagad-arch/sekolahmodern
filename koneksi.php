@@ -82,11 +82,12 @@ if ($isLocal && file_exists(__DIR__ . '/koneksi_local.php')) {
     if (isset($conn) && $conn instanceof mysqli) {
         require_once __DIR__ . '/multi_tenant.php';
         mt_bootstrap($conn);
-        if (!file_exists(__DIR__ . '/.migrated_v2')) {
-            require_once __DIR__ . '/auto_migrate.php';
-            run_auto_migrations($conn);
-            @file_put_contents(__DIR__ . '/.migrated_v2', '1');
-        }
+        // Menonaktifkan auto migrate untuk menghindari antrean server saat traffic tinggi
+        // if (!file_exists(__DIR__ . '/.migrated_v2')) {
+        //     require_once __DIR__ . '/auto_migrate.php';
+        //     run_auto_migrations($conn);
+        //     @file_put_contents(__DIR__ . '/.migrated_v2', '1');
+        // }
     }
     return;
 }
@@ -97,6 +98,7 @@ $port = 3306;
 $user = '';
 $password = '';
 $database = '';
+$persistent = true; // Default aktifkan persistent connection untuk performa tinggi
 
 if (file_exists(__DIR__ . '/config.hosting.php')) {
     $cfg = require __DIR__ . '/config.hosting.php';
@@ -106,6 +108,9 @@ if (file_exists(__DIR__ . '/config.hosting.php')) {
         $user = (string) ($cfg['user'] ?? $user);
         $password = (string) ($cfg['password'] ?? $password);
         $database = (string) ($cfg['database'] ?? $database);
+        if (isset($cfg['persistent'])) {
+            $persistent = (bool) $cfg['persistent'];
+        }
     }
 } else {
     // Fallback legacy (isi via config.hosting.php di production)
@@ -120,7 +125,17 @@ if (file_exists(__DIR__ . '/config.hosting.php')) {
 mysqli_report(MYSQLI_REPORT_OFF);
 $conn = null;
 try {
-    $conn = new mysqli($host, $user, $password, $database, $port);
+    // Gunakan persistent connection (p:host) untuk mengurangi load database saat traffic tinggi
+    $connect_host = $host;
+    if ($persistent && strpos($connect_host, 'p:') !== 0 && $connect_host !== 'localhost' && $connect_host !== '127.0.0.1') {
+         // p:localhost is tricky on some setups, better to just prepend p: if it's an IP or specific hostname.
+         // Actually, p:localhost works if localhost maps to a TCP connection (or socket). 
+         $connect_host = 'p:' . $connect_host;
+    } elseif ($persistent && strpos($connect_host, 'p:') !== 0) {
+         $connect_host = 'p:' . $connect_host;
+    }
+
+    $conn = new mysqli($connect_host, $user, $password, $database, $port);
     if ($conn->connect_error) {
         error_log('[koneksi.php] MySQL connect error: ' . $conn->connect_error);
         $conn = null;
@@ -128,11 +143,12 @@ try {
         mysqli_set_charset($conn, 'utf8');
         require_once __DIR__ . '/multi_tenant.php';
         mt_bootstrap($conn);
-        if (!file_exists(__DIR__ . '/.migrated_v2')) {
-            require_once __DIR__ . '/auto_migrate.php';
-            run_auto_migrations($conn);
-            @file_put_contents(__DIR__ . '/.migrated_v2', '1');
-        }
+        // Menonaktifkan auto migrate untuk menghindari antrean server saat traffic tinggi
+        // if (!file_exists(__DIR__ . '/.migrated_v2')) {
+        //     require_once __DIR__ . '/auto_migrate.php';
+        //     run_auto_migrations($conn);
+        //     @file_put_contents(__DIR__ . '/.migrated_v2', '1');
+        // }
     }
 } catch (Throwable $e) {
     error_log('[koneksi.php] MySQL exception: ' . $e->getMessage());
