@@ -45,8 +45,21 @@ $hariini = ubah_nama_hari($tglskr);
 // Total Kelas Ampu
 $kelasAmpu = [];
 $qKelas = mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_mapel_ampu WHERE no_induk='$nipEsc' AND kelas <> ''");
-while ($row = mysqli_fetch_assoc($qKelas)) {
-    $kelasAmpu[] = $row['kelas'];
+if ($qKelas) {
+    while ($row = mysqli_fetch_assoc($qKelas)) {
+        $kelasAmpu[] = $row['kelas'];
+    }
+}
+// Tambahkan kelas dampingan Guru BK
+$kelas_bk = [];
+$qBkCheck = mysqli_query($conn, "SELECT kelas FROM tbl_guru_bk WHERE no_induk='$nipEsc' AND kelas <> ''");
+if ($qBkCheck) {
+    while ($rbk = mysqli_fetch_assoc($qBkCheck)) {
+        $kelas_bk[] = $rbk['kelas'];
+        if (!in_array($rbk['kelas'], $kelasAmpu)) {
+            $kelasAmpu[] = $rbk['kelas'];
+        }
+    }
 }
 $totalKelasAmpu = count($kelasAmpu);
 
@@ -402,13 +415,9 @@ $isWaliKelas = !empty($waliKelasList);
 
 // Cek Guru BK (fitur baru dan fallback)
 $isGuruBK = false;
-$kelas_bk = [];
-$qBkCheck = mysqli_query($conn, "SELECT kelas FROM tbl_guru_bk WHERE no_induk='$nipEsc'");
-if ($qBkCheck && mysqli_num_rows($qBkCheck) > 0) {
+// $kelas_bk sudah diinisialisasi di atas
+if (!empty($kelas_bk)) {
     $isGuruBK = true;
-    while ($rbk = mysqli_fetch_assoc($qBkCheck)) {
-        $kelas_bk[] = $rbk['kelas'];
-    }
 } else {
     $qBkCheckOld = mysqli_query($conn, "SELECT id_guru FROM tbl_guru WHERE no_induk = '$nipEsc' AND (jabatan LIKE '%BK%' OR is_guru_bk = 1) LIMIT 1");
     if ($qBkCheckOld && mysqli_num_rows($qBkCheckOld) > 0) {
