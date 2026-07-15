@@ -248,7 +248,6 @@ if ($tblExists) {
            AND ({$tenantMapelAlias} OR ma.id_mapel IS NULL)
            AND ({$tenantGuruAlias} OR g.no_induk IS NULL)
            AND a.no_induk='$nisEsc'
-           AND a.kelas='$klsEsc'
            AND DATE_FORMAT(a.tanggal,'%Y-%m')='$bulanEsc'
          ORDER BY a.tanggal ASC, ma.jam_mulai ASC"
     );
@@ -267,8 +266,8 @@ if ($tblExists) {
                 ];
             }
             
-            $stSiswa = trim($row['status']);
-            $sumber = trim($row['sumber'] ?? '');
+            $stSiswa = trim((string)($row['status'] ?? ''));
+            $sumber = trim((string)($row['sumber'] ?? ''));
             if (empty($stSiswa) || $sumber === 'guru') {
                 $hurufSiswa = '-'; // If empty or from teacher, student didn't input
             } else {
@@ -281,7 +280,7 @@ if ($tblExists) {
                 else $hurufSiswa = strtoupper(substr($stSiswa, 0, 1));
             }
 
-            $stGuru = trim($row['status_guru'] ?? '');
+            $stGuru = trim((string)($row['status_guru'] ?? ''));
             if (empty($stGuru)) {
                 $hurufGuru = '-';
             } else {
@@ -294,7 +293,7 @@ if ($tblExists) {
                 else $hurufGuru = strtoupper(substr($stGuru, 0, 1));
             }
             
-            $stAkhir = trim($row['status_akhir'] ?? $row['status']);
+            $stAkhir = trim((string)($row['status_akhir'] ?? $row['status'] ?? ''));
             $stAkhirLow = strtolower($stAkhir);
             if (empty($stAkhir)) $hurufAkhir = 'A/BA';
             elseif ($stAkhirLow == 'hadir') $hurufAkhir = 'H';
@@ -355,7 +354,7 @@ if ($tblExists) {
         $conn,
         "SELECT DISTINCT DATE_FORMAT(tanggal,'%Y-%m') AS bln
          FROM tbl_absen
-         WHERE {$tenantAbsen} AND no_induk='$nisEsc' AND kelas='$klsEsc'
+         WHERE {$tenantAbsen} AND no_induk='$nisEsc'
          ORDER BY bln DESC LIMIT 12"
     );
     if ($qBln) {
