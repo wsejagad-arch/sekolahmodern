@@ -20,38 +20,8 @@ $tenantSiswa = function_exists('mt_column_exists') && $conn instanceof mysqli &&
 $tenantPresensi = function_exists('mt_column_exists') && $conn instanceof mysqli && mt_column_exists($conn, 'tbl_presensi_setting', 'id_sekolah') ? "WHERE id_sekolah={$tenantId}" : "";
 $tenantKonfirmasi = function_exists('mt_column_exists') && $conn instanceof mysqli && mt_column_exists($conn, 'tbl_konfirmasi_kehadiran_guru', 'id_sekolah') ? "id_sekolah={$tenantId}" : "1=1";
 
-// ── Pastikan kolom `sumber` ada di tbl_absen ─────────────────────────────────
-$_colChk = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_absen LIKE 'sumber'");
-if ($_colChk && mysqli_num_rows($_colChk) === 0) {
-    @mysqli_query($conn, "ALTER TABLE tbl_absen ADD COLUMN sumber ENUM('guru','siswa') DEFAULT 'guru' AFTER status");
-}
-// Re-check after potential ALTER
-$_colChk2   = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_absen LIKE 'sumber'");
-$_hasSumber = ($_colChk2 && mysqli_num_rows($_colChk2) > 0);
-
-// ── Auto-migrate: tambah kolom jabatan ke tbl_siswa ───────────────────────────
-$_jabColChk = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_siswa LIKE 'jabatan'");
-if ($_jabColChk && mysqli_num_rows($_jabColChk) === 0) {
-    @mysqli_query($conn, "ALTER TABLE tbl_siswa ADD COLUMN jabatan ENUM('Siswa','Ketua Kelas') DEFAULT 'Siswa' AFTER kelas");
-}
-
-// ── Buat tabel konfirmasi kehadiran guru ─────────────────────────────────────
-@mysqli_query($conn, "CREATE TABLE IF NOT EXISTS tbl_konfirmasi_kehadiran_guru (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  tanggal DATE NOT NULL,
-  id_mapel INT NOT NULL,
-  kelas VARCHAR(100) NOT NULL,
-  no_induk_guru VARCHAR(25) NOT NULL,
-  nama_guru VARCHAR(150) DEFAULT '',
-  nama_mapel VARCHAR(100) DEFAULT '',
-  no_induk_ketua VARCHAR(25) NOT NULL,
-  nama_ketua VARCHAR(150) NOT NULL,
-  status ENUM('Hadir','Telat','Izin','Tidak Hadir Tanpa Tugas','Tidak Hadir Ada Tugas') NOT NULL,
-  catatan TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uniq_konfirm (tanggal, id_mapel, kelas)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+// (Auto-migration dihapus untuk optimasi performa jam sibuk)
+$_hasSumber = true;
 
 // ── Jadwal hari ini untuk kelas siswa (untuk fitur absen mandiri) ─────────────
 $jadwalHariIni = [];
@@ -103,27 +73,12 @@ if ($qJadwal) {
 }
 
 // ── Presensi setting (lokasi sekolah) ─────────────────────────────────────────
-// Buat tabel jika belum ada
-mysqli_query($conn, "CREATE TABLE IF NOT EXISTS tbl_presensi_setting (
-  id INT PRIMARY KEY AUTO_INCREMENT, lat DOUBLE, lng DOUBLE, radius_m INT,
-  schedule TEXT, holidays TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
 $presensiSetting = ['lat' => -6.7656, 'lng' => 108.3891, 'radius_m' => 30000];
-$tblSettingChk = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_presensi_setting'");
-if ($tblSettingChk && mysqli_num_rows($tblSettingChk) > 0) {
-    $qS = mysqli_query($conn, "SELECT lat, lng, radius_m FROM tbl_presensi_setting {$tenantPresensi} ORDER BY id DESC LIMIT 1");
-    if ($qS && ($rS = mysqli_fetch_assoc($qS))) {
-        if (!empty($rS['lat']))      $presensiSetting['lat']      = (float)$rS['lat'];
-        if (!empty($rS['lng']))      $presensiSetting['lng']      = (float)$rS['lng'];
-        if (!empty($rS['radius_m'])) $presensiSetting['radius_m'] = (int)$rS['radius_m'];
-    } else {
-        // Insert default SMA Negeri 1 Sumber
-        $defSched = mysqli_real_escape_string($conn, json_encode(['monday' => ['in' => '07:00', 'out' => '15:00'], 'tuesday' => ['in' => '07:00', 'out' => '15:00'], 'wednesday' => ['in' => '07:00', 'out' => '15:00'], 'thursday' => ['in' => '07:00', 'out' => '15:00'], 'friday' => ['in' => '07:00', 'out' => '12:00']]));
-        mysqli_query($conn, "INSERT INTO tbl_presensi_setting (lat,lng,radius_m,schedule,holidays) VALUES (-6.7656,108.3891,30000,'$defSched','')");
-    }
+$qS = @mysqli_query($conn, "SELECT lat, lng, radius_m FROM tbl_presensi_setting {$tenantPresensi} ORDER BY id DESC LIMIT 1");
+if ($qS && ($rS = mysqli_fetch_assoc($qS))) {
+    if (!empty($rS['lat']))      $presensiSetting['lat']      = (float)$rS['lat'];
+    if (!empty($rS['lng']))      $presensiSetting['lng']      = (float)$rS['lng'];
+    if (!empty($rS['radius_m'])) $presensiSetting['radius_m'] = (int)$rS['radius_m'];
 }
 
 // ── Pengaturan Sholat Sekolah ──────────────────────────────────────────────────
@@ -222,16 +177,14 @@ if ($isKetuaKelas) {
 if (isset($_GET['bulan']) && preg_match('/^\d{4}-\d{2}$/', $_GET['bulan'])) {
     $bulan = $_GET['bulan'];
 } else {
-    // Akan di-set setelah mengambil $bulanList
     $bulan = '';
 }
 
+$tblExists = true;
 $nisEsc   = mysqli_real_escape_string($conn, $nis);
 $klsEsc   = mysqli_real_escape_string($conn, $kelas);
 
-// ── Cek tabel ───────────────────────────────────────────────────────────────
-$tblChk    = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_absen'");
-$tblExists = ($tblChk && mysqli_num_rows($tblChk) > 0);
+
 
 // ── Daftar bulan untuk dropdown ───────────────────────────────────────────────
 $bulanList = [];
