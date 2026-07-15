@@ -71,7 +71,7 @@ if (isset($_GET['hapus_kelas'])) {
             }
         }
         
-        // Cek jurnal/tugas jika ada
+        // Cek jurnal/tugas (tbl_jurnal) jika ada
         $cek_jurnal_table = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_jurnal'");
         $row_jurnal = ['total' => 0];
         if ($cek_jurnal_table && mysqli_num_rows($cek_jurnal_table) > 0) {
@@ -81,7 +81,18 @@ if (isset($_GET['hapus_kelas'])) {
             }
         }
         
-        $total_penggunaan = $row_siswa['total'] + $row_mapel['total'] + $row_jadwal['total'] + $row_jurnal['total'];
+        // Cek materi/jurnal guru (tbl_materi) jika ada
+        $cek_materi_table = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_materi'");
+        $row_materi = ['total' => 0];
+        if ($cek_materi_table && mysqli_num_rows($cek_materi_table) > 0) {
+            // tbl_materi mungkin menyimpan id_kelas (INT) atau kelas (VARCHAR)
+            $cek_materi = mysqli_query($conn, "SELECT COUNT(*) as total FROM tbl_materi WHERE id_kelas = '$id_kelas' OR id_kelas = '$nama_kelas'");
+            if ($cek_materi) {
+                $row_materi = mysqli_fetch_assoc($cek_materi);
+            }
+        }
+        
+        $total_penggunaan = $row_siswa['total'] + $row_mapel['total'] + $row_jadwal['total'] + $row_jurnal['total'] + $row_materi['total'];
         
         if ($total_penggunaan > 0) {
             $pesan = "Kelas '$nama_kelas' masih digunakan oleh: ";
@@ -89,7 +100,7 @@ if (isset($_GET['hapus_kelas'])) {
             if ($row_siswa['total'] > 0) $alasan[] = $row_siswa['total'] . " siswa aktif";
             if ($row_mapel['total'] > 0) $alasan[] = $row_mapel['total'] . " mata pelajaran";
             if ($row_jadwal['total'] > 0) $alasan[] = $row_jadwal['total'] . " jadwal";
-            if ($row_jurnal['total'] > 0) $alasan[] = $row_jurnal['total'] . " jurnal";
+            if ($row_jurnal['total'] > 0 || $row_materi['total'] > 0) $alasan[] = ($row_jurnal['total'] + $row_materi['total']) . " jurnal";
             
             echo "<script>
                 Swal.fire({
@@ -196,10 +207,16 @@ if (isset($_GET['paksa_hapus'])) {
         mysqli_autocommit($conn, FALSE);
         
         try {
-            // 1. Hapus data jurnal/tugas (jika tabel ada)
+            // 1. Hapus data jurnal/tugas (tbl_jurnal) jika tabel ada
             $check_jurnal = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_jurnal'");
             if ($check_jurnal && mysqli_num_rows($check_jurnal) > 0) {
                 mysqli_query($conn, "DELETE FROM tbl_jurnal WHERE kelas = '$nama_kelas'");
+            }
+            
+            // 1b. Hapus data jurnal guru e-kinerja (tbl_materi) jika tabel ada
+            $check_materi = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_materi'");
+            if ($check_materi && mysqli_num_rows($check_materi) > 0) {
+                mysqli_query($conn, "DELETE FROM tbl_materi WHERE id_kelas = '$id_kelas' OR id_kelas = '$nama_kelas'");
             }
             
             // 2. Hapus jadwal (jika tabel ada)
@@ -341,6 +358,13 @@ if (isset($_POST['hapus_batch_kelas'])) {
                     if ($check_jurnal && mysqli_num_rows($check_jurnal) > 0) {
                         $del_jurnal = mysqli_query($conn, "DELETE FROM tbl_jurnal WHERE kelas = '$nama_kelas'");
                         echo "<script>console.log('Hapus jurnal: " . ($del_jurnal ? "berhasil" : "gagal") . "');</script>";
+                    }
+                    
+                    // Hapus materi/e-kinerja jika tabel ada
+                    $check_materi = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_materi'");
+                    if ($check_materi && mysqli_num_rows($check_materi) > 0) {
+                        $del_materi = mysqli_query($conn, "DELETE FROM tbl_materi WHERE id_kelas = '$id_kelas' OR id_kelas = '$nama_kelas'");
+                        echo "<script>console.log('Hapus materi: " . ($del_materi ? "berhasil" : "gagal") . "');</script>";
                     }
                     
                     // Hapus kelas
