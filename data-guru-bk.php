@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_bk'])) {
             echo "<script>
                 document.addEventListener('DOMContentLoaded', function() {
                     Swal.fire('Berhasil!', 'Data Guru BK berhasil disimpan.', 'success').then(() => {
-                        window.location.href = 'home.php?page=data-guru-bk';
+                        window.location.href = window.location.pathname;
                     });
                 });
             </script>";
@@ -50,7 +50,9 @@ if (isset($_GET['hapus_bk'])) {
     echo "<script>
         document.addEventListener('DOMContentLoaded', function() {
             Swal.fire('Berhasil!', 'Data Guru BK berhasil dihapus.', 'success').then(() => {
-                window.location.href = 'home.php?page=data-guru-bk';
+                var url = new URL(window.location.href);
+                url.searchParams.delete('hapus_bk');
+                window.location.href = url.toString();
             });
         });
     </script>";
@@ -242,12 +244,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        window.location.href = 'home.php?page=data-guru-bk&hapus_bk=' + encodeURIComponent(id);
+                        var url = new URL(window.location.href);
+                        url.searchParams.set('hapus_bk', id);
+                        window.location.href = url.toString();
                     }
                 });
             } else {
                 if (confirm('Yakin ingin menghapus ' + nama + '?')) {
-                    window.location.href = 'home.php?page=data-guru-bk&hapus_bk=' + encodeURIComponent(id);
+                    var url = new URL(window.location.href);
+                    url.searchParams.set('hapus_bk', id);
+                    window.location.href = url.toString();
                 }
             }
         });
