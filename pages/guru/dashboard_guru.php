@@ -672,6 +672,19 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                 </div>
                 
                 <?php if ($totalJadwalHari > 0): ?>
+                    <style>
+                        .delivery-tracker { display: flex; align-items: center; justify-content: space-between; margin: 20px 0; padding: 0 5px; }
+                        .delivery-node { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #fff; border: 2px solid #cbd5e1; transition: all 0.3s ease; flex-shrink: 0; z-index: 2; position: relative; }
+                        .delivery-node.filled { background: #10b981; border-color: #10b981; }
+                        .delivery-node.blink { background: #3b82f6; border-color: #3b82f6; animation: blink-node 1.5s infinite; }
+                        .delivery-line-container { flex: 1; height: 3px; background: #e2e8f0; border-radius: 2px; margin: 0 -5px; z-index: 1; position: relative; }
+                        .delivery-line-filled { height: 100%; background: #10b981; border-radius: 2px; transition: width 0.3s ease; }
+                        @keyframes blink-node {
+                            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
+                            70% { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0); }
+                            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+                        }
+                    </style>
                     <div class="progress-card-modern">
                         <div class="progress-header-modern">
                             <div style="display:flex; align-items:center; gap:8px;">
@@ -680,30 +693,62 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                             </div>
                             <span class="pct-badge"><?= $jurnalPercentage ?>%</span>
                         </div>
-                        <div class="progress-track-modern">
-                            <div class="progress-fill-modern" style="width: <?= $jurnalPercentage ?>%;"></div>
+                        
+                        <div class="delivery-tracker">
+                            <?php 
+                            $jadwalCount = count($jadwalHariIni);
+                            $foundNext = false;
+                            foreach ($jadwalHariIni as $idx => $j): 
+                                $idm = (int)$j['id_mapel'];
+                                $isFilled = isset($jurnalStatusByMapel[$idm]);
+                                $isNext = false;
+                                if (!$isFilled && !$foundNext) {
+                                    $isNext = true;
+                                    $foundNext = true;
+                                }
+                            ?>
+                                <div class="delivery-node <?= $isFilled ? 'filled' : '' ?> <?= $isNext ? 'blink' : '' ?>" title="<?= htmlspecialchars($j['nama_mapel']) . ' - ' . htmlspecialchars($j['kelas']) ?>">
+                                    <?php if ($isFilled): ?>
+                                        <i class="bi bi-check" style="font-size:18px; color:#fff; -webkit-text-stroke: 1px;"></i>
+                                    <?php else: ?>
+                                        <span style="font-size:11px; font-weight:700; color:<?= $isNext ? '#fff' : '#94a3b8' ?>;"><?= $idx + 1 ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if ($idx < $jadwalCount - 1): ?>
+                                    <?php 
+                                    $nextIdm = (int)$jadwalHariIni[$idx+1]['id_mapel'];
+                                    $isNextFilled = isset($jurnalStatusByMapel[$nextIdm]);
+                                    ?>
+                                    <div class="delivery-line-container">
+                                        <div class="delivery-line-filled" style="width: <?= $isFilled && $isNextFilled ? '100' : ($isFilled ? '50' : '0') ?>%;"></div>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
                         </div>
+
                         <div class="progress-footer-modern">
                             <div class="footer-text">
                                 <?= $filledJurnalCount ?> dari <?= $totalJadwalHari ?> kelas terselesaikan
                             </div>
                             <div class="avatar-stack">
-                                <div class="avatar" style="background-color: #fca5a5;">S</div>
-                                <div class="avatar" style="background-color: #6ee7b7;">I</div>
-                                <div class="avatar" style="background-color: #93c5fd;">S</div>
-                                <div class="avatar more">+<?= max(1, $totalJadwalHari) ?></div>
+                                <?php foreach(array_slice($jadwalHariIni, 0, 3) as $k): ?>
+                                    <div class="avatar" style="background-color: #<?= substr(md5($k['kelas']), 0, 6) ?>; color: #fff; font-size: 10px;" title="<?= htmlspecialchars($k['kelas']) ?>"><?= substr($k['kelas'], 0, 2) ?></div>
+                                <?php endforeach; ?>
+                                <?php if($totalJadwalHari > 3): ?>
+                                    <div class="avatar more">+<?= $totalJadwalHari - 3 ?></div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
                 <?php endif; ?>
 
-                <div class="banner-actions mt-4">
+                <div class="banner-actions mt-4" style="margin-top: 36px !important;">
                     <?php if ($unfilledJurnalCount > 0 && !empty($unfilledJadwal)): ?>
-                        <a href="javascript:void(0)" onclick="openInputJurnal(<?= $unfilledJadwal[0]['id_mapel'] ?>)" class="btn-premium-primary">
+                        <a href="javascript:void(0)" onclick="openInputJurnal(<?= $unfilledJadwal[0]['id_mapel'] ?>)" class="btn-premium-primary shadow-sm" style="padding: 12px 24px;">
                             <i class="bi bi-pencil-square"></i> Input Jurnal Sekarang
                         </a>
                     <?php else: ?>
-                        <a href="javascript:void(0)" onclick="startInputJurnal()" class="btn-premium-secondary">
+                        <a href="javascript:void(0)" onclick="startInputJurnal()" class="btn-premium-secondary shadow-sm" style="padding: 12px 24px;">
                             <i class="bi bi-journal-check"></i> Lihat Jurnal
                         </a>
                     <?php endif; ?>
@@ -1519,7 +1564,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
         <section class="section-card">
             <div class="card-head">
                 <h3>Jadwal Hari Ini</h3>
-                <a href="#">Lihat Semua <i class="bi bi-chevron-right"></i></a>
+                <a href="javascript:void(0)" onclick="startInputJurnal()">Lihat Semua <i class="bi bi-chevron-right"></i></a>
             </div>
             <div class="timeline">
                 <?php if (empty($jadwalHariIni)): ?>
@@ -1547,7 +1592,12 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                             </div>
                             <div class="tm-info">
                                 <strong><?= $j['kelas'] ?></strong>
-                                <span><?= $j['nama_mapel'] ?></span>
+                                <span style="display: flex; align-items: center; gap: 4px;">
+                                    <?= $j['nama_mapel'] ?>
+                                    <?php if ($isJurnalTerisi): ?>
+                                        <i class="bi bi-check-circle-fill text-success" style="font-size: 10px;"></i>
+                                    <?php endif; ?>
+                                </span>
                             </div>
                             <div class="tm-room"><?= $j['ruang'] ?? 'R. Kelas' ?></div>
                             <i class="bi bi-chevron-right" style="font-size:10px; color:#cbd5e1;"></i>

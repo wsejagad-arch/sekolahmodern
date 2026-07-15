@@ -42,6 +42,7 @@ $lembaga = $lembaga ?? (function_exists('data_lembaga') ? data_lembaga() : []);
         <a href="<?= $prefix ?>ekinerja.php" class="nav-item <?= ($current_page === 'ekinerja') ? 'active' : '' ?>"><i class="bi bi-speedometer2"></i><span>e-Kinerja</span></a>
         
         <?php if (!empty($isWaliKelas) || !empty($isGuruBK)): ?>
+            <a href="<?= $prefix ?>walikelas.php" class="nav-item <?= ($current_page === 'walikelas') ? 'active' : '' ?>"><i class="bi bi-kanban"></i><span>Dasbor Dampingan</span></a>
             <a href="<?= $prefix ?>validasi-izin.php" class="nav-item <?= ($current_page === 'validasi-izin') ? 'active' : '' ?>"><i class="bi bi-patch-check-fill"></i><span>Validasi Izin</span></a>
         <?php endif; ?>
         

@@ -171,6 +171,12 @@ if (guru_wk_table_exists($conn, 'tbl_kelas') && guru_wk_column_exists($conn, 'tb
         $kelasOptions[(string) $row['kelas']] = (string) $row['kelas'];
     }
 }
+if (guru_wk_table_exists($conn, 'tbl_guru_bk')) {
+    $qBK = @mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_guru_bk WHERE no_induk='{$nipEsc}' AND kelas <> '' ORDER BY kelas ASC");
+    while ($qBK && ($row = mysqli_fetch_assoc($qBK))) {
+        $kelasOptions[(string) $row['kelas']] = (string) $row['kelas'];
+    }
+}
 ksort($kelasOptions, SORT_NATURAL | SORT_FLAG_CASE);
 
 $periodeDefault = guru_wk_normalize_month(trim((string) ($_GET['periode'] ?? date('Y-m'))), date('Y-m'));
@@ -511,7 +517,7 @@ if ($hasClass && isset($_GET['cetak_pdf']) && (string) $_GET['cetak_pdf'] === '1
     </table>
     <div class="kop-rule"></div>
     <div class="title">
-        <h2>LAPORAN RESMI WALI KELAS</h2>
+        <h2>LAPORAN RESMI KELAS DAMPINGAN</h2>
         <p class="year"><strong>' . $safe($tahunAjaranLabel) . '</strong></p>
         <p>Kelas ' . $safe($kelasFilter) . ' | Periode ' . $safe($selectedPeriodLabel) . '</p>
     </div>
@@ -521,7 +527,7 @@ if ($hasClass && isset($_GET['cetak_pdf']) && (string) $_GET['cetak_pdf'] === '1
             <td class="label">Periode</td><td class="value">' . $safe($selectedPeriodLabel) . '</td>
         </tr>
         <tr>
-            <td class="label">Wali Kelas</td><td class="value">' . $safe($namaGuru) . '</td>
+            <td class="label">Wali Kelas / Guru BK</td><td class="value">' . $safe($namaGuru) . '</td>
             <td class="label">Tanggal Cetak</td><td class="value">' . $safe($tanggalCetak) . '</td>
         </tr>
     </table>
@@ -612,7 +618,7 @@ if ($hasClass && isset($_GET['cetak_pdf']) && (string) $_GET['cetak_pdf'] === '1
                 NIP. ' . $safe($nipKepala ?: '-') . '
             </td>
             <td>
-                ' . $safe($tanggalTtd) . '<br>Wali Kelas ' . $safe($kelasFilter) . '
+                ' . $safe($tanggalTtd) . '<br>Wali Kelas / Guru BK<br>' . $safe($kelasFilter) . '
                 <div class="name-line"></div>
                 <span class="bold">' . $safe($namaGuru) . '</span><br>
                 NIP. ' . $safe($nipGuru ?: '-') . '
@@ -623,8 +629,8 @@ if ($hasClass && isset($_GET['cetak_pdf']) && (string) $_GET['cetak_pdf'] === '1
     $pdf = new TCPDF('P', 'mm', [210, 330], true, 'UTF-8', false);
     $pdf->SetCreator('SIMANIS');
     $pdf->SetAuthor($namaGuru);
-    $pdf->SetTitle('Laporan Wali Kelas ' . $kelasFilter);
-    $pdf->SetSubject('Laporan Wali Kelas');
+    $pdf->SetTitle('Laporan Dampingan Kelas ' . $kelasFilter);
+    $pdf->SetSubject('Laporan Kelas Dampingan');
     $pdf->setPrintHeader(false);
     $pdf->setPrintFooter(true);
     $pdf->SetMargins(12, 12, 12);
@@ -643,7 +649,7 @@ if ($hasClass && isset($_GET['cetak_pdf']) && (string) $_GET['cetak_pdf'] === '1
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Walikelas - SIMANIS</title>
+    <title>Dasbor Dampingan - SIMANIS</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <style>
@@ -724,8 +730,8 @@ if ($hasClass && isset($_GET['cetak_pdf']) && (string) $_GET['cetak_pdf'] === '1
 <main class="page-shell">
     <section class="hero">
         <a href="../../home.php" class="text-white-50 text-decoration-none"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
-        <h1 class="mt-3 mb-2">Ruang Analisis Walikelas</h1>
-        <p class="mb-0 text-white-50">Pantau kehadiran, nilai, rencana siswa, dan cetak laporan resmi wali kelas.</p>
+        <h1 class="mt-3 mb-2">Ruang Analisis Kelas Dampingan</h1>
+        <p class="mb-0 text-white-50">Pantau kehadiran, nilai, rencana siswa, dan cetak laporan resmi kelas dampingan.</p>
     </section>
 
     <section class="panel panel-pad">
@@ -768,7 +774,7 @@ if ($hasClass && isset($_GET['cetak_pdf']) && (string) $_GET['cetak_pdf'] === '1
     </section>
 
     <?php if (empty($kelasOptions)): ?>
-        <section class="panel panel-pad mt-3 text-center text-muted">Akun <?= guru_wk_h($namaGuru); ?> belum terhubung sebagai wali kelas.</section>
+        <section class="panel panel-pad mt-3 text-center text-muted">Akun <?= guru_wk_h($namaGuru); ?> belum terhubung sebagai wali kelas / guru BK.</section>
     <?php elseif (!$hasClass): ?>
         <section class="panel panel-pad mt-3 text-center text-muted">Pilih kelas terlebih dahulu untuk melihat ringkasan dan mencetak laporan.</section>
     <?php else: ?>
