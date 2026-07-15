@@ -589,6 +589,51 @@ include "sidebar.php";
         </div>
         <?php endif; ?>
 
+        <?php if ((int)($_SESSION['hak_akses'] ?? 0) === 1): 
+          $qKelasX = @mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_siswa WHERE (kelas LIKE 'X %' OR kelas LIKE 'X-%' OR kelas = 'X') AND (status IS NULL OR status = '' OR UPPER(status) = 'AKTIF') ORDER BY kelas ASC");
+          $kelasXBelumNaik = [];
+          if ($qKelasX) {
+            while ($r = mysqli_fetch_assoc($qKelasX)) {
+              $kelasXBelumNaik[] = $r['kelas'];
+            }
+          }
+        ?>
+        <div class="col-md-12 mb-4">
+          <div class="card border-0 shadow-sm" style="border-radius:18px; background:#fff; overflow:hidden;">
+            <div style="height:5px; background:#eab308;"></div>
+            <div class="card-body py-3 px-4">
+              <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:10px;">
+                <div>
+                  <div style="font-size:12px; font-weight:800; color:#ca8a04; letter-spacing:0.8px; text-transform:uppercase;">Kenaikan Kelas</div>
+                  <h5 style="margin:0; color:#0f172a; font-weight:800;">Data Kelas X yang Belum Naik Kelas</h5>
+                  <div style="font-size:12px;color:#64748b;margin-top:4px;">Menampilkan kelas X yang masih memiliki siswa aktif (belum diproses).</div>
+                </div>
+                <a href="home.php?page=kenaikan-kelas" class="btn btn-sm btn-warning" style="border-radius:999px; font-weight:700; color:#fff;">
+                  <i class="fas fa-level-up-alt mr-1"></i>Proses Kenaikan
+                </a>
+              </div>
+              <div class="row mt-3">
+                <div class="col-12">
+                  <?php if (empty($kelasXBelumNaik)): ?>
+                    <div class="p-3" style="border:1px dashed #fef08a;border-radius:14px;color:#ca8a04;font-weight:600;">
+                      <i class="fas fa-check-circle mr-1"></i> Semua kelas X sudah diproses naik kelas.
+                    </div>
+                  <?php else: ?>
+                    <div class="d-flex flex-wrap" style="gap:8px;">
+                      <?php foreach ($kelasXBelumNaik as $kx): ?>
+                        <span class="badge" style="background:#fef08a;color:#a16207;font-size:13px;padding:8px 12px;border-radius:8px;">
+                          <?= htmlspecialchars($kx) ?>
+                        </span>
+                      <?php endforeach; ?>
+                    </div>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <?php endif; ?>
+
         <div class="col-md-12 mb-4">
           <div class="card border-0 shadow-sm" style="border-radius:18px; background:#fff; overflow:hidden;">
             <div style="height:5px; background:#ffffff;"></div>
