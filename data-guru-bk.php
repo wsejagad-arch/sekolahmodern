@@ -68,9 +68,9 @@ if($res){
   while($r = mysqli_fetch_assoc($res)) $rows[] = $r;
 }
 
-// Ambil list guru untuk dropdown
+// Ambil list guru untuk dropdown (hanya yang jabatannya BK atau ditandai sebagai Guru BK)
 $guruList = [];
-$res_guru = mysqli_query($conn, "SELECT no_induk, nama_guru FROM tbl_guru ORDER BY nama_guru ASC");
+$res_guru = mysqli_query($conn, "SELECT no_induk, nama_guru FROM tbl_guru WHERE (jabatan LIKE '%BK%' OR is_guru_bk = 1) ORDER BY nama_guru ASC");
 if($res_guru){
   while($r = mysqli_fetch_assoc($res_guru)) $guruList[] = $r;
 }
