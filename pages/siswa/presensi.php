@@ -219,18 +219,48 @@ if ($isKetuaKelas) {
 }
 
 // Pilihan bulan (dari GET, default bulan ini)
-$bulan = $_GET['bulan'] ?? date('Y-m');
-if (!preg_match('/^\d{4}-\d{2}$/', $bulan)) {
-    $bulan = date('Y-m');
+if (isset($_GET['bulan']) && preg_match('/^\d{4}-\d{2}$/', $_GET['bulan'])) {
+    $bulan = $_GET['bulan'];
+} else {
+    // Akan di-set setelah mengambil $bulanList
+    $bulan = '';
 }
 
 $nisEsc   = mysqli_real_escape_string($conn, $nis);
 $klsEsc   = mysqli_real_escape_string($conn, $kelas);
-$bulanEsc = mysqli_real_escape_string($conn, $bulan);
 
 // ── Cek tabel ───────────────────────────────────────────────────────────────
 $tblChk    = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_absen'");
 $tblExists = ($tblChk && mysqli_num_rows($tblChk) > 0);
+
+// ── Daftar bulan untuk dropdown ───────────────────────────────────────────────
+$bulanList = [];
+$latestBulanWithData = '';
+if ($tblExists) {
+    $qBln = mysqli_query(
+        $conn,
+        "SELECT DISTINCT DATE_FORMAT(tanggal,'%Y-%m') AS bln
+         FROM tbl_absen
+         WHERE {$tenantAbsen} AND no_induk='$nisEsc'
+         ORDER BY bln DESC LIMIT 12"
+    );
+    if ($qBln) {
+        while ($r = mysqli_fetch_assoc($qBln)) {
+            $bulanList[] = $r['bln'];
+            if (empty($latestBulanWithData)) {
+                $latestBulanWithData = $r['bln'];
+            }
+        }
+    }
+}
+if (!in_array(date('Y-m'), $bulanList)) {
+    array_unshift($bulanList, date('Y-m'));
+}
+
+if (empty($bulan)) {
+    $bulan = !empty($latestBulanWithData) ? $latestBulanWithData : date('Y-m');
+}
+$bulanEsc = mysqli_real_escape_string($conn, $bulan);
 
 $summary = ['Hadir' => 0, 'Ijin' => 0, 'Sakit' => 0, 'Dispen' => 0, 'Alpha' => 0];
 
@@ -347,25 +377,7 @@ if ($tblExists) {
 }
 $totalPertemuan = array_sum($summary);
 
-// ── Daftar bulan untuk dropdown ───────────────────────────────────────────────
-$bulanList = [];
-if ($tblExists) {
-    $qBln = mysqli_query(
-        $conn,
-        "SELECT DISTINCT DATE_FORMAT(tanggal,'%Y-%m') AS bln
-         FROM tbl_absen
-         WHERE {$tenantAbsen} AND no_induk='$nisEsc'
-         ORDER BY bln DESC LIMIT 12"
-    );
-    if ($qBln) {
-        while ($r = mysqli_fetch_assoc($qBln)) {
-            $bulanList[] = $r['bln'];
-        }
-    }
-}
-if (!in_array(date('Y-m'), $bulanList)) {
-    array_unshift($bulanList, date('Y-m'));
-}
+// Dropdown bulan dipindahkan ke atas
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function statusBadge($status)
@@ -914,34 +926,34 @@ function konfirmasiButtonColor($opt)
                 </div>
 
                 <!-- Detail Empty State or List -->
-                <?php if (empty($detailList)): ?>
-                    <div class="bg-white border border-gray-100 rounded-xl p-8 shadow-sm flex flex-col items-center justify-center card-shadow">
-                        <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                            <i class="fas fa-clipboard-list text-blue-300 text-3xl"></i>
-                        </div>
-                        <p class="text-gray-500 font-medium text-sm text-center">Tidak ada data presensi<br>pada <?= bulanIndo($bulan) ?>.</p>
+                <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm card-shadow mb-8">
+                    <div class="mb-3 text-xs font-bold text-gray-600 uppercase tracking-wide flex items-center">
+                        <i class="fas fa-list-ul mr-2 text-blue-500"></i>Detail Pertemuan
                     </div>
-                <?php else: ?>
-                    <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm card-shadow mb-8">
-                        <div class="mb-3 text-xs font-bold text-gray-600 uppercase tracking-wide flex items-center">
-                            <i class="fas fa-list-ul mr-2 text-blue-500"></i>Detail Pertemuan
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm text-gray-600 border-collapse">
-                                <thead class="bg-gray-50 border-b text-[10px] uppercase text-gray-500 font-bold tracking-wider">
-                                    <tr>
-                                        <th class="py-2 px-3">No</th>
-                                        <th class="py-2 px-3 whitespace-nowrap">Hari/Tgl</th>
-                                        <th class="py-2 px-3">Mata Pelajaran</th>
-                                        <th class="py-2 px-3">Materi</th>
-                                        <th class="py-2 px-3">Kegiatan</th>
-                                        <th class="py-2 px-3 text-center">Ket Guru</th>
-                                        <th class="py-2 px-3 text-center">Ket Siswa</th>
-                                        <th class="py-2 px-3 text-center">Status Akhir</th>
-                                        <th class="py-2 px-3 text-center whitespace-nowrap">Rekap Harian</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600 border-collapse">
+                            <thead class="bg-gray-50 border-b text-[10px] uppercase text-gray-500 font-bold tracking-wider">
+                                <tr>
+                                    <th class="py-2 px-3">No</th>
+                                    <th class="py-2 px-3 whitespace-nowrap">Hari/Tgl</th>
+                                    <th class="py-2 px-3">Mata Pelajaran</th>
+                                    <th class="py-2 px-3">Materi</th>
+                                    <th class="py-2 px-3">Kegiatan</th>
+                                    <th class="py-2 px-3 text-center">Ket Guru</th>
+                                    <th class="py-2 px-3 text-center">Ket Siswa</th>
+                                    <th class="py-2 px-3 text-center">Status Akhir</th>
+                                    <th class="py-2 px-3 text-center whitespace-nowrap">Rekap Harian</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                <?php if (empty($rekapHarian)): ?>
+                                <tr>
+                                    <td colspan="9" class="py-8 text-center text-gray-500">
+                                        <i class="fas fa-clipboard-list text-gray-300 text-3xl mb-3 block"></i>
+                                        Tidak ada data presensi pada <?= htmlspecialchars(bulanIndo($bulan)) ?>.
+                                    </td>
+                                </tr>
+                                <?php else: ?>
                                     <?php
                                     $no = 1;
                                     foreach ($rekapHarian as $tgl => $d):
@@ -975,10 +987,11 @@ function konfirmasiButtonColor($opt)
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                <?php endif; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             <?php endif; ?>
         </div>
     </div>
