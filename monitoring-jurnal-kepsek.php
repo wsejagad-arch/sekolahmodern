@@ -98,15 +98,22 @@ if ($resWeeklyJP) {
     }
 }
 
-// Deteksi guru BK berdasarkan nama_mapel mengandung 'BK' atau 'Bimbingan'
-// Hitung total siswa yang diajar per guru BK dari semua kelasnya
-$sqlBKSiswa = "SELECT ma.no_induk,
+// Deteksi guru BK berdasarkan tbl_guru_bk (fitur baru) atau tbl_mapel_ampu (fallback lama)
+// Hitung total siswa yang diajar per guru BK dari kelas dampingannya
+$sqlBKSiswa = "
+SELECT 
+    bk.no_induk,
     COUNT(DISTINCT s.no_induk) AS total_siswa
-FROM tbl_mapel_ampu ma
-INNER JOIN tbl_siswa s ON s.kelas = ma.kelas
-WHERE (ma.nama_mapel LIKE '%BK%' OR ma.nama_mapel LIKE '%Bimbingan%')
-    AND (s.status = 'Aktif' OR s.status IS NULL)
-GROUP BY ma.no_induk";
+FROM (
+    SELECT no_induk, kelas FROM tbl_guru_bk
+    UNION
+    SELECT ma.no_induk, ma.kelas FROM tbl_mapel_ampu ma 
+    WHERE (ma.nama_mapel LIKE '%BK%' OR ma.nama_mapel LIKE '%Bimbingan%')
+) bk
+INNER JOIN tbl_siswa s ON s.kelas = bk.kelas
+WHERE (s.status = 'Aktif' OR s.status IS NULL)
+GROUP BY bk.no_induk
+";
 
 $resBKSiswa = mysqli_query($conn, $sqlBKSiswa);
 $guruBKSiswa = []; // no_induk => total_siswa

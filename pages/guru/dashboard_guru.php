@@ -16,6 +16,15 @@ $qWkCheck = mysqli_query($conn, "SELECT id_kelas FROM tbl_kelas WHERE nip_wali='
 if ($qWkCheck && mysqli_num_rows($qWkCheck) > 0) {
     $isWaliKelas = true;
 }
+$qBkCheck = mysqli_query($conn, "SELECT no_induk FROM tbl_guru_bk WHERE no_induk='$nipEsc' LIMIT 1");
+if ($qBkCheck && mysqli_num_rows($qBkCheck) > 0) {
+    $isGuruBK = true;
+} else {
+    $qBkCheckOld = mysqli_query($conn, "SELECT id_guru FROM tbl_guru WHERE no_induk='$nipEsc' AND (jabatan LIKE '%BK%' OR is_guru_bk=1) LIMIT 1");
+    if ($qBkCheckOld && mysqli_num_rows($qBkCheckOld) > 0) {
+        $isGuruBK = true;
+    }
+}
 if (!$isWaliKelas) {
     $qWk2Check = mysqli_query($conn, "SELECT id FROM tbl_wali_kelas WHERE nip_wali='$nipEsc' LIMIT 1");
     if ($qWk2Check && mysqli_num_rows($qWk2Check) > 0) {
@@ -391,11 +400,20 @@ if (count($kelasAmpu) === 1) {
 // Cek Wali Kelas
 $isWaliKelas = !empty($waliKelasList);
 
-// Cek Guru BK
+// Cek Guru BK (fitur baru dan fallback)
 $isGuruBK = false;
-$qBkCheck = mysqli_query($conn, "SELECT id_guru FROM tbl_guru WHERE no_induk = '$nipEsc' AND (jabatan LIKE '%BK%' OR is_guru_bk = 1) LIMIT 1");
+$kelas_bk = [];
+$qBkCheck = mysqli_query($conn, "SELECT kelas FROM tbl_guru_bk WHERE no_induk='$nipEsc'");
 if ($qBkCheck && mysqli_num_rows($qBkCheck) > 0) {
     $isGuruBK = true;
+    while ($rbk = mysqli_fetch_assoc($qBkCheck)) {
+        $kelas_bk[] = $rbk['kelas'];
+    }
+} else {
+    $qBkCheckOld = mysqli_query($conn, "SELECT id_guru FROM tbl_guru WHERE no_induk = '$nipEsc' AND (jabatan LIKE '%BK%' OR is_guru_bk = 1) LIMIT 1");
+    if ($qBkCheckOld && mysqli_num_rows($qBkCheckOld) > 0) {
+        $isGuruBK = true;
+    }
 }
 
 // Hitung izin pending untuk notif badge
@@ -414,9 +432,14 @@ if ($isWaliKelas && !empty($waliKelasList)) {
     }
 }
 if ($isGuruBK) {
+    $filter_kelas = "";
+    if (!empty($kelas_bk)) {
+        $kelas_in = "'" . implode("','", array_map(static fn($k) => mysqli_real_escape_string($conn, $k), $kelas_bk)) . "'";
+        $filter_kelas = " AND s.kelas IN ($kelas_in)";
+    }
     $qPendingBK = mysqli_query($conn, "SELECT i.id_izin, i.kategori_pengajuan, i.tanggal_izin, s.nama_siswa, s.kelas
         FROM tbl_izin_siswa i JOIN tbl_siswa s ON i.no_induk_siswa = s.no_induk
-        WHERE i.validasi_guru_bk = 'Menunggu'
+        WHERE i.validasi_guru_bk = 'Menunggu' $filter_kelas
         ORDER BY i.waktu_pengajuan ASC");
     if ($qPendingBK) {
         while ($rp = mysqli_fetch_assoc($qPendingBK)) {

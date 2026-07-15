@@ -94,22 +94,24 @@
       </div>
     </div>
   </li>
-  <?php if (isset($_SESSION['hak_akses']) && $_SESSION['hak_akses'] == 1): ?>
-    <!-- Nav Item - Wali Kelas under Data Guru dan Siswa -->
-    <li class="nav-item">
-      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseWaliKelas" aria-expanded="false" aria-controls="collapseWaliKelas">
-        <i class="fas fa-fw fa-user-tie"></i>
-        <span>Wali Kelas</span>
-      </a>
-      <div id="collapseWaliKelas" class="collapse" aria-labelledby="headingWaliKelas" data-parent="#accordionSidebar">
-        <div class="bg-white py-2 collapse-inner rounded">
-          <h6 class="collapse-header">Kelola:</h6>
-          <a class="collapse-item" href="home.php?page=kelola-wali-kelas"><i class="fas fa-users-cog text-primary mr-1" style="font-size:11px"></i>Kelola Wali Kelas</a>
-          <a class="collapse-item" href="home.php?page=data-wali-kelas"><i class="fas fa-address-book text-info mr-1" style="font-size:11px"></i>Data Wali Kelas</a>
+    <?php if (isset($_SESSION['hak_akses']) && $_SESSION['hak_akses'] == 1): ?>
+      <!-- Nav Item - Wali Kelas under Data Guru dan Siswa -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseWaliKelas" aria-expanded="false" aria-controls="collapseWaliKelas">
+          <i class="fas fa-fw fa-user-tie"></i>
+          <span>Wali Kelas & Guru BK</span>
+        </a>
+        <div id="collapseWaliKelas" class="collapse" aria-labelledby="headingWaliKelas" data-parent="#accordionSidebar">
+          <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header">Wali Kelas:</h6>
+            <a class="collapse-item" href="home.php?page=kelola-wali-kelas"><i class="fas fa-users-cog text-primary mr-1" style="font-size:11px"></i>Kelola Wali Kelas</a>
+            <a class="collapse-item" href="home.php?page=data-wali-kelas"><i class="fas fa-address-book text-info mr-1" style="font-size:11px"></i>Data Wali Kelas</a>
+            <h6 class="collapse-header mt-2">Bimbingan Konseling:</h6>
+            <a class="collapse-item" href="home.php?page=data-guru-bk"><i class="fas fa-user-shield text-success mr-1" style="font-size:11px"></i>Data Guru BK</a>
+          </div>
         </div>
-      </div>
-    </li>
-  <?php endif; ?>
+      </li>
+    <?php endif; ?>
   <!-- Nav Item - Pages Collapse Menu Monitoring -->
   <li class="nav-item">
     <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMonitoring" aria-expanded="false" aria-controls="collapseMonitoring">
@@ -435,6 +437,7 @@
       'ketua-kelas': 'collapseSiswa',
       'kelola-wali-kelas': 'collapseWaliKelas',
       'data-wali-kelas': 'collapseWaliKelas',
+      'data-guru-bk': 'collapseWaliKelas',
       'jurnal': 'collapseMonitoring',
       'kelas': 'collapseMonitoring',
       'monitoring-guru': 'collapseMonitoring',

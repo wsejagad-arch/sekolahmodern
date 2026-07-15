@@ -26,11 +26,24 @@ while ($qWali2 && ($row = mysqli_fetch_assoc($qWali2))) {
 }
 $is_wali_kelas = count($kelas_wali) > 0;
 
-// Cek apakah user adalah guru BK
+// Cek apakah user adalah guru BK dan ambil kelas dampingannya
 $is_guru_bk = false;
-$qBk = mysqli_query($conn, "SELECT id_guru FROM tbl_guru WHERE no_induk = '$nipGuru' AND (jabatan LIKE '%BK%' OR is_guru_bk = 1) LIMIT 1");
-if ($qBk && mysqli_num_rows($qBk) > 0) {
+$kelas_bk = [];
+
+// 1. Cek dari tabel tbl_guru_bk (fitur baru)
+$qBkTable = mysqli_query($conn, "SELECT kelas FROM tbl_guru_bk WHERE no_induk = '$nipGuru'");
+if ($qBkTable && mysqli_num_rows($qBkTable) > 0) {
     $is_guru_bk = true;
+    while ($rbk = mysqli_fetch_assoc($qBkTable)) {
+        $kelas_bk[] = $rbk['kelas'];
+    }
+} else {
+    // Fallback deteksi lama jika belum diset di admin
+    $qBk = mysqli_query($conn, "SELECT id_guru FROM tbl_guru WHERE no_induk = '$nipGuru' AND (jabatan LIKE '%BK%' OR is_guru_bk = 1) LIMIT 1");
+    if ($qBk && mysqli_num_rows($qBk) > 0) {
+        $is_guru_bk = true;
+        // Jika fallback, kelas_bk kosong berarti dia bisa melihat semua (atau sesuai rule lama)
+    }
 }
 
 if (!$is_wali_kelas && !$is_guru_bk) {
@@ -127,7 +140,12 @@ if ($is_wali_kelas) {
 // Fetch pending izin for Guru BK
 $list_izin_bk = [];
 if ($is_guru_bk) {
-    $qBkIzin = mysqli_query($conn, "SELECT i.*, s.nama_siswa FROM tbl_izin_siswa i JOIN tbl_siswa s ON i.no_induk_siswa = s.no_induk WHERE i.validasi_guru_bk = 'Menunggu' ORDER BY i.waktu_pengajuan ASC");
+    $filter_kelas = "";
+    if (!empty($kelas_bk)) {
+        $kelas_in = "'" . implode("','", array_map(function($k) use ($conn) { return mysqli_real_escape_string($conn, $k); }, $kelas_bk)) . "'";
+        $filter_kelas = " AND i.kelas_siswa IN ($kelas_in)";
+    }
+    $qBkIzin = mysqli_query($conn, "SELECT i.*, s.nama_siswa FROM tbl_izin_siswa i JOIN tbl_siswa s ON i.no_induk_siswa = s.no_induk WHERE i.validasi_guru_bk = 'Menunggu' $filter_kelas ORDER BY i.waktu_pengajuan ASC");
     if ($qBkIzin) {
         while ($row = mysqli_fetch_assoc($qBkIzin)) {
             $list_izin_bk[] = $row;
@@ -172,14 +190,19 @@ if ($is_wali_kelas) {
     if ($qH) while ($r = mysqli_fetch_assoc($qH)) $history_wali[] = $r;
 }
 
-// Fetch history untuk Guru BK (semua kelas)
+// Fetch history untuk Guru BK (semua kelas atau sesuai filter)
 $history_bk = [];
 if ($is_guru_bk) {
+    $filter_kelas = "";
+    if (!empty($kelas_bk)) {
+        $kelas_in = "'" . implode("','", array_map(function($k) use ($conn) { return mysqli_real_escape_string($conn, $k); }, $kelas_bk)) . "'";
+        $filter_kelas = " AND i.kelas_siswa IN ($kelas_in)";
+    }
     $qHB = mysqli_query($conn, "SELECT i.*, s.nama_siswa
         FROM tbl_izin_siswa i
         JOIN tbl_siswa s ON i.no_induk_siswa = s.no_induk
         WHERE 1=1
-        $status_where $date_where
+        $status_where $date_where $filter_kelas
         ORDER BY i.waktu_pengajuan DESC");
     if ($qHB) while ($r = mysqli_fetch_assoc($qHB)) $history_bk[] = $r;
 }

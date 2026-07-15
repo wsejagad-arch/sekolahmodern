@@ -8,6 +8,15 @@ function run_auto_migrations($conn) {
     // Tambahkan query tabel baru di dalam array ini.
     
     $migrations = [
+        "CREATE TABLE IF NOT EXISTS `tbl_guru_bk` (
+            `id_guru_bk` int(11) NOT NULL AUTO_INCREMENT,
+            `no_induk` varchar(50) NOT NULL,
+            `kelas` varchar(50) NOT NULL,
+            `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id_guru_bk`),
+            UNIQUE KEY `unik_guru_kelas` (`no_induk`,`kelas`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;",
+        
         // Contoh Tabel Tugas Siswa (Sesuaikan kolomnya dengan struktur asli Anda jika punya)
         "CREATE TABLE IF NOT EXISTS `tbl_tugas_siswa` (
             `id_tugas` int(11) NOT NULL AUTO_INCREMENT,

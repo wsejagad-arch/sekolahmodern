@@ -94,7 +94,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
                 // NOTIF WA GURU BK
-                $bkQuery = mysqli_query($conn, "SELECT no_wa FROM tbl_guru WHERE (jabatan LIKE '%BK%' OR is_guru_bk = 1) AND no_wa != ''");
+                // Cek guru BK yang ditugaskan ke kelas ini
+                $qBkKelas = mysqli_query($conn, "SELECT g.no_wa FROM tbl_guru_bk b JOIN tbl_guru g ON b.no_induk = g.no_induk WHERE b.kelas = '$kelas' AND g.no_wa != ''");
+                
+                if ($qBkKelas && mysqli_num_rows($qBkKelas) > 0) {
+                    $bkQuery = $qBkKelas;
+                } else {
+                    // Fallback ke deteksi lama (semua guru BK) jika belum ada di tabel tbl_guru_bk
+                    $bkQuery = mysqli_query($conn, "SELECT no_wa FROM tbl_guru WHERE (jabatan LIKE '%BK%' OR is_guru_bk = 1) AND no_wa != ''");
+                }
+                
                 if ($bkQuery && mysqli_num_rows($bkQuery) > 0) {
                     while ($rowBk = mysqli_fetch_assoc($bkQuery)) {
                         $no_wa_bk = $rowBk['no_wa'];

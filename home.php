@@ -124,6 +124,9 @@ include "sidebar.php";
         case 'data-wali-kelas':
           include "data-wali-kelas.php";
           break;
+        case 'data-guru-bk':
+          include "data-guru-bk.php";
+          break;
         case 'kelola-wali-kelas':
           include "kelola-wali-kelas.php";
           break;
