@@ -140,6 +140,7 @@ $namaBulan = [
 
 $kelasOptions = [];
 $kelasMapelIds = [];
+$kelasSuperUser = [];
 
 if (guru_rk_table_exists($conn, 'tbl_mapel_ampu')) {
     $qKelas = @mysqli_query($conn, "SELECT id_mapel, kelas FROM tbl_mapel_ampu WHERE no_induk='{$nipEsc}' AND kelas <> '' ORDER BY kelas ASC, nama_mapel ASC");
@@ -147,6 +148,26 @@ if (guru_rk_table_exists($conn, 'tbl_mapel_ampu')) {
         $kelas = (string) $row['kelas'];
         $kelasOptions[$kelas] = $kelas;
         $kelasMapelIds[$kelas][] = (int) $row['id_mapel'];
+    }
+}
+
+// Tambahan untuk Guru BK
+if (guru_rk_table_exists($conn, 'tbl_guru_bk')) {
+    $qBk = @mysqli_query($conn, "SELECT kelas FROM tbl_guru_bk WHERE no_induk='{$nipEsc}' AND kelas <> ''");
+    while ($qBk && ($row = mysqli_fetch_assoc($qBk))) {
+        $kelas = (string) $row['kelas'];
+        $kelasOptions[$kelas] = $kelas;
+        $kelasSuperUser[$kelas] = true;
+    }
+}
+
+// Tambahan untuk Wali Kelas
+if (guru_rk_table_exists($conn, 'tbl_kelas') && guru_rk_column_exists($conn, 'tbl_kelas', 'nip_wali')) {
+    $qWali = @mysqli_query($conn, "SELECT kelas FROM tbl_kelas WHERE nip_wali='{$nipEsc}' AND kelas <> ''");
+    while ($qWali && ($row = mysqli_fetch_assoc($qWali))) {
+        $kelas = (string) $row['kelas'];
+        $kelasOptions[$kelas] = $kelas;
+        $kelasSuperUser[$kelas] = true;
     }
 }
 
@@ -207,14 +228,20 @@ if ($hasFilter && !empty($students) && guru_rk_table_exists($conn, 'tbl_absen'))
     $firstEsc = mysqli_real_escape_string($conn, $firstDay);
     $lastEsc = mysqli_real_escape_string($conn, $lastDay);
     $mapelIds = array_values(array_unique(array_filter($kelasMapelIds[$kelasFilter] ?? [])));
-    $ownershipParts = [];
-    if (!empty($mapelIds) && guru_rk_column_exists($conn, 'tbl_absen', 'id_mapel')) {
-        $ownershipParts[] = 'id_mapel IN (' . implode(',', array_map('intval', $mapelIds)) . ')';
+    $isSuperUser = isset($kelasSuperUser[$kelasFilter]);
+
+    if ($isSuperUser) {
+        $ownershipWhere = '';
+    } else {
+        $ownershipParts = [];
+        if (!empty($mapelIds) && guru_rk_column_exists($conn, 'tbl_absen', 'id_mapel')) {
+            $ownershipParts[] = 'id_mapel IN (' . implode(',', array_map('intval', $mapelIds)) . ')';
+        }
+        if (guru_rk_column_exists($conn, 'tbl_absen', 'no_induk_guru')) {
+            $ownershipParts[] = "no_induk_guru='{$nipEsc}'";
+        }
+        $ownershipWhere = !empty($ownershipParts) ? ' AND (' . implode(' OR ', $ownershipParts) . ')' : '';
     }
-    if (guru_rk_column_exists($conn, 'tbl_absen', 'no_induk_guru')) {
-        $ownershipParts[] = "no_induk_guru='{$nipEsc}'";
-    }
-    $ownershipWhere = !empty($ownershipParts) ? ' AND (' . implode(' OR ', $ownershipParts) . ')' : '';
 
     $qAbsen = @mysqli_query($conn, "SELECT no_induk, status FROM tbl_absen WHERE kelas='{$kelasEsc}' AND tanggal BETWEEN '{$firstEsc}' AND '{$lastEsc}'{$ownershipWhere}");
     while ($qAbsen && ($row = mysqli_fetch_assoc($qAbsen))) {
