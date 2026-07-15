@@ -936,58 +936,37 @@ function konfirmasiButtonColor($opt)
                                 <tr>
                                     <th class="py-2 px-3">No</th>
                                     <th class="py-2 px-3 whitespace-nowrap">Hari/Tgl</th>
-                                    <th class="py-2 px-3">Mata Pelajaran</th>
-                                    <th class="py-2 px-3">Materi</th>
-                                    <th class="py-2 px-3">Kegiatan</th>
-                                    <th class="py-2 px-3 text-center">Ket Guru</th>
-                                    <th class="py-2 px-3 text-center">Ket Siswa</th>
-                                    <th class="py-2 px-3 text-center">Status Akhir</th>
-                                    <th class="py-2 px-3 text-center whitespace-nowrap">Rekap Harian</th>
+                                    <th class="py-2 px-3 text-center">Status Kehadiran</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
-                                <?php if (empty($rekapHarian)): ?>
+                                <?php
+                                $daysInMonth = date('t', strtotime($bulanEsc . '-01'));
+                                $no = 1;
+                                for ($i = 1; $i <= $daysInMonth; $i++):
+                                    $currentDate = $bulanEsc . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+                                    $hariTgl = function_exists('tgl_indo') ? tgl_indo($currentDate) : date('d M Y', strtotime($currentDate));
+                                    
+                                    $ket = 'A/BA'; // Default jika belum absen
+                                    if (isset($rekapHarian[$currentDate])) {
+                                        $ket = $rekapHarian[$currentDate]['ket_harian'];
+                                    }
+                                    
+                                    $badgeKet = 'bg-red-100 text-red-700';
+                                    if ($ket == 'H') $badgeKet = 'bg-green-100 text-green-700';
+                                    elseif ($ket == 'H/T') $badgeKet = 'bg-yellow-200 text-yellow-800';
+                                    elseif (in_array($ket, ['I','S','D'])) $badgeKet = 'bg-yellow-100 text-yellow-700';
+                                ?>
                                 <tr>
-                                    <td colspan="9" class="py-8 text-center text-gray-500">
-                                        <i class="fas fa-clipboard-list text-gray-300 text-3xl mb-3 block"></i>
-                                        Tidak ada data presensi pada <?= htmlspecialchars(bulanIndo($bulan)) ?>.
+                                    <td class="py-2 px-3 align-top font-bold text-gray-500"><?= $no++ ?></td>
+                                    <td class="py-2 px-3 align-top whitespace-nowrap font-bold text-[11px] text-gray-800"><?= htmlspecialchars($hariTgl) ?></td>
+                                    <td class="py-2 px-3 align-middle text-center">
+                                        <span class="inline-block px-3 py-1 rounded-full text-[11px] font-black <?= $badgeKet ?>">
+                                            <?= $ket ?>
+                                        </span>
                                     </td>
                                 </tr>
-                                <?php else: ?>
-                                    <?php
-                                    $no = 1;
-                                    foreach ($rekapHarian as $tgl => $d):
-                                        $ket = $d['ket_harian'];
-                                        $hariTgl = function_exists('tgl_indo') ? tgl_indo($tgl) : date('d M Y', strtotime($tgl));
-                                        $mapelStr = implode('<br><br>', $d['mapel']);
-                                        $materiStr = implode('<br><br>', $d['materi']);
-                                        $kegiatanStr = implode('<br><br>', $d['kegiatan']);
-                                        $statusGuruStr = implode('<br><br>', $d['status_guru']);
-                                        $statusSiswaStr = implode('<br><br>', $d['status_siswa']);
-                                        $statusAkhirStr = implode('<br><br>', $d['status_akhir']);
-                                        
-                                        $badgeKet = 'bg-red-100 text-red-700';
-                                        if ($ket == 'H') $badgeKet = 'bg-green-100 text-green-700';
-                                        elseif ($ket == 'H/T') $badgeKet = 'bg-yellow-200 text-yellow-800';
-                                        elseif (in_array($ket, ['I','S','D'])) $badgeKet = 'bg-yellow-100 text-yellow-700';
-                                    ?>
-                                    <tr>
-                                        <td class="py-2 px-3 align-top font-bold text-gray-500"><?= $no++ ?></td>
-                                        <td class="py-2 px-3 align-top whitespace-nowrap font-bold text-[11px] text-gray-800"><?= htmlspecialchars($hariTgl) ?></td>
-                                        <td class="py-2 px-3 align-top text-[11px] leading-relaxed text-gray-600"><?= $mapelStr ?></td>
-                                        <td class="py-2 px-3 align-top text-[11px] leading-relaxed text-gray-600"><?= $materiStr ?></td>
-                                        <td class="py-2 px-3 align-top text-[11px] leading-relaxed text-gray-600"><?= $kegiatanStr ?></td>
-                                        <td class="py-2 px-3 align-top text-[11px] text-center font-black leading-relaxed"><?= $statusGuruStr ?></td>
-                                        <td class="py-2 px-3 align-top text-[11px] text-center font-black leading-relaxed"><?= $statusSiswaStr ?></td>
-                                        <td class="py-2 px-3 align-top text-[11px] text-center font-black leading-relaxed"><?= $statusAkhirStr ?></td>
-                                        <td class="py-2 px-3 align-middle text-center">
-                                            <span class="inline-block px-3 py-1 rounded-full text-[11px] font-black <?= $badgeKet ?>">
-                                                <?= $ket ?>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
+                                <?php endfor; ?>
                             </tbody>
                         </table>
                     </div>
