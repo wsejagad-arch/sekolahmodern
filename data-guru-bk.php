@@ -86,14 +86,16 @@ if($res_kelas){
 <!-- Include Select2 CSS & JS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
-    .select2-container .select2-selection--multiple { min-height: 38px; border: 1px solid #d1d3e2; }
-    .select2-container--default .select2-selection--multiple .select2-selection__choice {
-        background-color: #4e73df; color: white; border: none; padding: 2px 8px; margin-top: 6px;
-    }
-    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-        color: white; margin-right: 5px;
-    }
     .select2-container--default .select2-selection--single { height: 38px; border: 1px solid #d1d3e2; padding-top: 4px; }
+    .kelas-checkbox-container {
+        max-height: 250px; 
+        overflow-y: auto; 
+        border: 1px solid #d1d3e2; 
+        border-radius: 8px; 
+        padding: 12px; 
+        background-color: #f8f9fc;
+    }
+    .custom-control-label { cursor: pointer; font-size: 14px; padding-top: 2px;}
 </style>
 
 <div class="container-fluid">
@@ -121,11 +123,24 @@ if($res_kelas){
             </div>
             <div class="form-group">
                 <label class="font-weight-bold text-gray-800">Pilih Kelas Dampingan <br><small class="text-muted">(Bisa pilih lebih dari satu)</small></label>
-                <select name="kelas[]" class="form-control select2-multiple" multiple="multiple" required>
-                    <?php foreach($kelasList as $k): ?>
-                    <option value="<?= htmlspecialchars($k) ?>"><?= htmlspecialchars($k) ?></option>
-                    <?php endforeach; ?>
-                </select>
+                
+                <div class="mb-2">
+                    <strong>Kelas Terpilih: </strong>
+                    <span id="selectedClassesText" class="text-primary font-weight-bold">-</span>
+                </div>
+
+                <div class="kelas-checkbox-container">
+                    <div class="row">
+                        <?php foreach($kelasList as $k): ?>
+                        <div class="col-6 mb-2">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input class-checkbox" name="kelas[]" id="chk_<?= htmlspecialchars(str_replace(' ', '_', $k)) ?>" value="<?= htmlspecialchars($k) ?>">
+                                <label class="custom-control-label" for="chk_<?= htmlspecialchars(str_replace(' ', '_', $k)) ?>"><?= htmlspecialchars($k) ?></label>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
             </div>
             <button type="submit" name="simpan_bk" class="btn btn-primary btn-block" style="border-radius:20px; box-shadow: 0 4px 6px rgba(78,115,223,0.3);"><i class="fas fa-save mr-1"></i> Simpan Data</button>
           </form>
@@ -191,11 +206,21 @@ document.addEventListener('DOMContentLoaded', function() {
         $('.select2').select2({
             width: '100%'
         });
-        $('.select2-multiple').select2({
-            placeholder: "Klik untuk memilih kelas...",
-            width: '100%',
-            allowClear: true
-        });
+
+        // Update selected classes text when checkboxes change
+        function updateSelectedClasses() {
+            var selected = [];
+            $('.class-checkbox:checked').each(function() {
+                selected.push($(this).val());
+            });
+            if (selected.length > 0) {
+                $('#selectedClassesText').text(selected.join(', '));
+            } else {
+                $('#selectedClassesText').text('-');
+            }
+        }
+
+        $('.class-checkbox').on('change', updateSelectedClasses);
 
         $('.btn-hapus').click(function(e) {
             e.preventDefault();
