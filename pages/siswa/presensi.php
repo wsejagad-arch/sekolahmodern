@@ -284,7 +284,8 @@ if ($tblExists) {
     if ($qDet) {
         while ($row = mysqli_fetch_assoc($qDet)) {
             $detailList[] = $row;
-            $tgl = $row['tanggal'];
+            // Pastikan format Y-m-d, hilangkan jam jika ada (DATETIME)
+            $tgl = date('Y-m-d', strtotime($row['tanggal']));
             if (!isset($rekapHarian[$tgl])) {
                 $rekapHarian[$tgl] = [
                     'mapel' => [],
@@ -323,7 +324,10 @@ if ($tblExists) {
                 else $hurufGuru = strtoupper(substr($stGuru, 0, 1));
             }
             
-            $stAkhir = trim((string)($row['status_akhir'] ?? $row['status'] ?? ''));
+            $stAkhir = trim((string)($row['status_akhir'] ?? ''));
+            if (empty($stAkhir)) {
+                $stAkhir = trim((string)($row['status'] ?? ''));
+            }
             $stAkhirLow = strtolower($stAkhir);
             if (empty($stAkhir)) $hurufAkhir = 'A/BA';
             elseif ($stAkhirLow == 'hadir') $hurufAkhir = 'H';
