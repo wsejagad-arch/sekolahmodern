@@ -59,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     // Cek izin saat ini
     $qCek = mysqli_query($conn, "SELECT * FROM tbl_izin_siswa WHERE id_izin = $id_izin");
     $rCek = mysqli_fetch_assoc($qCek);
+    $catatan = isset($_POST['catatan']) ? mysqli_real_escape_string($conn, trim($_POST['catatan'])) : '';
     
     if ($rCek) {
         if ($action === 'acc_wali' && $is_wali_kelas) {
@@ -66,24 +67,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             if ($rCek['validasi_guru_bk'] === 'Disetujui') {
                 $status_baru = ($rCek['kategori_pengajuan'] === 'Keluar Sekolah') ? 'Menunggu Satpam' : 'Disetujui Penuh';
             }
-            mysqli_query($conn, "UPDATE tbl_izin_siswa SET validasi_wali_kelas = 'Disetujui', validator_wali_kelas = '$namaGuru', waktu_validasi_wali_kelas = NOW(), status_izin = '$status_baru' WHERE id_izin = $id_izin");
+            mysqli_query($conn, "UPDATE tbl_izin_siswa SET validasi_wali_kelas = 'Disetujui', validator_wali_kelas = '$namaGuru', waktu_validasi_wali_kelas = NOW(), status_izin = '$status_baru', catatan_wali_kelas = '$catatan' WHERE id_izin = $id_izin");
             $msg_validasi = "Izin berhasil disetujui sebagai Wali Kelas.";
         } elseif ($action === 'tolak_wali' && $is_wali_kelas) {
-            mysqli_query($conn, "UPDATE tbl_izin_siswa SET validasi_wali_kelas = 'Ditolak', validator_wali_kelas = '$namaGuru', waktu_validasi_wali_kelas = NOW(), status_izin = 'Ditolak' WHERE id_izin = $id_izin");
+            mysqli_query($conn, "UPDATE tbl_izin_siswa SET validasi_wali_kelas = 'Ditolak', validator_wali_kelas = '$namaGuru', waktu_validasi_wali_kelas = NOW(), status_izin = 'Ditolak', catatan_wali_kelas = '$catatan' WHERE id_izin = $id_izin");
             $msg_validasi = "Izin berhasil ditolak sebagai Wali Kelas.";
         } elseif ($action === 'acc_bk' && $is_guru_bk) {
             $status_baru = 'Menunggu Wali Kelas';
             if ($rCek['validasi_wali_kelas'] === 'Disetujui') {
                 $status_baru = ($rCek['kategori_pengajuan'] === 'Keluar Sekolah') ? 'Menunggu Satpam' : 'Disetujui Penuh';
             }
-            mysqli_query($conn, "UPDATE tbl_izin_siswa SET validasi_guru_bk = 'Disetujui', validator_guru_bk = '$namaGuru', waktu_validasi_guru_bk = NOW(), status_izin = '$status_baru' WHERE id_izin = $id_izin AND validasi_guru_bk IN ('Menunggu', 'Menunggu Validasi')");
+            mysqli_query($conn, "UPDATE tbl_izin_siswa SET validasi_guru_bk = 'Disetujui', validator_guru_bk = '$namaGuru', waktu_validasi_guru_bk = NOW(), status_izin = '$status_baru', catatan_guru_bk = '$catatan' WHERE id_izin = $id_izin AND validasi_guru_bk IN ('Menunggu', 'Menunggu Validasi')");
             if (mysqli_affected_rows($conn) > 0) {
                 $msg_validasi = "Izin berhasil disetujui sebagai Guru BK.";
             } else {
                 $msg_validasi = "Izin ini sudah diproses oleh Guru BK lain.";
             }
         } elseif ($action === 'tolak_bk' && $is_guru_bk) {
-            mysqli_query($conn, "UPDATE tbl_izin_siswa SET validasi_guru_bk = 'Ditolak', validator_guru_bk = '$namaGuru', waktu_validasi_guru_bk = NOW(), status_izin = 'Ditolak' WHERE id_izin = $id_izin AND validasi_guru_bk IN ('Menunggu', 'Menunggu Validasi')");
+            mysqli_query($conn, "UPDATE tbl_izin_siswa SET validasi_guru_bk = 'Ditolak', validator_guru_bk = '$namaGuru', waktu_validasi_guru_bk = NOW(), status_izin = 'Ditolak', catatan_guru_bk = '$catatan' WHERE id_izin = $id_izin AND validasi_guru_bk IN ('Menunggu', 'Menunggu Validasi')");
             if (mysqli_affected_rows($conn) > 0) {
                 $msg_validasi = "Izin berhasil ditolak sebagai Guru BK.";
             } else {
@@ -371,24 +372,28 @@ function viConfirm(string $n):string{
             <div class="vi-val"><?= htmlspecialchars($izin['opsi_kembali']) ?></div>
         </div>
         <?php endif; ?>
+        <?php if(!empty($izin['lokasi_izin'])): ?>
+        <div class="vi-info-item full">
+            <div class="vi-lbl">Lokasi GPS</div>
+            <div class="vi-val"><a href="https://www.google.com/maps?q=<?= htmlspecialchars(urlencode($izin['lokasi_izin'])) ?>" target="_blank" style="color:var(--blue);text-decoration:none;"><i class="fas fa-map-marker-alt"></i> Buka di Google Maps</a></div>
+        </div>
+        <?php endif; ?>
     </div>
     <?php if(!empty($izin['foto_selfie'])): ?>
     <div class="vi-line"></div>
     <button class="vi-bukti wali" onclick="openLB('../../uploads/izin/<?= htmlspecialchars(addslashes($izin['foto_selfie'])) ?>','<?= viConfirm($izin['nama_siswa']) ?>')"><i class="fas fa-image"></i> Lihat Bukti Dukung</button>
     <?php endif; ?>
     <div class="vi-line"></div>
-    <div class="vi-actions">
-        <form method="POST">
-            <input type="hidden" name="id_izin" value="<?= $izin['id_izin'] ?>">
-            <input type="hidden" name="action" value="acc_wali">
-            <button class="vi-btn acc" onclick="return confirm('Setujui izin <?= viConfirm($izin['nama_siswa']) ?>?')"><i class="fas fa-check-circle"></i> Setujui</button>
-        </form>
-        <form method="POST">
-            <input type="hidden" name="id_izin" value="<?= $izin['id_izin'] ?>">
-            <input type="hidden" name="action" value="tolak_wali">
-            <button class="vi-btn tolak" onclick="return confirm('Tolak izin <?= viConfirm($izin['nama_siswa']) ?>?')"><i class="fas fa-times-circle"></i> Tolak</button>
-        </form>
-    </div>
+    <form method="POST">
+        <input type="hidden" name="id_izin" value="<?= $izin['id_izin'] ?>">
+        <div style="padding: 10px 18px 0;">
+            <textarea name="catatan" rows="2" style="width:100%; border:1px solid var(--border); border-radius:10px; padding:8px 12px; font-size:13px; font-family:inherit; outline:none; resize:none;" placeholder="Catatan Validator (opsional)..."></textarea>
+        </div>
+        <div class="vi-actions">
+            <button type="submit" name="action" value="acc_wali" class="vi-btn acc" onclick="return confirm('Setujui izin <?= viConfirm($izin['nama_siswa']) ?>?')"><i class="fas fa-check-circle"></i> Setujui</button>
+            <button type="submit" name="action" value="tolak_wali" class="vi-btn tolak" onclick="return confirm('Tolak izin <?= viConfirm($izin['nama_siswa']) ?>?')"><i class="fas fa-times-circle"></i> Tolak</button>
+        </div>
+    </form>
 </div>
 <?php endforeach; ?>
 <?php endif; ?>
@@ -439,24 +444,28 @@ function viConfirm(string $n):string{
             <div class="vi-lbl">Alasan</div>
             <div class="vi-val" style="color:var(--muted);font-weight:500"><?= htmlspecialchars($izin['detail_izin']?:'-') ?></div>
         </div>
+        <?php if(!empty($izin['lokasi_izin'])): ?>
+        <div class="vi-info-item full">
+            <div class="vi-lbl">Lokasi GPS</div>
+            <div class="vi-val"><a href="https://www.google.com/maps?q=<?= htmlspecialchars(urlencode($izin['lokasi_izin'])) ?>" target="_blank" style="color:var(--green);text-decoration:none;"><i class="fas fa-map-marker-alt"></i> Buka di Google Maps</a></div>
+        </div>
+        <?php endif; ?>
     </div>
     <?php if(!empty($izin['foto_selfie'])): ?>
     <div class="vi-line"></div>
     <button class="vi-bukti bk" onclick="openLB('../../uploads/izin/<?= htmlspecialchars(addslashes($izin['foto_selfie'])) ?>','<?= viConfirm($izin['nama_siswa']) ?>')"><i class="fas fa-image"></i> Lihat Bukti Dukung</button>
     <?php endif; ?>
     <div class="vi-line"></div>
-    <div class="vi-actions">
-        <form method="POST">
-            <input type="hidden" name="id_izin" value="<?= $izin['id_izin'] ?>">
-            <input type="hidden" name="action" value="acc_bk">
-            <button class="vi-btn acc" onclick="return confirm('Setujui izin <?= viConfirm($izin['nama_siswa']) ?>?')"><i class="fas fa-check-circle"></i> Setujui</button>
-        </form>
-        <form method="POST">
-            <input type="hidden" name="id_izin" value="<?= $izin['id_izin'] ?>">
-            <input type="hidden" name="action" value="tolak_bk">
-            <button class="vi-btn tolak" onclick="return confirm('Tolak izin <?= viConfirm($izin['nama_siswa']) ?>?')"><i class="fas fa-times-circle"></i> Tolak</button>
-        </form>
-    </div>
+    <form method="POST">
+        <input type="hidden" name="id_izin" value="<?= $izin['id_izin'] ?>">
+        <div style="padding: 10px 18px 0;">
+            <textarea name="catatan" rows="2" style="width:100%; border:1px solid var(--border); border-radius:10px; padding:8px 12px; font-size:13px; font-family:inherit; outline:none; resize:none;" placeholder="Catatan Validator (opsional)..."></textarea>
+        </div>
+        <div class="vi-actions">
+            <button type="submit" name="action" value="acc_bk" class="vi-btn acc" onclick="return confirm('Setujui izin <?= viConfirm($izin['nama_siswa']) ?>?')"><i class="fas fa-check-circle"></i> Setujui</button>
+            <button type="submit" name="action" value="tolak_bk" class="vi-btn tolak" onclick="return confirm('Tolak izin <?= viConfirm($izin['nama_siswa']) ?>?')"><i class="fas fa-times-circle"></i> Tolak</button>
+        </div>
+    </form>
 </div>
 <?php endforeach; ?>
 <?php endif; ?>
@@ -642,10 +651,21 @@ function viConfirm(string $n):string{
             <div style="font-size:11.5px;color:var(--muted);margin-top:4px;font-style:italic"><?= htmlspecialchars(mb_strimwidth($hz['detail_izin'], 0, 80, '…')) ?></div>
             <?php endif; ?>
             <?php if(!empty($hz['validator_wali_kelas']) && $hz['validasi_wali_kelas'] !== 'Menunggu'): ?>
-            <div style="font-size:10.5px;color:var(--muted);margin-top:3px"><i class="fas fa-user-tie fa-xs"></i> Wali: <?= htmlspecialchars($hz['validator_wali_kelas']) ?> <?= $hz['validasi_wali_kelas'] === 'Ditolak' ? '(Menolak)' : '' ?></div>
+            <div style="font-size:10.5px;color:var(--muted);margin-top:3px"><i class="fas fa-user-tie fa-xs"></i> Wali: <?= htmlspecialchars($hz['validator_wali_kelas']) ?> <?= $hz['validasi_wali_kelas'] === 'Ditolak' ? '(Menolak)' : '' ?>
+                <?php if(!empty($hz['catatan_wali_kelas'])): ?>
+                    <br><span style="color:#64748b;font-style:italic">"<?= htmlspecialchars($hz['catatan_wali_kelas']) ?>"</span>
+                <?php endif; ?>
+            </div>
             <?php endif; ?>
             <?php if(!empty($hz['validator_guru_bk']) && $hz['validasi_guru_bk'] !== 'Menunggu'): ?>
-            <div style="font-size:10.5px;color:var(--muted);margin-top:3px"><i class="fas fa-user-shield fa-xs"></i> BK: <?= htmlspecialchars($hz['validator_guru_bk']) ?> <?= $hz['validasi_guru_bk'] === 'Ditolak' ? '(Menolak)' : '' ?></div>
+            <div style="font-size:10.5px;color:var(--muted);margin-top:3px"><i class="fas fa-user-shield fa-xs"></i> BK: <?= htmlspecialchars($hz['validator_guru_bk']) ?> <?= $hz['validasi_guru_bk'] === 'Ditolak' ? '(Menolak)' : '' ?>
+                <?php if(!empty($hz['catatan_guru_bk'])): ?>
+                    <br><span style="color:#64748b;font-style:italic">"<?= htmlspecialchars($hz['catatan_guru_bk']) ?>"</span>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+            <?php if(!empty($hz['lokasi_izin'])): ?>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px"><i class="fas fa-map-marker-alt" style="color:var(--green)"></i> <a href="https://www.google.com/maps?q=<?= htmlspecialchars(urlencode($hz['lokasi_izin'])) ?>" target="_blank" style="color:var(--green);text-decoration:none;">Buka Lokasi</a></div>
             <?php endif; ?>
         </div>
         <div class="hist-right">
