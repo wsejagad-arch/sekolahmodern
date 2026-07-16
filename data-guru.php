@@ -387,7 +387,8 @@ if (!function_exists('get_user_online_visual_state')) {
     if(kepegawaianFilter) kepegawaianFilter.addEventListener('change', filterTable);
     if(jabatanFilter) jabatanFilter.addEventListener('change', filterTable);
 
-    setInterval(refreshUserStatusRealtime, 30000);
+    // Interval auto-refresh user status (diubah dari 30s jadi 120s untuk mengurangi beban server)
+    setInterval(refreshUserStatusRealtime, 120000);
 
     window.exportData = function() {
       let csvContent = "data:text/csv;charset=utf-8,";

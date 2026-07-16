@@ -98,7 +98,7 @@ $port = 3306;
 $user = '';
 $password = '';
 $database = '';
-$persistent = true; // Default aktifkan persistent connection untuk performa tinggi
+$persistent = false; // Nonaktifkan persistent connection di shared hosting (mencegah Too many connections)
 
 if (file_exists(__DIR__ . '/config.hosting.php')) {
     $cfg = require __DIR__ . '/config.hosting.php';
@@ -125,15 +125,9 @@ if (file_exists(__DIR__ . '/config.hosting.php')) {
 mysqli_report(MYSQLI_REPORT_OFF);
 $conn = null;
 try {
-    // Gunakan persistent connection (p:host) untuk mengurangi load database saat traffic tinggi
+    // Hapus fitur persistent (p:host) untuk menghindari bug max_connections di cPanel/Shared Hosting
     $connect_host = $host;
-    if ($persistent && strpos($connect_host, 'p:') !== 0 && $connect_host !== 'localhost' && $connect_host !== '127.0.0.1') {
-         // p:localhost is tricky on some setups, better to just prepend p: if it's an IP or specific hostname.
-         // Actually, p:localhost works if localhost maps to a TCP connection (or socket). 
-         $connect_host = 'p:' . $connect_host;
-    } elseif ($persistent && strpos($connect_host, 'p:') !== 0) {
-         $connect_host = 'p:' . $connect_host;
-    }
+
 
     $conn = new mysqli($connect_host, $user, $password, $database, $port);
     if ($conn->connect_error) {
