@@ -82,12 +82,12 @@ if ($isLocal && file_exists(__DIR__ . '/koneksi_local.php')) {
     if (isset($conn) && $conn instanceof mysqli) {
         require_once __DIR__ . '/multi_tenant.php';
         mt_bootstrap($conn);
-        // Auto migrate diaktifkan kembali (v3)
-        if (!file_exists(__DIR__ . '/.migrated_v3')) {
-            require_once __DIR__ . '/auto_migrate.php';
-            run_auto_migrations($conn);
-            @file_put_contents(__DIR__ . '/.migrated_v3', '1');
-        }
+        // Auto migrate dimatikan SEMENTARA karena menyebabkan Metadata Lock saat jam sibuk
+        // if (!file_exists(__DIR__ . '/.migrated_v3')) {
+        //     require_once __DIR__ . '/auto_migrate.php';
+        //     run_auto_migrations($conn);
+        //     @file_put_contents(__DIR__ . '/.migrated_v3', '1');
+        // }
     }
     return;
 }
@@ -137,12 +137,12 @@ try {
         mysqli_set_charset($conn, 'utf8');
         require_once __DIR__ . '/multi_tenant.php';
         mt_bootstrap($conn);
-        // Auto migrate diaktifkan kembali (v3)
-        if (!file_exists(__DIR__ . '/.migrated_v3')) {
-            require_once __DIR__ . '/auto_migrate.php';
-            run_auto_migrations($conn);
-            @file_put_contents(__DIR__ . '/.migrated_v3', '1');
-        }
+        // Auto migrate dimatikan SEMENTARA karena menyebabkan Metadata Lock saat jam sibuk
+        // if (!file_exists(__DIR__ . '/.migrated_v3')) {
+        //     require_once __DIR__ . '/auto_migrate.php';
+        //     run_auto_migrations($conn);
+        //     @file_put_contents(__DIR__ . '/.migrated_v3', '1');
+        // }
     }
 } catch (Throwable $e) {
     error_log('[koneksi.php] MySQL exception: ' . $e->getMessage());
