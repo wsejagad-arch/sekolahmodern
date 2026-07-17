@@ -742,7 +742,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                     </div>
                 <?php endif; ?>
 
-                <div class="banner-actions mt-4" style="margin-top: 36px !important;">
+                <div class="banner-actions mt-4" style="margin-top: 36px !important; display: flex; flex-wrap: wrap; gap: 12px;">
                     <?php if ($unfilledJurnalCount > 0 && !empty($unfilledJadwal)): ?>
                         <a href="javascript:void(0)" onclick="openInputJurnal(<?= $unfilledJadwal[0]['id_mapel'] ?>)" class="btn-premium-primary shadow-sm" style="padding: 12px 24px;">
                             <i class="bi bi-pencil-square"></i> Input Jurnal Sekarang
@@ -752,6 +752,9 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                             <i class="bi bi-journal-check"></i> Lihat Jurnal
                         </a>
                     <?php endif; ?>
+                    <a href="history-pertemuan" class="btn-premium-secondary shadow-sm" style="padding: 12px 24px; background: rgba(255, 255, 255, 0.2); color: #fff; border: 1px solid rgba(255, 255, 255, 0.4); backdrop-filter: blur(4px);">
+                        <i class="bi bi-clock-history"></i> History Pertemuan
+                    </a>
                 </div>
             </div>
             
