@@ -28,6 +28,7 @@ RewriteRule ^pengumuman$ home.php?page=pengumuman [L,QSA]
 # Fallbacks for footer links (in case of cached HTML)
 RewriteRule ^data-siswa$ router.php?type=guru&page=data-siswa [L,QSA]
 RewriteRule ^history-tugas$ router.php?type=guru&page=history-tugas [L,QSA]
+RewriteRule ^history-pertemuan$ router.php?type=guru&page=history-pertemuan [L,QSA]
 RewriteRule ^profil-guru$ router.php?type=guru&page=profil-guru [L,QSA]
 
 RewriteRule ^pages/guru/([a-zA-Z0-9_-]+)(?:\.php)?/?$ router.php?type=guru&page=$1 [L,QSA]
