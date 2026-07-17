@@ -52,8 +52,8 @@ if ($qHistory) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
-    <link rel='stylesheet' href='pages/guru/css/guru-2026-scoped.css?v=<?= time() ?>'>
-    <link rel='stylesheet' href='pages/guru/css/guru-desktop.css?v=<?= time() ?>'>
+    <link rel='stylesheet' href='css/guru-2026-scoped.css?v=<?= time() ?>'>
+    <link rel='stylesheet' href='css/guru-desktop.css?v=<?= time() ?>'>
     <style>
         body, #content-wrapper, .desktop-sidebar, .desktop-nav, .nav-item, h1, h2, h3, h4, h5, h6, p, span, a, div, button, input, textarea, select, table {
             font-family: 'Poppins', sans-serif !important;
@@ -96,16 +96,24 @@ if ($qHistory) {
 
 <?php include 'guru_sidebar_shared.php'; ?>
 
-<div class="app-shell" id="desktopAppShell">
-    <div class="desktop-center-column">
+<div class="app-shell" id="desktopAppShell" style="grid-template-columns: 1fr; padding-right: 24px;">
+    <div class="desktop-center-column" style="padding-top: 10px;">
         
-        <div class="page-header-premium">
-            <div style="position: relative; z-index: 10;">
-                <h2><i class="bi bi-clock-history me-2"></i>History Pertemuan</h2>
-                <p>Riwayat materi dan kegiatan yang telah Anda laksanakan.</p>
+        <div class="welcome-banner-premium mb-4">
+            <div class="banner-content">
+                <div class="banner-text">
+                    <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">History Pertemuan 🕒</h2>
+                    <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Riwayat materi dan kegiatan yang telah Anda laksanakan.</p>
+                </div>
+                <div class="banner-actions">
+                    <a href="../../home.php?page=beranda" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+                </div>
             </div>
-            <!-- Decorative circle -->
-            <div style="position: absolute; right: -50px; top: -50px; width: 150px; height: 150px; border-radius: 50%; background: rgba(255,255,255,0.05);"></div>
+            <div class="banner-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
         </div>
 
         <div class="filter-card">
