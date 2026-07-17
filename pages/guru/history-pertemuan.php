@@ -109,9 +109,7 @@ if ($qHistory) {
         </div>
 
         <div class="filter-card">
-            <form method="GET" class="row align-items-end g-3" action="router.php">
-                <input type="hidden" name="type" value="guru">
-                <input type="hidden" name="page" value="history-pertemuan">
+            <form method="GET" class="row align-items-end g-3" action="history-pertemuan.php">
                 <div class="col-md-3">
                     <label class="form-label text-xs fw-bold text-slate-500 uppercase">Pilih Waktu</label>
                     <select name="filter" class="form-select form-select-sm" onchange="this.form.submit()" style="border-radius:10px; padding:8px 12px; font-size:13px;">
