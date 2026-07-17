@@ -106,6 +106,7 @@ if ($qHistory) {
                     <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Riwayat materi dan kegiatan yang telah Anda laksanakan.</p>
                 </div>
                 <div class="banner-actions">
+                    <a href="/pages/guru/cetak-history.php?filter=<?= $filterType ?>&start=<?= $startDate ?>&end=<?= $endDate ?>" target="_blank" class="btn-premium-primary me-2"><i class="bi bi-printer"></i> Cetak Jurnal</a>
                     <a href="../../home.php?page=beranda" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
                 </div>
             </div>
@@ -117,7 +118,7 @@ if ($qHistory) {
         </div>
 
         <div class="filter-card">
-            <form method="GET" class="row align-items-end g-3" action="history-pertemuan.php">
+            <form method="GET" class="row align-items-end g-3" action="">
                 <div class="col-md-3">
                     <label class="form-label text-xs fw-bold text-slate-500 uppercase">Pilih Waktu</label>
                     <select name="filter" class="form-select form-select-sm" onchange="this.form.submit()" style="border-radius:10px; padding:8px 12px; font-size:13px;">
