@@ -24,6 +24,7 @@ if (!isset($_SESSION['no_induk']) || ($_SESSION['hak_akses'] ?? 0) != 3) {
 include __DIR__ . '/../koneksi.php';
 include __DIR__ . '/../functions.php';
 require_once __DIR__ . '/../notification_helper.php';
+require_once __DIR__ . '/../plugins/FileCache.php';
 
 if (!$conn) {
     http_response_code(500);
@@ -73,8 +74,19 @@ $settingLng    = $defLng;
 $settingRadius = $defRadius;
 
 // Ambil setting lokasi (abaikan error jika tabel belum ada untuk menghindari Metadata Lock)
-$qSet = @mysqli_query($conn, "SELECT lat, lng, radius_m FROM tbl_presensi_setting {$tenantPresensi} ORDER BY id DESC LIMIT 1");
-if ($qSet && ($rowSet = mysqli_fetch_assoc($qSet))) {
+$cacheKeySetting = 'presensi_setting_' . $tenantId;
+$rowSet = FileCache::get($cacheKeySetting);
+if ($rowSet === false) {
+    $qSet = @mysqli_query($conn, "SELECT lat, lng, radius_m FROM tbl_presensi_setting {$tenantPresensi} ORDER BY id DESC LIMIT 1");
+    if ($qSet && ($row = mysqli_fetch_assoc($qSet))) {
+        $rowSet = $row;
+        FileCache::set($cacheKeySetting, $rowSet, 3600); // 1 jam cache
+    } else {
+        $rowSet = [];
+    }
+}
+
+if (!empty($rowSet)) {
     if (!empty($rowSet['lat']))      $settingLat    = (float)$rowSet['lat'];
     if (!empty($rowSet['lng']))      $settingLng    = (float)$rowSet['lng'];
     if (!empty($rowSet['radius_m'])) $settingRadius = (int)$rowSet['radius_m'];
@@ -109,15 +121,24 @@ if ($jarak > $settingRadius) {
 $idMapelEsc = mysqli_real_escape_string($conn, $idMapel);
 $kelasEsc   = mysqli_real_escape_string($conn, $kelas);
 
-$qMapel = mysqli_query($conn,
-    "SELECT id_mapel, nama_mapel, no_induk AS no_induk_guru, jam_mulai, jam_selesai, hari
-     FROM tbl_mapel_ampu
-     WHERE {$tenantMapel} AND id_mapel = '$idMapelEsc' AND kelas = '$kelasEsc' LIMIT 1"
-);
-if (!$qMapel || mysqli_num_rows($qMapel) === 0) {
+$cacheKeyMapel = 'mapel_' . $tenantId . '_' . $idMapelEsc . '_' . md5($kelasEsc);
+$mapelRow = FileCache::get($cacheKeyMapel);
+
+if ($mapelRow === false) {
+    $qMapel = mysqli_query($conn,
+        "SELECT id_mapel, nama_mapel, no_induk AS no_induk_guru, jam_mulai, jam_selesai, hari
+         FROM tbl_mapel_ampu
+         WHERE {$tenantMapel} AND id_mapel = '$idMapelEsc' AND kelas = '$kelasEsc' LIMIT 1"
+    );
+    if ($qMapel && mysqli_num_rows($qMapel) > 0) {
+        $mapelRow = mysqli_fetch_assoc($qMapel);
+        FileCache::set($cacheKeyMapel, $mapelRow, 600); // 10 menit
+    }
+}
+
+if (empty($mapelRow)) {
     jsonOut(['success' => false, 'message' => 'Jadwal tidak valid untuk kelas Anda'], 400);
 }
-$mapelRow = mysqli_fetch_assoc($qMapel);
 $namaMapel  = $mapelRow['nama_mapel'];
 $nipGuru    = $mapelRow['no_induk_guru'];
 // ── Tentukan status: Hadir atau Telat ─────────────────────────────────────────
@@ -130,13 +151,19 @@ $statusAbsen = (strtotime($waktuIni) > strtotime($jamMulai)) ? 'H/T' : 'Hadir';
 $jamSelesaiMapel = $mapelRow['jam_selesai'] ?? '00:00:00';
 $hariMapelEsc    = mysqli_real_escape_string($conn, $mapelRow['hari'] ?? '');
 
-$qLastChk = mysqli_query($conn,
-    "SELECT COUNT(*) AS cnt FROM tbl_mapel_ampu
-     WHERE {$tenantMapel} AND kelas = '$kelasEsc' AND hari = '$hariMapelEsc'
-       AND jam_selesai > '" . mysqli_real_escape_string($conn, $jamSelesaiMapel) . "'"
-);
-$rLastChk     = $qLastChk ? mysqli_fetch_assoc($qLastChk) : ['cnt' => 0];
-$isLastPeriod = ((int)($rLastChk['cnt'] ?? 0) === 0);
+$cacheKeyLastPeriod = 'last_period_' . $tenantId . '_' . md5($kelasEsc . '_' . $hariMapelEsc . '_' . $jamSelesaiMapel);
+$isLastPeriod = FileCache::get($cacheKeyLastPeriod);
+
+if ($isLastPeriod === false) {
+    $qLastChk = mysqli_query($conn,
+        "SELECT COUNT(*) AS cnt FROM tbl_mapel_ampu
+         WHERE {$tenantMapel} AND kelas = '$kelasEsc' AND hari = '$hariMapelEsc'
+           AND jam_selesai > '" . mysqli_real_escape_string($conn, $jamSelesaiMapel) . "'"
+    );
+    $rLastChk     = $qLastChk ? mysqli_fetch_assoc($qLastChk) : ['cnt' => 0];
+    $isLastPeriod = ((int)($rLastChk['cnt'] ?? 0) === 0);
+    FileCache::set($cacheKeyLastPeriod, $isLastPeriod, 3600); // 1 jam
+}
 
 if ($isLastPeriod) {
     // Absen pulang: hanya boleh antara jam_selesai s/d 23:59

@@ -11,6 +11,7 @@ if (!isset($_SESSION["no_induk"])) {
 
 include "../../koneksi.php";
 include "../../functions.php";
+require_once "../../plugins/FileCache.php";
 date_default_timezone_set('Asia/Jakarta');
 $kls = $_SESSION['kelas'];
 $tglskr = date("Y-m-d");
@@ -29,22 +30,31 @@ $__tblAb = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_absen'");
 if ($__tblAb && mysqli_num_rows($__tblAb) > 0) {
   $nisEsc = mysqli_real_escape_string($conn, $nisSiswa);
   $klsEsc = mysqli_real_escape_string($conn, $kls);
-  $__qAbs = mysqli_query($conn, "SELECT 
-      SUM(status='Hadir')  AS hadir,
-      SUM(status='Ijin')   AS ijin,
-      SUM(status='Sakit')  AS sakit,
-      SUM(status='Dispen') AS dispen,
-      SUM(status='Alpha')  AS alpha
-    FROM tbl_absen
-    WHERE {$tenantAbsen} AND no_induk='" . $nisEsc . "' AND kelas='" . $klsEsc . "' AND DATE_FORMAT(tanggal,'%Y-%m')='" . $bulanNow . "'");
-  if ($__qAbs && ($__ra = mysqli_fetch_assoc($__qAbs))) {
-    $absSummary = [
-      'hadir'  => (int)($__ra['hadir'] ?? 0),
-      'ijin'   => (int)($__ra['ijin'] ?? 0),
-      'sakit'  => (int)($__ra['sakit'] ?? 0),
-      'dispen' => (int)($__ra['dispen'] ?? 0),
-      'alpha'  => (int)($__ra['alpha'] ?? 0),
-    ];
+  
+  $cacheKeyAbsSummary = 'abs_summary_' . $tenantId . '_' . md5($nisEsc . '_' . $klsEsc . '_' . $bulanNow);
+  $cachedSummary = FileCache::get($cacheKeyAbsSummary);
+  
+  if ($cachedSummary === false) {
+      $__qAbs = mysqli_query($conn, "SELECT 
+          SUM(status='Hadir')  AS hadir,
+          SUM(status='Ijin')   AS ijin,
+          SUM(status='Sakit')  AS sakit,
+          SUM(status='Dispen') AS dispen,
+          SUM(status='Alpha')  AS alpha
+        FROM tbl_absen
+        WHERE {$tenantAbsen} AND no_induk='" . $nisEsc . "' AND kelas='" . $klsEsc . "' AND DATE_FORMAT(tanggal,'%Y-%m')='" . $bulanNow . "'");
+      if ($__qAbs && ($__ra = mysqli_fetch_assoc($__qAbs))) {
+        $absSummary = [
+          'hadir'  => (int)($__ra['hadir'] ?? 0),
+          'ijin'   => (int)($__ra['ijin'] ?? 0),
+          'sakit'  => (int)($__ra['sakit'] ?? 0),
+          'dispen' => (int)($__ra['dispen'] ?? 0),
+          'alpha'  => (int)($__ra['alpha'] ?? 0),
+        ];
+        FileCache::set($cacheKeyAbsSummary, $absSummary, 900); // 15 menit
+      }
+  } else {
+      $absSummary = $cachedSummary;
   }
 }
 // Cek notifikasi izin terbaru (7 hari terakhir)

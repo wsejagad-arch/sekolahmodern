@@ -53,9 +53,22 @@ function data_lembaga()
 	}
 
 	$whereSchool = '';
+	$idSekolah = 1;
 	if (function_exists('mt_column_exists') && $conn instanceof mysqli && mt_column_exists($conn, 'tbl_setting', 'id_sekolah')) {
 		$idSekolah = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
 		$whereSchool = " WHERE id_sekolah=" . (int)$idSekolah;
+	}
+
+	$cacheKey = 'data_lembaga_' . $idSekolah;
+	if (!class_exists('FileCache')) {
+	    @include_once __DIR__ . '/plugins/FileCache.php';
+	}
+	if (class_exists('FileCache')) {
+	    $fileCached = FileCache::get($cacheKey);
+	    if ($fileCached !== false) {
+	        $cached = $fileCached;
+	        return $cached;
+	    }
 	}
 
 	$sql = @mysqli_query($conn, "SELECT * FROM tbl_setting$whereSchool ORDER BY id DESC LIMIT 1");
@@ -81,6 +94,11 @@ function data_lembaga()
 		"logo" => $nm['logo'] ?? $default['logo'],
 		"maintenance_mode" => $nm['maintenance_mode'] ?? $default['maintenance_mode']
 	);
+
+	if (class_exists('FileCache')) {
+	    FileCache::set($cacheKey, $cached, 3600); // 1 jam cache
+	}
+
 	return $cached;
 }
 
