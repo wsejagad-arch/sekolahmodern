@@ -271,7 +271,7 @@ $qHistory = mysqli_query($conn, "SELECT tanggal, nama_mapel, kelas, materi, kegi
                 if ($qHistory && mysqli_num_rows($qHistory) > 0) {
                     $no = 1;
                     while ($row = mysqli_fetch_assoc($qHistory)) {
-                        $hari = nama_hari($row['tanggal']);
+                        $hari = ubah_nama_hari($row['tanggal']);
                         $tanggal = tgl_indo($row['tanggal']);
                         
                         // Format materi & kegiatan
