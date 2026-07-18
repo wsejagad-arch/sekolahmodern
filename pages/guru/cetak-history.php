@@ -57,6 +57,18 @@ if (!empty($startDate) && !empty($endDate)) {
     $where .= " AND tanggal BETWEEN '$startEsc' AND '$endEsc'";
 }
 
+// Get distinct mapel
+$qMapel = mysqli_query($conn, "SELECT DISTINCT nama_mapel FROM tbl_materi WHERE $where");
+$mapelList = [];
+if ($qMapel) {
+    while ($m = mysqli_fetch_assoc($qMapel)) {
+        if (!empty(trim($m['nama_mapel']))) {
+            $mapelList[] = trim($m['nama_mapel']);
+        }
+    }
+}
+$mapelStr = empty($mapelList) ? '-' : implode(', ', $mapelList);
+
 if ($filterKelas !== 'semua') {
     $kelasEsc = mysqli_real_escape_string($conn, $filterKelas);
     $where .= " AND kelas = '$kelasEsc'";
@@ -244,15 +256,36 @@ $qHistory = mysqli_query($conn, "SELECT tanggal, nama_mapel, kelas, materi, kegi
         <!-- Judul -->
         <div class="judul-dokumen">
             <h3>JURNAL MENGAJAR GURU</h3>
-            <?php if (!empty($startDate) && !empty($endDate)): ?>
-                <p>Periode: <?= tgl_indo($startDate) ?> s.d <?= tgl_indo($endDate) ?></p>
-            <?php else: ?>
-                <p>Periode: Semua Waktu</p>
-            <?php endif; ?>
-            <?php if ($filterKelas !== 'semua'): ?>
-                <p style="margin-top:2px;">Kelas: <?= htmlspecialchars($filterKelas) ?></p>
-            <?php endif; ?>
         </div>
+
+        <table style="width: 100%; margin-bottom: 20px; font-size: 11pt; border: none;" class="no-border-table">
+            <tr>
+                <td style="width: 150px; padding: 3px 0; border: none;">Nama Guru</td>
+                <td style="width: 10px; padding: 3px 0; border: none;">:</td>
+                <td style="border: none;"><strong><?= htmlspecialchars($dataGuru['nama_guru']) ?></strong></td>
+            </tr>
+            <tr>
+                <td style="padding: 3px 0; border: none;">Mata Pelajaran</td>
+                <td style="padding: 3px 0; border: none;">:</td>
+                <td style="border: none;"><?= htmlspecialchars($mapelStr) ?></td>
+            </tr>
+            <tr>
+                <td style="padding: 3px 0; border: none;">Kelas</td>
+                <td style="padding: 3px 0; border: none;">:</td>
+                <td style="border: none;"><?= $filterKelas !== 'semua' ? htmlspecialchars($filterKelas) : 'Semua Kelas' ?></td>
+            </tr>
+            <tr>
+                <td style="padding: 3px 0; border: none;">Periode</td>
+                <td style="padding: 3px 0; border: none;">:</td>
+                <td style="border: none;">
+                    <?php if (!empty($startDate) && !empty($endDate)): ?>
+                        <?= tgl_indo($startDate) ?> s.d <?= tgl_indo($endDate) ?>
+                    <?php else: ?>
+                        Semua Waktu
+                    <?php endif; ?>
+                </td>
+            </tr>
+        </table>
 
         <!-- Tabel Data -->
         <table class="tabel-jurnal">
@@ -309,7 +342,7 @@ $qHistory = mysqli_query($conn, "SELECT tanggal, nama_mapel, kelas, materi, kegi
                 <p>NIP. <?= htmlspecialchars($settingData['nip_pimpinan']) ?></p>
             </div>
             <div class="ttd-box">
-                <p>&nbsp;</p>
+                <p>Sumber, <?= tgl_indo(date("Y-m-d")) ?></p>
                 <p>Guru Mata Pelajaran</p>
                 <div class="nama"><?= htmlspecialchars($dataGuru['nama_guru']) ?></div>
                 <p>NIP. <?= htmlspecialchars($nip) ?></p>
