@@ -312,9 +312,20 @@ $qHistory = mysqli_query($conn, "SELECT tanggal, nama_mapel, kelas, materi, kegi
                         $materiKegiatan .= "<strong>Kegiatan:</strong> " . htmlspecialchars($row['kegiatan']);
 
                         // Format absen: Only show if not empty
-                        $absen = htmlspecialchars($row['absen']);
-                        if (empty(trim($absen)) || trim($absen) === '-') {
+                        $absenRaw = trim($row['absen']);
+                        if (empty($absenRaw) || $absenRaw === '-') {
                             $absen = "Nihil";
+                        } else {
+                            $absenList = explode(',', $absenRaw);
+                            $absenHtml = '<ul style="margin: 0; padding-left: 15px;">';
+                            foreach ($absenList as $abs) {
+                                $abs = trim($abs);
+                                if (!empty($abs)) {
+                                    $absenHtml .= '<li>' . htmlspecialchars($abs) . '</li>';
+                                }
+                            }
+                            $absenHtml .= '</ul>';
+                            $absen = $absenHtml;
                         }
 
                         echo "<tr>
