@@ -123,7 +123,7 @@ if ($qHistory) {
                     <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Riwayat materi dan kegiatan yang telah Anda laksanakan.</p>
                 </div>
                 <div class="banner-actions">
-                    <a href="/pages/guru/cetak-history.php?filter=<?= $filterType ?>&start=<?= $startDate ?>&end=<?= $endDate ?>&kelas=<?= urlencode($filterKelas) ?>" target="_blank" class="btn-premium-primary me-2"><i class="bi bi-printer"></i> Cetak Jurnal</a>
+                    <a href="/pages/guru/cetak-history.php?filter=<?= $filterType ?>&start=<?= $startDate ?>&end=<?= $endDate ?>&kelas=<?= urlencode($filterKelas) ?>" target="_blank" class="btn-premium-primary me-2 d-none d-md-inline-block"><i class="bi bi-printer"></i> Cetak Jurnal</a>
                     <a href="../../home.php?page=beranda" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
                 </div>
             </div>
@@ -167,6 +167,12 @@ if ($qHistory) {
                         <button type="submit" class="btn btn-primary btn-sm btn-filter w-100" style="background: #3b82f6; border: none;"><i class="bi bi-search me-1"></i> Terapkan</button>
                     </div>
                 <?php endif; ?>
+                
+                <div class="col-md-auto ms-auto text-end">
+                    <a href="/pages/guru/cetak-history.php?filter=<?= $filterType ?>&start=<?= $startDate ?>&end=<?= $endDate ?>&kelas=<?= urlencode($filterKelas) ?>" target="_blank" class="btn btn-sm btn-filter" style="background: #10b981; color: white; border: none; padding: 8px 20px;">
+                        <i class="bi bi-printer-fill me-1"></i> Cetak PDF
+                    </a>
+                </div>
             </form>
         </div>
 
