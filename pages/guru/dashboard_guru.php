@@ -752,7 +752,7 @@ while ($qGuruWaliJurnal && ($rowJurnalWali = mysqli_fetch_assoc($qGuruWaliJurnal
                             <i class="bi bi-journal-check"></i> Lihat Jurnal
                         </a>
                     <?php endif; ?>
-                    <a href="/history-pertemuan" class="btn-premium-secondary shadow-sm" style="padding: 12px 24px; background: rgba(255, 255, 255, 0.2); color: #fff; border: 1px solid rgba(255, 255, 255, 0.4); backdrop-filter: blur(4px);">
+                    <a href="/pages/guru/history-pertemuan.php" class="btn-premium-secondary shadow-sm" style="padding: 12px 24px; background: rgba(255, 255, 255, 0.2); color: #fff; border: 1px solid rgba(255, 255, 255, 0.4); backdrop-filter: blur(4px);">
                         <i class="bi bi-clock-history"></i> History Pertemuan
                     </a>
                 </div>
