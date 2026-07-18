@@ -123,7 +123,6 @@ if ($qHistory) {
                     <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Riwayat materi dan kegiatan yang telah Anda laksanakan.</p>
                 </div>
                 <div class="banner-actions">
-                    <a href="/pages/guru/cetak-history.php?filter=<?= $filterType ?>&start=<?= $startDate ?>&end=<?= $endDate ?>&kelas=<?= urlencode($filterKelas) ?>" target="_blank" class="btn-premium-primary me-2 d-none d-md-inline-block"><i class="bi bi-printer"></i> Cetak Jurnal</a>
                     <a href="../../home.php?page=beranda" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
                 </div>
             </div>
