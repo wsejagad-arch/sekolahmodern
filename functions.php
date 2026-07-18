@@ -2,6 +2,9 @@
 
 function tgl_indo($tanggal)
 {
+	if (empty($tanggal) || $tanggal === '0000-00-00') {
+		return '-';
+	}
 	$bulan = array(
 		1 =>   'Januari',
 		'Februari',
@@ -18,9 +21,9 @@ function tgl_indo($tanggal)
 	);
 	$pecahkan = explode('-', $tanggal);
 
-	// variabel pecahkan 0 = tanggal
-	// variabel pecahkan 1 = bulan
-	// variabel pecahkan 2 = tahun
+	if (count($pecahkan) < 3) {
+		return $tanggal;
+	}
 
 	return $pecahkan[2] . ' ' . $bulan[(int)$pecahkan[1]] . ' ' . $pecahkan[0];
 }

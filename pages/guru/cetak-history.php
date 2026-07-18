@@ -233,8 +233,8 @@ $qHistory = mysqli_query($conn, "SELECT tanggal, nama_mapel, kelas, materi, kegi
                     <div class="kop-logo" style="display:flex;align-items:center;justify-content:center;border:1px solid #ccc;height:80px;font-size:10px;text-align:center;">LOGO<br>SEKOLAH</div>
                 <?php endif; ?>
                 <div class="kop-text">
-                    <h2>PEMERINTAH PROVINSI DAERAH SETEMPAT</h2>
-                    <h2>DINAS PENDIDIKAN</h2>
+                    <h2>PEMERINTAH PROVINSI JAWA TENGAH</h2>
+                    <h2>DINAS PENDIDIKAN DAN KEBUDAYAAN</h2>
                     <h1><?= htmlspecialchars($settingData['nama_sekolah']) ?></h1>
                     <p><?= htmlspecialchars($settingData['alamat']) ?></p>
                 </div>
