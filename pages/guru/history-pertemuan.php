@@ -13,8 +13,20 @@ $nipEsc = mysqli_real_escape_string($conn, $nip);
 
 // Filter logic
 $filterType = $_GET['filter'] ?? 'semua';
+$filterKelas = $_GET['kelas'] ?? 'semua';
 $startDate = $_GET['start'] ?? date('Y-m-01');
 $endDate = $_GET['end'] ?? date('Y-m-t');
+
+// Ambil daftar kelas yang pernah diajar
+$qClasses = mysqli_query($conn, "SELECT DISTINCT kelas FROM tbl_materi WHERE no_induk = '$nipEsc' ORDER BY kelas ASC");
+$classList = [];
+if ($qClasses) {
+    while ($r = mysqli_fetch_assoc($qClasses)) {
+        if (!empty($r['kelas'])) {
+            $classList[] = $r['kelas'];
+        }
+    }
+}
 
 if ($filterType === 'minggu') {
     $startDate = date('Y-m-d', strtotime('monday this week'));
@@ -33,6 +45,11 @@ if ($startDate && $endDate) {
     $startEsc = mysqli_real_escape_string($conn, $startDate);
     $endEsc = mysqli_real_escape_string($conn, $endDate);
     $where .= " AND tanggal BETWEEN '$startEsc' AND '$endEsc'";
+}
+
+if ($filterKelas !== 'semua') {
+    $kelasEsc = mysqli_real_escape_string($conn, $filterKelas);
+    $where .= " AND kelas = '$kelasEsc'";
 }
 
 $qHistory = mysqli_query($conn, "SELECT tanggal, nama_mapel, kelas, materi, kegiatan, absen FROM tbl_materi WHERE $where ORDER BY tanggal DESC, id_materi DESC");
@@ -106,7 +123,7 @@ if ($qHistory) {
                     <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;">Riwayat materi dan kegiatan yang telah Anda laksanakan.</p>
                 </div>
                 <div class="banner-actions">
-                    <a href="/pages/guru/cetak-history.php?filter=<?= $filterType ?>&start=<?= $startDate ?>&end=<?= $endDate ?>" target="_blank" class="btn-premium-primary me-2"><i class="bi bi-printer"></i> Cetak Jurnal</a>
+                    <a href="/pages/guru/cetak-history.php?filter=<?= $filterType ?>&start=<?= $startDate ?>&end=<?= $endDate ?>&kelas=<?= urlencode($filterKelas) ?>" target="_blank" class="btn-premium-primary me-2"><i class="bi bi-printer"></i> Cetak Jurnal</a>
                     <a href="../../home.php?page=beranda" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
                 </div>
             </div>
@@ -126,6 +143,15 @@ if ($qHistory) {
                         <option value="bulan" <?= $filterType == 'bulan' ? 'selected' : '' ?>>Bulan Ini</option>
                         <option value="semua" <?= $filterType == 'semua' ? 'selected' : '' ?>>Semua Waktu</option>
                         <option value="custom" <?= $filterType == 'custom' ? 'selected' : '' ?>>Kustom Rentang</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label text-xs fw-bold text-slate-500 uppercase">Pilih Kelas</label>
+                    <select name="kelas" class="form-select form-select-sm" onchange="this.form.submit()" style="border-radius:10px; padding:8px 12px; font-size:13px;">
+                        <option value="semua" <?= $filterKelas == 'semua' ? 'selected' : '' ?>>Semua Kelas</option>
+                        <?php foreach ($classList as $kls): ?>
+                            <option value="<?= htmlspecialchars($kls) ?>" <?= $filterKelas == $kls ? 'selected' : '' ?>><?= htmlspecialchars($kls) ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <?php if ($filterType == 'custom'): ?>

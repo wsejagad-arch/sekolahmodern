@@ -31,6 +31,7 @@ $settingData = $qSetting ? mysqli_fetch_assoc($qSetting) : [
 $filterType = isset($_GET['filter']) ? $_GET['filter'] : 'minggu';
 $startDate = isset($_GET['start']) ? $_GET['start'] : '';
 $endDate = isset($_GET['end']) ? $_GET['end'] : '';
+$filterKelas = isset($_GET['kelas']) ? $_GET['kelas'] : 'semua';
 
 // Calculate dates if not custom
 if ($filterType !== 'custom' || empty($startDate) || empty($endDate)) {
@@ -54,6 +55,11 @@ if (!empty($startDate) && !empty($endDate)) {
     $startEsc = mysqli_real_escape_string($conn, $startDate);
     $endEsc = mysqli_real_escape_string($conn, $endDate);
     $where .= " AND tanggal BETWEEN '$startEsc' AND '$endEsc'";
+}
+
+if ($filterKelas !== 'semua') {
+    $kelasEsc = mysqli_real_escape_string($conn, $filterKelas);
+    $where .= " AND kelas = '$kelasEsc'";
 }
 
 $qHistory = mysqli_query($conn, "SELECT tanggal, nama_mapel, kelas, materi, kegiatan, absen FROM tbl_materi WHERE $where ORDER BY tanggal DESC, id_materi DESC");
@@ -242,6 +248,9 @@ $qHistory = mysqli_query($conn, "SELECT tanggal, nama_mapel, kelas, materi, kegi
                 <p>Periode: <?= tgl_indo($startDate) ?> s.d <?= tgl_indo($endDate) ?></p>
             <?php else: ?>
                 <p>Periode: Semua Waktu</p>
+            <?php endif; ?>
+            <?php if ($filterKelas !== 'semua'): ?>
+                <p style="margin-top:2px;">Kelas: <?= htmlspecialchars($filterKelas) ?></p>
             <?php endif; ?>
         </div>
 
