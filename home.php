@@ -263,40 +263,51 @@ include "sidebar.php";
 
       if ($conn) {
         $idSekolah = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
-        $posterQuery = mysqli_query($conn, "SELECT
-            a.no_induk,
-            COALESCE(NULLIF(TRIM(s.nama_siswa), ''), a.no_induk) AS nama_siswa,
-            COALESCE(NULLIF(TRIM(s.kelas), ''), a.kelas) AS kelas,
-            SUM(CASE WHEN LOWER(a.status) = 'hadir' THEN 1 ELSE 0 END) AS hadir_count,
-            SUM(CASE WHEN LOWER(a.status) = 'alpha' THEN 1 ELSE 0 END) AS alpha_count,
-            SUM(CASE WHEN LOWER(a.status) = 'telat' THEN 1 ELSE 0 END) AS telat_count,
-            SUM(CASE WHEN LOWER(a.status) IN ('ijin','izin') THEN 1 ELSE 0 END) AS izin_count,
-            SUM(CASE WHEN LOWER(a.status) = 'sakit' THEN 1 ELSE 0 END) AS sakit_count,
-            COUNT(*) AS total_records
-          FROM tbl_absen a
-          LEFT JOIN tbl_siswa s ON s.no_induk = a.no_induk AND s.id_sekolah = a.id_sekolah
-          WHERE a.id_sekolah = $idSekolah AND DATE_FORMAT(a.tanggal, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
-          GROUP BY a.no_induk
-          ORDER BY a.no_induk");
+        $cacheKeyPoster = 'poster_rajin_' . $idSekolah . '_' . date('Y-m');
+        if (!class_exists('FileCache')) {
+            @include_once __DIR__ . '/plugins/FileCache.php';
+        }
+        $cachedPoster = class_exists('FileCache') ? FileCache::get($cacheKeyPoster) : false;
 
-        $posterRows = [];
-        if ($posterQuery) {
-          while ($posterRow = mysqli_fetch_assoc($posterQuery)) {
-            $totalPoster = (int)($posterRow['total_records'] ?? 0);
-            $hadirPoster = (int)($posterRow['hadir_count'] ?? 0);
-            $posterRows[] = [
-              'no_induk' => (string)($posterRow['no_induk'] ?? '-'),
-              'nama_siswa' => (string)($posterRow['nama_siswa'] ?? 'Belum ada data absensi'),
-              'kelas' => (string)($posterRow['kelas'] ?? '-'),
-              'hadir_count' => $hadirPoster,
-              'alpha_count' => (int)($posterRow['alpha_count'] ?? 0),
-              'telat_count' => (int)($posterRow['telat_count'] ?? 0),
-              'izin_count' => (int)($posterRow['izin_count'] ?? 0),
-              'sakit_count' => (int)($posterRow['sakit_count'] ?? 0),
-              'total_records' => $totalPoster,
-              'attendance_rate' => $totalPoster > 0 ? round(($hadirPoster / $totalPoster) * 100, 1) : 0,
-            ];
-          }
+        if ($cachedPoster !== false) {
+            $posterRows = $cachedPoster;
+        } else {
+            $posterQuery = mysqli_query($conn, "SELECT
+                a.no_induk,
+                COALESCE(NULLIF(TRIM(s.nama_siswa), ''), a.no_induk) AS nama_siswa,
+                COALESCE(NULLIF(TRIM(s.kelas), ''), a.kelas) AS kelas,
+                SUM(CASE WHEN LOWER(a.status) = 'hadir' THEN 1 ELSE 0 END) AS hadir_count,
+                SUM(CASE WHEN LOWER(a.status) = 'alpha' THEN 1 ELSE 0 END) AS alpha_count,
+                SUM(CASE WHEN LOWER(a.status) = 'telat' THEN 1 ELSE 0 END) AS telat_count,
+                SUM(CASE WHEN LOWER(a.status) IN ('ijin','izin') THEN 1 ELSE 0 END) AS izin_count,
+                SUM(CASE WHEN LOWER(a.status) = 'sakit' THEN 1 ELSE 0 END) AS sakit_count,
+                COUNT(*) AS total_records
+              FROM tbl_absen a
+              LEFT JOIN tbl_siswa s ON s.no_induk = a.no_induk AND s.id_sekolah = a.id_sekolah
+              WHERE a.id_sekolah = $idSekolah AND DATE_FORMAT(a.tanggal, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
+              GROUP BY a.no_induk
+              ORDER BY a.no_induk");
+
+            $posterRows = [];
+            if ($posterQuery) {
+              while ($posterRow = mysqli_fetch_assoc($posterQuery)) {
+                $totalPoster = (int)($posterRow['total_records'] ?? 0);
+                $hadirPoster = (int)($posterRow['hadir_count'] ?? 0);
+                $posterRows[] = [
+                  'no_induk' => (string)($posterRow['no_induk'] ?? '-'),
+                  'nama_siswa' => (string)($posterRow['nama_siswa'] ?? 'Belum ada data absensi'),
+                  'kelas' => (string)($posterRow['kelas'] ?? '-'),
+                  'hadir_count' => $hadirPoster,
+                  'alpha_count' => (int)($posterRow['alpha_count'] ?? 0),
+                  'telat_count' => (int)($posterRow['telat_count'] ?? 0),
+                  'izin_count' => (int)($posterRow['izin_count'] ?? 0),
+                  'sakit_count' => (int)($posterRow['sakit_count'] ?? 0),
+                  'total_records' => $totalPoster,
+                  'attendance_rate' => $totalPoster > 0 ? round(($hadirPoster / $totalPoster) * 100, 1) : 0,
+                ];
+              }
+              if (class_exists('FileCache')) FileCache::set($cacheKeyPoster, $posterRows, 3600);
+            }
         }
 
         if (!empty($posterRows)) {
@@ -442,14 +453,32 @@ include "sidebar.php";
             KEY idx_created (created_at)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
         $idSekolah = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
-        $qAduanDashCount = @mysqli_query($conn, "SELECT COUNT(*) AS total, SUM(status <> 'selesai') AS open_total FROM tbl_aduan_siswa WHERE id_sekolah = $idSekolah");
-        if ($qAduanDashCount && ($rowAduanDashCount = mysqli_fetch_assoc($qAduanDashCount))) {
-          $aduanDashboardCount = (int)($rowAduanDashCount['total'] ?? 0);
-          $aduanDashboardOpen = (int)($rowAduanDashCount['open_total'] ?? 0);
-        }
-        $qAduanDash = @mysqli_query($conn, "SELECT kode_aduan, nama_pelapor, kelas_pelapor, kategori, judul, status, tahap_aktif, prioritas, created_at FROM tbl_aduan_siswa WHERE id_sekolah = $idSekolah ORDER BY created_at DESC LIMIT 5");
-        while ($qAduanDash && ($rowAduanDash = mysqli_fetch_assoc($qAduanDash))) {
-          $aduanDashboardRows[] = $rowAduanDash;
+        
+        $cacheKeyAduan = 'aduan_dash_' . $idSekolah;
+        $cachedAduan = class_exists('FileCache') ? FileCache::get($cacheKeyAduan) : false;
+        
+        if ($cachedAduan !== false) {
+            $aduanDashboardCount = $cachedAduan['count'];
+            $aduanDashboardOpen = $cachedAduan['open'];
+            $aduanDashboardRows = $cachedAduan['rows'];
+        } else {
+            $qAduanDashCount = @mysqli_query($conn, "SELECT COUNT(*) AS total, SUM(status <> 'selesai') AS open_total FROM tbl_aduan_siswa WHERE id_sekolah = $idSekolah");
+            if ($qAduanDashCount && ($rowAduanDashCount = mysqli_fetch_assoc($qAduanDashCount))) {
+              $aduanDashboardCount = (int)($rowAduanDashCount['total'] ?? 0);
+              $aduanDashboardOpen = (int)($rowAduanDashCount['open_total'] ?? 0);
+            }
+            $qAduanDash = @mysqli_query($conn, "SELECT kode_aduan, nama_pelapor, kelas_pelapor, kategori, judul, status, tahap_aktif, prioritas, created_at FROM tbl_aduan_siswa WHERE id_sekolah = $idSekolah ORDER BY created_at DESC LIMIT 5");
+            while ($qAduanDash && ($rowAduanDash = mysqli_fetch_assoc($qAduanDash))) {
+              $aduanDashboardRows[] = $rowAduanDash;
+            }
+            
+            if (class_exists('FileCache')) {
+                FileCache::set($cacheKeyAduan, [
+                    'count' => $aduanDashboardCount,
+                    'open' => $aduanDashboardOpen,
+                    'rows' => $aduanDashboardRows
+                ], 600); // 10 menit
+            }
         }
       }
     ?>
