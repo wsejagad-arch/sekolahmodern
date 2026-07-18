@@ -53,23 +53,7 @@ if ($sisLat === null || $sisLng === null) jsonOut(['success' => false, 'message'
 $tglHariIni = date('Y-m-d');
 $waktuAbsen = date('H:i:s');
 
-// ── Cek dan buat tabel tbl_absen_sholat jika belum ada ────────────────────────
-$qCheckTable = @mysqli_query($conn, "SHOW TABLES LIKE 'tbl_absen_sholat'");
-if (!$qCheckTable || mysqli_num_rows($qCheckTable) == 0) {
-    $createTable = "CREATE TABLE IF NOT EXISTS tbl_absen_sholat (
-        id int(11) NOT NULL AUTO_INCREMENT,
-        no_induk varchar(50) NOT NULL,
-        jenis_sholat enum('Dzuhur','Jumat') NOT NULL,
-        tanggal date NOT NULL,
-        waktu time NOT NULL,
-        lat varchar(100) DEFAULT NULL,
-        lng varchar(100) DEFAULT NULL,
-        status_lokasi varchar(100) DEFAULT 'Valid',
-        id_sekolah int(11) DEFAULT 1,
-        PRIMARY KEY (id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
-    @mysqli_query($conn, $createTable);
-}
+// Asumsikan tabel tbl_absen_sholat sudah ada di database untuk menghindari Metadata Lock
 
 // ── Cek apakah sudah absen hari ini ────────────────────────────────────────────
 $qCek = mysqli_query($conn, "SELECT id FROM tbl_absen_sholat WHERE id_sekolah={$tenantId} AND no_induk='" . mysqli_real_escape_string($conn, $nis) . "' AND tanggal='$tglHariIni' AND jenis_sholat='$jenisSholat'");

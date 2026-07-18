@@ -72,38 +72,12 @@ $settingLat    = $defLat;
 $settingLng    = $defLng;
 $settingRadius = $defRadius;
 
-// Cek tabel
-$tblSet = mysqli_query($conn, "SHOW TABLES LIKE 'tbl_presensi_setting'");
-if ($tblSet && mysqli_num_rows($tblSet) > 0) {
-    $qSet = mysqli_query($conn, "SELECT lat, lng, radius_m FROM tbl_presensi_setting {$tenantPresensi} ORDER BY id DESC LIMIT 1");
-    if ($qSet && ($rowSet = mysqli_fetch_assoc($qSet))) {
-        if (!empty($rowSet['lat']))      $settingLat    = (float)$rowSet['lat'];
-        if (!empty($rowSet['lng']))      $settingLng    = (float)$rowSet['lng'];
-        if (!empty($rowSet['radius_m'])) $settingRadius = (int)$rowSet['radius_m'];
-    }
-} else {
-    // Buat tabel dengan default lokasi SMAN 1 Sumber
-    mysqli_query($conn, "CREATE TABLE IF NOT EXISTS tbl_presensi_setting (
-        id INT PRIMARY KEY AUTO_INCREMENT,
-        lat DOUBLE,
-        lng DOUBLE,
-        radius_m INT,
-        schedule TEXT,
-        holidays TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-    $sched = json_encode([
-        'monday'    => ['in' => '07:00', 'out' => '15:00'],
-        'tuesday'   => ['in' => '07:00', 'out' => '15:00'],
-        'wednesday' => ['in' => '07:00', 'out' => '15:00'],
-        'thursday'  => ['in' => '07:00', 'out' => '15:00'],
-        'friday'    => ['in' => '07:00', 'out' => '12:00'],
-    ]);
-    $schedEsc = mysqli_real_escape_string($conn, $sched);
-    mysqli_query($conn, "INSERT INTO tbl_presensi_setting (lat, lng, radius_m, schedule, holidays)
-        VALUES ($defLat, $defLng, $defRadius, '$schedEsc', '')");
+// Ambil setting lokasi (abaikan error jika tabel belum ada untuk menghindari Metadata Lock)
+$qSet = @mysqli_query($conn, "SELECT lat, lng, radius_m FROM tbl_presensi_setting {$tenantPresensi} ORDER BY id DESC LIMIT 1");
+if ($qSet && ($rowSet = mysqli_fetch_assoc($qSet))) {
+    if (!empty($rowSet['lat']))      $settingLat    = (float)$rowSet['lat'];
+    if (!empty($rowSet['lng']))      $settingLng    = (float)$rowSet['lng'];
+    if (!empty($rowSet['radius_m'])) $settingRadius = (int)$rowSet['radius_m'];
 }
 
 // ── Hitung jarak (Haversine formula) ─────────────────────────────────────────

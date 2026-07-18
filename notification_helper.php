@@ -52,7 +52,7 @@ function notif_normalize_phone(string $phone): string
 
 function notif_queue(mysqli $conn, int $schoolId, string $channel, string $target, string $title, string $message): bool
 {
-    notif_ensure_schema($conn);
+    // notif_ensure_schema($conn); // DIMATIKAN SEMENTARA untuk menghindari Metadata Lock
 
     $channel = strtolower(trim($channel));
     if (!in_array($channel, ['email', 'whatsapp'], true)) {
@@ -85,7 +85,7 @@ function notif_queue(mysqli $conn, int $schoolId, string $channel, string $targe
 
 function notif_queue_school(mysqli $conn, int $schoolId, string $title, string $message): int
 {
-    notif_ensure_schema($conn);
+    // notif_ensure_schema($conn); // DIMATIKAN SEMENTARA untuk menghindari Metadata Lock
     $schoolId = max(1, $schoolId);
     $q = @mysqli_query($conn, "SELECT email_kontak, hp_kontak FROM tbl_sekolah WHERE id_sekolah=$schoolId LIMIT 1");
     $school = $q ? mysqli_fetch_assoc($q) : null;
@@ -107,7 +107,7 @@ function notif_queue_school(mysqli $conn, int $schoolId, string $title, string $
 
 function notif_queue_all_schools(mysqli $conn, string $title, string $message): int
 {
-    notif_ensure_schema($conn);
+    // notif_ensure_schema($conn); // DIMATIKAN SEMENTARA untuk menghindari Metadata Lock
     $count = 0;
     $q = @mysqli_query($conn, "SELECT id_sekolah FROM tbl_sekolah WHERE status='Aktif' ORDER BY id_sekolah ASC");
     while ($q && ($row = mysqli_fetch_assoc($q))) {
@@ -690,7 +690,7 @@ function notif_check_and_trigger_morning_reminder(mysqli $conn)
 
 function notif_process_pending(mysqli $conn, int $limit = 20): array
 {
-    notif_ensure_schema($conn);
+    // notif_ensure_schema($conn); // DIMATIKAN SEMENTARA untuk menghindari Metadata Lock
     
     // Cek dan kirim pengingat pagi jika sudah waktunya
     notif_check_and_trigger_morning_reminder($conn);
