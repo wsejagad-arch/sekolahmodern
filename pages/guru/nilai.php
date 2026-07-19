@@ -349,8 +349,8 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
 <body>
 <?php include 'guru_sidebar_shared.php'; ?>
 
-<div class="app-shell pe-md-4 pe-2" style="grid-template-columns: 1fr;">
-  <div class="desktop-center-column">
+<div class="app-shell pe-md-4 pe-2" style="grid-template-columns: 1fr; min-width: 0; max-width: 100vw; overflow-x: hidden;">
+  <div class="desktop-center-column" style="min-width: 0;">
 
     <div class="welcome-banner-premium mb-4">
         <div class="banner-content d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
