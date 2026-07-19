@@ -1805,11 +1805,25 @@ include "sidebar.php";
     // mencegah orang menyalin/refresh berulang-ulang ke endpoint yang spesifik.
     if (window.history && window.history.replaceState) {
         var currentUrl = window.location.href;
-        if (currentUrl.indexOf('?') > -1) {
-            var cleanUrl = currentUrl.split('?')[0];
-            if (window.location.hash) {
-                cleanUrl += window.location.hash;
-            }
+        var cleanUrl = currentUrl;
+        
+        // Hapus parameter query (contoh: ?page=...)
+        if (cleanUrl.indexOf('?') > -1) {
+            cleanUrl = cleanUrl.split('?')[0];
+        }
+        
+        // Hapus ekstensi .php secara visual dari browser
+        if (cleanUrl.endsWith('.php')) {
+            cleanUrl = cleanUrl.slice(0, -4);
+        } else if (cleanUrl.indexOf('.php/') > -1) {
+            cleanUrl = cleanUrl.replace('.php/', '/');
+        }
+
+        if (window.location.hash) {
+            cleanUrl += window.location.hash;
+        }
+        
+        if (currentUrl !== cleanUrl) {
             window.history.replaceState(null, document.title, cleanUrl);
         }
     }

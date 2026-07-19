@@ -11,9 +11,7 @@
           <span style="font-size:12px; color:#94a3b8;">
             &copy; 2026 &mdash; Sistem Manajemen Pendidikan SMA Negeri 1 Sumber
           </span>
-          <span style="font-size:12px; color:#94a3b8;">
-            <i class="fas fa-code mr-1" style="color:#f0b429;"></i>TIM IT SMAN1S - Hak Cipta Dilindungi Undang-undang
-          </span>
+
         </div>
 
         <?php if (!isset($_SESSION['hak_akses']) || (int)$_SESSION['hak_akses'] !== 2): ?>
