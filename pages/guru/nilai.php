@@ -159,7 +159,6 @@ if ($scope === 'wali') {
 }
 
 $where = ' WHERE ' . implode(' AND ', $whereParts);
-if ($isFilterActive) {
     $pertemuan = mysqli_query(
         $conn,
         "SELECT pi.tanggal, pi.id_mapel, pi.kelas, pi.mapel, pi.no_induk_guru, MAX(g.nama_guru) AS nama_guru
@@ -169,6 +168,19 @@ if ($isFilterActive) {
          GROUP BY pi.tanggal, pi.id_mapel, pi.kelas, pi.mapel, pi.no_induk_guru
          ORDER BY pi.tanggal DESC, pi.kelas ASC, pi.mapel ASC"
     );
+    if ($pertemuan) {
+        $num_rows = mysqli_num_rows($pertemuan);
+    } else {
+        $num_rows = 'ERROR: ' . mysqli_error($conn);
+    }
+    
+    $qDates = mysqli_query($conn, "SELECT DISTINCT tanggal FROM tbl_penilaian_item WHERE no_induk_guru='$nipEsc' ORDER BY tanggal DESC LIMIT 5");
+    $all_dates = [];
+    if ($qDates) {
+        while($rDate = mysqli_fetch_assoc($qDates)) { $all_dates[] = $rDate['tanggal']; }
+    }
+    
+    echo "<!-- DEBUG: Query Where: $where | Num rows: $num_rows | Recent Dates: ".implode(', ', $all_dates)." -->";
 } else {
     $pertemuan = false;
 }
