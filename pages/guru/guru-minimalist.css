@@ -285,3 +285,14 @@ body {
   opacity: 0.6 !important;
   backdrop-filter: blur(3px);
 }
+
+/* Modal Animation (Zoom In) */
+.modal.fade .modal-dialog {
+  transform: scale(0.85);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.modal.show .modal-dialog {
+  transform: scale(1);
+  opacity: 1;
+}

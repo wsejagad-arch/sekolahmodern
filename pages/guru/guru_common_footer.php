@@ -196,9 +196,27 @@ $isActiveFooterItem = static function (array $item) use ($currentGuruFooterPage)
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
 .modern-swal-popup {
-    border-radius: 16px !important;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
     font-family: 'Poppins', sans-serif !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+.modern-swal-btn {
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    padding: 12px 28px !important;
+    letter-spacing: 0.3px;
+    transition: all 0.2s ease !important;
+}
+.modern-swal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+.swal2-backdrop-show {
+    backdrop-filter: blur(4px);
+    background: rgba(15, 23, 42, 0.6) !important;
 }
 </style>
 <script>
@@ -212,7 +230,15 @@ $isActiveFooterItem = static function (array $item) use ($currentGuruFooterPage)
                 showConfirmButton: false,
                 timer: 3000,
                 timerProgressBar: true,
-                customClass: { popup: 'modern-swal-popup' }
+                customClass: { popup: 'modern-swal-popup' },
+                showClass: {
+                    popup: 'swal2-noanimation',
+                    backdrop: 'swal2-noanimation'
+                },
+                hideClass: {
+                    popup: '',
+                    backdrop: ''
+                }
             });
         };
     }
@@ -221,13 +247,21 @@ $isActiveFooterItem = static function (array $item) use ($currentGuruFooterPage)
             return Swal.fire({
                 title: title,
                 text: msg,
-                icon: 'warning',
+                icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#3b82f6',
                 cancelButtonColor: '#ef4444',
-                confirmButtonText: 'Ya, Lanjutkan',
-                cancelButtonText: 'Batal',
-                customClass: { popup: 'modern-swal-popup' }
+                confirmButtonText: '<i class="bi bi-check2-circle"></i> Ya, Lanjutkan',
+                cancelButtonText: '<i class="bi bi-x-circle"></i> Batal',
+                customClass: { 
+                    popup: 'modern-swal-popup',
+                    confirmButton: 'modern-swal-btn',
+                    cancelButton: 'modern-swal-btn'
+                },
+                showClass: {
+                    popup: 'swal2-show',
+                    backdrop: 'swal2-backdrop-show'
+                }
             }).then((result) => result.isConfirmed);
         };
     }
