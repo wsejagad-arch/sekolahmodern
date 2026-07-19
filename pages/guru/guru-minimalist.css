@@ -245,3 +245,43 @@ body {
   .desktop-sidebar { display: none; }
   .app-container { margin-left: 0; }
 }
+
+/* ===== MODERN CENTERED MODALS ===== */
+.modal-dialog {
+  display: flex !important;
+  align-items: center;
+  min-height: calc(100% - 1rem);
+  margin: 0 auto;
+}
+
+@media (min-width: 576px) {
+  .modal-dialog {
+    min-height: calc(100% - 3.5rem);
+  }
+}
+
+.modal-content {
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(10px);
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+  background: var(--surface) !important;
+  padding: 16px 24px !important;
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(0,0,0,0.05) !important;
+  background: #f8fafc !important;
+  padding: 16px 24px !important;
+}
+
+.modal-backdrop.show {
+  opacity: 0.6 !important;
+  backdrop-filter: blur(3px);
+}

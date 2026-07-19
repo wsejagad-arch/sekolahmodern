@@ -423,17 +423,6 @@ if (isset($_POST['getDetail']) || isset($_GET['getDetail'])) {
         });
     }
 
-    // Polyfill for showToast and showConfirm if not defined
-    if (typeof showToast !== 'function') {
-        window.showToast = function(msg, type) {
-            alert(msg);
-        };
-    }
-    if (typeof showConfirm !== 'function') {
-        window.showConfirm = function(msg) {
-            return Promise.resolve(confirm(msg));
-        };
-    }
     </script>
 
     <?php

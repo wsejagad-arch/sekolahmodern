@@ -193,6 +193,43 @@ $isActiveFooterItem = static function (array $item) use ($currentGuruFooterPage)
     </nav>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+.modern-swal-popup {
+    border-radius: 16px !important;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
+    font-family: 'Poppins', sans-serif !important;
+}
+</style>
 <script>
+    if (typeof showToast !== 'function') {
+        window.showToast = function(msg, type = 'success') {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: type,
+                title: msg,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                customClass: { popup: 'modern-swal-popup' }
+            });
+        };
+    }
+    if (typeof showConfirm !== 'function') {
+        window.showConfirm = function(msg, title = 'Konfirmasi') {
+            return Swal.fire({
+                title: title,
+                text: msg,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3b82f6',
+                cancelButtonColor: '#ef4444',
+                confirmButtonText: 'Ya, Lanjutkan',
+                cancelButtonText: 'Batal',
+                customClass: { popup: 'modern-swal-popup' }
+            }).then((result) => result.isConfirmed);
+        };
+    }
     document.body.classList.add('guru-common-footer-active');
 </script>
