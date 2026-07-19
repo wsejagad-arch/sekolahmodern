@@ -35,96 +35,95 @@ if ($_chkJabatan && mysqli_num_rows($_chkJabatan) === 0) {
 
 // Pemrosesan form
 if (isset($_POST['submit'])) {
-  $nip              = trim(mysqli_real_escape_string($conn, $_POST['nip']));
+  $nip              = trim(mysqli_real_escape_string($conn, isset($_POST['nip']) ? $_POST['nip'] : ''));
   $defaultPassword  = '12345';
   $hashnip          = md5($defaultPassword);
-  $nami             = mysqli_real_escape_string($conn, $_POST['nama']);
+  $nami             = mysqli_real_escape_string($conn, isset($_POST['nama']) ? $_POST['nama'] : '');
   $no_wa            = mysqli_real_escape_string($conn, trim(isset($_POST['no_wa']) ? $_POST['no_wa'] : ''));
-  $status_kepegawaian = mysqli_real_escape_string($conn, $_POST['status_kepegawaian']);
+  $status_kepegawaian = mysqli_real_escape_string($conn, isset($_POST['status_kepegawaian']) ? $_POST['status_kepegawaian'] : '');
   $jabatan          = mysqli_real_escape_string($conn, trim(isset($_POST['jabatan']) ? $_POST['jabatan'] : ''));
   $is_guru_bk       = isset($_POST['is_guru_bk']) ? 1 : 0;
   $is_pendamping_literasi = isset($_POST['is_pendamping_literasi']) ? 1 : 0;
   $is_tim_aduan       = isset($_POST['is_tim_aduan']) ? 1 : 0;
   $id_kelas_wali    = isset($_POST['wali_kelas']) ? (int)$_POST['wali_kelas'] : 0;
   $walas_status     = ($id_kelas_wali > 0) ? 'Ya' : 'Tidak';
-  $status           = mysqli_real_escape_string($conn, $_POST['status_keaktifan']);
+  $status           = mysqli_real_escape_string($conn, isset($_POST['status_keaktifan']) ? $_POST['status_keaktifan'] : 'Aktif');
   $akses            = isset($_POST['is_admin']) ? '1' : '2';
   $tglskr           = date('Y-m-d H:i:s');
-  $namafile         = $_FILES['file']['name'];
-  $ukuranFile       = $_FILES['file']['size'];
-  $error            = $_FILES['file']['error'];
-  $tmpName          = $_FILES['file']['tmp_name'];
-  $isilog           = "$nama menambahkan data guru dengan NIP/NUPTK $nip kedalam sistem";
+  
+  $namafile         = isset($_FILES['file']['name']) ? $_FILES['file']['name'] : '';
+  $ukuranFile       = isset($_FILES['file']['size']) ? $_FILES['file']['size'] : 0;
+  $error            = isset($_FILES['file']['error']) ? $_FILES['file']['error'] : UPLOAD_ERR_NO_FILE;
+  $tmpName          = isset($_FILES['file']['tmp_name']) ? $_FILES['file']['tmp_name'] : '';
+  $isilog           = "$nami menambahkan data guru dengan NIP/NUPTK $nip kedalam sistem";
 
   $cek = cek_guru($nip);
-  if ($cek == True && $error != UPLOAD_ERR_NO_FILE) {
-    $cekfoto = cek_foto($namafile);
-    $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
-    
-    $ins1 = mysqli_query($conn, "INSERT INTO tbl_guru(no_induk, nama_guru, no_wa, status_kepegawaian, jabatan, is_guru_bk, is_pendamping_literasi, is_tim_aduan, walas, foto, status) VALUES('$nip','$nami','$no_wa','$status_kepegawaian','$jabatan',$is_guru_bk,$is_pendamping_literasi,$is_tim_aduan,'$walas_status','$cekfoto','$status')");
-    if (!$ins1) { die("Database Insert Error (1): " . mysqli_error($conn)); }
-    move_uploaded_file($tmpName, 'foto/' . $cekfoto);
-    mysqli_query($conn, "INSERT INTO tbl_pengguna(no_induk, password, hak_akses) VALUES('$nip','$hashnip','$akses')");
-    
-    // --- SINKRONISASI WALI KELAS ---
-    if ($id_kelas_wali > 0) {
-        mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
-        $tgl_now = date('Y-m-d H:i:s');
-        mysqli_query($conn, "INSERT INTO tbl_wali_kelas(id_kelas, nip_wali, nama_wali, id_sekolah, created_at, updated_at) VALUES($id_kelas_wali, '$nip', '$nami', $tenantId, '$tgl_now', '$tgl_now')");
-        mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas='$nami', nip_wali='$nip' WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
-    }
-    // -------------------------------
-    
-    mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr','$isilog')");
-  ?>
-    <script>
-      Swal.fire({
-          position: 'top-end',
-          icon: 'success',
-          title: 'Berhasil menambah data guru!',
-          showConfirmButton: false,
-          timer: 1500
-        })
-        .then(function() {
-          window.location.href = "?page=data-guru";
-        });
-    </script>
-  <?php } else if ($cek == True && $error === UPLOAD_ERR_NO_FILE) {
-    $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
-    
-    $ins2 = mysqli_query($conn, "INSERT INTO tbl_guru(no_induk, nama_guru, no_wa, status_kepegawaian, jabatan, is_guru_bk, is_pendamping_literasi, is_tim_aduan, walas, status) VALUES('$nip','$nami','$no_wa','$status_kepegawaian','$jabatan',$is_guru_bk,$is_pendamping_literasi,$is_tim_aduan,'$walas_status','$status')");
-    if (!$ins2) { die("Database Insert Error (2): " . mysqli_error($conn)); }
-    mysqli_query($conn, "INSERT INTO tbl_pengguna(no_induk, password, hak_akses) VALUES('$nip','$hashnip','$akses')");
-    
-    // --- SINKRONISASI WALI KELAS ---
-    if ($id_kelas_wali > 0) {
-        mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
-        $tgl_now = date('Y-m-d H:i:s');
-        mysqli_query($conn, "INSERT INTO tbl_wali_kelas(id_kelas, nip_wali, nama_wali, id_sekolah, created_at, updated_at) VALUES($id_kelas_wali, '$nip', '$nami', $tenantId, '$tgl_now', '$tgl_now')");
-        mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas='$nami', nip_wali='$nip' WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
-    }
-    // -------------------------------
-    
-    mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr','$isilog')");
-  ?>
-    <script>
-      Swal.fire({
-          position: 'top-end',
-          icon: 'success',
-          title: 'Berhasil menambah data guru!',
-          showConfirmButton: false,
-          timer: 1500
-        })
-        .then(function() {
-          window.location.href = "?page=data-guru";
-        });
-    </script>
-  <?php } else { ?>
-    <script>
-      Swal.fire('Gagal', 'Guru dengan NIP ini sudah ada di dalam daftar!', 'error')
-    </script>
-<?php }
+  if ($cek == True) {
+      $success = false;
+      $dbError = "";
+      $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
+      
+      if ($error != UPLOAD_ERR_NO_FILE) {
+          $cekfoto = cek_foto($namafile);
+          $ins1 = mysqli_query($conn, "INSERT INTO tbl_guru(no_induk, nama_guru, no_wa, status_kepegawaian, jabatan, is_guru_bk, is_pendamping_literasi, is_tim_aduan, walas, foto, status) VALUES('$nip','$nami','$no_wa','$status_kepegawaian','$jabatan',$is_guru_bk,$is_pendamping_literasi,$is_tim_aduan,'$walas_status','$cekfoto','$status')");
+          if (!$ins1) {
+              $dbError = mysqli_error($conn);
+          } else {
+              $success = true;
+              move_uploaded_file($tmpName, 'foto/' . $cekfoto);
+          }
+      } else {
+          $ins2 = mysqli_query($conn, "INSERT INTO tbl_guru(no_induk, nama_guru, no_wa, status_kepegawaian, jabatan, is_guru_bk, is_pendamping_literasi, is_tim_aduan, walas, status) VALUES('$nip','$nami','$no_wa','$status_kepegawaian','$jabatan',$is_guru_bk,$is_pendamping_literasi,$is_tim_aduan,'$walas_status','$status')");
+          if (!$ins2) {
+              $dbError = mysqli_error($conn);
+          } else {
+              $success = true;
+          }
+      }
+      
+      if ($success) {
+          mysqli_query($conn, "INSERT INTO tbl_pengguna(no_induk, password, hak_akses) VALUES('$nip','$hashnip','$akses')");
+          
+          // --- SINKRONISASI WALI KELAS ---
+          if ($id_kelas_wali > 0) {
+              mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
+              $tgl_now = date('Y-m-d H:i:s');
+              mysqli_query($conn, "INSERT INTO tbl_wali_kelas(id_kelas, nip_wali, nama_wali, id_sekolah, created_at, updated_at) VALUES($id_kelas_wali, '$nip', '$nami', $tenantId, '$tgl_now', '$tgl_now')");
+              mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas='$nami', nip_wali='$nip' WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
+          }
+          // -------------------------------
+          
+          mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr','$isilog')");
+          ?>
+          <script>
+            Swal.fire({
+                position: 'top-end',
+                icon: 'success',
+                title: 'Berhasil menambah data guru!',
+                showConfirmButton: false,
+                timer: 1500
+              })
+              .then(function() {
+                window.location.href = "?page=data-guru";
+              });
+          </script>
+          <?php
+      } else {
+          ?>
+          <script>
+              Swal.fire('Gagal Menyimpan!', 'Database Error: <?= htmlspecialchars($dbError) ?>', 'error')
+          </script>
+          <?php
+      }
+  } else { 
+      ?>
+      <script>
+        Swal.fire('Gagal', 'Guru dengan NIP ini sudah ada di dalam daftar!', 'error')
+      </script>
+      <?php 
+  }
 }
+
 ?>
 
 <div class="container-fluid">

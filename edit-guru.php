@@ -37,84 +37,56 @@ $tglskr = date('Y-m-d H:i:s');
 // Pemrosesan form
 if (isset($_POST['submit'])) {
     //definisikan variabel dulu
-    $nip = trim(mysqli_real_escape_string($conn, $_POST['nip']));
-    $nami = mysqli_real_escape_string($conn, $_POST['nama']);
-    $no_wa = mysqli_real_escape_string($conn, trim($_POST['no_wa'] ?? ''));
-    $status_kepegawaian = mysqli_real_escape_string($conn, $_POST['status_kepegawaian']);
-    $jabatan = mysqli_real_escape_string($conn, trim($_POST['jabatan'] ?? ''));
+    $nip = trim(mysqli_real_escape_string($conn, isset($_POST['nip']) ? $_POST['nip'] : ''));
+    $nami = mysqli_real_escape_string($conn, isset($_POST['nama']) ? $_POST['nama'] : '');
+    $no_wa = mysqli_real_escape_string($conn, trim(isset($_POST['no_wa']) ? $_POST['no_wa'] : ''));
+    $status_kepegawaian = mysqli_real_escape_string($conn, isset($_POST['status_kepegawaian']) ? $_POST['status_kepegawaian'] : '');
+    $jabatan = mysqli_real_escape_string($conn, trim(isset($_POST['jabatan']) ? $_POST['jabatan'] : ''));
     $is_guru_bk = isset($_POST['is_guru_bk']) ? 1 : 0;
     $is_pendamping_literasi = isset($_POST['is_pendamping_literasi']) ? 1 : 0;
     $is_tim_aduan = isset($_POST['is_tim_aduan']) ? 1 : 0;
     $akses = isset($_POST['is_admin']) ? '1' : '2';
     $id_kelas_wali = isset($_POST['wali_kelas']) ? (int)$_POST['wali_kelas'] : 0;
     $walas_status = ($id_kelas_wali > 0) ? 'Ya' : 'Tidak';
-    $status = mysqli_real_escape_string($conn, $_POST['status_keaktifan']);
-    $fotolama = $_POST['foto'];
-    $namafile = $_FILES['file']['name'];
-    $ukuranFile = $_FILES['file']['size'];
-    $error = $_FILES['file']['error'];
-    $tmpName = $_FILES['file']['tmp_name'];
-    $isilog = "$nama" . " mengubah data guru dengan NIP/NUPTK " . "$nip" . " kedalam sistem";
+    $status = mysqli_real_escape_string($conn, isset($_POST['status_keaktifan']) ? $_POST['status_keaktifan'] : 'Aktif');
+    $fotolama = isset($_POST['foto']) ? $_POST['foto'] : '';
+    
+    $namafile = isset($_FILES['file']['name']) ? $_FILES['file']['name'] : '';
+    $ukuranFile = isset($_FILES['file']['size']) ? $_FILES['file']['size'] : 0;
+    $error = isset($_FILES['file']['error']) ? $_FILES['file']['error'] : UPLOAD_ERR_NO_FILE;
+    $tmpName = isset($_FILES['file']['tmp_name']) ? $_FILES['file']['tmp_name'] : '';
+    $isilog = "$nami mengubah data guru dengan NIP/NUPTK $nip kedalam sistem";
 
-    // === DEBUG LOG (hapus setelah masalah terselesaikan) ===
-    $debugLog = date('Y-m-d H:i:s') . " | id_guru=$idguru | nip=$nip | no_wa=$no_wa | status_kpg=$status_kepegawaian | error_file=$error\n";
-    @file_put_contents(__DIR__ . '/logs/edit_guru_debug.log', $debugLog, FILE_APPEND);
-    // ======================================================
+    $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
+    $q_old = mysqli_query($conn, "SELECT no_induk FROM tbl_guru WHERE id_guru='$idguru'");
+    $old_nip = ($r_old = mysqli_fetch_assoc($q_old)) ? $r_old['no_induk'] : $nip;
+    
+    $success = false;
+    $dbError = "";
 
     if ($error != UPLOAD_ERR_NO_FILE) {
         $cekfoto = cek_foto($namafile);
-        
-        // Ambil NIP lama untuk update relasi jika NIP diubah
-        $q_old = mysqli_query($conn, "SELECT no_induk FROM tbl_guru WHERE id_guru='$idguru'");
-        $old_nip = ($r_old = mysqli_fetch_assoc($q_old)) ? $r_old['no_induk'] : $nip;
-        $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
-        
         $upd1 = mysqli_query($conn, "UPDATE tbl_guru SET no_induk='$nip', nama_guru='$nami', no_wa='$no_wa', status_kepegawaian='$status_kepegawaian', jabatan='$jabatan', is_guru_bk=$is_guru_bk, is_pendamping_literasi=$is_pendamping_literasi, is_tim_aduan=$is_tim_aduan, walas='$walas_status', foto='$cekfoto', status='$status' WHERE id_guru='$idguru'");
-        if (!$upd1) { die("Database Update Error (1): " . mysqli_error($conn)); }
-        if ($old_nip !== $nip) {
-            mysqli_query($conn, "UPDATE tbl_mapel_ampu SET no_induk='$nip' WHERE no_induk='$old_nip'");
-        }
-        mysqli_query($conn, "UPDATE tbl_pengguna SET hak_akses='$akses', no_induk='$nip' WHERE no_induk='$old_nip'");
         
-        // --- SINKRONISASI WALI KELAS ---
-        $old_wk_q = mysqli_query($conn, "SELECT id_kelas FROM tbl_wali_kelas WHERE nip_wali='$old_nip' AND id_sekolah=$tenantId");
-        while($row_old = mysqli_fetch_assoc($old_wk_q)) {
-            $old_id = $row_old['id_kelas'];
-            mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas=NULL, nip_wali=NULL WHERE id_kelas=$old_id AND id_sekolah=$tenantId");
+        if (!$upd1) { 
+            $dbError = mysqli_error($conn); 
+        } else {
+            $success = true;
+            move_uploaded_file($tmpName, 'foto/' . $cekfoto);
+            if (!empty($fotolama) && file_exists('foto/' . $fotolama)) {
+                @unlink('foto/' . $fotolama);
+            }
         }
-        mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE nip_wali='$old_nip' AND id_sekolah=$tenantId");
-
-        if ($id_kelas_wali > 0) {
-            mysqli_query($conn, "DELETE FROM tbl_wali_kelas WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
-            $tgl_now = date('Y-m-d H:i:s');
-            mysqli_query($conn, "INSERT INTO tbl_wali_kelas(id_kelas, nip_wali, nama_wali, id_sekolah, created_at, updated_at) VALUES($id_kelas_wali, '$nip', '$nami', $tenantId, '$tgl_now', '$tgl_now')");
-            mysqli_query($conn, "UPDATE tbl_kelas SET wali_kelas='$nami', nip_wali='$nip' WHERE id_kelas=$id_kelas_wali AND id_sekolah=$tenantId");
-        }
-        // -------------------------------
-        
-        move_uploaded_file($tmpName, 'foto/' . $cekfoto);
-        unlink('foto/' . $fotolama);
-        mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr', '$isilog')");
-    ?>
-        <script>
-            Swal.fire({
-                position: 'top-end',
-                icon: 'success',
-                title: 'Berhasil merubah data guru!',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(function() {
-                window.location.href = "?page=data-guru";
-            })
-        </script>
-    <?php } else if ($error === UPLOAD_ERR_NO_FILE) {
-        // Ambil NIP lama untuk update relasi jika NIP diubah
-        $q_old = mysqli_query($conn, "SELECT no_induk FROM tbl_guru WHERE id_guru='$idguru'");
-        $old_nip = ($r_old = mysqli_fetch_assoc($q_old)) ? $r_old['no_induk'] : $nip;
-        $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
-        
+    } else {
         $upd2 = mysqli_query($conn, "UPDATE tbl_guru SET no_induk='$nip', nama_guru='$nami', no_wa='$no_wa', status_kepegawaian='$status_kepegawaian', jabatan='$jabatan', is_guru_bk=$is_guru_bk, is_pendamping_literasi=$is_pendamping_literasi, is_tim_aduan=$is_tim_aduan, walas='$walas_status', status='$status' WHERE id_guru='$idguru'");
-        if (!$upd2) { die("Database Update Error (2): " . mysqli_error($conn)); }
+        if (!$upd2) { 
+            $dbError = mysqli_error($conn); 
+        } else {
+            $success = true;
+        }
+    }
+    
+    if ($success) {
         if ($old_nip !== $nip) {
             mysqli_query($conn, "UPDATE tbl_mapel_ampu SET no_induk='$nip' WHERE no_induk='$old_nip'");
         }
@@ -136,7 +108,8 @@ if (isset($_POST['submit'])) {
         }
         // -------------------------------
         
-        mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr', '$isilog')"); ?>
+        mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr', '$isilog')");
+        ?>
         <script>
             Swal.fire({
                 position: 'top-end',
@@ -148,11 +121,14 @@ if (isset($_POST['submit'])) {
                 window.location.href = "?page=data-guru";
             })
         </script>
-    <?php } else { ?>
+        <?php
+    } else {
+        ?>
         <script>
-            Swal.fire('Gagal', 'merubah data guru!', 'error')
+            Swal.fire('Gagal Menyimpan!', 'Database Error: <?= htmlspecialchars($dbError) ?>', 'error')
         </script>
-<?php }
+        <?php
+    }
 }
 ?>
 
