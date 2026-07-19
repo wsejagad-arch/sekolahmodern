@@ -56,6 +56,11 @@ if (isset($_POST['submit'])) {
     $tmpName = $_FILES['file']['tmp_name'];
     $isilog = "$nama" . " mengubah data guru dengan NIP/NUPTK " . "$nip" . " kedalam sistem";
 
+    // === DEBUG LOG (hapus setelah masalah terselesaikan) ===
+    $debugLog = date('Y-m-d H:i:s') . " | id_guru=$idguru | nip=$nip | no_wa=$no_wa | status_kpg=$status_kepegawaian | error_file=$error\n";
+    @file_put_contents(__DIR__ . '/logs/edit_guru_debug.log', $debugLog, FILE_APPEND);
+    // ======================================================
+
     if ($error != UPLOAD_ERR_NO_FILE) {
         $cekfoto = cek_foto($namafile);
         
@@ -169,11 +174,12 @@ if (isset($_POST['submit'])) {
                 <!-- NIP -->
                 <div class="form-group col-sm-4 pt-4">
                     <label for="nip">NIP/NUPTK:</label>
-                    <input type="number" class="form-control" id="nip" name="nip" value="<?= $data['no_induk']; ?>" required>
+                    <input type="text" class="form-control" id="nip" name="nip" value="<?= htmlspecialchars($data['no_induk']); ?>" required pattern="[0-9]+" title="Hanya boleh berisi angka">
                     <div class="valid-feedback">Valid.</div>
-                    <div class="invalid-feedback">Harap diisi kolom ini.</div>
+                    <div class="invalid-feedback">Harap diisi kolom ini (hanya angka).</div>
                 </div>
                 <!-- NIP -->
+
 
                 <!-- Nama Guru -->
                 <div class="form-group col-sm-4">
