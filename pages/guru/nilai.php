@@ -159,6 +159,7 @@ if ($scope === 'wali') {
 }
 
 $where = ' WHERE ' . implode(' AND ', $whereParts);
+if ($isFilterActive) {
     $pertemuan = mysqli_query(
         $conn,
         "SELECT pi.tanggal, pi.id_mapel, pi.kelas, pi.mapel, pi.no_induk_guru, MAX(g.nama_guru) AS nama_guru
