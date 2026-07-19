@@ -495,13 +495,11 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
     </div>
   </div>
 
-  <div class="alert <?= $scope === 'wali' ? 'alert-info' : 'alert-secondary'; ?> py-2 small">
-    <?php if ($scope === 'wali') { ?>
+  <?php if ($scope === 'wali') { ?>
+  <div class="alert alert-info py-2 small">
       Mode kelas wali aktif: Anda dapat memantau nilai semua mapel pada kelas wali yang dipilih. Nilai milik guru lain ditampilkan hanya untuk pemantauan.
-    <?php } else { ?>
-      Mode mapel saya: halaman hanya menampilkan nilai dari mapel yang Anda ampu.
-    <?php } ?>
   </div>
+  <?php } ?>
 
   <?php if (!$isFilterActive) { ?>
     <div class="text-center py-5 empty-state" style="background:#fff; border-radius:16px; border:1px dashed #cbd5e1;">
