@@ -62,6 +62,14 @@ function tugas_ensure_schema(mysqli $conn): void
     if (!tugas_column_exists($conn, 'updated_at')) {
         mysqli_query($conn, "ALTER TABLE tbl_tugas ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at");
     }
+    if (!tugas_column_exists($conn, 'tanggal_pengumpulan')) {
+        // Coba rename batas_waktu jika ada, jika tidak, tambahkan baru
+        if (tugas_column_exists($conn, 'batas_waktu')) {
+            mysqli_query($conn, "ALTER TABLE tbl_tugas CHANGE batas_waktu tanggal_pengumpulan DATE NULL");
+        } else {
+            mysqli_query($conn, "ALTER TABLE tbl_tugas ADD COLUMN tanggal_pengumpulan DATE NULL AFTER file_tugas");
+        }
+    }
 }
 
 function tugas_store_file(array $file): ?string
