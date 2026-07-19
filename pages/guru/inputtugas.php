@@ -350,13 +350,21 @@ if (isset($_POST['getDetail']) || isset($_GET['getDetail'])) {
                         location.reload();
                     }
                 } else {
-                    showToast('Error: ' + (data.message || 'Gagal menyimpan tugas'), 'error');
+                    if (typeof showToast === 'function') {
+                        showToast('Error: ' + (data.message || 'Gagal menyimpan tugas'), 'error');
+                    } else {
+                        alert('Error: ' + (data.message || 'Gagal menyimpan tugas'));
+                    }
                 }
             })
             .catch(error => {
                 document.getElementById('loadingOverlay').style.display = 'none';
                 console.error('Error:', error);
-                showToast('Terjadi kesalahan saat menyimpan tugas', 'error');
+                if (typeof showToast === 'function') {
+                    showToast('Terjadi kesalahan saat menyimpan tugas', 'error');
+                } else {
+                    alert('Terjadi kesalahan saat menyimpan tugas');
+                }
             });
             
             return false;
@@ -406,9 +414,26 @@ if (isset($_POST['getDetail']) || isset($_GET['getDetail'])) {
             .catch(error => {
                 document.getElementById('loadingOverlay').style.display = 'none';
                 console.error('Error:', error);
-                showToast('Terjadi kesalahan saat menghapus tugas', 'error');
+                if (typeof showToast === 'function') {
+                    showToast('Terjadi kesalahan saat menghapus tugas', 'error');
+                } else {
+                    alert('Terjadi kesalahan saat menghapus tugas');
+                }
             });
-        }
+        });
+    }
+
+    // Polyfill for showToast and showConfirm if not defined
+    if (typeof showToast !== 'function') {
+        window.showToast = function(msg, type) {
+            alert(msg);
+        };
+    }
+    if (typeof showConfirm !== 'function') {
+        window.showConfirm = function(msg) {
+            return Promise.resolve(confirm(msg));
+        };
+    }
     </script>
 
     <?php
