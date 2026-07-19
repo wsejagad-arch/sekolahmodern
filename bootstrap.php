@@ -21,6 +21,27 @@ date_default_timezone_set('Asia/Jakarta');
 // Include authentication helper (handles session initialization)
 require_once __DIR__ . '/auth_helper.php';
 
+// --- Basic Anti-DDoS / Rate Limiting ---
+if (session_status() === PHP_SESSION_ACTIVE) {
+    if (!isset($_SESSION['rate_limit_hits'])) {
+        $_SESSION['rate_limit_hits'] = 1;
+        $_SESSION['rate_limit_start'] = time();
+    } else {
+        $time_diff = time() - $_SESSION['rate_limit_start'];
+        if ($time_diff < 10) {
+            $_SESSION['rate_limit_hits']++;
+            if ($_SESSION['rate_limit_hits'] > 40) {
+                http_response_code(429);
+                die("<!DOCTYPE html><html lang='id'><head><meta charset='utf-8'><title>Terlalu Banyak Permintaan</title><style>body{font-family:system-ui,sans-serif;background:#f8fafc;color:#1e293b;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;} .box{background:#fff;padding:40px;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,0.05);text-align:center;max-width:400px;} h2{color:#dc2626;margin-top:0;}</style></head><body><div class='box'><h2>Tunggu Sebentar</h2><p>Terdeteksi terlalu banyak permintaan. Mohon tunggu beberapa detik sebelum memuat ulang.</p></div></body></html>");
+            }
+        } else {
+            $_SESSION['rate_limit_hits'] = 1;
+            $_SESSION['rate_limit_start'] = time();
+        }
+    }
+}
+// ----------------------------------------
+
 // Include database connection
 require_once __DIR__ . '/koneksi.php';
 

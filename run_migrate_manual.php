@@ -9,12 +9,13 @@ require 'koneksi.php';
     <style>body { font-family: sans-serif; padding: 20px; }</style>
 </head>
 <body>
-    <h2>Migrasi Database Manual (Penambahan Catatan Izin)</h2>
+    <h2>Migrasi Database Manual</h2>
     <ul>
 <?php
 $queries = [
     "ALTER TABLE tbl_izin_siswa ADD COLUMN `catatan_wali_kelas` VARCHAR(255) DEFAULT NULL",
-    "ALTER TABLE tbl_izin_siswa ADD COLUMN `catatan_guru_bk` VARCHAR(255) DEFAULT NULL"
+    "ALTER TABLE tbl_izin_siswa ADD COLUMN `catatan_guru_bk` VARCHAR(255) DEFAULT NULL",
+    "ALTER TABLE tbl_materi ADD COLUMN `waktu_input` TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
 ];
 
 foreach ($queries as $q) {

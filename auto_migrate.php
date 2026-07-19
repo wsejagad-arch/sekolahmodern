@@ -106,4 +106,7 @@ function run_auto_migrations($conn) {
     @mysqli_query($conn, "ALTER TABLE `tbl_absen` MODIFY COLUMN `status` VARCHAR(50) DEFAULT NULL");
     @mysqli_query($conn, "ALTER TABLE `tbl_absen` ADD COLUMN `status_guru` VARCHAR(50) DEFAULT NULL");
     @mysqli_query($conn, "ALTER TABLE `tbl_absen` ADD COLUMN `status_akhir` VARCHAR(50) DEFAULT NULL");
+    
+    // Penambahan kolom waktu_input untuk kecepatan isi jurnal
+    @mysqli_query($conn, "ALTER TABLE `tbl_materi` ADD COLUMN `waktu_input` TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
 }

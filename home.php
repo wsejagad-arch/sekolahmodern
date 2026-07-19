@@ -1772,7 +1772,8 @@ include "sidebar.php";
     // Auto-initialize charts on dashboard page (no ?page= parameter)
     document.addEventListener('DOMContentLoaded', function() {
       // Only run on dashboard (home page without parameters)
-      if (!window.location.search.includes('page=')) {
+      var isDashboardPage = <?php echo isset($_REQUEST['page']) ? 'false' : 'true'; ?>;
+      if (isDashboardPage) {
         // Intercept back button to stay on beranda
         if (window.history && window.history.pushState) {
           window.history.pushState('forward', null, window.location.href);
@@ -1796,6 +1797,22 @@ include "sidebar.php";
         }
       }
     });
+  </script>
+
+  <script>
+    // URL Masking / Obfuscation (Anti-Tracking & Anti-DDoS)
+    // Script ini secara otomatis menyembunyikan parameter URL dari address bar,
+    // mencegah orang menyalin/refresh berulang-ulang ke endpoint yang spesifik.
+    if (window.history && window.history.replaceState) {
+        var currentUrl = window.location.href;
+        if (currentUrl.indexOf('?') > -1) {
+            var cleanUrl = currentUrl.split('?')[0];
+            if (window.location.hash) {
+                cleanUrl += window.location.hash;
+            }
+            window.history.replaceState(null, document.title, cleanUrl);
+        }
+    }
   </script>
 
   <?php include "footer.php"; ?>

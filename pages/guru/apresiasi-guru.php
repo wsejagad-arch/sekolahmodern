@@ -142,6 +142,8 @@ while ($qGuru && ($row = mysqli_fetch_assoc($qGuru))) {
         'kelas_wali' => [],
         'pendampingan_total' => 0,
         'tindak_lanjut_total' => 0,
+        'jurnal_early_seconds_total' => 0,
+        'jurnal_timing_count' => 0,
     ];
 }
 
@@ -165,6 +167,7 @@ if (!empty($teachers)) {
             'no_induk' => $nip,
             'hari' => $hari,
             'jam_mulai' => (string)$row['jam_mulai'],
+            'jam_selesai' => (string)$row['jam_selesai'],
             'kelas' => (string)$row['kelas'],
         ];
         $teachers[$nip]['jadwal_total'] += $expected;
@@ -217,7 +220,7 @@ if (ag_table_exists($conn, 'tbl_kelas') && ag_column_exists($conn, 'tbl_kelas', 
 
 if (ag_table_exists($conn, 'tbl_materi')) {
     $qMateri = @mysqli_query($conn, "
-        SELECT no_induk, id_mapel, tanggal, COUNT(*) AS qty
+        SELECT no_induk, id_mapel, tanggal, COUNT(*) AS qty, MIN(waktu_input) AS waktu_input
         FROM tbl_materi
         WHERE tanggal BETWEEN '$startEsc' AND '$endEsc' AND tanggal <> '0000-00-00'
         GROUP BY no_induk, id_mapel, tanggal
@@ -226,12 +229,28 @@ if (ag_table_exists($conn, 'tbl_materi')) {
         $nip = (string)$row['no_induk'];
         $idMapel = (int)$row['id_mapel'];
         $tanggal = (string)$row['tanggal'];
+        $waktuInput = (string)($row['waktu_input'] ?? '');
+        
         if (!isset($teachers[$nip])) {
             continue;
         }
         $teachers[$nip]['jurnal_total']++;
         if (isset($expectedDatesByMapel[$idMapel][$tanggal])) {
             $teachers[$nip]['jurnal_tepat']++;
+            
+            if ($waktuInput !== '' && $waktuInput !== '0000-00-00 00:00:00' && isset($scheduleById[$idMapel])) {
+                $limit = strtotime($tanggal . ' ' . $scheduleById[$idMapel]['jam_selesai']);
+                $actual = strtotime($waktuInput);
+                
+                if ($actual !== false && $limit !== false) {
+                    $diff = $limit - $actual; // Positive = early/fast, Negative = late
+                    if ($diff > 3600) $diff = 3600; // Cap early at 1 hour
+                    if ($diff < -86400) $diff = -86400; // Cap late at 24 hours
+                    
+                    $teachers[$nip]['jurnal_early_seconds_total'] += $diff;
+                    $teachers[$nip]['jurnal_timing_count']++;
+                }
+            }
         }
     }
 }
@@ -399,6 +418,18 @@ foreach ($teachers as $nip => $teacher) {
         $excessRatio = ($expected - $avgJadwal) / $avgJadwal;
         $volumeBonus = min(5, $excessRatio * 10);
     }
+    
+    // Speed Bonus (siapa yang paling tepat dan cepat mengisi jurnal)
+    $speedBonus = 0;
+    if ($teacher['jurnal_timing_count'] > 0) {
+        $avgEarly = $teacher['jurnal_early_seconds_total'] / $teacher['jurnal_timing_count'];
+        if ($avgEarly >= 0) {
+            $speedBonus = 10; 
+        } else {
+            $speedBonus = 10 + ($avgEarly / 86400) * 20;
+            if ($speedBonus < -10) $speedBonus = -10;
+        }
+    }
 
     $isWali = !empty($teacher['kelas_wali']);
     $waliBonus = 0;
@@ -410,7 +441,7 @@ foreach ($teachers as $nip => $teacher) {
         $waliBonus = $pendampinganScore + $tindakScore;
     }
 
-    $finalScore = min(110, $baseScore + $waliBonus + $volumeBonus);
+    $finalScore = min(110, $baseScore + $waliBonus + $volumeBonus + $speedBonus);
     [$label, $badgeClass] = ag_score_badge($finalScore);
     $rows[] = array_merge($teacher, [
         'is_wali' => $isWali,
@@ -420,6 +451,7 @@ foreach ($teachers as $nip => $teacher) {
         'timing_pct' => $timingPct,
         'base_score' => $baseScore,
         'volume_bonus' => $volumeBonus,
+        'speed_bonus' => $speedBonus,
         'wali_bonus' => $waliBonus,
         'target_penilaian' => $targetPenilaian,
         'target_pendampingan' => $targetPendampingan,
@@ -590,7 +622,10 @@ if (!empty($rows)) {
                                 <td class="text-center">
                                     <div class="score"><?= number_format($row['final_score'], 1, ',', '.'); ?></div>
                                     <?php if ($row['volume_bonus'] > 0): ?>
-                                        <div class="bonus text-primary"><i class="bi bi-stars"></i> +<?= number_format($row['volume_bonus'], 1, ',', '.'); ?> bonus beban</div>
+                                        <div class="bonus text-primary"><i class="bi bi-stars"></i> +<?= number_format($row['volume_bonus'], 1, ',', '.'); ?> beban</div>
+                                    <?php endif; ?>
+                                    <?php if ($row['speed_bonus'] > 0): ?>
+                                        <div class="bonus text-success"><i class="fas fa-bolt"></i> +<?= number_format($row['speed_bonus'], 1, ',', '.'); ?> speed</div>
                                     <?php endif; ?>
                                 </td>
                                 <td style="min-width:150px;">
@@ -612,6 +647,9 @@ if (!empty($rows)) {
                                     <?php else: ?>
                                         <strong><?= (int)$row['absen_tepat']; ?>/<?= (int)$row['absen_timing_total']; ?></strong>
                                         <div class="progress mt-1"><div class="progress-bar bg-warning" style="width:<?= number_format($row['timing_pct'], 1, '.', ''); ?>%"></div></div>
+                                        <?php if ($row['jurnal_timing_count'] > 0): ?>
+                                            <div class="mini mt-1"><i class="fas fa-bolt text-warning"></i> Respon Jurnal: Cepat</div>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </td>
                                 <td><span class="mini">-</span></td>
@@ -651,7 +689,10 @@ if (!empty($rows)) {
                                 <td class="text-center">
                                     <div class="score"><?= number_format($row['final_score'], 1, ',', '.'); ?></div>
                                     <?php if ($row['volume_bonus'] > 0): ?>
-                                        <div class="bonus text-primary"><i class="bi bi-stars"></i> +<?= number_format($row['volume_bonus'], 1, ',', '.'); ?> bonus beban</div>
+                                        <div class="bonus text-primary"><i class="bi bi-stars"></i> +<?= number_format($row['volume_bonus'], 1, ',', '.'); ?> beban</div>
+                                    <?php endif; ?>
+                                    <?php if ($row['speed_bonus'] > 0): ?>
+                                        <div class="bonus text-success"><i class="fas fa-bolt"></i> +<?= number_format($row['speed_bonus'], 1, ',', '.'); ?> speed</div>
                                     <?php endif; ?>
                                     <?php if ($row['wali_bonus'] > 0): ?>
                                         <div class="bonus">+<?= number_format($row['wali_bonus'], 1, ',', '.'); ?> bonus wali</div>
@@ -676,6 +717,9 @@ if (!empty($rows)) {
                                     <?php else: ?>
                                         <strong><?= (int)$row['absen_tepat']; ?>/<?= (int)$row['absen_timing_total']; ?></strong>
                                         <div class="progress mt-1"><div class="progress-bar bg-warning" style="width:<?= number_format($row['timing_pct'], 1, '.', ''); ?>%"></div></div>
+                                        <?php if ($row['jurnal_timing_count'] > 0): ?>
+                                            <div class="mini mt-1"><i class="fas fa-bolt text-warning"></i> Respon Jurnal: Cepat</div>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </td>
                                 <td>
