@@ -21,9 +21,18 @@ if ($no_induk === '') {
     exit;
 }
 
-@mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN IF NOT EXISTS no_wa VARCHAR(20) DEFAULT NULL AFTER nama_guru");
-@mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN IF NOT EXISTS alamat TEXT DEFAULT NULL AFTER no_wa");
-@mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN IF NOT EXISTS jabatan VARCHAR(100) DEFAULT NULL AFTER status_kepegawaian");
+$_chkWa = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'no_wa'");
+if ($_chkWa && mysqli_num_rows($_chkWa) === 0) {
+    @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN no_wa VARCHAR(20) DEFAULT NULL AFTER nama_guru");
+}
+$_chkAlamat = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'alamat'");
+if ($_chkAlamat && mysqli_num_rows($_chkAlamat) === 0) {
+    @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN alamat TEXT DEFAULT NULL AFTER no_wa");
+}
+$_chkJabatan = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'jabatan'");
+if ($_chkJabatan && mysqli_num_rows($_chkJabatan) === 0) {
+    @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN jabatan VARCHAR(100) DEFAULT NULL AFTER status_kepegawaian");
+}
 @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS tbl_pengaturan (
     kunci VARCHAR(60) PRIMARY KEY,
     nilai VARCHAR(255) DEFAULT NULL,

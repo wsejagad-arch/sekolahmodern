@@ -64,7 +64,10 @@ if (isset($_POST['submit'])) {
         $old_nip = ($r_old = mysqli_fetch_assoc($q_old)) ? $r_old['no_induk'] : $nip;
         $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
         
-        mysqli_query($conn, "UPDATE tbl_guru g LEFT JOIN tbl_mapel_ampu m ON g.no_induk=m.no_induk SET g.no_induk='$nip', g.nama_guru='$nami', g.no_wa='$no_wa', g.status_kepegawaian='$status_kepegawaian', g.jabatan='$jabatan', g.is_guru_bk=$is_guru_bk, g.is_pendamping_literasi=$is_pendamping_literasi, g.is_tim_aduan=$is_tim_aduan, g.walas='$walas_status', g.foto='$cekfoto', g.status='$status', m.no_induk='$nip' WHERE g.id_guru='$idguru'");
+        mysqli_query($conn, "UPDATE tbl_guru SET no_induk='$nip', nama_guru='$nami', no_wa='$no_wa', status_kepegawaian='$status_kepegawaian', jabatan='$jabatan', is_guru_bk=$is_guru_bk, is_pendamping_literasi=$is_pendamping_literasi, is_tim_aduan=$is_tim_aduan, walas='$walas_status', foto='$cekfoto', status='$status' WHERE id_guru='$idguru'");
+        if ($old_nip !== $nip) {
+            mysqli_query($conn, "UPDATE tbl_mapel_ampu SET no_induk='$nip' WHERE no_induk='$old_nip'");
+        }
         mysqli_query($conn, "UPDATE tbl_pengguna SET hak_akses='$akses', no_induk='$nip' WHERE no_induk='$old_nip'");
         
         // --- SINKRONISASI WALI KELAS ---
@@ -104,7 +107,10 @@ if (isset($_POST['submit'])) {
         $old_nip = ($r_old = mysqli_fetch_assoc($q_old)) ? $r_old['no_induk'] : $nip;
         $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
         
-        mysqli_query($conn, "UPDATE tbl_guru g LEFT JOIN tbl_mapel_ampu m ON g.no_induk=m.no_induk SET g.no_induk='$nip', g.nama_guru='$nami', g.no_wa='$no_wa', g.status_kepegawaian='$status_kepegawaian', g.jabatan='$jabatan', g.is_guru_bk=$is_guru_bk, g.is_pendamping_literasi=$is_pendamping_literasi, g.is_tim_aduan=$is_tim_aduan, g.walas='$walas_status', g.status='$status', m.no_induk='$nip' WHERE g.id_guru='$idguru'");
+        mysqli_query($conn, "UPDATE tbl_guru SET no_induk='$nip', nama_guru='$nami', no_wa='$no_wa', status_kepegawaian='$status_kepegawaian', jabatan='$jabatan', is_guru_bk=$is_guru_bk, is_pendamping_literasi=$is_pendamping_literasi, is_tim_aduan=$is_tim_aduan, walas='$walas_status', status='$status' WHERE id_guru='$idguru'");
+        if ($old_nip !== $nip) {
+            mysqli_query($conn, "UPDATE tbl_mapel_ampu SET no_induk='$nip' WHERE no_induk='$old_nip'");
+        }
         mysqli_query($conn, "UPDATE tbl_pengguna SET hak_akses='$akses', no_induk='$nip' WHERE no_induk='$old_nip'");
         
         // --- SINKRONISASI WALI KELAS ---
