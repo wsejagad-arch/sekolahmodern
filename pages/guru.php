@@ -24,7 +24,7 @@ $dataguru = mysqli_fetch_array($sqlguru);
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<link rel="icon" href="../../img/6695f027d063a.png" type="image/x-icon">
+	<link rel="icon" href="../../img/<?= htmlspecialchars($lembaga['logo'] ?? 'favicon.ico'); ?>" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap">
@@ -98,7 +98,7 @@ $dataguru = mysqli_fetch_array($sqlguru);
         <!-- end -->
         <div class="container-fluid d-flex justify-content-between mt-2">
           <span class="d-lg-none img-tab p-3">
-            <img src="../../img/logo-man-2.png" alt="" />
+            <img src="../../img/<?= htmlspecialchars($lembaga['logo'] ?? 'logo-man-2.png'); ?>" alt="" />
           </span>
           <p class="navbar-brand-title p-4 pt-4 text-decoration-none d-none d-sm-none d-lg-block">Dashboard</p>
           <a class="navbar-brand p-4 pt-4 d-flex" href="#">

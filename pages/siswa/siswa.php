@@ -291,6 +291,7 @@ $notif_count = count($all_notifications);
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title><?= htmlspecialchars($lembaga['nmsekolah'] ?? 'Portal Siswa') ?></title>
+  <link rel="icon" href="../../img/<?= htmlspecialchars($lembaga['logo'] ?? 'favicon.ico'); ?>" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
