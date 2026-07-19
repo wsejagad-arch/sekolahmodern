@@ -33,6 +33,18 @@ $_chkJabatan = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'jabatan'")
 if ($_chkJabatan && mysqli_num_rows($_chkJabatan) === 0) {
     @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN jabatan VARCHAR(100) DEFAULT NULL AFTER status_kepegawaian");
 }
+$_chkBK = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'is_guru_bk'");
+if ($_chkBK && mysqli_num_rows($_chkBK) === 0) {
+    @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN is_guru_bk TINYINT(1) NOT NULL DEFAULT 0 AFTER status");
+}
+$_chkLit = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'is_pendamping_literasi'");
+if ($_chkLit && mysqli_num_rows($_chkLit) === 0) {
+    @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN is_pendamping_literasi TINYINT(1) NOT NULL DEFAULT 0 AFTER is_guru_bk");
+}
+$_chkAduan = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru LIKE 'is_tim_aduan'");
+if ($_chkAduan && mysqli_num_rows($_chkAduan) === 0) {
+    @mysqli_query($conn, "ALTER TABLE tbl_guru ADD COLUMN is_tim_aduan TINYINT(1) NOT NULL DEFAULT 0 AFTER is_pendamping_literasi");
+}
 @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS tbl_pengaturan (
     kunci VARCHAR(60) PRIMARY KEY,
     nilai VARCHAR(255) DEFAULT NULL,
