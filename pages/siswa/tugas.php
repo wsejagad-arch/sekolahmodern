@@ -16,19 +16,34 @@ $kelasEsc = mysqli_real_escape_string($conn, $kelas);
 $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
 $tenantTugas = function_exists('mt_column_exists') && $conn instanceof mysqli && mt_column_exists($conn, 'tbl_tugas', 'id_sekolah') ? " AND t.id_sekolah={$tenantId} " : "";
 
-// Ambil daftar tugas aktif untuk kelas siswa
-$query = "
-    SELECT t.*, t.batas_waktu, ts.status AS status_siswa, ts.waktu_submit
-    FROM tbl_tugas t
-    LEFT JOIN tbl_tugas_siswa ts ON t.id = ts.id_tugas AND ts.no_induk_siswa = '$nisEsc'
-    WHERE t.kelas = '$kelasEsc' AND t.status = 'aktif' {$tenantTugas}
-    ORDER BY t.created_at DESC
-";
-$result = mysqli_query($conn, $query);
+$tab = $_GET['tab'] ?? 'tugas';
+
 $tasks = [];
-if ($result) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        $tasks[] = $row;
+$materials = [];
+
+if ($tab === 'tugas') {
+    // Ambil daftar tugas aktif untuk kelas siswa
+    $query = "
+        SELECT t.*, t.batas_waktu, ts.status AS status_siswa, ts.waktu_submit
+        FROM tbl_tugas t
+        LEFT JOIN tbl_tugas_siswa ts ON t.id = ts.id_tugas AND ts.no_induk_siswa = '$nisEsc'
+        WHERE t.kelas = '$kelasEsc' AND t.status = 'aktif' {$tenantTugas}
+        ORDER BY t.created_at DESC
+    ";
+    $result = mysqli_query($conn, $query);
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $tasks[] = $row;
+        }
+    }
+} elseif ($tab === 'materi') {
+    // Ambil daftar materi untuk kelas siswa
+    $materiQuery = "SELECT * FROM tbl_bahan_ajar WHERE kelas = '$kelasEsc' ORDER BY id_bahan DESC";
+    $materiResult = mysqli_query($conn, $materiQuery);
+    if ($materiResult) {
+        while ($row = mysqli_fetch_assoc($materiResult)) {
+            $materials[] = $row;
+        }
     }
 }
 ?>
@@ -55,8 +70,8 @@ if ($result) {
                     <i class="fas fa-book-open text-2xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-black text-slate-800 tracking-tight">Tugas Kelas</h1>
-                    <p class="text-xs text-slate-500 mt-1 font-medium">Daftar tugas dari guru pengampu</p>
+                    <h1 class="text-2xl font-black text-slate-800 tracking-tight"><?= $tab === 'materi' ? 'Materi Belajar' : 'Tugas Kelas' ?></h1>
+                    <p class="text-xs text-slate-500 mt-1 font-medium"><?= $tab === 'materi' ? 'Daftar bahan ajar dari guru' : 'Daftar tugas dari guru pengampu' ?></p>
                 </div>
             </div>
             <a href="siswa.php" class="text-blue-600 hover:text-blue-700 text-sm font-semibold flex items-center gap-1.5 transition-colors">
@@ -64,6 +79,17 @@ if ($result) {
             </a>
         </header>
 
+        <!-- Tabs -->
+        <div class="flex border-b border-slate-200 mb-6">
+            <a href="?tab=tugas" class="<?= $tab === 'tugas' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' ?> border-b-2 py-3 px-6 text-sm font-bold flex items-center gap-2 transition-colors">
+                <i class="fas fa-tasks"></i> Tugas
+            </a>
+            <a href="?tab=materi" class="<?= $tab === 'materi' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300' ?> border-b-2 py-3 px-6 text-sm font-bold flex items-center gap-2 transition-colors">
+                <i class="fas fa-book"></i> Materi
+            </a>
+        </div>
+
+        <?php if ($tab === 'tugas'): ?>
         <!-- Daftar Tugas -->
         <div class="space-y-4">
             <?php if (empty($tasks)): ?>
@@ -129,6 +155,59 @@ if ($result) {
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
+        <?php elseif ($tab === 'materi'): ?>
+        <!-- Daftar Materi -->
+        <div class="space-y-4">
+            <?php if (empty($materials)): ?>
+                <div class="bg-white rounded-[24px] p-8 shadow-sm border border-slate-100 text-center mt-4">
+                    <div class="w-20 h-20 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-4xl mx-auto mb-4">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-slate-700 mb-1">Belum ada materi</h2>
+                    <p class="text-sm text-slate-500">Saat ini tidak ada bahan ajar yang diunggah untuk kelas Anda.</p>
+                </div>
+            <?php else: ?>
+                <?php foreach ($materials as $m): 
+                    $bgColors = [
+                        'blue' => 'bg-blue-50 border-blue-200',
+                        'green' => 'bg-emerald-50 border-emerald-200',
+                        'yellow' => 'bg-amber-50 border-amber-200',
+                        'red' => 'bg-rose-50 border-rose-200',
+                        'purple' => 'bg-purple-50 border-purple-200',
+                        'white' => 'bg-white border-slate-200'
+                    ];
+                    $c = $m['warna_bg'] ?? 'white';
+                    $cardClass = $bgColors[$c] ?? 'bg-white border-slate-200';
+                ?>
+                <div class="<?= $cardClass ?> rounded-2xl p-5 shadow-sm border flex flex-col gap-3 transition-shadow hover:shadow-md">
+                    <div class="flex justify-between items-start gap-2">
+                        <div>
+                            <span class="inline-block px-2 py-1 bg-black/5 text-slate-700 text-[10px] font-bold rounded-md mb-2 uppercase tracking-wide">
+                                <?= htmlspecialchars($m['nama_mapel']) ?>
+                            </span>
+                            <h3 class="font-black text-slate-800 text-lg leading-tight mb-1"><?= htmlspecialchars($m['judul']) ?></h3>
+                            <div class="text-xs text-slate-600 font-medium flex items-center gap-1">
+                                <i class="fas fa-user-circle"></i> <?= htmlspecialchars($m['nama_guru'] ?? 'Guru') ?>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-sm text-slate-700 bg-white/60 p-3 rounded-xl border border-white/40">
+                        <?= nl2br(htmlspecialchars($m['deskripsi'])) ?>
+                    </div>
+
+                    <div class="flex gap-2 items-center flex-wrap mt-1">
+                        <?php if (!empty($m['file_pdf'])): ?>
+                            <a href="../../materi/<?= htmlspecialchars($m['file_pdf']) ?>" target="_blank" class="text-xs bg-red-100 text-red-700 px-3 py-2 rounded-lg font-bold hover:bg-red-200 transition-colors flex items-center gap-1.5">
+                                <i class="fas fa-file-pdf"></i> Lihat PDF
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
     </div>
 
     <script>
