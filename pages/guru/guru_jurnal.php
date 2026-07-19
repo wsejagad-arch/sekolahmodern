@@ -184,7 +184,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <tbody>
                  
-                 <?php while ($data = mysqli_fetch_array($result)) { ?>
+                 <?php while ($data = mysqli_fetch_array($result)) { 
+                            // Format absen list
+                            $absenRaw = trim($data['absen']);
+                            if (empty($absenRaw) || $absenRaw === '-' || $absenRaw === 'Nihil') {
+                                $absenHtml = "-";
+                            } else {
+                                $absenList = explode(',', $absenRaw);
+                                $absenHtml = '<ul style="margin: 0; padding-left: 15px; text-align: left;">';
+                                foreach ($absenList as $abs) {
+                                    $abs = trim($abs);
+                                    if (!empty($abs)) {
+                                        $absenHtml .= '<li>' . htmlspecialchars($abs) . '</li>';
+                                    }
+                                }
+                                $absenHtml .= '</ul>';
+                            }
+                 ?>
                             <tr>
                                 <td class="text-center"><?= $no++; ?></td>
                                 <td><?= $data['jam_mulai']; ?> WIB s.d <?= $data['jam_selesai']; ?> WIB</td>
@@ -192,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
 								<td><?= $data['nama_guru']; ?></td>
 								<td><?= $data['nama_mapel']; ?></td>
 							    <td><?= $data['materi']; ?></td>
-								<td><?= $data['absen']; ?></td>
+								<td><?= $absenHtml; ?></td>
 								<td><?= $data['keterangan']; ?></td>
                             </tr>
                      <?php } ?>

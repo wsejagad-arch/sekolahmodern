@@ -31,14 +31,30 @@ date_default_timezone_set('Asia/Jakarta');
     if (mysqli_num_rows($sql) > 0) {
       $no = 1;
       while ($data = mysqli_fetch_array($sql)) {
+        // Format absen list
+        $absenRaw = trim($data['absen']);
+        if (empty($absenRaw) || $absenRaw === '-' || $absenRaw === 'Nihil') {
+            $absenHtml = "-";
+        } else {
+            $absenList = explode(',', $absenRaw);
+            $absenHtml = '<ul style="margin: 0; padding-left: 15px; text-align: left;">';
+            foreach ($absenList as $abs) {
+                $abs = trim($abs);
+                if (!empty($abs)) {
+                    $absenHtml .= '<li>' . htmlspecialchars($abs) . '</li>';
+                }
+            }
+            $absenHtml .= '</ul>';
+        }
+
         echo "<tr>
-          <td>$no</td>
+          <td style='text-align:center;'>$no</td>
           <td>" . tgl_indo($data['tanggal']) . "</td>
-          <td>{$data['jam_mulai']} - {$data['jam_selesai']}</td>
-          <td>{$data['kelas']}</td>
+          <td style='text-align:center;'>{$data['jam_mulai']} - {$data['jam_selesai']}</td>
+          <td style='text-align:center;'>{$data['kelas']}</td>
           <td>{$data['nama_mapel']}</td>
           <td>{$data['materi']}</td>
-          <td>{$data['absen']}</td>
+          <td>{$absenHtml}</td>
           <td>{$data['keterangan']}</td>
         </tr>";
         $no++;
