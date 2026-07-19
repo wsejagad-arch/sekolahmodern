@@ -115,6 +115,9 @@ if (strtotime($startDate) > strtotime($endDate)) {
 $startEsc = mysqli_real_escape_string($conn, $startDate);
 $endEsc = mysqli_real_escape_string($conn, $endDate);
 
+$selectedDays = max(1, (strtotime($endDate) - strtotime($startDate)) / 86400);
+$elapsedRatio = min(1, $selectedDays / 182.5);
+
 $teachers = [];
 $qGuru = @mysqli_query($conn, "
     SELECT no_induk, nama_guru, status_kepegawaian, jabatan, status
@@ -177,6 +180,16 @@ if (!empty($teachers)) {
         }
     }
 }
+
+$totalExpected = 0;
+$activeTeachersWithSchedule = 0;
+foreach ($teachers as $nip => $teacher) {
+    if ($teacher['jadwal_total'] > 0) {
+        $totalExpected += $teacher['jadwal_total'];
+        $activeTeachersWithSchedule++;
+    }
+}
+$avgJadwal = $activeTeachersWithSchedule > 0 ? $totalExpected / $activeTeachersWithSchedule : 0;
 
 if (ag_table_exists($conn, 'tbl_wali_kelas') && ag_table_exists($conn, 'tbl_kelas')) {
     $qWali = @mysqli_query($conn, "
@@ -366,7 +379,11 @@ foreach ($teachers as $nip => $teacher) {
     $expected = (int)$teacher['jadwal_total'];
     $jurnalPct = ag_pct((float)$teacher['jurnal_tepat'], (float)$expected);
     $jurnalConsistencyPct = ag_pct((float)$teacher['jurnal_total'], (float)$expected);
-    $penilaianPct = min(100, ((int)$teacher['penilaian_total'] / 3) * 100);
+    
+    // Dynamic Penilaian target (1 per 8 meetings)
+    $targetPenilaian = max(1, round($expected / 8));
+    $penilaianPct = min(100, ((int)$teacher['penilaian_total'] / $targetPenilaian) * 100);
+    
     $absenPct = ag_pct((float)$teacher['absen_total'], (float)$expected);
     $timingPct = $teacher['absen_timing_total'] > 0 ? ag_pct((float)$teacher['absen_tepat'], (float)$teacher['absen_timing_total']) : null;
 
@@ -377,15 +394,23 @@ foreach ($teachers as $nip => $teacher) {
         ($absenPct * 0.25) +
         (($timingPct ?? $absenPct) * 0.15);
 
+    $volumeBonus = 0;
+    if ($avgJadwal > 0 && $expected > $avgJadwal) {
+        $excessRatio = ($expected - $avgJadwal) / $avgJadwal;
+        $volumeBonus = min(5, $excessRatio * 10);
+    }
+
     $isWali = !empty($teacher['kelas_wali']);
     $waliBonus = 0;
+    $targetPendampingan = max(1, round(5 * $elapsedRatio));
+    $targetTindakLanjut = max(1, round(3 * $elapsedRatio));
     if ($isWali) {
-        $pendampinganScore = min(5, ((int)$teacher['pendampingan_total'] / 5) * 5);
-        $tindakScore = min(5, ((int)$teacher['tindak_lanjut_total'] / 3) * 5);
+        $pendampinganScore = min(5, ((int)$teacher['pendampingan_total'] / $targetPendampingan) * 5);
+        $tindakScore = min(5, ((int)$teacher['tindak_lanjut_total'] / $targetTindakLanjut) * 5);
         $waliBonus = $pendampinganScore + $tindakScore;
     }
 
-    $finalScore = min(110, $baseScore + $waliBonus);
+    $finalScore = min(110, $baseScore + $waliBonus + $volumeBonus);
     [$label, $badgeClass] = ag_score_badge($finalScore);
     $rows[] = array_merge($teacher, [
         'is_wali' => $isWali,
@@ -394,7 +419,11 @@ foreach ($teachers as $nip => $teacher) {
         'absen_pct' => $absenPct,
         'timing_pct' => $timingPct,
         'base_score' => $baseScore,
+        'volume_bonus' => $volumeBonus,
         'wali_bonus' => $waliBonus,
+        'target_penilaian' => $targetPenilaian,
+        'target_pendampingan' => $targetPendampingan,
+        'target_tindak' => $targetTindakLanjut,
         'final_score' => $finalScore,
         'label' => $label,
         'badge_class' => $badgeClass,
@@ -497,9 +526,10 @@ if (!empty($rows)) {
 
     <section class="panel panel-pad mb-3">
         <div class="formula">
-            <strong>Rumus skor utama:</strong>
-            Jurnal tepat jadwal 35%, konsistensi jurnal 10%, penilaian minimal 3 kali 15%, absensi siswa per jadwal 25%, ketepatan hadir/konfirmasi 15%.
-            <strong>Bonus wali kelas:</strong> maksimal +10 dari pendampingan dan tindak lanjut, hanya dihitung untuk guru yang benar-benar menjadi wali kelas.
+            <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-info-circle text-primary"></i> Penyesuaian Beban Kerja & Waktu Berjalan (<?= round($elapsedRatio * 100); ?>% Semester)</h6>
+            <strong>1. Target Penilaian Dinamis:</strong> Tidak dipatok rata. Guru wajib melakukan 1 penilaian untuk setiap 8 pertemuan kelas, menyesuaikan dengan jam mengajarnya.<br>
+            <strong>2. Bonus Beban Mengajar (Volume Bonus):</strong> Rata-rata sesi sekolah saat ini adalah <?= round($avgJadwal); ?>. Guru dengan jam mengajar di atas rata-rata berhak mendapat skor kompensasi maksimal +5 poin.<br>
+            <strong>3. Skala Waktu Wali Kelas:</strong> Karena periode yang difilter adalah <?= round($selectedDays); ?> hari, target wali kelas otomatis diproporsionalkan (menyesuaikan hari yang sudah berlalu).
         </div>
     </section>
 
@@ -533,6 +563,9 @@ if (!empty($rows)) {
                         </td>
                         <td class="text-center">
                             <div class="score"><?= number_format($row['final_score'], 1, ',', '.'); ?></div>
+                            <?php if ($row['volume_bonus'] > 0): ?>
+                                <div class="bonus text-primary"><i class="bi bi-stars"></i> +<?= number_format($row['volume_bonus'], 1, ',', '.'); ?> bonus beban</div>
+                            <?php endif; ?>
                             <?php if ($row['wali_bonus'] > 0): ?>
                                 <div class="bonus">+<?= number_format($row['wali_bonus'], 1, ',', '.'); ?> bonus wali</div>
                             <?php endif; ?>
@@ -543,7 +576,7 @@ if (!empty($rows)) {
                             <div class="mini">Total isi: <?= (int)$row['jurnal_total']; ?></div>
                         </td>
                         <td>
-                            <strong><?= (int)$row['penilaian_total']; ?></strong> <span class="mini">/ target 3</span>
+                            <strong><?= (int)$row['penilaian_total']; ?></strong> <span class="mini">/ target <?= $row['target_penilaian']; ?></span>
                             <div class="progress mt-1"><div class="progress-bar bg-info" style="width:<?= number_format($row['penilaian_pct'], 1, '.', ''); ?>%"></div></div>
                         </td>
                         <td>
@@ -561,9 +594,9 @@ if (!empty($rows)) {
                         <td>
                             <?php if ($row['is_wali']): ?>
                                 <strong><?= ag_h(implode(', ', $row['kelas_wali'])); ?></strong>
-                                <div class="mini">Pendampingan: <?= (int)$row['pendampingan_total']; ?> • Tindak lanjut: <?= (int)$row['tindak_lanjut_total']; ?></div>
+                                <div class="mini">Pendampingan: <?= (int)$row['pendampingan_total']; ?>/<?= $row['target_pendampingan']; ?> • Tindak lanjut: <?= (int)$row['tindak_lanjut_total']; ?>/<?= $row['target_tindak']; ?></div>
                             <?php else: ?>
-                                <span class="mini">Bukan wali kelas, pendampingan tidak dihitung.</span>
+                                <span class="mini">Bukan wali kelas.</span>
                             <?php endif; ?>
                         </td>
                         <td><span class="badge rounded-pill <?= ag_h($row['badge_class']); ?>"><?= ag_h($row['label']); ?></span></td>
