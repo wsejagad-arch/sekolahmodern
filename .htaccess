@@ -6,6 +6,21 @@ Options -Indexes +FollowSymLinks
 RewriteEngine On
 RewriteBase /
 
+# --- Menyembunyikan Ekstensi .PHP ---
+# 1. Jika URL diminta memiliki .php dan itu adalah GET request, Redirect ke URL tanpa .php
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /([^\ ]+)\.php
+RewriteCond %{REQUEST_URI} !^/router\.php
+RewriteCond %{REQUEST_URI} !^/index\.php
+RewriteCond %{REQUEST_METHOD} =GET
+RewriteRule ^(.*)\.php$ /$1 [R=301,L]
+
+# 2. Jika file tanpa ekstensi diminta, cek apakah ada file .php yang cocok, lalu load
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L]
+# ------------------------------------
+
 RewriteRule ^masuk$ login.php [L,QSA]
 RewriteRule ^auth$ login_action.php [L,QSA]
 RewriteRule ^keluar$ logout.php [L,QSA]
