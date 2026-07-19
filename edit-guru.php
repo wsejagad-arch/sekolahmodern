@@ -64,7 +64,8 @@ if (isset($_POST['submit'])) {
         $old_nip = ($r_old = mysqli_fetch_assoc($q_old)) ? $r_old['no_induk'] : $nip;
         $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
         
-        mysqli_query($conn, "UPDATE tbl_guru SET no_induk='$nip', nama_guru='$nami', no_wa='$no_wa', status_kepegawaian='$status_kepegawaian', jabatan='$jabatan', is_guru_bk=$is_guru_bk, is_pendamping_literasi=$is_pendamping_literasi, is_tim_aduan=$is_tim_aduan, walas='$walas_status', foto='$cekfoto', status='$status' WHERE id_guru='$idguru'");
+        $upd1 = mysqli_query($conn, "UPDATE tbl_guru SET no_induk='$nip', nama_guru='$nami', no_wa='$no_wa', status_kepegawaian='$status_kepegawaian', jabatan='$jabatan', is_guru_bk=$is_guru_bk, is_pendamping_literasi=$is_pendamping_literasi, is_tim_aduan=$is_tim_aduan, walas='$walas_status', foto='$cekfoto', status='$status' WHERE id_guru='$idguru'");
+        if (!$upd1) { die("Database Update Error (1): " . mysqli_error($conn)); }
         if ($old_nip !== $nip) {
             mysqli_query($conn, "UPDATE tbl_mapel_ampu SET no_induk='$nip' WHERE no_induk='$old_nip'");
         }
@@ -107,7 +108,8 @@ if (isset($_POST['submit'])) {
         $old_nip = ($r_old = mysqli_fetch_assoc($q_old)) ? $r_old['no_induk'] : $nip;
         $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
         
-        mysqli_query($conn, "UPDATE tbl_guru SET no_induk='$nip', nama_guru='$nami', no_wa='$no_wa', status_kepegawaian='$status_kepegawaian', jabatan='$jabatan', is_guru_bk=$is_guru_bk, is_pendamping_literasi=$is_pendamping_literasi, is_tim_aduan=$is_tim_aduan, walas='$walas_status', status='$status' WHERE id_guru='$idguru'");
+        $upd2 = mysqli_query($conn, "UPDATE tbl_guru SET no_induk='$nip', nama_guru='$nami', no_wa='$no_wa', status_kepegawaian='$status_kepegawaian', jabatan='$jabatan', is_guru_bk=$is_guru_bk, is_pendamping_literasi=$is_pendamping_literasi, is_tim_aduan=$is_tim_aduan, walas='$walas_status', status='$status' WHERE id_guru='$idguru'");
+        if (!$upd2) { die("Database Update Error (2): " . mysqli_error($conn)); }
         if ($old_nip !== $nip) {
             mysqli_query($conn, "UPDATE tbl_mapel_ampu SET no_induk='$nip' WHERE no_induk='$old_nip'");
         }

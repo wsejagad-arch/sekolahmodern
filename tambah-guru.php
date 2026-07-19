@@ -61,7 +61,8 @@ if (isset($_POST['submit'])) {
     $cekfoto = cek_foto($namafile);
     $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
     
-    mysqli_query($conn, "INSERT INTO tbl_guru(no_induk, nama_guru, no_wa, status_kepegawaian, jabatan, is_guru_bk, is_pendamping_literasi, is_tim_aduan, walas, foto, status) VALUES('$nip','$nami','$no_wa','$status_kepegawaian','$jabatan',$is_guru_bk,$is_pendamping_literasi,$is_tim_aduan,'$walas_status','$cekfoto','$status')");
+    $ins1 = mysqli_query($conn, "INSERT INTO tbl_guru(no_induk, nama_guru, no_wa, status_kepegawaian, jabatan, is_guru_bk, is_pendamping_literasi, is_tim_aduan, walas, foto, status) VALUES('$nip','$nami','$no_wa','$status_kepegawaian','$jabatan',$is_guru_bk,$is_pendamping_literasi,$is_tim_aduan,'$walas_status','$cekfoto','$status')");
+    if (!$ins1) { die("Database Insert Error (1): " . mysqli_error($conn)); }
     move_uploaded_file($tmpName, 'foto/' . $cekfoto);
     mysqli_query($conn, "INSERT INTO tbl_pengguna(no_induk, password, hak_akses) VALUES('$nip','$hashnip','$akses')");
     
@@ -91,7 +92,8 @@ if (isset($_POST['submit'])) {
   <?php } else if ($cek == True && $error === UPLOAD_ERR_NO_FILE) {
     $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
     
-    mysqli_query($conn, "INSERT INTO tbl_guru(no_induk, nama_guru, no_wa, status_kepegawaian, jabatan, is_guru_bk, is_pendamping_literasi, is_tim_aduan, walas, status) VALUES('$nip','$nami','$no_wa','$status_kepegawaian','$jabatan',$is_guru_bk,$is_pendamping_literasi,$is_tim_aduan,'$walas_status','$status')");
+    $ins2 = mysqli_query($conn, "INSERT INTO tbl_guru(no_induk, nama_guru, no_wa, status_kepegawaian, jabatan, is_guru_bk, is_pendamping_literasi, is_tim_aduan, walas, status) VALUES('$nip','$nami','$no_wa','$status_kepegawaian','$jabatan',$is_guru_bk,$is_pendamping_literasi,$is_tim_aduan,'$walas_status','$status')");
+    if (!$ins2) { die("Database Insert Error (2): " . mysqli_error($conn)); }
     mysqli_query($conn, "INSERT INTO tbl_pengguna(no_induk, password, hak_akses) VALUES('$nip','$hashnip','$akses')");
     
     // --- SINKRONISASI WALI KELAS ---
