@@ -349,17 +349,17 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
 <body>
 <?php include 'guru_sidebar_shared.php'; ?>
 
-<div class="app-shell" style="grid-template-columns: 1fr; padding-right: 24px;">
+<div class="app-shell pe-md-4 pe-2" style="grid-template-columns: 1fr;">
   <div class="desktop-center-column">
 
     <div class="welcome-banner-premium mb-4">
-        <div class="banner-content">
+        <div class="banner-content d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
             <div class="banner-text">
                 <h2 class="animate-fade-in" style="font-size:2.2rem;font-weight:800;margin-bottom:12px;letter-spacing:-0.5px;">Nilai Siswa 📊</h2>
                 <p class="banner-subtitle" style="font-size:1.05rem;opacity:0.9;"><?= $scope === 'wali' ? 'Pantau nilai lintas mapel kelas wali Anda.' : 'Rekap dan kelola penilaian mata pelajaran yang Anda ampu.'; ?></p>
             </div>
-            <div class="banner-actions">
-                <a href="../../home.php" class="btn-premium-secondary"><i class="bi bi-arrow-left"></i> Kembali ke Dashboard</a>
+            <div class="banner-actions w-100 w-md-auto text-md-end text-center">
+                <a href="../../home.php" class="btn-premium-secondary d-inline-block w-100"><i class="bi bi-arrow-left"></i> Kembali ke Dashboard</a>
             </div>
         </div>
         <div class="banner-shapes">
@@ -561,7 +561,7 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
   ?>
   <div class="card meeting-card mb-4">
     <div class="card-header bg-white">
-      <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
         <div>
           <span class="badge bg-primary-subtle text-primary border border-primary-subtle me-2">Kelas <?= htmlspecialchars($kls); ?></span>
           <span class="fw-semibold"><?= htmlspecialchars($mpl); ?></span>
