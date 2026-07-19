@@ -64,7 +64,15 @@ mysqli_query($conn, "CREATE TABLE IF NOT EXISTS tbl_nilai_item (
   UNIQUE KEY uniq_nilai_item (id_item, no_induk_siswa)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-$tanggal = mysqli_real_escape_string($conn, $_GET['tanggal'] ?? '');
+$tahunAjaran = trim((string)($_GET['tahun_ajaran'] ?? ''));
+$semesterFilter = trim((string)($_GET['semester'] ?? ''));
+$bulanFilter = trim((string)($_GET['bulan'] ?? ''));
+
+$currentY = (int)date('Y');
+$tahunAjaranOptions = [];
+for($i = $currentY - 2; $i <= $currentY + 1; $i++) {
+    $tahunAjaranOptions[$i] = $i . '/' . ($i+1);
+}
 $kelas = trim((string)($_GET['kelas'] ?? ''));
 $idmapel = (int)($_GET['idmapel'] ?? 0);
 $scope = (string)($_GET['scope'] ?? 'own');
@@ -119,7 +127,22 @@ $kelasEsc = mysqli_real_escape_string($conn, $kelas);
 // Ambil daftar pertemuan untuk guru ini (dengan filter opsional)
 $whereParts = [];
 $whereParts[] = $tenantPenilaianAlias;
-if ($tanggal !== '') { $whereParts[] = "pi.tanggal='".$tanggal."'"; }
+
+if ($tahunAjaran !== '') {
+    $taStart = (int)$tahunAjaran;
+    $taEnd = $taStart + 1;
+    $whereParts[] = "(pi.tanggal >= '{$taStart}-07-01' AND pi.tanggal <= '{$taEnd}-06-30')";
+}
+if ($semesterFilter === '1') {
+    $whereParts[] = "MONTH(pi.tanggal) >= 7";
+} elseif ($semesterFilter === '2') {
+    $whereParts[] = "MONTH(pi.tanggal) <= 6";
+}
+if ($bulanFilter !== '') {
+    $bulanInt = (int)$bulanFilter;
+    $whereParts[] = "MONTH(pi.tanggal) = {$bulanInt}";
+}
+
 if ($idmapel > 0) { $whereParts[] = "pi.id_mapel=".$idmapel; }
 
 if ($scope === 'wali') {
@@ -339,7 +362,7 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
       <form class="row g-3 align-items-end" method="get">
         <input type="hidden" name="filter" value="1">
         <?php if ($isWaliKelas) { ?>
-        <div class="col-12 col-md-3">
+        <div class="col-12 col-md-3 mb-2">
           <label class="form-label">Cakupan Nilai</label>
           <select name="scope" class="form-select" onchange="this.form.submit()">
             <option value="own" <?= $scope === 'own' ? 'selected' : ''; ?>>Mapel Saya</option>
@@ -349,11 +372,35 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
         <?php } else { ?>
           <input type="hidden" name="scope" value="own">
         <?php } ?>
-        <div class="col-12 col-md-<?= $isWaliKelas ? '2' : '3'; ?>">
-          <label class="form-label">Tanggal</label>
-          <input type="date" name="tanggal" value="<?= htmlspecialchars($tanggal); ?>" class="form-control" />
+        <div class="col-12 col-md-<?= $isWaliKelas ? '3' : '4'; ?> mb-2">
+          <label class="form-label">Tahun Ajaran</label>
+          <select name="tahun_ajaran" class="form-select">
+            <option value="">Semua</option>
+            <?php foreach($tahunAjaranOptions as $val => $label) { ?>
+                <option value="<?= $val; ?>" <?= $tahunAjaran === (string)$val ? 'selected' : ''; ?>><?= htmlspecialchars($label); ?></option>
+            <?php } ?>
+          </select>
         </div>
-        <div class="col-12 col-md-<?= $isWaliKelas ? '2' : '3'; ?>">
+        <div class="col-12 col-md-<?= $isWaliKelas ? '3' : '4'; ?> mb-2">
+          <label class="form-label">Semester</label>
+          <select name="semester" class="form-select">
+            <option value="">Semua</option>
+            <option value="1" <?= $semesterFilter === '1' ? 'selected' : ''; ?>>Ganjil</option>
+            <option value="2" <?= $semesterFilter === '2' ? 'selected' : ''; ?>>Genap</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-<?= $isWaliKelas ? '3' : '4'; ?> mb-2">
+          <label class="form-label">Bulan</label>
+          <select name="bulan" class="form-select">
+            <option value="">Semua</option>
+            <?php 
+            $namaBulan = [1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+            foreach($namaBulan as $num => $nama) { ?>
+                <option value="<?= $num; ?>" <?= $bulanFilter === (string)$num ? 'selected' : ''; ?>><?= $nama; ?></option>
+            <?php } ?>
+          </select>
+        </div>
+        <div class="col-12 col-md-4">
           <label class="form-label">Kelas</label>
           <select name="kelas" class="form-select">
             <option value="">Semua Kelas</option>
@@ -362,7 +409,7 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
             <?php } ?>
           </select>
         </div>
-        <div class="col-12 col-md-<?= $isWaliKelas ? '3' : '4'; ?>">
+        <div class="col-12 col-md-6">
           <label class="form-label">Mapel</label>
           <select name="idmapel" class="form-select">
             <option value="">Semua Mapel</option>
@@ -399,7 +446,9 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
               <input type="hidden" name="filter" value="1">
             <?php } ?>
             <input type="hidden" name="scope" value="<?= htmlspecialchars($scope); ?>">
-            <input type="hidden" name="tanggal" value="<?= htmlspecialchars($tanggal); ?>">
+            <input type="hidden" name="tahun_ajaran" value="<?= htmlspecialchars($tahunAjaran); ?>">
+            <input type="hidden" name="semester" value="<?= htmlspecialchars($semesterFilter); ?>">
+            <input type="hidden" name="bulan" value="<?= htmlspecialchars($bulanFilter); ?>">
             <input type="hidden" name="kelas" value="<?= htmlspecialchars($kelas); ?>">
             <input type="hidden" name="idmapel" value="<?= $idmapel > 0 ? (int)$idmapel : ''; ?>">
             <div class="col-12 col-md">
@@ -447,7 +496,7 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
         <i class="bi bi-funnel fs-1"></i>
       </div>
       <h5 class="fw-bold text-dark">Gunakan Filter untuk Menampilkan Data</h5>
-      <p class="text-muted mb-0">Silakan pilih cakupan, tanggal, kelas, atau mapel pada form di atas lalu klik "Terapkan".</p>
+      <p class="text-muted mb-0">Silakan pilih filter pada form di atas lalu klik "Terapkan".</p>
     </div>
   <?php } elseif (!$pertemuan) { ?>
     <div class="alert alert-danger shadow-sm border-0 rounded-4">
