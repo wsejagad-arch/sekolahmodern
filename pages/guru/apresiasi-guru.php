@@ -430,12 +430,26 @@ foreach ($teachers as $nip => $teacher) {
     ]);
 }
 
-usort($rows, static function (array $a, array $b): int {
+$rowsWali = [];
+$rowsNonWali = [];
+foreach ($rows as $r) {
+    if ($r['is_wali']) {
+        $rowsWali[] = $r;
+    } else {
+        $rowsNonWali[] = $r;
+    }
+}
+
+$ag_sort_func = static function (array $a, array $b): int {
     if (abs($a['final_score'] - $b['final_score']) < 0.001) {
         return strcmp($a['nama_guru'], $b['nama_guru']);
     }
     return $a['final_score'] < $b['final_score'] ? 1 : -1;
-});
+};
+
+usort($rows, $ag_sort_func);
+usort($rowsWali, $ag_sort_func);
+usort($rowsNonWali, $ag_sort_func);
 
 if (!empty($rows)) {
     $summary['avg_score'] = array_sum(array_column($rows, 'base_score')) / count($rows);
@@ -536,74 +550,145 @@ if (!empty($rows)) {
     <section class="panel">
         <div class="panel-pad border-bottom">
             <h5 class="mb-1 fw-bold"><i class="bi bi-award-fill text-warning"></i> Peringkat Apresiasi Semua Guru</h5>
-            <div class="mini">Guru tanpa jadwal pada periode ini tetap tampil, tetapi tidak diberi penalti tersembunyi di luar data yang tersedia.</div>
+            <div class="mini">Klasemen kini dipisah untuk menjaga keadilan antara guru dengan tugas tambahan Wali Kelas dan Guru Mata Pelajaran.</div>
+            
+            <ul class="nav nav-pills mt-3 mb-1" id="pills-tab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold" id="pills-nonwali-tab" data-bs-toggle="pill" data-bs-target="#pills-nonwali" type="button" role="tab" style="border-radius:20px;"><i class="bi bi-person-video3"></i> Guru Mapel (Non-Wali)</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" id="pills-wali-tab" data-bs-toggle="pill" data-bs-target="#pills-wali" type="button" role="tab" style="border-radius:20px; margin-left:8px;"><i class="bi bi-people-fill"></i> Wali Kelas</button>
+              </li>
+            </ul>
         </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th class="text-center">Rank</th>
-                        <th>Guru</th>
-                        <th class="text-center">Skor</th>
-                        <th>Jurnal</th>
-                        <th>Penilaian</th>
-                        <th>Absensi</th>
-                        <th>Ketepatan</th>
-                        <th>Wali Kelas</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($rows as $idx => $row): ?>
-                    <tr>
-                        <td class="text-center"><div class="rank <?= $idx < 3 ? 'top' : ''; ?>"><?= $idx + 1; ?></div></td>
-                        <td>
-                            <div class="teacher"><?= ag_h($row['nama_guru']); ?></div>
-                            <div class="mini">NIP/ID: <?= ag_h($row['no_induk']); ?><?= $row['status_kepegawaian'] ? ' • ' . ag_h($row['status_kepegawaian']) : ''; ?></div>
-                        </td>
-                        <td class="text-center">
-                            <div class="score"><?= number_format($row['final_score'], 1, ',', '.'); ?></div>
-                            <?php if ($row['volume_bonus'] > 0): ?>
-                                <div class="bonus text-primary"><i class="bi bi-stars"></i> +<?= number_format($row['volume_bonus'], 1, ',', '.'); ?> bonus beban</div>
-                            <?php endif; ?>
-                            <?php if ($row['wali_bonus'] > 0): ?>
-                                <div class="bonus">+<?= number_format($row['wali_bonus'], 1, ',', '.'); ?> bonus wali</div>
-                            <?php endif; ?>
-                        </td>
-                        <td style="min-width:150px;">
-                            <strong><?= (int)$row['jurnal_tepat']; ?>/<?= (int)$row['jadwal_total']; ?></strong>
-                            <div class="progress mt-1"><div class="progress-bar bg-success" style="width:<?= number_format($row['jurnal_pct'], 1, '.', ''); ?>%"></div></div>
-                            <div class="mini">Total isi: <?= (int)$row['jurnal_total']; ?></div>
-                        </td>
-                        <td>
-                            <strong><?= (int)$row['penilaian_total']; ?></strong> <span class="mini">/ target <?= $row['target_penilaian']; ?></span>
-                            <div class="progress mt-1"><div class="progress-bar bg-info" style="width:<?= number_format($row['penilaian_pct'], 1, '.', ''); ?>%"></div></div>
-                        </td>
-                        <td>
-                            <strong><?= (int)$row['absen_total']; ?>/<?= (int)$row['jadwal_total']; ?></strong>
-                            <div class="progress mt-1"><div class="progress-bar bg-primary" style="width:<?= number_format($row['absen_pct'], 1, '.', ''); ?>%"></div></div>
-                        </td>
-                        <td>
-                            <?php if ($row['timing_pct'] === null): ?>
-                                <span class="mini">Belum ada data jam/status</span>
-                            <?php else: ?>
-                                <strong><?= (int)$row['absen_tepat']; ?>/<?= (int)$row['absen_timing_total']; ?></strong>
-                                <div class="progress mt-1"><div class="progress-bar bg-warning" style="width:<?= number_format($row['timing_pct'], 1, '.', ''); ?>%"></div></div>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <?php if ($row['is_wali']): ?>
-                                <strong><?= ag_h(implode(', ', $row['kelas_wali'])); ?></strong>
-                                <div class="mini">Pendampingan: <?= (int)$row['pendampingan_total']; ?>/<?= $row['target_pendampingan']; ?> • Tindak lanjut: <?= (int)$row['tindak_lanjut_total']; ?>/<?= $row['target_tindak']; ?></div>
-                            <?php else: ?>
-                                <span class="mini">Bukan wali kelas.</span>
-                            <?php endif; ?>
-                        </td>
-                        <td><span class="badge rounded-pill <?= ag_h($row['badge_class']); ?>"><?= ag_h($row['label']); ?></span></td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
+        <div class="tab-content" id="pills-tabContent">
+            <!-- TAB NON WALI -->
+            <div class="tab-pane fade show active" id="pills-nonwali" role="tabpanel" tabindex="0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Rank</th>
+                                <th>Guru</th>
+                                <th class="text-center">Skor</th>
+                                <th>Jurnal</th>
+                                <th>Penilaian</th>
+                                <th>Absensi</th>
+                                <th>Ketepatan</th>
+                                <th>Wali Kelas</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($rowsNonWali as $idx => $row): ?>
+                            <tr>
+                                <td class="text-center"><div class="rank <?= $idx < 3 ? 'top' : ''; ?>"><?= $idx + 1; ?></div></td>
+                                <td>
+                                    <div class="teacher"><?= ag_h($row['nama_guru']); ?></div>
+                                    <div class="mini">NIP/ID: <?= ag_h($row['no_induk']); ?><?= $row['status_kepegawaian'] ? ' • ' . ag_h($row['status_kepegawaian']) : ''; ?></div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="score"><?= number_format($row['final_score'], 1, ',', '.'); ?></div>
+                                    <?php if ($row['volume_bonus'] > 0): ?>
+                                        <div class="bonus text-primary"><i class="bi bi-stars"></i> +<?= number_format($row['volume_bonus'], 1, ',', '.'); ?> bonus beban</div>
+                                    <?php endif; ?>
+                                </td>
+                                <td style="min-width:150px;">
+                                    <strong><?= (int)$row['jurnal_tepat']; ?>/<?= (int)$row['jadwal_total']; ?></strong>
+                                    <div class="progress mt-1"><div class="progress-bar bg-success" style="width:<?= number_format($row['jurnal_pct'], 1, '.', ''); ?>%"></div></div>
+                                    <div class="mini">Total isi: <?= (int)$row['jurnal_total']; ?></div>
+                                </td>
+                                <td>
+                                    <strong><?= (int)$row['penilaian_total']; ?></strong> <span class="mini">/ target <?= $row['target_penilaian']; ?></span>
+                                    <div class="progress mt-1"><div class="progress-bar bg-info" style="width:<?= number_format($row['penilaian_pct'], 1, '.', ''); ?>%"></div></div>
+                                </td>
+                                <td>
+                                    <strong><?= (int)$row['absen_total']; ?>/<?= (int)$row['jadwal_total']; ?></strong>
+                                    <div class="progress mt-1"><div class="progress-bar bg-primary" style="width:<?= number_format($row['absen_pct'], 1, '.', ''); ?>%"></div></div>
+                                </td>
+                                <td>
+                                    <?php if ($row['timing_pct'] === null): ?>
+                                        <span class="mini">Belum ada data</span>
+                                    <?php else: ?>
+                                        <strong><?= (int)$row['absen_tepat']; ?>/<?= (int)$row['absen_timing_total']; ?></strong>
+                                        <div class="progress mt-1"><div class="progress-bar bg-warning" style="width:<?= number_format($row['timing_pct'], 1, '.', ''); ?>%"></div></div>
+                                    <?php endif; ?>
+                                </td>
+                                <td><span class="mini">-</span></td>
+                                <td><span class="badge rounded-pill <?= ag_h($row['badge_class']); ?>"><?= ag_h($row['label']); ?></span></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB WALI KELAS -->
+            <div class="tab-pane fade" id="pills-wali" role="tabpanel" tabindex="0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Rank</th>
+                                <th>Guru</th>
+                                <th class="text-center">Skor</th>
+                                <th>Jurnal</th>
+                                <th>Penilaian</th>
+                                <th>Absensi</th>
+                                <th>Ketepatan</th>
+                                <th>Wali Kelas</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($rowsWali as $idx => $row): ?>
+                            <tr>
+                                <td class="text-center"><div class="rank <?= $idx < 3 ? 'top' : ''; ?>"><?= $idx + 1; ?></div></td>
+                                <td>
+                                    <div class="teacher"><?= ag_h($row['nama_guru']); ?></div>
+                                    <div class="mini">NIP/ID: <?= ag_h($row['no_induk']); ?><?= $row['status_kepegawaian'] ? ' • ' . ag_h($row['status_kepegawaian']) : ''; ?></div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="score"><?= number_format($row['final_score'], 1, ',', '.'); ?></div>
+                                    <?php if ($row['volume_bonus'] > 0): ?>
+                                        <div class="bonus text-primary"><i class="bi bi-stars"></i> +<?= number_format($row['volume_bonus'], 1, ',', '.'); ?> bonus beban</div>
+                                    <?php endif; ?>
+                                    <?php if ($row['wali_bonus'] > 0): ?>
+                                        <div class="bonus">+<?= number_format($row['wali_bonus'], 1, ',', '.'); ?> bonus wali</div>
+                                    <?php endif; ?>
+                                </td>
+                                <td style="min-width:150px;">
+                                    <strong><?= (int)$row['jurnal_tepat']; ?>/<?= (int)$row['jadwal_total']; ?></strong>
+                                    <div class="progress mt-1"><div class="progress-bar bg-success" style="width:<?= number_format($row['jurnal_pct'], 1, '.', ''); ?>%"></div></div>
+                                    <div class="mini">Total isi: <?= (int)$row['jurnal_total']; ?></div>
+                                </td>
+                                <td>
+                                    <strong><?= (int)$row['penilaian_total']; ?></strong> <span class="mini">/ target <?= $row['target_penilaian']; ?></span>
+                                    <div class="progress mt-1"><div class="progress-bar bg-info" style="width:<?= number_format($row['penilaian_pct'], 1, '.', ''); ?>%"></div></div>
+                                </td>
+                                <td>
+                                    <strong><?= (int)$row['absen_total']; ?>/<?= (int)$row['jadwal_total']; ?></strong>
+                                    <div class="progress mt-1"><div class="progress-bar bg-primary" style="width:<?= number_format($row['absen_pct'], 1, '.', ''); ?>%"></div></div>
+                                </td>
+                                <td>
+                                    <?php if ($row['timing_pct'] === null): ?>
+                                        <span class="mini">Belum ada data</span>
+                                    <?php else: ?>
+                                        <strong><?= (int)$row['absen_tepat']; ?>/<?= (int)$row['absen_timing_total']; ?></strong>
+                                        <div class="progress mt-1"><div class="progress-bar bg-warning" style="width:<?= number_format($row['timing_pct'], 1, '.', ''); ?>%"></div></div>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <strong><?= ag_h(implode(', ', $row['kelas_wali'])); ?></strong>
+                                    <div class="mini">Pendampingan: <?= (int)$row['pendampingan_total']; ?>/<?= $row['target_pendampingan']; ?> • Tindak: <?= (int)$row['tindak_lanjut_total']; ?>/<?= $row['target_tindak']; ?></div>
+                                </td>
+                                <td><span class="badge rounded-pill <?= ag_h($row['badge_class']); ?>"><?= ag_h($row['label']); ?></span></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </section>
 </main>
@@ -614,6 +699,7 @@ if (!empty($rows)) {
     <a href="apresiasi-guru" style="color:#0f766e;"><i class="bi bi-award"></i><span>Apresiasi</span></a>
     <a href="profil-guru"><i class="bi bi-person"></i><span>Profil</span></a>
 </nav>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <?php include __DIR__ . '/guru_common_footer.php'; ?>
 </body>
 </html>
