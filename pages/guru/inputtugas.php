@@ -237,9 +237,14 @@ if (isset($_POST['getDetail']) || isset($_GET['getDetail'])) {
     </div>
 
     <div class="tugas-form-container">
-        <div class="tugas-header">
-            <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Input Tugas</h5>
-            <div class="small opacity-75"><?= htmlspecialchars($mapel) ?> • Kelas <?= htmlspecialchars($kelas) ?> • <?= date('d/m/Y') ?></div>
+        <div class="tugas-header d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Input Tugas</h5>
+                <div class="small opacity-75"><?= htmlspecialchars($mapel) ?> • Kelas <?= htmlspecialchars($kelas) ?> • <?= date('d/m/Y') ?></div>
+            </div>
+            <?php if ($standalone): ?>
+            <a href="nilai.php" class="btn btn-sm btn-outline-light"><i class="fas fa-arrow-left me-1"></i> Kembali</a>
+            <?php endif; ?>
         </div>
         
         <div class="tugas-body">

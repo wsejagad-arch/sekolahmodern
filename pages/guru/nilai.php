@@ -448,8 +448,8 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
           <div class="d-flex align-items-center gap-3">
             <span class="input-score-icon"><i class="bi bi-pencil-square fs-4"></i></span>
             <div>
-              <h6 class="mb-1 fw-bold text-dark">Input Nilai Siswa</h6>
-              <div class="text-muted small">Pilih mapel sesuai kelas, lalu buka form input nilai siswa.</div>
+              <h6 class="mb-1 fw-bold text-dark">Input Nilai & Tugas Siswa</h6>
+              <div class="text-muted small">Pilih mapel sesuai kelas, lalu buka form input nilai atau tugas siswa.</div>
             </div>
           </div>
         </div>
@@ -478,14 +478,20 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
                 <?php } ?>
               </select>
             </div>
-            <div class="col-12 col-md-auto d-grid">
+            <div class="col-12 col-md-auto d-flex flex-column flex-md-row gap-2">
               <?php if ($inputIdMapel > 0) { ?>
-                <a class="btn btn-success" href="inputnilai?getDetail=<?= (int)$inputIdMapel; ?>">
+                <a class="btn btn-success flex-fill" href="inputnilai?getDetail=<?= (int)$inputIdMapel; ?>">
                   <i class="bi bi-pencil-square"></i> Input Nilai
                 </a>
+                <a class="btn btn-primary flex-fill" href="inputtugas.php?getDetail=<?= (int)$inputIdMapel; ?>">
+                  <i class="bi bi-journal-plus"></i> Input Tugas
+                </a>
               <?php } else { ?>
-                <button class="btn btn-secondary" type="button" disabled>
+                <button class="btn btn-secondary flex-fill" type="button" disabled>
                   <i class="bi bi-pencil-square"></i> Input Nilai
+                </button>
+                <button class="btn btn-secondary flex-fill" type="button" disabled>
+                  <i class="bi bi-journal-plus"></i> Input Tugas
                 </button>
               <?php } ?>
             </div>
