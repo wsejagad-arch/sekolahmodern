@@ -17,7 +17,7 @@ $lembaga = $lembaga ?? (function_exists('data_lembaga') ? data_lembaga() : []);
     </div>
     <nav class="desktop-nav">
         <a href="<?= $home_link ?>" class="nav-item <?= ($current_page === 'beranda' || $current_page === 'dashboard_guru') ? 'active' : '' ?>"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
-        <a href="<?= $prefix ?>setting-jadwal.php" class="nav-item <?= ($current_page === 'setting-jadwal') ? 'active' : '' ?>"><i class="bi bi-calendar3"></i><span>Kelas Saya</span></a>
+        <!-- <a href="<?= $prefix ?>setting-jadwal.php" class="nav-item <?= ($current_page === 'setting-jadwal') ? 'active' : '' ?>"><i class="bi bi-calendar3"></i><span>Kelas Saya</span></a> -->
         <a href="<?= $prefix ?>data-siswa.php" class="nav-item <?= ($current_page === 'data-siswa') ? 'active' : '' ?>"><i class="bi bi-people"></i><span>Data Siswa</span></a>
         <a href="<?= $prefix ?>nilai.php" class="nav-item <?= ($current_page === 'nilai') ? 'active' : '' ?>"><i class="bi bi-journal-check"></i><span>Nilai & Tugas</span></a>
         <a href="<?= $prefix ?>materi.php" class="nav-item <?= ($current_page === 'materi') ? 'active' : '' ?>"><i class="bi bi-book"></i><span>Materi</span></a>

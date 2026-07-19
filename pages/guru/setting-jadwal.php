@@ -369,17 +369,11 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Jam Mulai</label>
-                    <div class="input-group">
-                        <input id="inp_jam_mulai" class="form-control" type="time" name="jam_mulai" value="<?= sj_h($selectedMulai); ?>" required style="background-color: white; cursor: pointer;">
-                        <label class="input-group-text" for="inp_jam_mulai" style="cursor: pointer;"><i class="bi bi-clock"></i></label>
-                    </div>
+                    <input id="inp_jam_mulai" class="form-control" type="time" name="jam_mulai" value="<?= sj_h($selectedMulai); ?>" required style="background-color: white; cursor: pointer;">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Jam Selesai</label>
-                    <div class="input-group">
-                        <input id="inp_jam_selesai" class="form-control" type="time" name="jam_selesai" value="<?= sj_h($selectedSelesai); ?>" required style="background-color: white; cursor: pointer;">
-                        <label class="input-group-text" for="inp_jam_selesai" style="cursor: pointer;"><i class="bi bi-clock"></i></label>
-                    </div>
+                    <input id="inp_jam_selesai" class="form-control" type="time" name="jam_selesai" value="<?= sj_h($selectedSelesai); ?>" required style="background-color: white; cursor: pointer;">
                 </div>
                 <div class="col-md-6 d-flex align-items-end">
                     <button class="btn btn-green w-100 fw-bold" style="padding:10px; border-radius:12px; box-shadow:0 4px 12px rgba(5,150,105,0.2);" type="submit">
@@ -456,19 +450,7 @@ $selectedRuang = (string)($editData['ruang'] ?? '');
 <?php include __DIR__ . '/guru_common_footer.php'; ?>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-$(document).ready(function(){
-    // Buka native time picker saat icon jam diklik (dukungan browser modern)
-    $('.input-group-text').on('click', function(e){
-        var input = $(this).siblings('input')[0];
-        if (input && typeof input.showPicker === 'function') {
-            try {
-                input.showPicker();
-            } catch (err) {
-                // Ignore if showPicker fails (e.g. not triggered by user gesture)
-            }
-        }
-    });
-});
+// Icon jam (input-group) dihapus untuk menghindari tampilan jam ganda di browser modern
 </script>
 </body>
 </html>
