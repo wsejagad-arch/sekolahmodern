@@ -47,9 +47,21 @@ function login_page_data_lembaga(): array
 
         if (isset($conn) && $conn) {
             $idSekolahEsc = (int)$idSekolah;
+            
+            // FileCache lookup
+            $cacheKey = 'login_lembaga_' . $idSekolahEsc;
+            if (!class_exists('FileCache')) {
+                @include_once __DIR__ . '/plugins/FileCache.php';
+            }
+            $cached = class_exists('FileCache') ? FileCache::get($cacheKey) : false;
+            
+            if ($cached !== false) {
+                return $cached;
+            }
+            
             $sql = mysqli_query($conn, "SELECT * FROM tbl_setting WHERE id_sekolah = $idSekolahEsc ORDER BY id DESC LIMIT 1");
             if ($sql && $row = mysqli_fetch_assoc($sql)) {
-                return array_merge($default, [
+                $result = array_merge($default, [
                     "nmsekolah" => $row['nama_sekolah'] ?? $default['nmsekolah'],
                     "nama_aplikasi" => $row['nama_aplikasi'] ?? $default['nama_aplikasi'],
                     "alamatlembaga" => $row['alamat'] ?? $default['alamatlembaga'],
@@ -59,6 +71,12 @@ function login_page_data_lembaga(): array
                     "logo" => $row['logo'] ?? $default['logo'],
                     "maintenance_mode" => $row['maintenance_mode'] ?? $default['maintenance_mode']
                 ]);
+                
+                if (class_exists('FileCache')) {
+                    FileCache::set($cacheKey, $result, 3600); // 1 jam
+                }
+                
+                return $result;
             }
         }
     } catch (Throwable $e) {

@@ -69,12 +69,14 @@ function mt_ensure_schema(mysqli $conn)
     }
     $done = true;
 
-    // Cache schema migration to avoid running 50+ queries on every page load.
-    // Re-check schema only once per hour.
-    $cacheFile = sys_get_temp_dir() . '/simanis_schema_' . md5(__DIR__) . '.cache';
-    if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < 3600) {
+    // Menggunakan file statis di direktori app agar tidak terhapus saat server direstart (mencegah Metadata Lock MySQL).
+    $cacheFile = __DIR__ . '/.mt_schema_done';
+    if (file_exists($cacheFile)) {
         return;
     }
+    
+    // Sentuh file terlebih dahulu agar request bersamaan (race condition) tidak mengeksekusi ini juga.
+    @touch($cacheFile);
 
     @mysqli_query($conn, "CREATE TABLE IF NOT EXISTS tbl_sekolah (
         id_sekolah INT AUTO_INCREMENT PRIMARY KEY,
@@ -174,8 +176,8 @@ function mt_ensure_schema(mysqli $conn)
         }
     }
 
-    // Mark schema as up-to-date
-    @file_put_contents($cacheFile, date('Y-m-d H:i:s'), LOCK_EX);
+    // Tandai selesai
+    @file_put_contents($cacheFile, '1');
 }
 
 function mt_bootstrap($conn)

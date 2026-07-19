@@ -39,6 +39,15 @@ function google_oauth_db_credentials(mysqli $conn): array
         'redirect_uri' => '',
     ];
 
+    $cacheKey = 'google_oauth_db';
+    if (!class_exists('FileCache')) {
+        @include_once __DIR__ . '/plugins/FileCache.php';
+    }
+    $cached = class_exists('FileCache') ? FileCache::get($cacheKey) : false;
+    if ($cached !== false) {
+        return $cached;
+    }
+
     $q = @mysqli_query($conn, "SELECT kunci, nilai FROM tbl_app_config WHERE kunci IN ('google_client_id','google_client_secret','google_redirect_uri')");
     while ($q && ($row = mysqli_fetch_assoc($q))) {
         if ($row['kunci'] === 'google_client_id') {
@@ -48,6 +57,10 @@ function google_oauth_db_credentials(mysqli $conn): array
         } elseif ($row['kunci'] === 'google_redirect_uri') {
             $values['redirect_uri'] = (string)$row['nilai'];
         }
+    }
+    
+    if (class_exists('FileCache')) {
+        FileCache::set($cacheKey, $values, 3600);
     }
 
     return $values;
@@ -69,6 +82,13 @@ function google_oauth_save_db_credentials(mysqli $conn, string $clientId, string
         if (!$ok) {
             return false;
         }
+    }
+
+    if (!class_exists('FileCache')) {
+        @include_once __DIR__ . '/plugins/FileCache.php';
+    }
+    if (class_exists('FileCache')) {
+        FileCache::delete('google_oauth_db');
     }
 
     return true;
