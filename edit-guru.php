@@ -40,6 +40,9 @@ if (isset($_POST['submit'])) {
     $nip = trim(mysqli_real_escape_string($conn, $_POST['nip']));
     $nami = mysqli_real_escape_string($conn, $_POST['nama']);
     $no_wa = mysqli_real_escape_string($conn, trim($_POST['no_wa'] ?? ''));
+    if (isset($_POST['no_wa'])) {
+        die("<div style='padding:20px;background:#fff;border:2px solid red;'><h2>DEBUG SYSTEM</h2><p>Nomor WA yang terkirim dari form: <b>" . htmlspecialchars($_POST['no_wa']) . "</b></p><p>Variabel no_wa: <b>" . $no_wa . "</b></p></div>");
+    }
     $status_kepegawaian = mysqli_real_escape_string($conn, $_POST['status_kepegawaian']);
     $jabatan = mysqli_real_escape_string($conn, trim($_POST['jabatan'] ?? ''));
     $is_guru_bk = isset($_POST['is_guru_bk']) ? 1 : 0;
