@@ -237,20 +237,14 @@ if (isset($_POST['submit'])) {
                 <!-- Status Kepegawaian -->
                 <div class="form-group col-sm-4">
                     <label for="status_kepegawaian">Status Kepegawaian:</label>
+                    <?php $skNow = $data['status_kepegawaian'] ?? ''; ?>
                     <select class="form-control" name="status_kepegawaian">
-                        <?php if ($data['status_kepegawaian'] === "ASN") : ?>
-                            <option value="ASN" selected>ASN</option>
-                            <option value="Non-ASN">Non-ASN</option>
-                            <!--	<option value="PPPK">PPPK</option> -->
-                        <?php endif; ?>
-
-                        <?php if ($data['status_kepegawaian'] === "Non-ASN") : ?>
-                            <option value="ASN">ASN</option>
-                            <option value="Non-ASN" selected>Non-ASN</option>
-                            <!--	<option value="PPPK">PPPK</option>-->
-                        <?php endif; ?>
-
-
+                        <option value="ASN"       <?= ($skNow === 'ASN'       ? 'selected' : '') ?>>ASN</option>
+                        <option value="Non-ASN"   <?= ($skNow === 'Non-ASN'   ? 'selected' : '') ?>>Non-ASN</option>
+                        <option value="PNS"       <?= ($skNow === 'PNS'       ? 'selected' : '') ?>>PNS</option>
+                        <option value="CPNS"      <?= ($skNow === 'CPNS'      ? 'selected' : '') ?>>CPNS</option>
+                        <option value="GTT/PTT"   <?= ($skNow === 'GTT/PTT'   ? 'selected' : '') ?>>GTT/PTT</option>
+                        <option value="Honorer"   <?= ($skNow === 'Honorer'   ? 'selected' : '') ?>>Honorer</option>
                     </select>
                     <div class="valid-feedback">Valid.</div>
                     <div class="invalid-feedback">Harap diisi kolom ini.</div>
@@ -281,15 +275,8 @@ if (isset($_POST['submit'])) {
                 <div class="form-group col-sm-4">
                     <label for="status_keaktifan">Status Keaktifan:</label>
                     <select class="form-control" name="status_keaktifan">
-                        <?php if ($data['status'] === "Aktif") : ?>
-                            <option value="Aktif" selected>Aktif</option>
-                            <option value="Non-Aktif">Non-Aktif</option>
-                        <?php endif; ?>
-
-                        <?php if ($data['status'] === "Non-Aktif") : ?>
-                            <option value="Aktif">Aktif</option>
-                            <option value="Non-Aktif" selected>Non-Aktif</option>
-                        <?php endif; ?>
+                        <option value="Aktif"     <?= ($data['status'] === 'Aktif'     ? 'selected' : '') ?>>Aktif</option>
+                        <option value="Non-Aktif" <?= ($data['status'] === 'Non-Aktif' ? 'selected' : '') ?>>Non-Aktif</option>
                     </select>
                     <div class="valid-feedback">Valid.</div>
                     <div class="invalid-feedback">Harap diisi kolom ini.</div>
