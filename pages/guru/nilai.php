@@ -178,11 +178,11 @@ $kelasOptions = array_values($availableKelasList);
 $mapelSql = $scope === 'wali'
     ? "SELECT DISTINCT pi.id_mapel, pi.mapel AS nama_mapel, pi.kelas, pi.no_induk_guru
        FROM tbl_penilaian_item pi
-       WHERE {$tenantPenilaianAlias} AND pi.kelas IN (" . gn_sql_in($conn, array_values($waliKelasList)) . ")" . ($kelas !== '' ? " AND pi.kelas='$kelasEsc'" : "") . "
+       WHERE {$tenantPenilaianAlias} AND pi.kelas IN (" . gn_sql_in($conn, array_values($waliKelasList)) . ")
        ORDER BY pi.mapel ASC, pi.kelas ASC"
     : "SELECT DISTINCT id_mapel, nama_mapel, kelas, no_induk AS no_induk_guru
        FROM tbl_mapel_ampu
-       WHERE {$tenantMapelAmpu} AND no_induk='$nipEsc'" . ($kelas !== '' ? " AND kelas='$kelasEsc'" : "") . "
+       WHERE {$tenantMapelAmpu} AND no_induk='$nipEsc'
        ORDER BY nama_mapel ASC, kelas ASC";
 $mapelOpts = mysqli_query($conn, $mapelSql);
 $mapelOptions = [];
@@ -194,7 +194,7 @@ while ($mapelOpts && ($mo = mysqli_fetch_assoc($mapelOpts))) {
 $inputMapelOptions = [];
 $inputMapelSql = "SELECT id_mapel, nama_mapel, kelas
                   FROM tbl_mapel_ampu
-                  WHERE {$tenantMapelAmpu} AND no_induk='$nipEsc'" . ($kelas !== '' ? " AND kelas='$kelasEsc'" : "") . "
+                  WHERE {$tenantMapelAmpu} AND no_induk='$nipEsc'
                   ORDER BY kelas ASC, nama_mapel ASC";
 $inputMapelResult = mysqli_query($conn, $inputMapelSql);
 while ($inputMapelResult && ($row = mysqli_fetch_assoc($inputMapelResult))) {
