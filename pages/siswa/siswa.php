@@ -218,15 +218,15 @@ $__tblTugas = @mysqli_query($conn, "SHOW TABLES LIKE 'tbl_tugas'");
 $__tblTugasSiswa = @mysqli_query($conn, "SHOW TABLES LIKE 'tbl_tugas_siswa'");
 if ($__tblTugas && mysqli_num_rows($__tblTugas) > 0 && $__tblTugasSiswa && mysqli_num_rows($__tblTugasSiswa) > 0) {
     $qTugas = @mysqli_query($conn, "
-        SELECT t.id, t.judul_tugas, t.batas_waktu 
+        SELECT t.id, t.judul_tugas, t.tanggal_pengumpulan 
         FROM tbl_tugas t 
         LEFT JOIN tbl_tugas_siswa ts ON t.id = ts.id_tugas AND ts.no_induk_siswa = '$nisEsc' 
         WHERE t.kelas = '$klsEsc' AND t.status = 'aktif' AND (ts.id IS NULL OR ts.status != 'Selesai') 
-        ORDER BY t.batas_waktu ASC LIMIT 5");
+        ORDER BY t.tanggal_pengumpulan ASC LIMIT 5");
     if ($qTugas) {
         while($tg = mysqli_fetch_assoc($qTugas)) {
-            $tenggat = $tg['batas_waktu'] ? date('d/m/Y H:i', strtotime($tg['batas_waktu'])) : 'Tidak ada tenggat';
-            $is_late = $tg['batas_waktu'] && strtotime($tg['batas_waktu']) < time() ? true : false;
+            $tenggat = $tg['tanggal_pengumpulan'] ? date('d/m/Y H:i', strtotime($tg['tanggal_pengumpulan'])) : 'Tidak ada tenggat';
+            $is_late = $tg['tanggal_pengumpulan'] && strtotime($tg['tanggal_pengumpulan']) < time() ? true : false;
             
             $all_notifications[] = [
                 'type' => 'tugas',
@@ -1042,7 +1042,7 @@ $notif_count = count($all_notifications);
       ['name' => '7 KAIH', 'icon' => 'fa-star',                'color' => 'bg-yellow', 'link' => 'jurnal-7kih.php'],
       ['name' => 'Ajukan Izin', 'icon' => 'fa-file-signature',      'color' => 'bg-green',  'link' => 'ajukan-izin.php'],
       ['name' => 'Lentera',     'icon' => 'fa-rocket',              'color' => 'bg-orange', 'link' => 'literasi.php'],
-      ['name' => 'Tugas',       'icon' => 'fa-book-open',           'color' => 'bg-red',    'link' => 'tugas.php'],
+      ['name' => 'Tugas dan Materi',       'icon' => 'fa-book-open',           'color' => 'bg-red',    'link' => 'tugas.php'],
       ['name' => 'Pengumuman',  'icon' => 'fa-bullhorn',            'color' => 'bg-purple', 'link' => '../../pengumuman.php'],
       ['name' => 'Pelanggaran', 'icon' => 'fa-exclamation-triangle','color' => 'bg-teal',   'link' => 'pelanggaran.php'],
       ['name' => 'Aduan',       'icon' => 'fa-shield-heart',        'color' => 'bg-pink',   'link' => 'aduan.php'],
