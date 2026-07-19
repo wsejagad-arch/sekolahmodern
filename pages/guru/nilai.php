@@ -101,7 +101,16 @@ if (!$isWaliKelas || $scope !== 'wali') {
     $scope = 'own';
 }
 
+$isFilterActive = isset($_GET['filter']);
+
 $availableKelasList = $scope === 'wali' ? $waliKelasList : $ownKelasList;
+
+// Jika belum ada filter aktif, otomatis pilih kelas pertama dan jalankan query
+if (!$isFilterActive && $kelas === '' && !empty($availableKelasList)) {
+    $kelas = current($availableKelasList);
+    $isFilterActive = true;
+}
+
 if ($kelas !== '' && !isset($availableKelasList[$kelas])) {
     $kelas = '';
 }
@@ -125,8 +134,6 @@ if ($scope === 'wali') {
         $whereParts[] = "pi.kelas='$kelasEsc'";
     }
 }
-
-$isFilterActive = isset($_GET['filter']);
 
 $where = ' WHERE ' . implode(' AND ', $whereParts);
 if ($isFilterActive) {
