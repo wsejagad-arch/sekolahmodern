@@ -199,6 +199,7 @@
       <div class="bg-white py-2 collapse-inner rounded">
         <h6 class="collapse-header">Mapel:</h6>
         <a class="collapse-item" href="home.php?page=tambah-data-mapel"><i class="fas fa-plus-circle text-primary mr-1" style="font-size:11px"></i>Tambah Mapel</a>
+        <a class="collapse-item" href="import-jadwal.php"><i class="fas fa-calendar-alt text-success mr-1" style="font-size:11px"></i>Import Jadwal Guru</a>
       </div>
     </div>
   </li>
