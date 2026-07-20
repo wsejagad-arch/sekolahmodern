@@ -40,7 +40,7 @@ if (isset($_POST['fix_excel']) && isset($_REQUEST['page']) && $_REQUEST['page'] 
     $fix_kelas_baku = [];
     if ($qKelas) { while ($r = mysqli_fetch_assoc($qKelas)) { $fix_kelas_baku[] = $r['nama_kelas']; } }
 
-    $xlsx = SimpleXLSX::parse($filename);
+    $xlsx = \Shuchkin\SimpleXLSX::parse($filename);
     if ($xlsx) {
         $rows = $xlsx->rows();
         $new_rows = [];
@@ -90,7 +90,7 @@ if (isset($_POST['fix_excel']) && isset($_REQUEST['page']) && $_REQUEST['page'] 
         $new_xlsx->downloadAs('jadwal_fixed.xlsx');
         exit();
     } else {
-        $err = SimpleXLSX::parseError();
+        $err = \Shuchkin\SimpleXLSX::parseError();
         echo "<script>alert('Gagal membaca file Excel: " . addslashes($err) . "'); window.location.href='/home/import-jadwal';</script>";
         exit();
     }
