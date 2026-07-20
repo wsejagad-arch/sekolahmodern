@@ -56,13 +56,22 @@ if (isset($_POST['fix_excel']) && isset($_REQUEST['page']) && $_REQUEST['page'] 
             // Auto-fill no_induk dari database
             if (empty($no_induk) && !empty($nama_guru)) {
                 $name_clean = explode(',', $nama_guru)[0];
-                $name_clean = str_ireplace(['Drs.','Dra.','H.','Hj.','Dr.','M.Pd','S.Pd','M.Si','S.Si','S.Ag','M.Ag','S.Sos','S.Kom','M.Kom','S.E','M.M'], '', $name_clean);
-                $name_clean = trim($name_clean);
+                $name_clean = str_ireplace(['Drs.','Dra.','H.','Hj.','Dr.','M.Pd','S.Pd','M.Si','S.Si','S.Ag','M.Ag','S.Sos','S.Kom','M.Kom','S.E','M.M', 'S.Pd.I', 'M.Pd.I'], '', $name_clean);
+                $name_clean = preg_replace('/[^a-zA-Z\s]/', '', $name_clean);
+                $name_clean = trim(preg_replace('/\s+/', ' ', $name_clean));
+                
                 $words = explode(' ', $name_clean);
-                $search_name = strtolower($words[0]);
-                if (isset($words[1]) && strlen($words[1]) > 2) { $search_name .= ' ' . strtolower($words[1]); }
+                $search_name = strtolower($words[0] ?? '');
+                if (isset($words[1]) && strlen($words[1]) > 2) { 
+                    $search_name .= ' ' . strtolower($words[1]); 
+                }
+                
                 foreach ($fix_gurus as $g) {
-                    if (strpos(strtolower($g['nama_guru']), $search_name) !== false) {
+                    $db_name_clean = str_ireplace(['Drs.','Dra.','H.','Hj.','Dr.','M.Pd','S.Pd','M.Si','S.Si','S.Ag','M.Ag','S.Sos','S.Kom','M.Kom','S.E','M.M', 'S.Pd.I', 'M.Pd.I'], '', $g['nama_guru']);
+                    $db_name_clean = preg_replace('/[^a-zA-Z\s]/', '', $db_name_clean);
+                    $db_name_clean = strtolower(trim(preg_replace('/\s+/', ' ', $db_name_clean)));
+                    
+                    if (!empty($search_name) && strpos($db_name_clean, $search_name) !== false) {
                         $row[0] = $g['no_induk'];
                         break;
                     }
