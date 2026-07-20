@@ -15,7 +15,7 @@ if (isset($_POST['import'])) {
     $ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
     
     if ($ext != 'xlsx') {
-        echo "<script>alert('Harap upload file Excel dengan format .xlsx'); window.location.href='import-jadwal.php';</script>";
+        echo "<script>alert('Harap upload file Excel dengan format .xlsx'); window.location.href='/home.php?page=import-jadwal';</script>";
         exit();
     }
 
@@ -73,9 +73,9 @@ if (isset($_POST['import'])) {
         
     } else {
         $err = SimpleXLSX::parseError();
-        echo "<script>alert('Gagal membaca file Excel: $err'); window.location.href='import-jadwal.php';</script>";
+        echo "<script>alert('Gagal membaca file Excel: $err'); window.location.href='/home.php?page=import-jadwal';</script>";
     }
 } else {
-    header("Location: import-jadwal.php");
+    header("Location: /home.php?page=import-jadwal");
 }
 ?>

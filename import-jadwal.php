@@ -9,12 +9,12 @@
         <em>Tips: Anda dapat menyalin data dari hasil export Excel aSc Timetables ke dalam template ini.</em>
     </div>
     
-    <a href="template_jadwal.xlsx" class="btn btn-info mb-4">
+    <a href="/template_jadwal.xlsx" class="btn btn-info mb-4">
         <i class="fas fa-download"></i> Download Template Excel
     </a>
     
     <?php if (file_exists("jadwal_extracted.xlsx")): ?>
-    <a href="jadwal_extracted.xlsx" class="btn btn-success mb-4 ml-2">
+    <a href="/jadwal_extracted.xlsx" class="btn btn-success mb-4 ml-2">
         <i class="fas fa-file-excel"></i> Download Excel Hasil Ekstrak PDF
     </a>
     <?php endif; ?>
@@ -24,7 +24,7 @@
             <h6 class="m-0 font-weight-bold text-primary">Upload File Jadwal</h6>
         </div>
         <div class="card-body">
-            <form action="proses-import-jadwal.php" method="post" enctype="multipart/form-data">
+            <form action="/proses-import-jadwal.php" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <label>Pilih File Excel (.xlsx)</label>
                     <input type="file" name="file" class="form-control-file" accept=".xlsx" required>
