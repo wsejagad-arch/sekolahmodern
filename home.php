@@ -60,21 +60,47 @@ if (isset($_POST['fix_excel']) && isset($_REQUEST['page']) && $_REQUEST['page'] 
                 $name_clean = preg_replace('/[^a-zA-Z\s]/', '', $name_clean);
                 $name_clean = trim(preg_replace('/\s+/', ' ', $name_clean));
                 
+                $name_clean = strtolower($name_clean);
                 $words = explode(' ', $name_clean);
-                $search_name = strtolower($words[0] ?? '');
+                $search_name = $words[0] ?? '';
                 if (isset($words[1]) && strlen($words[1]) > 2) { 
-                    $search_name .= ' ' . strtolower($words[1]); 
+                    $search_name .= ' ' . $words[1]; 
                 }
                 
+                $best_match_id = null;
+                $highest_sim = 0;
+                
                 foreach ($fix_gurus as $g) {
-                    $db_name_clean = str_ireplace(['Drs.','Dra.','H.','Hj.','Dr.','M.Pd','S.Pd','M.Si','S.Si','S.Ag','M.Ag','S.Sos','S.Kom','M.Kom','S.E','M.M', 'S.Pd.I', 'M.Pd.I'], '', $g['nama_guru']);
+                    $db_name_clean = str_ireplace(['Drs.','Dra.','H.','Hj.','Dr.','M.Pd','S.Pd','M.Si','S.Si','S.Ag','M.Ag','S.Sos','S.Kom','M.Kom','S.E','M.M', 'S.Pd.I', 'M.Pd.I', 'S.T', 'M.T'], '', $g['nama_guru']);
                     $db_name_clean = preg_replace('/[^a-zA-Z\s]/', '', $db_name_clean);
                     $db_name_clean = strtolower(trim(preg_replace('/\s+/', ' ', $db_name_clean)));
                     
-                    if (!empty($search_name) && strpos($db_name_clean, $search_name) !== false) {
-                        $row[0] = $g['no_induk'];
+                    if (empty($db_name_clean)) continue;
+                    
+                    if ($db_name_clean === $name_clean) {
+                        $best_match_id = $g['no_induk'];
                         break;
                     }
+                    
+                    if (!empty($search_name) && strpos($db_name_clean, $search_name) !== false) {
+                        $best_match_id = $g['no_induk'];
+                        $highest_sim = 100;
+                    } else if (strpos($name_clean, $db_name_clean) !== false) {
+                        $best_match_id = $g['no_induk'];
+                        $highest_sim = 100;
+                    }
+                    
+                    if ($highest_sim < 100) {
+                        similar_text($name_clean, $db_name_clean, $perc);
+                        if ($perc > $highest_sim && $perc > 72) {
+                            $highest_sim = $perc;
+                            $best_match_id = $g['no_induk'];
+                        }
+                    }
+                }
+                
+                if ($best_match_id) {
+                    $row[0] = $best_match_id;
                 }
             }
 
