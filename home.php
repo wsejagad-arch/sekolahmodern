@@ -166,6 +166,9 @@ include "sidebar.php";
         case 'import-siswa':
           include "import-siswa.php";
           break;
+        case 'import-jadwal':
+          include "import-jadwal.php";
+          break;
         case 'import-guru':
           include "import-guru.php";
           break;
