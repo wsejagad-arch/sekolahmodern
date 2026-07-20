@@ -86,7 +86,7 @@
                     </thead>
                     <tbody>
                         <?php
-                        $qJadwal = mysqli_query($conn, "SELECT j.*, g.nama AS nama_guru FROM tbl_mapel_ampu j LEFT JOIN tbl_guru g ON j.no_induk = g.no_induk ORDER BY j.hari ASC, j.jam_mulai ASC");
+                        $qJadwal = mysqli_query($conn, "SELECT j.*, g.nama_guru FROM tbl_mapel_ampu j LEFT JOIN tbl_guru g ON j.no_induk = g.no_induk ORDER BY j.hari ASC, j.jam_mulai ASC");
                         $no = 1;
                         if ($qJadwal && mysqli_num_rows($qJadwal) > 0) {
                             while ($r = mysqli_fetch_assoc($qJadwal)) {
