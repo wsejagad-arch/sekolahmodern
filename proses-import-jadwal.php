@@ -1,12 +1,10 @@
 <?php
-session_start();
+require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/nocache.php';
+require_login();
+
 include "koneksi.php";
 include "SimpleXLSX.php";
-
-if (!isset($_SESSION['no_induk'])) {
-    header("Location: login.php");
-    exit();
-}
 
 $hak_akses = $_SESSION['hak_akses'] ?? 0;
 
