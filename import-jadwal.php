@@ -62,4 +62,61 @@
             </div>
         </div>
     </div>
+
+    <!-- Tampilkan Data Jadwal yang Ada di Database -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-success">Jadwal Guru yang Berhasil Diimpor</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTableJadwalImport" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>NIP / No Induk</th>
+                            <th>Nama Guru</th>
+                            <th>Mapel</th>
+                            <th>Kelas</th>
+                            <th>Hari</th>
+                            <th>Jam Mulai</th>
+                            <th>Jam Selesai</th>
+                            <th>Ruang</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $qJadwal = mysqli_query($conn, "SELECT j.*, g.nama AS nama_guru FROM tbl_mapel_ampu j LEFT JOIN tbl_guru g ON j.no_induk = g.no_induk ORDER BY j.hari ASC, j.jam_mulai ASC");
+                        $no = 1;
+                        if ($qJadwal && mysqli_num_rows($qJadwal) > 0) {
+                            while ($r = mysqli_fetch_assoc($qJadwal)) {
+                                echo "<tr>";
+                                echo "<td>".$no++."</td>";
+                                echo "<td>".htmlspecialchars($r['no_induk'])."</td>";
+                                echo "<td>".htmlspecialchars($r['nama_guru'] ?? '-')."</td>";
+                                echo "<td>".htmlspecialchars($r['nama_mapel'])."</td>";
+                                echo "<td>".htmlspecialchars($r['kelas'])."</td>";
+                                echo "<td>".htmlspecialchars($r['hari'])."</td>";
+                                echo "<td>".htmlspecialchars($r['jam_mulai'])."</td>";
+                                echo "<td>".htmlspecialchars($r['jam_selesai'])."</td>";
+                                echo "<td>".htmlspecialchars($r['ruang'])."</td>";
+                                echo "</tr>";
+                            }
+                        } else {
+                            echo "<tr><td colspan='9' class='text-center'>Belum ada data jadwal di sistem. Silakan import melalui form di atas.</td></tr>";
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if ($.fn.DataTable) {
+        $('#dataTableJadwalImport').DataTable();
+    }
+});
+</script>

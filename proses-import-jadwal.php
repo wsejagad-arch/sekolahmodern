@@ -99,13 +99,13 @@ if (isset($_POST['import'])) {
             }
         }
         
-        echo "<script>alert('$msg'); window.location.href='/home.php?page=import-jadwal';</script>";
+        echo "<script>alert('$msg'); window.location.href='/home/import-jadwal';</script>";
         
     } else {
         $err = SimpleXLSX::parseError();
-        echo "<script>alert('Gagal membaca file Excel: $err'); window.location.href='/home.php?page=import-jadwal';</script>";
+        echo "<script>alert('Gagal membaca file Excel: $err'); window.location.href='/home/import-jadwal';</script>";
     }
 } else {
-    header("Location: /home.php?page=import-jadwal");
+    header("Location: /home/import-jadwal");
 }
 ?>
