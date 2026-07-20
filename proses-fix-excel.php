@@ -105,7 +105,13 @@ if (isset($_POST['fix_excel'])) {
         }
         
         $new_xlsx = SimpleXLSXGen::fromArray($new_rows);
-        $new_xlsx->downloadAs('jadwal_fixed.xlsx');
+        // Simpan file yang telah diperbaiki di server
+        $fixedPath = __DIR__ . '/jadwal_fixed.xlsx';
+        $new_xlsx->writeToFile($fixedPath);
+        // Set flag in session for notification
+        $_SESSION['fix_success'] = true;
+        // Redirect kembali ke halaman import jadwal
+        header('Location: /home.php?page=import-jadwal');
         exit();
     }
 }
