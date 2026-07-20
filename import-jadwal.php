@@ -6,11 +6,11 @@
         Anda dapat mengimpor jadwal mengajar guru menggunakan template Excel (<code>.xlsx</code>). <br>
         Pastikan urutan kolom sesuai dengan template: 
         <code>no_induk</code>, <code>nama_guru</code>, <code>nama_mapel</code>, <code>kelas</code>, <code>hari</code>, <code>jam_mulai</code>, <code>jam_selesai</code>, <code>ruang</code>. <br>
-        <em>Tips: Anda dapat menyalin data dari hasil export Excel aSc Timetables ke dalam template ini.</em>
+        <em>Tips: Template sudah berisi <strong>Daftar Guru</strong> (Nomor Induk + Nama) dan <strong>Daftar Kelas</strong> dari database, sehingga data selalu sinkron.</em>
     </div>
     
-    <a href="/template_jadwal.xlsx" class="btn btn-info mb-4">
-        <i class="fas fa-download"></i> Download Template Excel
+    <a href="/download-template-jadwal" class="btn btn-info mb-4">
+        <i class="fas fa-download"></i> Download Template Excel (Sinkron Database)
     </a>
     
     <?php if (file_exists("jadwal_extracted.xlsx")): ?>
