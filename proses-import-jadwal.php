@@ -13,11 +13,11 @@ if (isset($_POST['import'])) {
     $ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
     
     if ($ext != 'xlsx') {
-        echo "<script>alert('Harap upload file Excel dengan format .xlsx'); window.location.href='/home.php?page=import-jadwal';</script>";
+        echo "<script>alert('Harap upload file Excel dengan format .xlsx'); window.location.href='/home/import-jadwal';</script>";
         exit();
     }
 
-    $xlsx = SimpleXLSX::parse($filename);
+    $xlsx = \Shuchkin\SimpleXLSX::parse($filename);
     if ($xlsx) {
         $rows = $xlsx->rows();
         $count = 0;
@@ -100,7 +100,7 @@ if (isset($_POST['import'])) {
         echo "<script>alert('$msg'); window.location.href='/home/import-jadwal';</script>";
         
     } else {
-        $err = SimpleXLSX::parseError();
+        $err = \Shuchkin\SimpleXLSX::parseError();
         echo "<script>alert('Gagal membaca file Excel: $err'); window.location.href='/home/import-jadwal';</script>";
     }
 } else {
