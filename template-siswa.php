@@ -12,11 +12,11 @@ header("Expires: 0");
 $output = fopen("php://output", "w");
 
 // Header kolom sesuai tabel
-fputcsv($output, array('no_induk','nama_siswa','kelas','status'));
+fputcsv($output, array('nis','nama','kelas'), ';');
 
 // Contoh data (opsional, bisa dihapus kalau mau kosong)
-fputcsv($output, array('12345','BUDI SANTOSO','XI IPA 1','Aktif'));
-fputcsv($output, array('67890','ANITA DEWI','XII IPS 2','Non-Aktif'));
+fputcsv($output, array('12345','BUDI SANTOSO','XI IPA 1'), ';');
+fputcsv($output, array('67890','ANITA DEWI','XII IPS 2'), ';');
 
 fclose($output);
 exit;
