@@ -6,7 +6,7 @@
         <strong>Info:</strong> Pastikan format template memiliki kolom: <b>nis, nama, kelas</b> secara berurutan. Anda dapat mengupload file berextension <b>.xlsx</b> atau <b>.csv</b>.
     </div>
     <h4 class="mb-4">Import Data Siswa dari Excel/CSV</h4>
-    <form method="post" enctype="multipart/form-data" action="proses-import-siswa.php">
+    <form method="post" enctype="multipart/form-data" action="/proses-import-siswa.php">
       <div class="form-group">
           <label for="file">Pilih File Excel/CSV</label>
           <input type="file" name="file" class="form-control" accept=".xls,.xlsx,.csv" required>
