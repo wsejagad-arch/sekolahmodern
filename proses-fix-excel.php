@@ -4,6 +4,8 @@ include "koneksi.php";
 include "SimpleXLSX.php";
 include "SimpleXLSXGen.php";
 
+use Shuchkin\SimpleXLSXGen;
+
 if (!isset($_SESSION['no_induk'])) {
     header("Location: login.php");
     exit();
@@ -12,12 +14,18 @@ if (!isset($_SESSION['no_induk'])) {
 // Baca daftar guru dari database
 $qGuru = mysqli_query($conn, "SELECT no_induk, nama_guru FROM tbl_guru");
 $gurus = [];
-while ($r = mysqli_fetch_assoc($qGuru)) {
-    $gurus[] = $r;
+if ($qGuru) {
+    while ($r = mysqli_fetch_assoc($qGuru)) {
+        $gurus[] = $r;
+    }
 }
 
 // Baca daftar kelas baku dari database
 $qKelas = mysqli_query($conn, "SELECT nama_kelas FROM tbl_kelas");
+// Fallback: coba kolom 'kelas' jika 'nama_kelas' tidak ada
+if (!$qKelas) {
+    $qKelas = mysqli_query($conn, "SELECT kelas AS nama_kelas FROM tbl_kelas");
+}
 $kelas_baku = [];
 if ($qKelas) {
     while ($r = mysqli_fetch_assoc($qKelas)) {
@@ -28,7 +36,7 @@ if ($qKelas) {
 function find_no_induk($nama_pdf, $gurus) {
     // Bersihkan nama
     $name_clean = explode(',', $nama_pdf)[0];
-    $name_clean = str_ireplace(['Drs.', 'Dra.', 'H.', 'Hj.', 'Dr.', 'M.Pd', 'S.Pd'], '', $name_clean);
+    $name_clean = str_ireplace(['Drs.', 'Dra.', 'H.', 'Hj.', 'Dr.', 'M.Pd', 'S.Pd', 'M.Si', 'S.Si', 'S.Ag', 'M.Ag', 'S.Sos', 'S.Kom', 'M.Kom', 'S.E', 'M.M'], '', $name_clean);
     $name_clean = trim($name_clean);
     
     $words = explode(' ', $name_clean);
@@ -71,7 +79,7 @@ if (isset($_POST['fix_excel'])) {
     $ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
     
     if ($ext != 'xlsx') {
-        echo "<script>alert('Harap upload file Excel (.xlsx)'); window.location.href='/home.php?page=import-jadwal';</script>";
+        echo "<script>alert('Harap upload file Excel (.xlsx)'); window.location.href='/home/import-jadwal';</script>";
         exit();
     }
 
@@ -104,15 +112,18 @@ if (isset($_POST['fix_excel'])) {
             $new_rows[] = $row;
         }
         
+        // Langsung download file yang telah diperbaiki
         $new_xlsx = SimpleXLSXGen::fromArray($new_rows);
-        // Simpan file yang telah diperbaiki di server
-        $fixedPath = __DIR__ . '/jadwal_fixed.xlsx';
-        $new_xlsx->writeToFile($fixedPath);
-        // Set flag in session for notification
-        $_SESSION['fix_success'] = true;
-        // Redirect kembali ke halaman import jadwal
-        header('Location: /home.php?page=import-jadwal');
+        $new_xlsx->downloadAs('jadwal_fixed.xlsx');
+        exit();
+    } else {
+        $err = SimpleXLSX::parseError();
+        echo "<script>alert('Gagal membaca file Excel: " . addslashes($err) . "'); window.location.href='/home/import-jadwal';</script>";
         exit();
     }
+} else {
+    // Jika diakses langsung tanpa POST, redirect ke halaman import jadwal
+    header("Location: /home/import-jadwal");
+    exit();
 }
 ?>
