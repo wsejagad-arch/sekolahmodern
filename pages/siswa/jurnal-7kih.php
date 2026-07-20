@@ -6,6 +6,7 @@ if (!isset($_SESSION['no_induk']) || (int)($_SESSION['hak_akses'] ?? 0) !== 3) {
 }
 
 require_once __DIR__ . '/../../koneksi.php';
+session_write_close(); // UNBLOCK SESSION UNTUK SKALABILITAS 900+ SISWA
 date_default_timezone_set('Asia/Jakarta');
 
 function kihs_h($value): string

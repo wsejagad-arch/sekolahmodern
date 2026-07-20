@@ -10,6 +10,7 @@ if (!isset($_SESSION["no_induk"])) {
 
 include "../../koneksi.php";
 include "../../functions.php";
+session_write_close(); // UNBLOCK SESSION UNTUK SKALABILITAS 900+ SISWA
 date_default_timezone_set('Asia/Jakarta');
 $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
 $tenantAbsen = function_exists('mt_column_exists') && $conn instanceof mysqli && mt_column_exists($conn, 'tbl_absen', 'id_sekolah') ? "id_sekolah={$tenantId}" : "1=1";

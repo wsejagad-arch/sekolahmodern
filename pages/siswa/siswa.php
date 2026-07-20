@@ -20,6 +20,7 @@ $lembaga = data_lembaga();
 $stat = "Aktif";
 // Data tambahan untuk tampilan mobile siswa
 $nisSiswa = $_SESSION['no_induk'];
+session_write_close(); // UNBLOCK SESSION UNTUK SKALABILITAS 900+ SISWA
 $tenantId = function_exists('mt_current_school_id') ? mt_current_school_id() : 1;
 $tenantAbsen = function_exists('mt_column_exists') && $conn instanceof mysqli && mt_column_exists($conn, 'tbl_absen', 'id_sekolah') ? "id_sekolah={$tenantId}" : "1=1";
 $tenantIzin = function_exists('mt_column_exists') && $conn instanceof mysqli && mt_column_exists($conn, 'tbl_izin_siswa', 'id_sekolah') ? "id_sekolah={$tenantId}" : "1=1";
@@ -112,9 +113,17 @@ if ($__qAbsHariIni && mysqli_num_rows($__qAbsHariIni) > 0) {
 $ada_jadwal = false;
 $__kls = mysqli_real_escape_string($conn, $kls);
 $__hr = mysqli_real_escape_string($conn, $hariini);
-$__qJadwal = @mysqli_query($conn, "SELECT id_mapel FROM tbl_mapel_ampu WHERE kelas='$__kls' AND hari='$__hr' LIMIT 1");
-if ($__qJadwal && mysqli_num_rows($__qJadwal) > 0) {
-    $ada_jadwal = true;
+
+$cacheKeyJadwal = 'jadwal_hari_ini_' . $tenantId . '_' . md5($__kls . '_' . $__hr);
+$cachedJadwal = FileCache::get($cacheKeyJadwal);
+if ($cachedJadwal === false) {
+    $__qJadwal = @mysqli_query($conn, "SELECT id_mapel FROM tbl_mapel_ampu WHERE kelas='$__kls' AND hari='$__hr' LIMIT 1");
+    if ($__qJadwal && mysqli_num_rows($__qJadwal) > 0) {
+        $ada_jadwal = true;
+    }
+    FileCache::set($cacheKeyJadwal, $ada_jadwal, 3600);
+} else {
+    $ada_jadwal = $cachedJadwal;
 }
 
 if (!$sudah_absen && $ada_jadwal) {
@@ -131,21 +140,42 @@ if (!$sudah_absen && $ada_jadwal) {
 // 3. Tugas Baru
 $__tblTugasSiswa = @mysqli_query($conn, "SHOW TABLES LIKE 'tbl_tugas_siswa'");
 if ($__tblTugasSiswa && mysqli_num_rows($__tblTugasSiswa) > 0) {
-    $__qTugas = @mysqli_query($conn, "SELECT t.judul_tugas FROM tbl_tugas t 
-        WHERE t.kelas='$klsEsc' AND t.status='aktif' 
-        AND t.id NOT IN (
-            SELECT id_tugas FROM tbl_tugas_siswa WHERE no_induk_siswa='$nisEsc'
-        ) LIMIT 5");
-    if ($__qTugas) {
-        while($tg = mysqli_fetch_assoc($__qTugas)) {
-            $all_notifications[] = [
-                'type' => 'tugas',
-                'icon' => 'fas fa-tasks',
-                'color' => '#f97316',
-                'title' => 'Tugas Baru',
-                'text' => htmlspecialchars($tg['judul_tugas']),
-                'link' => 'tugas.php'
-            ];
+    $cacheKeyTugas = 'tugas_aktif_' . $tenantId . '_' . md5($klsEsc);
+    $activeTugas = FileCache::get($cacheKeyTugas);
+    if ($activeTugas === false) {
+        $activeTugas = [];
+        $__qTugas = @mysqli_query($conn, "SELECT id, judul_tugas FROM tbl_tugas WHERE kelas='$klsEsc' AND status='aktif' ORDER BY id DESC LIMIT 20");
+        if ($__qTugas) {
+            while($tg = mysqli_fetch_assoc($__qTugas)) {
+                $activeTugas[] = $tg;
+            }
+        }
+        FileCache::set($cacheKeyTugas, $activeTugas, 300); // 5 minutes
+    }
+    
+    if (!empty($activeTugas)) {
+        $doneTugas = [];
+        $__qDone = @mysqli_query($conn, "SELECT id_tugas FROM tbl_tugas_siswa WHERE no_induk_siswa='$nisEsc'");
+        if ($__qDone) {
+            while($r = mysqli_fetch_assoc($__qDone)) {
+                $doneTugas[] = $r['id_tugas'];
+            }
+        }
+        
+        $addedCount = 0;
+        foreach ($activeTugas as $tg) {
+            if (!in_array($tg['id'], $doneTugas)) {
+                $all_notifications[] = [
+                    'type' => 'tugas',
+                    'icon' => 'fas fa-tasks',
+                    'color' => '#f97316',
+                    'title' => 'Tugas Baru',
+                    'text' => htmlspecialchars($tg['judul_tugas']),
+                    'link' => 'tugas.php'
+                ];
+                $addedCount++;
+                if ($addedCount >= 5) break;
+            }
         }
     }
 }
@@ -153,21 +183,42 @@ if ($__tblTugasSiswa && mysqli_num_rows($__tblTugasSiswa) > 0) {
 // 4. Notifikasi Literasi
 $__tblLit = @mysqli_query($conn, "SHOW TABLES LIKE 'tbl_literasi_tugas'");
 if ($__tblLit && mysqli_num_rows($__tblLit) > 0) {
-    $__qLit = @mysqli_query($conn, "SELECT lt.judul FROM tbl_literasi_tugas lt
-        WHERE lt.kelas='$klsEsc' AND lt.status='aktif'
-        AND lt.id NOT IN (
-            SELECT id_tugas FROM tbl_literasi_progress WHERE no_induk_siswa='$nisEsc' AND status='selesai'
-        ) LIMIT 5");
-    if ($__qLit) {
-        while($lit = mysqli_fetch_assoc($__qLit)) {
-            $all_notifications[] = [
-                'type' => 'literasi',
-                'icon' => 'fas fa-book-reader',
-                'color' => '#14b8a6',
-                'title' => 'Misi Literasi',
-                'text' => htmlspecialchars($lit['judul']),
-                'link' => 'literasi.php'
-            ];
+    $cacheKeyLit = 'literasi_aktif_' . $tenantId . '_' . md5($klsEsc);
+    $activeLit = FileCache::get($cacheKeyLit);
+    if ($activeLit === false) {
+        $activeLit = [];
+        $__qLit = @mysqli_query($conn, "SELECT id, judul FROM tbl_literasi_tugas WHERE kelas='$klsEsc' AND status='aktif' ORDER BY id DESC LIMIT 20");
+        if ($__qLit) {
+            while($lit = mysqli_fetch_assoc($__qLit)) {
+                $activeLit[] = $lit;
+            }
+        }
+        FileCache::set($cacheKeyLit, $activeLit, 300); // 5 minutes
+    }
+    
+    if (!empty($activeLit)) {
+        $doneLit = [];
+        $__qDone = @mysqli_query($conn, "SELECT id_tugas FROM tbl_literasi_progress WHERE no_induk_siswa='$nisEsc' AND status='selesai'");
+        if ($__qDone) {
+            while($r = mysqli_fetch_assoc($__qDone)) {
+                $doneLit[] = $r['id_tugas'];
+            }
+        }
+        
+        $addedCount = 0;
+        foreach ($activeLit as $lit) {
+            if (!in_array($lit['id'], $doneLit)) {
+                $all_notifications[] = [
+                    'type' => 'literasi',
+                    'icon' => 'fas fa-book-reader',
+                    'color' => '#14b8a6',
+                    'title' => 'Misi Literasi',
+                    'text' => htmlspecialchars($lit['judul']),
+                    'link' => 'literasi.php'
+                ];
+                $addedCount++;
+                if ($addedCount >= 5) break;
+            }
         }
     }
 }
@@ -192,23 +243,47 @@ if ($__tbl7kih && mysqli_num_rows($__tbl7kih) > 0) {
 $__tblPeng = @mysqli_query($conn, "SHOW TABLES LIKE 'tbl_pengumuman'");
 $__tblPengRead = @mysqli_query($conn, "SHOW TABLES LIKE 'tbl_pengumuman_read'");
 if ($__tblPeng && mysqli_num_rows($__tblPeng) > 0 && $__tblPengRead && mysqli_num_rows($__tblPengRead) > 0) {
-    $__qPeng = @mysqli_query($conn, "SELECT p.id, p.judul FROM tbl_pengumuman p
-        WHERE p.status='aktif' AND p.mulai <= CURDATE() AND p.selesai >= CURDATE()
-        AND (p.target_scope='SEMUA' OR (p.target_scope='KELAS' AND p.target_value='$klsEsc'))
-        AND p.id NOT IN (
-            SELECT pengumuman_id FROM tbl_pengumuman_read WHERE no_induk='$nisEsc'
-        ) ORDER BY p.id DESC LIMIT 5");
-    if ($__qPeng) {
-        while($png = mysqli_fetch_assoc($__qPeng)) {
-            $all_notifications[] = [
-                'type' => 'pengumuman',
-                'icon' => 'fas fa-bullhorn',
-                'color' => '#eab308',
-                'title' => 'Pengumuman Baru',
-                'text' => htmlspecialchars($png['judul']),
-                'link' => 'javascript:void(0)',
-                'action_onclick' => 'markReadAndGo('.$png['id'].', \'../../pengumuman.php\')'
-            ];
+    $cacheKeyPeng = 'pengumuman_aktif_' . $tenantId . '_' . md5($klsEsc);
+    $activePeng = FileCache::get($cacheKeyPeng);
+    if ($activePeng === false) {
+        $activePeng = [];
+        $__qPeng = @mysqli_query($conn, "SELECT p.id, p.judul FROM tbl_pengumuman p
+            WHERE p.status='aktif' AND p.mulai <= CURDATE() AND p.selesai >= CURDATE()
+            AND (p.target_scope='SEMUA' OR (p.target_scope='KELAS' AND p.target_value='$klsEsc'))
+            ORDER BY p.id DESC LIMIT 20");
+        if ($__qPeng) {
+            while($png = mysqli_fetch_assoc($__qPeng)) {
+                $activePeng[] = $png;
+            }
+        }
+        FileCache::set($cacheKeyPeng, $activePeng, 600); // Cache 10 minutes per class
+    }
+
+    if (!empty($activePeng)) {
+        // Fetch read ids for this student
+        $readIds = [];
+        $__qRead = @mysqli_query($conn, "SELECT pengumuman_id FROM tbl_pengumuman_read WHERE no_induk='$nisEsc'");
+        if ($__qRead) {
+            while($r = mysqli_fetch_assoc($__qRead)) {
+                $readIds[] = $r['pengumuman_id'];
+            }
+        }
+
+        $addedCount = 0;
+        foreach ($activePeng as $png) {
+            if (!in_array($png['id'], $readIds)) {
+                $all_notifications[] = [
+                    'type' => 'pengumuman',
+                    'icon' => 'fas fa-bullhorn',
+                    'color' => '#eab308',
+                    'title' => 'Pengumuman Baru',
+                    'text' => htmlspecialchars($png['judul']),
+                    'link' => 'javascript:void(0)',
+                    'action_onclick' => 'markReadAndGo('.$png['id'].', \'../../pengumuman.php\')'
+                ];
+                $addedCount++;
+                if ($addedCount >= 5) break;
+            }
         }
     }
 }
