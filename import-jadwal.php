@@ -9,7 +9,7 @@
         <em>Tips: Template sudah berisi <strong>Daftar Guru</strong> (Nomor Induk + Nama) dan <strong>Daftar Kelas</strong> dari database, sehingga data selalu sinkron.</em>
     </div>
     
-    <a href="/download-template-jadwal" class="btn btn-info mb-4">
+    <a href="/home/download-template-jadwal" class="btn btn-info mb-4">
         <i class="fas fa-download"></i> Download Template Excel (Sinkron Database)
     </a>
     
@@ -28,7 +28,7 @@
                 </div>
                 <div class="card-body">
                     <p class="small">Upload file Excel hasil ekstrak PDF di sini. Sistem akan otomatis mengisi <strong>Nomor Induk</strong> guru dan merapikan <strong>Format Kelas</strong> sesuai database.</p>
-                    <form action="/proses-fix-excel.php" method="post" enctype="multipart/form-data">
+                    <form action="/home/import-jadwal" method="post" enctype="multipart/form-data">
                         <div class="form-group">
                             <label>Pilih File Excel Raw (.xlsx)</label>
                             <input type="file" name="file" class="form-control-file" accept=".xlsx" required>

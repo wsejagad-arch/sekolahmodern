@@ -16,6 +16,126 @@ if (isset($_GET['page']) && $_GET['page'] === 'beranda') {
   exit;
 }
 
+// ── Handle Fix-Excel POST (harus sebelum output HTML) ──
+if (isset($_POST['fix_excel']) && isset($_REQUEST['page']) && $_REQUEST['page'] === 'import-jadwal') {
+    include_once "SimpleXLSX.php";
+    include_once "SimpleXLSXGen.php";
+
+    $filename = $_FILES['file']['tmp_name'] ?? '';
+    $ext = pathinfo($_FILES['file']['name'] ?? '', PATHINFO_EXTENSION);
+
+    if ($ext != 'xlsx' || empty($filename)) {
+        echo "<script>alert('Harap upload file Excel (.xlsx)'); window.location.href='/home/import-jadwal';</script>";
+        exit();
+    }
+
+    // Baca daftar guru dari database
+    $qGuru = mysqli_query($conn, "SELECT no_induk, nama_guru FROM tbl_guru");
+    $fix_gurus = [];
+    if ($qGuru) { while ($r = mysqli_fetch_assoc($qGuru)) { $fix_gurus[] = $r; } }
+
+    // Baca daftar kelas baku dari database
+    $qKelas = mysqli_query($conn, "SELECT nama_kelas FROM tbl_kelas");
+    if (!$qKelas) { $qKelas = mysqli_query($conn, "SELECT kelas AS nama_kelas FROM tbl_kelas"); }
+    $fix_kelas_baku = [];
+    if ($qKelas) { while ($r = mysqli_fetch_assoc($qKelas)) { $fix_kelas_baku[] = $r['nama_kelas']; } }
+
+    $xlsx = SimpleXLSX::parse($filename);
+    if ($xlsx) {
+        $rows = $xlsx->rows();
+        $new_rows = [];
+
+        foreach ($rows as $index => $row) {
+            if ($index == 0) { $new_rows[] = $row; continue; }
+            if (empty(array_filter($row))) continue;
+
+            $no_induk  = $row[0] ?? '';
+            $nama_guru = $row[1] ?? '';
+            $kelas     = $row[3] ?? '';
+
+            // Auto-fill no_induk dari database
+            if (empty($no_induk) && !empty($nama_guru)) {
+                $name_clean = explode(',', $nama_guru)[0];
+                $name_clean = str_ireplace(['Drs.','Dra.','H.','Hj.','Dr.','M.Pd','S.Pd','M.Si','S.Si','S.Ag','M.Ag','S.Sos','S.Kom','M.Kom','S.E','M.M'], '', $name_clean);
+                $name_clean = trim($name_clean);
+                $words = explode(' ', $name_clean);
+                $search_name = strtolower($words[0]);
+                if (isset($words[1]) && strlen($words[1]) > 2) { $search_name .= ' ' . strtolower($words[1]); }
+                foreach ($fix_gurus as $g) {
+                    if (strpos(strtolower($g['nama_guru']), $search_name) !== false) {
+                        $row[0] = $g['no_induk'];
+                        break;
+                    }
+                }
+            }
+
+            // Sinkronkan nama kelas
+            if (!empty($kelas) && !empty($fix_kelas_baku)) {
+                foreach ($fix_kelas_baku as $kb) {
+                    if (strtolower(trim($kb)) == strtolower(trim($kelas))) { $row[3] = $kb; break; }
+                }
+                if ($row[3] === $kelas) {
+                    $clean_pdf = preg_replace('/[^A-Za-z0-9]/', '', $kelas);
+                    foreach ($fix_kelas_baku as $kb) {
+                        if (strtolower($clean_pdf) == strtolower(preg_replace('/[^A-Za-z0-9]/', '', $kb))) {
+                            $row[3] = $kb; break;
+                        }
+                    }
+                }
+            }
+            $new_rows[] = $row;
+        }
+
+        $new_xlsx = \Shuchkin\SimpleXLSXGen::fromArray($new_rows);
+        $new_xlsx->downloadAs('jadwal_fixed.xlsx');
+        exit();
+    } else {
+        $err = SimpleXLSX::parseError();
+        echo "<script>alert('Gagal membaca file Excel: " . addslashes($err) . "'); window.location.href='/home/import-jadwal';</script>";
+        exit();
+    }
+}
+
+// ── Handle Download Template Jadwal ──
+if (isset($_REQUEST['page']) && $_REQUEST['page'] === 'download-template-jadwal') {
+    include_once "SimpleXLSXGen.php";
+
+    $qGuru = mysqli_query($conn, "SELECT no_induk, nama_guru FROM tbl_guru ORDER BY nama_guru ASC");
+    $guru_list = [];
+    if ($qGuru) { while ($r = mysqli_fetch_assoc($qGuru)) { $guru_list[] = $r; } }
+
+    $qKelas = mysqli_query($conn, "SELECT nama_kelas FROM tbl_kelas ORDER BY nama_kelas ASC");
+    if (!$qKelas) { $qKelas = mysqli_query($conn, "SELECT kelas AS nama_kelas FROM tbl_kelas ORDER BY kelas ASC"); }
+    $kelas_list = [];
+    if ($qKelas) { while ($r = mysqli_fetch_assoc($qKelas)) { $kelas_list[] = $r['nama_kelas']; } }
+
+    // Sheet 1: Jadwal Guru
+    $jadwal_rows = [['<style bgcolor="#059669" color="#FFFFFF"><b>no_induk</b></style>','<style bgcolor="#059669" color="#FFFFFF"><b>nama_guru</b></style>','<style bgcolor="#059669" color="#FFFFFF"><b>nama_mapel</b></style>','<style bgcolor="#059669" color="#FFFFFF"><b>kelas</b></style>','<style bgcolor="#059669" color="#FFFFFF"><b>hari</b></style>','<style bgcolor="#059669" color="#FFFFFF"><b>jam_mulai</b></style>','<style bgcolor="#059669" color="#FFFFFF"><b>jam_selesai</b></style>','<style bgcolor="#059669" color="#FFFFFF"><b>ruang</b></style>']];
+    if (!empty($guru_list)) {
+        $sample = $guru_list[0];
+        $jadwal_rows[] = [$sample['no_induk'], $sample['nama_guru'], 'Contoh Mapel', !empty($kelas_list) ? $kelas_list[0] : 'X-1', 'Senin', '07:00', '07:45', 'Ruang 1'];
+    }
+    for ($i = 0; $i < 20; $i++) { $jadwal_rows[] = ['','','','','','','','']; }
+
+    // Sheet 2: Daftar Guru
+    $guru_rows = [['<style bgcolor="#2563EB" color="#FFFFFF"><b>No</b></style>','<style bgcolor="#2563EB" color="#FFFFFF"><b>Nomor Induk</b></style>','<style bgcolor="#2563EB" color="#FFFFFF"><b>Nama Guru</b></style>']];
+    foreach ($guru_list as $idx => $g) { $guru_rows[] = [$idx+1, $g['no_induk'], $g['nama_guru']]; }
+
+    // Sheet 3: Daftar Kelas
+    $kelas_rows = [['<style bgcolor="#D97706" color="#FFFFFF"><b>No</b></style>','<style bgcolor="#D97706" color="#FFFFFF"><b>Nama Kelas</b></style>']];
+    foreach ($kelas_list as $idx => $k) { $kelas_rows[] = [$idx+1, $k]; }
+
+    $xlsx = \Shuchkin\SimpleXLSXGen::fromArray($jadwal_rows, 'Jadwal Guru');
+    $xlsx->setColWidth(1,22); $xlsx->setColWidth(2,35); $xlsx->setColWidth(3,20); $xlsx->setColWidth(4,15);
+    $xlsx->setColWidth(5,12); $xlsx->setColWidth(6,12); $xlsx->setColWidth(7,12); $xlsx->setColWidth(8,18);
+    $xlsx->addSheet($guru_rows, 'Daftar Guru');
+    $xlsx->setColWidth(1,6); $xlsx->setColWidth(2,22); $xlsx->setColWidth(3,35);
+    $xlsx->addSheet($kelas_rows, 'Daftar Kelas');
+    $xlsx->setColWidth(1,6); $xlsx->setColWidth(2,25);
+    $xlsx->downloadAs('template_jadwal.xlsx');
+    exit();
+}
+
 // Get user info
 $id_user = $_SESSION['id_user'] ?? null;
 $username = $_SESSION['username'] ?? '';
