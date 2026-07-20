@@ -1,5 +1,5 @@
 <div class="container-fluid">
-    <a href="template-siswa.php" class="btn btn-info mb-3">
+    <a href="/template_siswa.xlsx" download="template_siswa.xlsx" class="btn btn-info mb-3">
         <i class="fas fa-download"></i> Download Template
     </a>
     <div class="alert alert-warning">
