@@ -64,9 +64,33 @@ if (isset($_POST['submit'])) {
     $success = false;
     $dbError = "";
 
+    // ── Cek kolom yang benar-benar ADA di tbl_guru (untuk hosting yg tidak support ALTER TABLE) ──
+    $_guruCols = [];
+    $_colQ = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_guru");
+    if ($_colQ) {
+        while ($_colR = mysqli_fetch_assoc($_colQ)) {
+            $_guruCols[] = $_colR['Field'];
+        }
+    }
+
+    // Build SET clause secara dinamis — kolom yang belum ada di DB dilewati
+    $_setClauses = [
+        "no_induk='$nip'",
+        "nama_guru='$nami'",
+        "status_kepegawaian='$status_kepegawaian'",
+        "walas='$walas_status'",
+        "status='$status'",
+    ];
+    if (in_array('no_wa', $_guruCols))                  $_setClauses[] = "no_wa='$no_wa'";
+    if (in_array('jabatan', $_guruCols))                $_setClauses[] = "jabatan='$jabatan'";
+    if (in_array('is_guru_bk', $_guruCols))             $_setClauses[] = "is_guru_bk=$is_guru_bk";
+    if (in_array('is_pendamping_literasi', $_guruCols)) $_setClauses[] = "is_pendamping_literasi=$is_pendamping_literasi";
+    if (in_array('is_tim_aduan', $_guruCols))           $_setClauses[] = "is_tim_aduan=$is_tim_aduan";
+    $_setStr = implode(', ', $_setClauses);
+
     if ($error != UPLOAD_ERR_NO_FILE) {
         $cekfoto = cek_foto($namafile);
-        $upd1 = mysqli_query($conn, "UPDATE tbl_guru SET no_induk='$nip', nama_guru='$nami', no_wa='$no_wa', status_kepegawaian='$status_kepegawaian', jabatan='$jabatan', is_guru_bk=$is_guru_bk, is_pendamping_literasi=$is_pendamping_literasi, is_tim_aduan=$is_tim_aduan, walas='$walas_status', foto='$cekfoto', status='$status' WHERE id_guru='$idguru'");
+        $upd1 = mysqli_query($conn, "UPDATE tbl_guru SET {$_setStr}, foto='$cekfoto' WHERE id_guru='$idguru'");
         
         if (!$upd1) { 
             $dbError = mysqli_error($conn); 
@@ -78,7 +102,7 @@ if (isset($_POST['submit'])) {
             }
         }
     } else {
-        $upd2 = mysqli_query($conn, "UPDATE tbl_guru SET no_induk='$nip', nama_guru='$nami', no_wa='$no_wa', status_kepegawaian='$status_kepegawaian', jabatan='$jabatan', is_guru_bk=$is_guru_bk, is_pendamping_literasi=$is_pendamping_literasi, is_tim_aduan=$is_tim_aduan, walas='$walas_status', status='$status' WHERE id_guru='$idguru'");
+        $upd2 = mysqli_query($conn, "UPDATE tbl_guru SET {$_setStr} WHERE id_guru='$idguru'");
         if (!$upd2) { 
             $dbError = mysqli_error($conn); 
         } else {
@@ -145,12 +169,12 @@ if (isset($_POST['submit'])) {
         ?>
 
         <div class="container rounded" style="background-color: #ffffff; outline: 1px solid lightgrey">
-            <form method="POST" action="" class="needs-validation" enctype="multipart/form-data" novalidate>
+            <form method="POST" action="?page=edit-guru&id_guru=<?= htmlspecialchars($idguru) ?>" class="needs-validation" enctype="multipart/form-data" novalidate>
 
                 <!-- NIP -->
                 <div class="form-group col-sm-4 pt-4">
                     <label for="nip">NIP/NUPTK:</label>
-                    <input type="text" class="form-control" id="nip" name="nip" value="<?= htmlspecialchars($data['no_induk']); ?>" required pattern="[0-9]+" title="Hanya boleh berisi angka">
+                    <input type="text" class="form-control" id="nip" name="nip" value="<?= htmlspecialchars($data['no_induk']); ?>" required>
                     <div class="valid-feedback">Valid.</div>
                     <div class="invalid-feedback">Harap diisi kolom ini (hanya angka).</div>
                 </div>

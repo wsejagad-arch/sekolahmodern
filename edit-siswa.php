@@ -20,14 +20,28 @@ if ($_jabatanChk && mysqli_num_rows($_jabatanChk) === 0) {
 if (isset($_POST['submit'])) {
     //definisikan variabel dulu
       $noinduk = trim(mysqli_real_escape_string($conn, $_POST['noinduk']));
-      $nami = mysqli_real_escape_string($conn, $_POST['nama']);
-	  $kelas = mysqli_real_escape_string($conn, $_POST['kelas']);
-	  $status = mysqli_real_escape_string($conn, $_POST['status']);
-	  $jabatan = in_array($_POST['jabatan'] ?? '', ['Siswa','Ketua Kelas']) ? $_POST['jabatan'] : 'Siswa';
-	  $tglskr = date('Y-m-d H:i:s');
-	  $isilog = "$nama"." mengubah data siswa dengan NIS "."$noinduk";
-	  
-	  $update = mysqli_query($conn, "UPDATE tbl_siswa SET kelas='$kelas', status='$status', jabatan='$jabatan' WHERE no_induk='$no_induk'");
+      $nami    = mysqli_real_escape_string($conn, $_POST['nama']);
+	  $kelas   = mysqli_real_escape_string($conn, $_POST['kelas']);
+	  $status  = mysqli_real_escape_string($conn, $_POST['status']);
+	  $jabatan = in_array(isset($_POST['jabatan']) ? $_POST['jabatan'] : '', ['Siswa','Ketua Kelas']) ? $_POST['jabatan'] : 'Siswa';
+	  $tglskr  = date('Y-m-d H:i:s');
+	  $isilog  = "$nama mengubah data siswa dengan NIS $noinduk";
+
+	  // Cek kolom yang benar-benar ADA di tbl_siswa (aman jika jabatan belum ada di DB hosting)
+	  $_siswaCols = [];
+	  $_colQs = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_siswa");
+	  if ($_colQs) {
+	      while ($_colRs = mysqli_fetch_assoc($_colQs)) {
+	          $_siswaCols[] = $_colRs['Field'];
+	      }
+	  }
+
+	  // Build SET clause dinamis
+	  $_setClauses = ["kelas='$kelas'", "status='$status'"];
+	  if (in_array('jabatan', $_siswaCols)) $_setClauses[] = "jabatan='$jabatan'";
+	  $_setStrSiswa = implode(', ', $_setClauses);
+
+	  $update = mysqli_query($conn, "UPDATE tbl_siswa SET {$_setStrSiswa} WHERE no_induk='$no_induk'");
 	  if($update) {
 		mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr', '$isilog')");
 		?>
@@ -42,8 +56,10 @@ if (isset($_POST['submit'])) {
 				  window.location.href = "?page=data-siswa";
 			  })
 		</script>
-	<?php } else { ?>
-		<script>Swal.fire('Gagal', 'merubah data siswa', 'error')</script>
+	<?php } else {
+		$_dbErrSiswa = mysqli_error($conn);
+		?>
+		<script>Swal.fire('Gagal Menyimpan!', 'Error database: <?= htmlspecialchars($_dbErrSiswa) ?>', 'error')</script>
 	<?php }
 }
 ?>
@@ -55,7 +71,7 @@ if (isset($_POST['submit'])) {
     </div>
 
 <div class="container rounded" style="background-color: #ffffff; outline: 1px solid lightgrey">
-<form method="POST" action="" class="needs-validation" novalidate>
+<form method="POST" action="?page=edit-siswa&no_induk=<?= htmlspecialchars($no_induk) ?>" class="needs-validation" novalidate>
 
 <?php 
 // Tampilkan data siswa yang akan diedit
