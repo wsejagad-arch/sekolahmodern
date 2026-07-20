@@ -62,13 +62,9 @@ if (isset($_POST['fix_excel']) && isset($_REQUEST['page']) && $_REQUEST['page'] 
                 
                 $name_clean = strtolower($name_clean);
                 $words = explode(' ', $name_clean);
-                $search_name = $words[0] ?? '';
-                if (isset($words[1]) && strlen($words[1]) > 2) { 
-                    $search_name .= ' ' . $words[1]; 
-                }
                 
                 $best_match_id = null;
-                $highest_sim = 0;
+                $highest_score = 0;
                 
                 foreach ($fix_gurus as $g) {
                     $db_name_clean = str_ireplace(['Drs.','Dra.','H.','Hj.','Dr.','M.Pd','S.Pd','M.Si','S.Si','S.Ag','M.Ag','S.Sos','S.Kom','M.Kom','S.E','M.M', 'S.Pd.I', 'M.Pd.I', 'S.T', 'M.T'], '', $g['nama_guru']);
@@ -77,25 +73,47 @@ if (isset($_POST['fix_excel']) && isset($_REQUEST['page']) && $_REQUEST['page'] 
                     
                     if (empty($db_name_clean)) continue;
                     
+                    // 1. Exact match
                     if ($db_name_clean === $name_clean) {
                         $best_match_id = $g['no_induk'];
                         break;
                     }
                     
-                    if (!empty($search_name) && strpos($db_name_clean, $search_name) !== false) {
+                    // 2. Contains match (full string without spaces)
+                    $nospace_excel = str_replace(' ', '', $name_clean);
+                    $nospace_db = str_replace(' ', '', $db_name_clean);
+                    if (strpos($nospace_db, $nospace_excel) !== false || strpos($nospace_excel, $nospace_db) !== false) {
                         $best_match_id = $g['no_induk'];
-                        $highest_sim = 100;
-                    } else if (strpos($name_clean, $db_name_clean) !== false) {
-                        $best_match_id = $g['no_induk'];
-                        $highest_sim = 100;
+                        $highest_score = 100;
+                        break;
                     }
                     
-                    if ($highest_sim < 100) {
-                        similar_text($name_clean, $db_name_clean, $perc);
-                        if ($perc > $highest_sim && $perc > 72) {
-                            $highest_sim = $perc;
-                            $best_match_id = $g['no_induk'];
+                    // 3. Word by word match (sangat ampuh untuk typo dan singkatan)
+                    $db_words = explode(' ', $db_name_clean);
+                    $score = 0;
+                    
+                    foreach ($words as $ew) {
+                        // Alias singkatan umum
+                        if ($ew == 'muh') $ew = 'muhammad';
+                        if ($ew == 'amat') $ew = 'ahmad';
+                        
+                        $best_word_sim = 0;
+                        foreach ($db_words as $dw) {
+                            if ($dw == 'muh') $dw = 'muhammad';
+                            if ($dw == 'amat') $dw = 'ahmad';
+                            
+                            similar_text($ew, $dw, $p);
+                            if ($p > $best_word_sim) $best_word_sim = $p;
                         }
+                        $score += $best_word_sim; // Tambahkan kemiripan tiap kata
+                    }
+                    
+                    // Rata-rata kemiripan per kata
+                    $avg_score = $score / count($words);
+                    
+                    if ($avg_score > $highest_score && $avg_score > 75) {
+                        $highest_score = $avg_score;
+                        $best_match_id = $g['no_induk'];
                     }
                 }
                 
