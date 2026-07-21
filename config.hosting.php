@@ -5,10 +5,10 @@
  * Sesuaikan user/password/database dengan cPanel > MySQL Databases
  */
 return [
-    'host'     => 'localhost',
+    'host'     => '203.175.125.118',
     'port'     => 3306,
-    'user'     => 'smasumb1_simanis1',
-    'password' => 'W@hyu1234!',
-    'database' => 'smasumb1_simanis',
+    'user'     => 'vps_jurnal',
+    'password' => 'WahyuJurnal123!',
+    'database' => 'sijurnal',
     'site_url' => 'https://simanis.sman1sumber.sch.id',
 ];
