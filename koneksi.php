@@ -92,68 +92,65 @@ if ($isLocal && file_exists(__DIR__ . '/koneksi_local.php')) {
     return;
 }
 
-// Database configuration untuk hosting
-$host = 'localhost';
-$port = 3306;
-$user = '';
-$password = '';
-$database = '';
-$persistent = false; // Nonaktifkan persistent connection di shared hosting (mencegah Too many connections)
-
-if (file_exists(__DIR__ . '/config.hosting.php')) {
-    $cfg = require __DIR__ . '/config.hosting.php';
-    if (is_array($cfg)) {
-        $host = (string) ($cfg['host'] ?? $host);
-        $port = (int) ($cfg['port'] ?? $port);
-        $user = (string) ($cfg['user'] ?? $user);
-        $password = (string) ($cfg['password'] ?? $password);
-        $database = (string) ($cfg['database'] ?? $database);
-        if (isset($cfg['persistent'])) {
-            $persistent = (bool) $cfg['persistent'];
-        }
-    }
-} else {
-    // Fallback legacy (isi via config.hosting.php di production)
-    $host = '127.0.0.1';
-    $port = 3306;
-    $user = 'smasumb1_simanis1';
-    $password = 'W@hyu1234!';
-    $database = 'smasumb1_simanis';
-}
-
-// Create connection
+// Database configuration (Multi-Target Failover: VPS Primary -> Local cPanel Fallback)
 mysqli_report(MYSQLI_REPORT_OFF);
 $conn = null;
-try {
-    // Hapus fitur persistent (p:host) untuk menghindari bug max_connections di cPanel/Shared Hosting
-    $connect_host = $host;
 
+$targets = [];
 
-    $conn = @new mysqli($connect_host, $user, $password, $database, $port);
-    if ($conn->connect_error) {
-        error_log('[koneksi.php] MySQL connect error: ' . $conn->connect_error);
-        $conn = null;
-    } else {
-        mysqli_set_charset($conn, 'utf8');
-        // Auto-close koneksi saat script PHP selesai mengeksekusi
-        register_shutdown_function(function() use (&$conn) {
-            if ($conn instanceof mysqli) {
-                @$conn->close();
-            }
-        });
-        require_once __DIR__ . '/multi_tenant.php';
-        mt_bootstrap($conn);
-        // Auto migrate dimatikan SEMENTARA karena menyebabkan Metadata Lock saat jam sibuk
-        // if (!file_exists(__DIR__ . '/.migrated_v3')) {
-        //     require_once __DIR__ . '/auto_migrate.php';
-        //     run_auto_migrations($conn);
-        //     @file_put_contents(__DIR__ . '/.migrated_v3', '1');
-        // }
+// Target 1: VPS Config (jika ada config.hosting.php)
+if (file_exists(__DIR__ . '/config.hosting.php')) {
+    $cfg = require __DIR__ . '/config.hosting.php';
+    if (is_array($cfg) && !empty($cfg['host'])) {
+        $targets[] = [
+            'label'    => 'VPS Primary',
+            'host'     => (string) $cfg['host'],
+            'port'     => (int) ($cfg['port'] ?? 3306),
+            'user'     => (string) ($cfg['user'] ?? ''),
+            'password' => (string) ($cfg['password'] ?? ''),
+            'database' => (string) ($cfg['database'] ?? ''),
+        ];
     }
-} catch (Throwable $e) {
-    error_log('[koneksi.php] MySQL exception: ' . $e->getMessage());
-    $conn = null;
 }
+
+// Target 2: Fallback Database Lokal cPanel
+$targets[] = [
+    'label'    => 'cPanel Local Fallback',
+    'host'     => '127.0.0.1',
+    'port'     => 3306,
+    'user'     => 'smasumb1_simanis1',
+    'password' => 'W@hyu1234!',
+    'database' => 'smasumb1_simanis',
+];
+
+$old_timeout = ini_get('default_socket_timeout');
+ini_set('default_socket_timeout', 3);
+
+foreach ($targets as $t) {
+    if (empty($t['host']) || empty($t['user'])) continue;
+    try {
+        $conn = @new mysqli($t['host'], $t['user'], $t['password'], $t['database'], $t['port']);
+        if (!$conn->connect_error) {
+            mysqli_set_charset($conn, 'utf8');
+            register_shutdown_function(function() use (&$conn) {
+                if ($conn instanceof mysqli) {
+                    @$conn->close();
+                }
+            });
+            require_once __DIR__ . '/multi_tenant.php';
+            mt_bootstrap($conn);
+            break;
+        } else {
+            error_log('[koneksi.php] Gagal terhubung ke ' . $t['label'] . ' (' . $t['host'] . '): ' . $conn->connect_error);
+            $conn = null;
+        }
+    } catch (Throwable $e) {
+        error_log('[koneksi.php] Exception pada ' . $t['label'] . ' (' . $t['host'] . '): ' . $e->getMessage());
+        $conn = null;
+    }
+}
+
+ini_set('default_socket_timeout', $old_timeout);
 
 if (!$conn) {
     http_response_code(503);
