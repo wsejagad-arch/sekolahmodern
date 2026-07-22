@@ -662,74 +662,123 @@ function konfirmasiButtonColor($opt)
                 </div>
             <?php endif; ?>
             
-            <?php if (!$izinHariIni && !empty($jadwalHariIni)): ?>
+            <?php if (!$izinHariIni): ?>
                 <?php
-                $lastMapelId = null;
-                $_maxSel = '';
-                foreach ($jadwalHariIni as $_j) {
-                    if (isset($_j['jam_selesai']) && strcmp($_j['jam_selesai'], $_maxSel) > 0) {
-                        $_maxSel = $_j['jam_selesai'];
-                        $lastMapelId = (int)$_j['id_mapel'];
-                    }
-                }
-                ?>
-                <div class="space-y-4" id="jadwalList">
-                    <?php foreach ($jadwalHariIni as $idx => $jdw):
-                        $jamMul = !empty($jdw['jam_mulai']) ? date('H:i', strtotime($jdw['jam_mulai'])) : '-';
-                        $jamSel = !empty($jdw['jam_selesai']) ? date('H:i', strtotime($jdw['jam_selesai'])) : '';
-                        $jam = ($jamSel && $jamSel !== '-') ? "$jamMul - $jamSel" : $jamMul;
-                        $sudahAbsen = !empty($jdw['status_absen']);
-                        $byGuru = ($jdw['sumber_absen'] ?? '') === 'guru';
-                        $bySiswa = ($jdw['sumber_absen'] ?? '') === 'siswa';
-                        $isLast = ((int)$jdw['id_mapel'] === (int)$lastMapelId);
-                        
-                        $nm = strtoupper($jdw['nama_mapel']);
-                        if (strpos($nm, 'BAHASA') !== false) {
-                            $iconBg = 'bg-cyan-400'; $iconClass = 'fa-comment-dots';
-                        } elseif (strpos($nm, 'PKN') !== false || strpos($nm, 'PENDIDIKAN PANCASILA') !== false) {
-                            $iconBg = 'bg-blue-400'; $iconClass = 'fa-book-open';
-                        } else {
-                            $iconBg = 'bg-blue-600'; $iconClass = 'fa-users';
+                $firstMapel = null;
+                $lastMapel  = null;
+                if (!empty($jadwalHariIni)) {
+                    $firstMapel = $jadwalHariIni[0];
+                    $lastMapel  = $jadwalHariIni[count($jadwalHariIni) - 1];
+                    $_minM = $firstMapel['jam_mulai'] ?? '23:59:59';
+                    $_maxS = $lastMapel['jam_selesai'] ?? '00:00:00';
+                    foreach ($jadwalHariIni as $_j) {
+                        if (isset($_j['jam_mulai']) && strcmp($_j['jam_mulai'], $_minM) <= 0) {
+                            $_minM = $_j['jam_mulai'];
+                            $firstMapel = $_j;
                         }
-                    ?>
-                        <div class="flex items-center justify-between <?= $idx > 0 ? 'border-t border-gray-100 pt-4' : '' ?>">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="shrink-0 w-10 h-10 <?= $iconBg ?> text-white rounded-full flex items-center justify-center shadow-sm">
-                                    <i class="fas <?= $iconClass ?> text-lg"></i>
+                        if (isset($_j['jam_selesai']) && strcmp($_j['jam_selesai'], $_maxS) >= 0) {
+                            $_maxS = $_j['jam_selesai'];
+                            $lastMapel = $_j;
+                        }
+                    }
+                } else {
+                    // Fallback jika belum ada jadwal mapel hari ini
+                    $qFb = mysqli_query($conn, "SELECT id_mapel, nama_mapel FROM tbl_mapel_ampu WHERE {$tenantMapelAlias} AND kelas = '$kelasEscGlobal' LIMIT 1");
+                    $rFb = ($qFb && mysqli_num_rows($qFb) > 0) ? mysqli_fetch_assoc($qFb) : ['id_mapel' => 1, 'nama_mapel' => 'Presensi Harian'];
+                    $firstMapel = [
+                        'id_mapel' => $rFb['id_mapel'],
+                        'nama_mapel' => 'Presensi Masuk (Pergi)',
+                        'jam_mulai' => '07:00:00',
+                        'jam_selesai' => '08:00:00',
+                        'status_absen' => null,
+                        'sumber_absen' => 'siswa'
+                    ];
+                    $lastMapel = [
+                        'id_mapel' => $rFb['id_mapel'],
+                        'nama_mapel' => 'Presensi Pulang',
+                        'jam_mulai' => '15:00:00',
+                        'jam_selesai' => '16:00:00',
+                        'status_absen' => null,
+                        'sumber_absen' => 'siswa'
+                    ];
+                }
+
+                $sudahMasuk  = !empty($firstMapel['status_absen']);
+                $sudahPulang = !empty($lastMapel['status_absen']) && ($firstMapel['id_mapel'] !== $lastMapel['id_mapel'] || $sudahMasuk);
+                ?>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2" id="presensiPergiPulang">
+                    <!-- KARTU 1: PRESENSI PERGI / MASUK -->
+                    <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden flex flex-col justify-between">
+                        <div class="flex items-start justify-between relative z-10 mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white text-2xl shadow-inner">
+                                    <i class="fas fa-running"></i>
                                 </div>
-                                <div class="min-w-0">
-                                    <p class="text-sm font-bold text-gray-800 truncate"><?= htmlspecialchars($nm) ?></p>
-                                    <div class="flex items-center text-[11px] text-gray-500 mt-0.5 gap-3">
-                                        <span><i class="fas fa-clock mr-1 text-gray-400"></i><?= $jam ?></span>
-                                        <?php if (!empty($jdw['nama_guru'])): ?>
-                                            <span class="truncate"><i class="fas fa-user mr-1 text-gray-400"></i><?= htmlspecialchars(strtoupper($jdw['nama_guru'])) ?></span>
-                                        <?php endif; ?>
-                                    </div>
+                                <div>
+                                    <h3 class="text-base font-extrabold tracking-wide">PRESENSI PERGI / MASUK</h3>
+                                    <p class="text-xs text-blue-100 mt-0.5"><i class="fas fa-clock mr-1"></i>Jam Datang Sekolah</p>
                                 </div>
-                            </div>
-                            
-                            <div class="shrink-0 flex flex-col items-end gap-1.5 pl-2">
-                                <?php if ($sudahAbsen): ?>
-                                    <span class="text-[11px] font-semibold px-3 py-1 rounded-full <?= $byGuru ? 'badge-guru' : ($bySiswa ? 'badge-siswa' : 'bg-green-100 text-green-700') ?>">
-                                        <i class="fas fa-check-circle mr-1"></i> <?= htmlspecialchars(strtoupper($jdw['status_absen'])) ?>
-                                    </span>
-                                <?php else: ?>
-                                    <button type="button"
-                                        class="btn-absen-mandiri text-[12px] font-semibold px-4 py-1.5 rounded-lg text-white shadow-sm transition-all active:scale-95 flex items-center
-                                        <?= $isLast ? 'bg-blue-800 hover:bg-blue-900' : 'bg-blue-500 hover:bg-blue-600' ?>"
-                                        data-idmapel="<?= (int)$jdw['id_mapel'] ?>"
-                                        data-mapel="<?= htmlspecialchars($jdw['nama_mapel'], ENT_QUOTES) ?>"
-                                        data-jam-mulai="<?= htmlspecialchars($jdw['jam_mulai'] ?? '') ?>"
-                                        data-jam-selesai="<?= htmlspecialchars($jdw['jam_selesai'] ?? '') ?>"
-                                        data-is-last="<?= $isLast ? '1' : '0' ?>"
-                                        onclick="openCameraForMapel(<?= (int)$jdw['id_mapel'] ?>, '<?= htmlspecialchars($jdw['nama_mapel'], ENT_QUOTES | ENT_HTML5) ?>', '<?= htmlspecialchars($jdw['jam_mulai'] ?? '', ENT_QUOTES) ?>', '<?= htmlspecialchars($jdw['jam_selesai'] ?? '', ENT_QUOTES) ?>', <?= $isLast ? 'true' : 'false' ?>)">
-                                        <i class="fas <?= $isLast ? 'fa-sign-out-alt' : 'fa-fingerprint' ?> mr-1.5"></i><?= $isLast ? 'Absen Pulang' : 'Absen' ?>
-                                    </button>
-                                <?php endif; ?>
-                                <div id="time-ind-<?= (int)$jdw['id_mapel'] ?>" class="text-[10px] text-right font-medium"></div>
                             </div>
                         </div>
-                    <?php endforeach; ?>
+
+                        <div class="relative z-10 mt-2 pt-3 border-t border-white/20 flex items-center justify-between">
+                            <div>
+                                <span class="text-[11px] text-blue-100 block">Status Masuk:</span>
+                                <span class="text-sm font-bold">
+                                    <?= $sudahMasuk ? htmlspecialchars(strtoupper($firstMapel['status_absen'])) : 'Belum Absen' ?>
+                                </span>
+                            </div>
+
+                            <?php if ($sudahMasuk): ?>
+                                <span class="px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                                    <i class="fas fa-check-circle text-green-300"></i> Sudah Masuk
+                                </span>
+                            <?php else: ?>
+                                <button type="button"
+                                    class="px-5 py-2.5 rounded-xl bg-white text-blue-700 hover:bg-blue-50 text-xs font-black shadow-md transition-all active:scale-95 flex items-center gap-2"
+                                    onclick="openCameraForMapel(<?= (int)$firstMapel['id_mapel'] ?>, 'Presensi Masuk (Pergi)', '<?= htmlspecialchars($firstMapel['jam_mulai'] ?? '07:00:00', ENT_QUOTES) ?>', '<?= htmlspecialchars($firstMapel['jam_selesai'] ?? '08:00:00', ENT_QUOTES) ?>', false)">
+                                    <i class="fas fa-fingerprint text-base"></i> Absen Masuk
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- KARTU 2: PRESENSI PULANG -->
+                    <div class="bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden flex flex-col justify-between">
+                        <div class="flex items-start justify-between relative z-10 mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white text-2xl shadow-inner">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-extrabold tracking-wide">PRESENSI PULANG</h3>
+                                    <p class="text-xs text-pink-100 mt-0.5"><i class="fas fa-clock mr-1"></i>Jam Pulang Sekolah</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative z-10 mt-2 pt-3 border-t border-white/20 flex items-center justify-between">
+                            <div>
+                                <span class="text-[11px] text-pink-100 block">Status Pulang:</span>
+                                <span class="text-sm font-bold">
+                                    <?= $sudahPulang ? htmlspecialchars(strtoupper($lastMapel['status_absen'])) : 'Belum Absen' ?>
+                                </span>
+                            </div>
+
+                            <?php if ($sudahPulang): ?>
+                                <span class="px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                                    <i class="fas fa-check-circle text-green-300"></i> Sudah Pulang
+                                </span>
+                            <?php else: ?>
+                                <button type="button"
+                                    class="px-5 py-2.5 rounded-xl bg-white text-purple-700 hover:bg-purple-50 text-xs font-black shadow-md transition-all active:scale-95 flex items-center gap-2"
+                                    onclick="openCameraForMapel(<?= (int)$lastMapel['id_mapel'] ?>, 'Presensi Pulang', '<?= htmlspecialchars($lastMapel['jam_mulai'] ?? '15:00:00', ENT_QUOTES) ?>', '<?= htmlspecialchars($lastMapel['jam_selesai'] ?? '16:00:00', ENT_QUOTES) ?>', true)">
+                                    <i class="fas fa-sign-out-alt text-base"></i> Absen Pulang
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
             <?php endif; ?>
         </div>
