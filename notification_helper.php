@@ -12,10 +12,17 @@
 
 function notif_column_exists(mysqli $conn, string $table, string $column): bool
 {
+    static $cache = [];
+    $key = $table . '.' . $column;
+    if (isset($cache[$key])) {
+        return $cache[$key];
+    }
     $tableEsc = mysqli_real_escape_string($conn, $table);
     $columnEsc = mysqli_real_escape_string($conn, $column);
     $q = @mysqli_query($conn, "SHOW COLUMNS FROM `$tableEsc` LIKE '$columnEsc'");
-    return (bool)($q && mysqli_num_rows($q) > 0);
+    $exists = (bool)($q && mysqli_num_rows($q) > 0);
+    $cache[$key] = $exists;
+    return $exists;
 }
 
 function notif_ensure_schema(mysqli $conn): void

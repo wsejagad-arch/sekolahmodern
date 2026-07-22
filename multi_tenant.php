@@ -9,17 +9,30 @@
 
 function mt_table_exists(mysqli $conn, string $table): bool
 {
+    static $cache = [];
+    if (isset($cache[$table])) {
+        return $cache[$table];
+    }
     $tableEsc = mysqli_real_escape_string($conn, $table);
     $q = @mysqli_query($conn, "SHOW TABLES LIKE '$tableEsc'");
-    return (bool)($q && mysqli_num_rows($q) > 0);
+    $exists = (bool)($q && mysqli_num_rows($q) > 0);
+    $cache[$table] = $exists;
+    return $exists;
 }
 
 function mt_column_exists(mysqli $conn, string $table, string $column): bool
 {
+    static $cache = [];
+    $key = $table . '.' . $column;
+    if (isset($cache[$key])) {
+        return $cache[$key];
+    }
     $tableEsc = mysqli_real_escape_string($conn, $table);
     $columnEsc = mysqli_real_escape_string($conn, $column);
     $q = @mysqli_query($conn, "SHOW COLUMNS FROM `$tableEsc` LIKE '$columnEsc'");
-    return (bool)($q && mysqli_num_rows($q) > 0);
+    $exists = (bool)($q && mysqli_num_rows($q) > 0);
+    $cache[$key] = $exists;
+    return $exists;
 }
 
 function mt_add_school_column(mysqli $conn, string $table, string $after = '')
