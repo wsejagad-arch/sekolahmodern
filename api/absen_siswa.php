@@ -141,46 +141,85 @@ if (empty($mapelRow)) {
 }
 $namaMapel  = $mapelRow['nama_mapel'];
 $nipGuru    = $mapelRow['no_induk_guru'];
-// ── Tentukan status: Hadir atau Telat ─────────────────────────────────────────
-$jamMulai    = $mapelRow['jam_mulai'] ?? '00:00:00';   // e.g. "07:00:00"
-$waktuIni    = date('H:i:s');                          // jam server saat ini
-$statusAbsen = (strtotime($waktuIni) > strtotime($jamMulai)) ? 'H/T' : 'Hadir';
+// ── Tentukan setting jam dari database / app_config ───────────────────────────
+$jamPulangMulai   = '15:30:00';
+$jamPulangSelesai = '17:00:00';
+$jamMasukBatas   = '07:00:00';
 
-// ── Validasi jam terakhir (absen pulang) ──────────────────────────────────────
-// Cek apakah mapel ini adalah jam paling akhir untuk kelas tsb hari ini
+$qCfg = @mysqli_query($conn, "SELECT kunci, nilai FROM tbl_app_config WHERE kunci IN ('jam_pulang_mulai', 'jam_pulang_selesai', 'jam_masuk_batas')");
+if ($qCfg) {
+    while ($rC = mysqli_fetch_assoc($qCfg)) {
+        if ($rC['kunci'] === 'jam_pulang_mulai')   $jamPulangMulai   = $rC['nilai'];
+        if ($rC['kunci'] === 'jam_pulang_selesai') $jamPulangSelesai = $rC['nilai'];
+        if ($rC['kunci'] === 'jam_masuk_batas')   $jamMasukBatas   = $rC['nilai'];
+    }
+}
+
+$waktuIni    = date('H:i:s');
+$tglHariIni  = date('Y-m-d');
+$nisEsc      = mysqli_real_escape_string($conn, $nis);
+$tglEsc      = mysqli_real_escape_string($conn, $tglHariIni);
+$kelasEsc    = mysqli_real_escape_string($conn, $kelas);
+$namaMapel   = $mapelRow['nama_mapel'];
+$nipGuru     = $mapelRow['no_induk_guru'];
+
+// ── Cek apakah ini Absen Pulang ───────────────────────────────────────────────
 $jamSelesaiMapel = $mapelRow['jam_selesai'] ?? '00:00:00';
 $hariMapelEsc    = mysqli_real_escape_string($conn, $mapelRow['hari'] ?? '');
+$isLastPeriod    = false;
 
-$cacheKeyLastPeriod = 'last_period_' . $tenantId . '_' . md5($kelasEsc . '_' . $hariMapelEsc . '_' . $jamSelesaiMapel);
-$isLastPeriod = FileCache::get($cacheKeyLastPeriod);
+$qLastChk = mysqli_query($conn,
+    "SELECT COUNT(*) AS cnt FROM tbl_mapel_ampu
+     WHERE {$tenantMapel} AND kelas = '$kelasEsc' AND hari = '$hariMapelEsc'
+       AND jam_selesai > '" . mysqli_real_escape_string($conn, $jamSelesaiMapel) . "'"
+);
+$rLastChk     = $qLastChk ? mysqli_fetch_assoc($qLastChk) : ['cnt' => 0];
+$isLastPeriod = ((int)($rLastChk['cnt'] ?? 0) === 0);
 
-if ($isLastPeriod === false) {
-    $qLastChk = mysqli_query($conn,
-        "SELECT COUNT(*) AS cnt FROM tbl_mapel_ampu
-         WHERE {$tenantMapel} AND kelas = '$kelasEsc' AND hari = '$hariMapelEsc'
-           AND jam_selesai > '" . mysqli_real_escape_string($conn, $jamSelesaiMapel) . "'"
-    );
-    $rLastChk     = $qLastChk ? mysqli_fetch_assoc($qLastChk) : ['cnt' => 0];
-    $isLastPeriod = ((int)($rLastChk['cnt'] ?? 0) === 0);
-    FileCache::set($cacheKeyLastPeriod, $isLastPeriod, 3600); // 1 jam
-}
+$isAbsenPulang = (isset($_POST['tipe']) && $_POST['tipe'] === 'pulang') || $isLastPeriod;
 
-if ($isLastPeriod) {
-    // Absen pulang: hanya boleh antara jam_selesai s/d 23:59
-    $batasMax = '23:59:59';
-    if (strtotime($waktuIni) > strtotime($batasMax)) {
+if ($isAbsenPulang) {
+    // 1. Syarat Wajib: Harus sudah presensi masuk pagi ini!
+    $qCekMasuk = mysqli_query($conn, "SELECT id, status FROM tbl_absen WHERE {$tenantAbsen} AND no_induk='$nisEsc' AND tanggal='$tglEsc' AND status IN ('Hadir','H/T','Telat','T') LIMIT 1");
+    if (!$qCekMasuk || mysqli_num_rows($qCekMasuk) === 0) {
         jsonOut([
             'success' => false,
-            'message' => 'Waktu absen pulang sudah berakhir (batas maksimal 23:59 WIB)',
-            'kode'    => 'LEWAT_BATAS',
-        ]);
+            'message' => 'Anda belum melakukan presensi masuk pagi ini (status A/TAM). Presensi pulang tidak dapat dilakukan.',
+            'kode'    => 'BELUM_ABSEN_MASUK'
+        ], 400);
     }
-    // Jam terakhir: status selalu Hadir (tidak ada logika Telat untuk absen pulang)
-    $statusAbsen = 'Hadir';
+    $rMasuk = mysqli_fetch_assoc($qCekMasuk);
+    $statusMasukPagi = $rMasuk['status'] ?? 'Hadir';
+
+    // 2. Cek Waktu Buka Absen Pulang (Default 15:30 WIB)
+    if (strtotime($waktuIni) < strtotime($jamPulangMulai)) {
+        $jamBukaFmt = date('H:i', strtotime($jamPulangMulai));
+        $jamKunciFmt = date('H:i', strtotime($jamPulangSelesai));
+        jsonOut([
+            'success' => false,
+            'message' => "Absen pulang belum dibuka. Absen pulang hanya dapat dilakukan pukul {$jamBukaFmt} - {$jamKunciFmt} WIB.",
+            'kode'    => 'BELUM_WAKTU_PULANG'
+        ], 400);
+    }
+
+    // 3. Cek Kunci Absen Pulang (Default 17:00 WIB)
+    if (strtotime($waktuIni) > strtotime($jamPulangSelesai)) {
+        $jamKunciFmt = date('H:i', strtotime($jamPulangSelesai));
+        jsonOut([
+            'success' => false,
+            'message' => "Waktu absen pulang telah dikunci (maksimal pukul {$jamKunciFmt} WIB).",
+            'kode'    => 'KUNCI_PULANG_SELESAI'
+        ], 400);
+    }
+
+    // Jika masuk pagi Telat (T) -> H/T, Jika Hadir -> Hadir
+    $statusAbsen = in_array($statusMasukPagi, ['Telat', 'T', 'H/T']) ? 'H/T' : 'Hadir';
+
+} else {
+    // Presensi Masuk (Pagi): Tepat waktu (Hadir) atau Terlambat (T)
+    $jamLimit = !empty($mapelRow['jam_mulai']) ? $mapelRow['jam_mulai'] : $jamMasukBatas;
+    $statusAbsen = (strtotime($waktuIni) > strtotime($jamLimit)) ? 'T' : 'Hadir';
 }
-$tglHariIni = date('Y-m-d');
-$nisEsc     = mysqli_real_escape_string($conn, $nis);
-$tglEsc     = mysqli_real_escape_string($conn, $tglHariIni);
 
 $qCek = mysqli_query($conn,
     "SELECT id FROM tbl_absen
@@ -189,22 +228,8 @@ $qCek = mysqli_query($conn,
 );
 
 if ($qCek && mysqli_num_rows($qCek) > 0) {
-    // Sudah absen → update jika sebelumnya oleh sistem/siswa (bukan diubah guru)
     $existing = mysqli_fetch_assoc($qCek);
     $idAbsen = $existing['id'];
-
-    // Cek apakah sudah di-edit guru
-    $colChkSumber = mysqli_query($conn, "SHOW COLUMNS FROM tbl_absen LIKE 'sumber'");
-    if ($colChkSumber && mysqli_num_rows($colChkSumber) > 0) {
-        $qSumber = mysqli_query($conn, "SELECT sumber FROM tbl_absen WHERE {$tenantAbsen} AND id = '$idAbsen'");
-        $rSumber = mysqli_fetch_assoc($qSumber);
-        if (($rSumber['sumber'] ?? 'siswa') === 'guru') {
-            jsonOut([
-                'success' => false,
-                'message' => "Presensi ini sudah diverifikasi guru dan tidak dapat diubah lagi.",
-            ]);
-        }
-    }
 
     $updRes = mysqli_query($conn,
         "UPDATE tbl_absen SET status = '$statusAbsen', status_akhir = '$statusAbsen', no_induk_guru = '".mysqli_real_escape_string($conn, $nipGuru)."',
@@ -215,12 +240,12 @@ if ($qCek && mysqli_num_rows($qCek) > 0) {
         if (function_exists('notif_trigger_presensi')) {
             notif_trigger_presensi($conn, $nisEsc, $statusAbsen);
         }
-        jsonOut(['success' => true, 'message' => ($statusAbsen === 'H/T' ? '⚠️ Presensi diperbarui: TERLAMBAT — ' : 'Presensi berhasil diperbarui: ') . $namaMapel, 'status' => 'updated', 'status_absen' => $statusAbsen]);
+        jsonOut(['success' => true, 'message' => ($statusAbsen === 'T' ? '⚠️ Presensi dicatat: TERLAMBAT — ' : 'Presensi berhasil: ') . $namaMapel, 'status' => 'updated', 'status_absen' => $statusAbsen]);
     } else {
         jsonOut(['success' => false, 'message' => 'Gagal memperbarui presensi: ' . mysqli_error($conn)], 500);
     }
 } else {
-    // Belum absen → insert baru
+    // Insert baru
     $nipGuruEsc   = mysqli_real_escape_string($conn, $nipGuru);
     $namaMapelEsc = mysqli_real_escape_string($conn, $namaMapel);
 
@@ -232,7 +257,8 @@ if ($qCek && mysqli_num_rows($qCek) > 0) {
         if (function_exists('notif_trigger_presensi')) {
             notif_trigger_presensi($conn, $nisEsc, $statusAbsen);
         }
-        jsonOut(['success' => true, 'message' => ($statusAbsen === 'H/T' ? '⚠️ Presensi tercatat TERLAMBAT: ' : 'Presensi berhasil: ') . $namaMapel, 'status' => 'inserted', 'status_absen' => $statusAbsen]);
+        jsonOut(['success' => true, 'message' => ($statusAbsen === 'T' ? '⚠️ Presensi dicatat TERLAMBAT: ' : 'Presensi berhasil: ') . $namaMapel, 'status' => 'inserted', 'status_absen' => $statusAbsen]);
+    }
     } else {
         // Mungkin kolom sumber belum ada, coba ulang tanpa sumber
         $insRes2 = mysqli_query($conn,

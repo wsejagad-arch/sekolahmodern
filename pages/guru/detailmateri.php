@@ -253,33 +253,35 @@ $existingKeterangan = $existingKeterangan ?? '';
                     while($s = mysqli_fetch_assoc($siswaQuery)) {
                         $nis = $s['no_induk'];
                         
-                        // Ambil status_guru existing, tapi karena kode lama pakai status, kita utamakan status_guru kalau ada.
-                        // (Dalam existingAbsen di atas belum mengambil status_guru, jadi default statusSiswa masih dari 'status' yg lama).
                         $statusSiswa = strtolower(trim((string)($existingAbsen[$nis] ?? '')));
                         if ($statusSiswa === 'izin') {
                             $statusSiswa = 'ijin';
                         }
                         
-                        // Jika belum ada inputan untuk mapel ini, dan siswa sudah telat di mapel sebelumnya
-                        if ($statusSiswa === '' && isset($siswaTelatHariIni[$nis])) {
+                        // Cek apakah siswa telat dari presensi pagi / mapel sebelumnya
+                        $isTelatPagi = isset($siswaTelatHariIni[$nis]) || in_array($statusSiswa, ['t', 'telat', 'h/t']);
+                        if ($isTelatPagi) {
                             $statusSiswa = 'telat';
                         }
                         
-                        $checkedHadir = $statusSiswa === 'hadir' ? ' checked' : '';
-                        $checkedIjin = $statusSiswa === 'ijin' ? ' checked' : '';
-                        $checkedSakit = $statusSiswa === 'sakit' ? ' checked' : '';
-                        $checkedDispen = $statusSiswa === 'dispen' ? ' checked' : '';
-                        $checkedAlpha = $statusSiswa === 'alpha' ? ' checked' : '';
-                        $checkedTelat = ($statusSiswa === 'telat' || $statusSiswa === 'h/t') ? ' checked' : '';
+                        $checkedHadir  = ($statusSiswa === 'hadir')  ? ' checked' : '';
+                        $checkedIjin   = ($statusSiswa === 'ijin')   ? ' checked' : '';
+                        $checkedSakit  = ($statusSiswa === 'sakit')  ? ' checked' : '';
+                        $checkedDispen = ($statusSiswa === 'dispen') ? ' checked' : '';
+                        $checkedAlpha  = ($statusSiswa === 'alpha')  ? ' checked' : '';
+                        $checkedTelat  = ($statusSiswa === 'telat' || $statusSiswa === 'h/t') ? ' checked' : '';
+                        
+                        $disabledRadio = $isTelatPagi ? ' disabled' : '';
+                        $hiddenHidden  = $isTelatPagi ? "<input type='hidden' name='absen[".$nis."]' value='Telat'>" : '';
                         
                         echo "<tr>
-                                <td class='col-nama'>" . htmlspecialchars($s['nama_siswa']) . "</td>
-                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='h' name='absen[".$nis."]' value='Hadir'".$checkedHadir."></td>
-                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='i' name='absen[".$nis."]' value='Ijin'".$checkedIjin."></td>
-                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='s' name='absen[".$nis."]' value='Sakit'".$checkedSakit."></td>
-                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='d' name='absen[".$nis."]' value='Dispen'".$checkedDispen."></td>
-                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='a' name='absen[".$nis."]' value='Alpha'".$checkedAlpha."></td>
-                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='t' name='absen[".$nis."]' value='Telat'".$checkedTelat."></td>
+                                <td class='col-nama'>" . htmlspecialchars($s['nama_siswa']) . ($isTelatPagi ? " <span class='badge bg-warning text-dark style='font-size:10px;'>TELAT (Siswa)</span>" : "") . "</td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='h' name='absen[".$nis."]' value='Hadir'".$checkedHadir.$disabledRadio."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='i' name='absen[".$nis."]' value='Ijin'".$checkedIjin.$disabledRadio."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='s' name='absen[".$nis."]' value='Sakit'".$checkedSakit.$disabledRadio."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='d' name='absen[".$nis."]' value='Dispen'".$checkedDispen.$disabledRadio."></td>
+                                <td class='col-radio'><input class='absen-radio' type='radio' data-letter='a' name='absen[".$nis."]' value='Alpha'".$checkedAlpha.$disabledRadio."></td>
+                                <td class='col-radio'>".$hiddenHidden."<input class='absen-radio' type='radio' data-letter='t' name='absen[".$nis."]' value='Telat'".$checkedTelat."></td>
                               </tr>";
                     }
                     echo "</tbody></table></div>";
