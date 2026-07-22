@@ -87,13 +87,20 @@ function verify_password(string $rawPassword, ?string $storedHash, string $noInd
 		return password_verify($rawPassword, $storedHash);
 	}
 
-	// Otherwise treat as MD5 hash
-	if (hash_equals(md5($rawPassword), $storedHash)) return true;
+	// Direct MD5 match
+	$rawMd5 = md5($rawPassword);
+	if (hash_equals($rawMd5, $storedHash)) return true;
+
+	// Flexible zero trimming / padding match (misal input '06102' vs db '6102')
+	$rawTrim = ltrim($rawPassword, '0');
+	if ($rawTrim !== '' && hash_equals(md5($rawTrim), $storedHash)) return true;
+	if (hash_equals(md5('0' . $rawPassword), $storedHash)) return true;
 	
 	// Fallback for default passwords: allow '12345' or NISN/NIP interchangeably for MD5 hashes
 	if ($noInduk !== '') {
-	    if ($rawPassword === '12345' && hash_equals(md5($noInduk), $storedHash)) return true;
-	    if ($rawPassword === $noInduk && hash_equals(md5('12345'), $storedHash)) return true;
+	    $noIndukClean = ltrim($noInduk, '0');
+	    if ($rawPassword === '12345' && (hash_equals(md5($noInduk), $storedHash) || hash_equals(md5($noIndukClean), $storedHash))) return true;
+	    if (($rawPassword === $noInduk || $rawPassword === $noIndukClean || $rawTrim === $noIndukClean) && (hash_equals(md5('12345'), $storedHash) || hash_equals(md5($noInduk), $storedHash) || hash_equals(md5($noIndukClean), $storedHash))) return true;
 	}
 	
 	return false;
