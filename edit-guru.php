@@ -42,6 +42,7 @@ if (isset($_POST['submit'])) {
     $no_wa = mysqli_real_escape_string($conn, trim(isset($_POST['no_wa']) ? $_POST['no_wa'] : ''));
     $status_kepegawaian = mysqli_real_escape_string($conn, isset($_POST['status_kepegawaian']) ? $_POST['status_kepegawaian'] : '');
     $jabatan = mysqli_real_escape_string($conn, trim(isset($_POST['jabatan']) ? $_POST['jabatan'] : ''));
+    $agama = mysqli_real_escape_string($conn, isset($_POST['agama']) ? $_POST['agama'] : 'Islam');
     $is_guru_bk = isset($_POST['is_guru_bk']) ? 1 : 0;
     $is_pendamping_literasi = isset($_POST['is_pendamping_literasi']) ? 1 : 0;
     $is_tim_aduan = isset($_POST['is_tim_aduan']) ? 1 : 0;
@@ -83,6 +84,7 @@ if (isset($_POST['submit'])) {
     ];
     if (in_array('no_wa', $_guruCols))                  $_setClauses[] = "no_wa='$no_wa'";
     if (in_array('jabatan', $_guruCols))                $_setClauses[] = "jabatan='$jabatan'";
+    if (in_array('agama', $_guruCols))                  $_setClauses[] = "agama='$agama'";
     if (in_array('is_guru_bk', $_guruCols))             $_setClauses[] = "is_guru_bk=$is_guru_bk";
     if (in_array('is_pendamping_literasi', $_guruCols)) $_setClauses[] = "is_pendamping_literasi=$is_pendamping_literasi";
     if (in_array('is_tim_aduan', $_guruCols))           $_setClauses[] = "is_tim_aduan=$is_tim_aduan";

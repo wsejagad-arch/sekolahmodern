@@ -988,46 +988,48 @@ function konfirmasiButtonColor($opt)
     <div id="cameraModal" role="dialog" aria-modal="true" aria-labelledby="cameraTitle">
         <div class="bg-white rounded-2xl shadow-2xl w-min(380px,95vw) p-5 mx-4 max-w-sm w-full relative">
             <h3 id="cameraTitle" class="text-base font-bold text-gray-800 mb-1 text-center">
-                <i class="fas fa-camera text-blue-500 mr-1"></i>Verifikasi Wajah
+                <i class="fas fa-camera text-blue-500 mr-1"></i>Verifikasi Presensi Siswa
             </h3>
-            <p class="text-xs text-gray-500 text-center mb-4" id="cameraSubtitle">Posisikan wajah Anda di dalam oval</p>
+            <p class="text-xs text-gray-500 text-center mb-3" id="cameraSubtitle">Posisikan wajah Anda di dalam oval guide</p>
 
-            <div id="videoWrap" class="mx-auto border-4 border-gray-100">
-                <video id="previewVideo" autoplay playsinline muted></video>
+            <div id="videoWrap" class="mx-auto border-4 border-gray-100 shadow-inner rounded-xl overflow-hidden relative">
+                <video id="previewVideo" autoplay playsinline muted class="w-full rounded-lg"></video>
                 <canvas id="faceCanvas"></canvas>
                 <div id="ovalGuide"></div>
             </div>
 
             <!-- Status deteksi -->
-            <div id="faceStatus" class="mt-4 text-center text-sm font-medium text-gray-500 bg-gray-50 rounded-lg py-2">
-                <i class="fas fa-spinner fa-spin mr-1 text-blue-500"></i>Memuat model deteksi…
+            <div id="faceStatus" class="mt-3 text-center text-xs font-medium text-gray-600 bg-gray-50 rounded-lg py-2 px-3">
+                <i class="fas fa-spinner fa-spin mr-1 text-blue-500"></i>Memuat kamera & GPS…
             </div>
             
-            <div class="mt-2 flex gap-2 justify-center">
-                <button type="button" onclick="centerLocation()" class="flex-1 px-2 py-1.5 text-[11px] font-bold text-blue-700 bg-blue-100 border border-blue-200 rounded-lg shadow-sm hover:bg-blue-200 transition-colors">
-                    <i class="fas fa-sync-alt mr-1"></i>Refresh Lokasi
+            <div class="mt-2.5 flex gap-2 justify-center">
+                <button type="button" onclick="manualCapture()" class="flex-1 px-2.5 py-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-100 border border-emerald-200 rounded-lg shadow-sm hover:bg-emerald-200 transition-colors">
+                    <i class="fas fa-camera-retro mr-1"></i>Ambil Foto Manual
                 </button>
-                <button type="button" onclick="viewMap()" class="flex-1 px-2 py-1.5 text-[11px] font-bold text-teal-700 bg-teal-100 border border-teal-200 rounded-lg shadow-sm hover:bg-teal-200 transition-colors">
-                    <i class="fas fa-map-marked-alt mr-1"></i>Lihat Peta
+                <button type="button" onclick="flipCamera()" class="px-2.5 py-1.5 text-[11px] font-bold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded-lg shadow-sm hover:bg-indigo-200 transition-colors">
+                    <i class="fas fa-sync-alt mr-1"></i>Ganti Kamera
+                </button>
+                <button type="button" onclick="centerLocation()" class="px-2.5 py-1.5 text-[11px] font-bold text-blue-700 bg-blue-100 border border-blue-200 rounded-lg shadow-sm hover:bg-blue-200 transition-colors">
+                    <i class="fas fa-location-arrow mr-1"></i>GPS
                 </button>
             </div>
 
             <!-- Petunjuk -->
-            <ul class="mt-3 text-[11px] text-gray-500 list-none space-y-1 bg-blue-50/50 p-3 rounded-lg border border-blue-100">
-                <li class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i>Hadapkan wajah ke kamera (depan)</li>
-                <li class="flex items-center gap-2"><i class="fas fa-check-circle text-green-500"></i>Pastikan cahaya cukup</li>
-                <li class="flex items-center gap-2"><i class="fas fa-times-circle text-red-500"></i>Wajah miring/samping tidak terdeteksi</li>
+            <ul class="mt-3 text-[11px] text-gray-500 list-none space-y-1 bg-blue-50/50 p-2.5 rounded-lg border border-blue-100">
+                <li class="flex items-center gap-1.5"><i class="fas fa-check-circle text-green-500"></i>Posisikan wajah & klik <strong>Ambil Foto Manual</strong> jika belum terdeteksi.</li>
+                <li class="flex items-center gap-1.5"><i class="fas fa-map-marker-alt text-blue-500"></i>Pastikan GPS/Lokasi HP sudah Aktif.</li>
             </ul>
 
             <!-- Tombol -->
             <div class="mt-4 flex gap-2">
                 <button id="btnAbsenKonfirm"
                     disabled
-                    class="flex-1 bg-blue-500 text-white text-sm font-bold py-2.5 rounded-xl opacity-50 cursor-not-allowed transition-all shadow-sm">
-                    <i class="fas fa-check mr-1"></i>Konfirmasi
+                    class="flex-1 bg-blue-600 text-white text-xs font-bold py-2.5 rounded-xl opacity-50 cursor-not-allowed transition-all shadow-md">
+                    <i class="fas fa-check-circle mr-1"></i>Konfirmasi Presensi
                 </button>
                 <button onclick="closeCamera()"
-                    class="px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
+                    class="px-4 py-2.5 border border-gray-200 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
                     Batal
                 </button>
             </div>
@@ -1234,85 +1236,108 @@ function konfirmasiButtonColor($opt)
                 }
             }
 
+            let currentFacingMode = 'user';
+
+            window.flipCamera = async function() {
+                currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+                if (stream) {
+                    stream.getTracks().forEach(t => t.stop());
+                }
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: currentFacingMode, width: 480, height: 360 }
+                    });
+                    if (videoEl) {
+                        videoEl.srcObject = stream;
+                        await videoEl.play();
+                    }
+                } catch(e) {
+                    if (statusEl) statusEl.innerHTML = '<span class="text-red-500">Gagal ganti kamera: ' + e.message + '</span>';
+                }
+            };
+
+            window.manualCapture = function() {
+                faceOk = true;
+                if (ovalEl) ovalEl.className = 'face-ok';
+                if (statusEl) statusEl.innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i><span class="text-green-700 font-semibold">Foto siap! ' + (gpsOk ? 'Silakan Konfirmasi.' : 'Mengecek GPS…') + '</span>';
+                updateKonfirmBtn();
+            };
+
             // ── GPS check ─────────────────────────────────────────────────────────────────
             function checkGPS(force = false) {
                 gpsOk = false;
                 updateKonfirmBtn();
                 if (!navigator.geolocation) {
-                    statusEl.innerHTML = '<span class="text-red-500"><i class="fas fa-times-circle mr-1"></i>Browser tidak mendukung GPS</span>';
+                    if (statusEl) statusEl.innerHTML = '<span class="text-red-500"><i class="fas fa-times-circle mr-1"></i>Browser tidak mendukung GPS</span>';
                     return;
                 }
                 
-                if (force) {
-                    modalMsg.innerHTML = '<span class="text-blue-500"><i class="fas fa-spinner fa-spin mr-1"></i>Memperbarui lokasi GPS...</span>';
+                if (modalMsg) {
+                    modalMsg.innerHTML = '<span class="text-blue-500"><i class="fas fa-spinner fa-spin mr-1"></i>Memperbarui koordinat GPS...</span>';
                 }
 
-                navigator.geolocation.getCurrentPosition(
-                    function(pos) {
-                        userCoords = {
-                            lat: pos.coords.latitude,
-                            lng: pos.coords.longitude
-                        };
-                        
-                        if (currentSholatType) {
-                            // Cek dengan lokasi mushola (bisa lebih dari satu)
-                            if (!MUSHOLA_LOCS || MUSHOLA_LOCS.length === 0) {
-                                modalMsg.innerHTML = `<span class="text-red-500"><i class="fas fa-exclamation-triangle mr-1"></i>Lokasi mushola belum diatur oleh Admin.</span>`;
-                                return;
+                const handleGeoPos = function(pos) {
+                    userCoords = {
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude
+                    };
+                    
+                    if (currentSholatType) {
+                        if (!MUSHOLA_LOCS || MUSHOLA_LOCS.length === 0) {
+                            modalMsg.innerHTML = `<span class="text-red-500"><i class="fas fa-exclamation-triangle mr-1"></i>Lokasi mushola belum diatur.</span>`;
+                            return;
+                        }
+                        let closestDist = Infinity;
+                        let closestName = '';
+                        let maxRad = 50;
+                        MUSHOLA_LOCS.forEach(function(m) {
+                            const dist = haversine(userCoords.lat, userCoords.lng, m.lat, m.lng);
+                            if (dist < closestDist) {
+                                closestDist = dist;
+                                closestName = m.nama;
+                                maxRad = m.radius || 50;
                             }
-                            
-                            let closestDist = Infinity;
-                            let closestName = '';
-                            let maxRad = 50;
-                            
-                            MUSHOLA_LOCS.forEach(function(m) {
-                                const dist = haversine(userCoords.lat, userCoords.lng, m.lat, m.lng);
-                                if (dist < closestDist) {
-                                    closestDist = dist;
-                                    closestName = m.nama;
-                                    maxRad = m.radius || 50;
-                                }
-                            });
-                            
-                            if (closestDist <= maxRad) {
-                                gpsOk = true;
-                                modalMsg.innerHTML = `<span class="text-teal-600"><i class="fas fa-map-marker-alt mr-1"></i>Lokasi Valid (${closestName})</span>`;
-                            } else {
-                                const distKm = (closestDist / 1000).toFixed(2);
-                                const radKm = (maxRad / 1000).toFixed(2);
-                                modalMsg.innerHTML = `<span class="text-red-500"><i class="fas fa-map-marker-alt mr-1"></i>Terlalu jauh dari ${closestName}: ${distKm} km (maks ${radKm} km)</span>`;
-                            }
+                        });
+                        if (closestDist <= maxRad) {
+                            gpsOk = true;
+                            modalMsg.innerHTML = `<span class="text-teal-600 font-bold"><i class="fas fa-map-marker-alt mr-1"></i>Lokasi Valid (${closestName})</span>`;
                         } else {
-                            // Presensi biasa (kelas)
-                            const dist = haversine(userCoords.lat, userCoords.lng, SCHOOL_LAT, SCHOOL_LNG);
-                            if (dist <= RADIUS_M) {
-                                gpsOk = true;
-                                if (force) modalMsg.innerHTML = `<span class="text-teal-600"><i class="fas fa-check-circle mr-1"></i>Lokasi berhasil diperbarui dan Valid!</span>`;
-                            } else {
-                                const distKm = (dist / 1000).toFixed(2);
-                                const radKm = (RADIUS_M / 1000).toFixed(2);
-                                modalMsg.innerHTML = `<span class="text-red-500"><i class="fas fa-map-marker-alt mr-1"></i>Lokasi terlalu jauh: ${distKm} km (maks ${radKm} km)</span>`;
-                            }
+                            const distKm = (closestDist / 1000).toFixed(2);
+                            const radKm = (maxRad / 1000).toFixed(2);
+                            modalMsg.innerHTML = `<span class="text-red-500 font-bold"><i class="fas fa-map-marker-alt mr-1"></i>Terlalu jauh dari ${closestName}: ${distKm} km (maks ${radKm} km)</span>`;
                         }
-                        
-                        updateKonfirmBtn();
-                    },
-                    function(err) {
-                        let errMsg = err.message;
-                        if (err.code === 1) {
-                            errMsg = "Akses lokasi ditolak! Izinkan lokasi di pengaturan browser/HP Anda.";
-                        } else if (err.code === 2) {
-                            errMsg = "Sinyal GPS tidak ditemukan. Pastikan GPS/Lokasi HP aktif.";
-                        } else if (err.code === 3) {
-                            errMsg = "Waktu pencarian lokasi habis. Coba klik Refresh Lokasi.";
+                    } else {
+                        const dist = haversine(userCoords.lat, userCoords.lng, SCHOOL_LAT, SCHOOL_LNG);
+                        if (dist <= RADIUS_M) {
+                            gpsOk = true;
+                            modalMsg.innerHTML = `<span class="text-teal-600 font-bold"><i class="fas fa-check-circle mr-1"></i>Lokasi Valid (${Math.round(dist)} m dari Sekolah)</span>`;
+                        } else {
+                            const distKm = (dist / 1000).toFixed(2);
+                            const radKm = (RADIUS_M / 1000).toFixed(2);
+                            modalMsg.innerHTML = `<span class="text-red-500 font-bold"><i class="fas fa-map-marker-alt mr-1"></i>Terlalu jauh: ${distKm} km (maks ${radKm} km)</span>`;
                         }
-                        modalMsg.innerHTML = '<span class="text-red-400 text-[11px] font-bold block mt-1"><i class="fas fa-exclamation-triangle mr-1"></i>Gagal GPS: ' + errMsg + '</span>';
-                    }, {
-                        enableHighAccuracy: true,
-                        timeout: 15000,
-                        maximumAge: 0
                     }
-                );
+                    updateKonfirmBtn();
+                };
+
+                const handleGeoErr = function(err) {
+                    navigator.geolocation.getCurrentPosition(
+                        handleGeoPos,
+                        function(err2) {
+                            let errMsg = "Nyalakan GPS / Klik 'Izinkan Lokasi' pada browser HP.";
+                            if (err2.code === 1) errMsg = "Akses lokasi ditolak! Izinkan lokasi pada pengaturan browser/HP.";
+                            else if (err2.code === 2) errMsg = "Sinyal GPS tidak aktif. Mohon aktifkan GPS/Lokasi HP.";
+                            if (modalMsg) modalMsg.innerHTML = '<span class="text-red-500 text-[11px] font-bold block mt-1"><i class="fas fa-exclamation-triangle mr-1"></i>' + errMsg + '</span>';
+                        },
+                        { enableHighAccuracy: false, timeout: 8000, maximumAge: 30000 }
+                    );
+                };
+
+                navigator.geolocation.getCurrentPosition(handleGeoPos, handleGeoErr, {
+                    enableHighAccuracy: true,
+                    timeout: 7000,
+                    maximumAge: 0
+                });
             }
             
             window.centerLocation = function() {

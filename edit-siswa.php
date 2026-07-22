@@ -23,11 +23,12 @@ if (isset($_POST['submit'])) {
       $nami    = mysqli_real_escape_string($conn, $_POST['nama']);
 	  $kelas   = mysqli_real_escape_string($conn, $_POST['kelas']);
 	  $status  = mysqli_real_escape_string($conn, $_POST['status']);
+	  $agama   = mysqli_real_escape_string($conn, isset($_POST['agama']) ? $_POST['agama'] : 'Islam');
 	  $jabatan = in_array(isset($_POST['jabatan']) ? $_POST['jabatan'] : '', ['Siswa','Ketua Kelas']) ? $_POST['jabatan'] : 'Siswa';
 	  $tglskr  = date('Y-m-d H:i:s');
 	  $isilog  = "$nama mengubah data siswa dengan NIS $noinduk";
 
-	  // Cek kolom yang benar-benar ADA di tbl_siswa (aman jika jabatan belum ada di DB hosting)
+	  // Cek kolom yang benar-benar ADA di tbl_siswa
 	  $_siswaCols = [];
 	  $_colQs = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_siswa");
 	  if ($_colQs) {
@@ -37,8 +38,16 @@ if (isset($_POST['submit'])) {
 	  }
 
 	  // Build SET clause dinamis
-	  $_setClauses = ["kelas='$kelas'", "status='$status'"];
+	  $_setClauses = [];
+	  if ($nami !== '') $_setClauses[] = "nama_siswa='$nami'";
+	  if ($kelas !== '') $_setClauses[] = "kelas='$kelas'";
+	  if ($status !== '') $_setClauses[] = "status='$status'";
+	  if (in_array('agama', $_siswaCols)) $_setClauses[] = "agama='$agama'";
 	  if (in_array('jabatan', $_siswaCols)) $_setClauses[] = "jabatan='$jabatan'";
+	  
+	  if (empty($_setClauses)) {
+	      $_setClauses[] = "status='$status'";
+	  }
 	  $_setStrSiswa = implode(', ', $_setClauses);
 
 	  $update = mysqli_query($conn, "UPDATE tbl_siswa SET {$_setStrSiswa} WHERE no_induk='$no_induk'");
@@ -67,35 +76,43 @@ if (isset($_POST['submit'])) {
     <div class="container-fluid">
     <div class="container">
     <div class="alert" style="background-color: #ffffff; outline: 1px solid lightgrey">
-        <h4>Tambah Data Siswa</h4>
+        <h4>Edit Data Siswa</h4>
     </div>
 
 <div class="container rounded" style="background-color: #ffffff; outline: 1px solid lightgrey">
-<form method="POST" action="?page=edit-siswa&no_induk=<?= htmlspecialchars($no_induk) ?>" class="needs-validation" novalidate>
+<form method="POST" action="?page=edit-siswa&no_induk=<?= htmlspecialchars($no_induk) ?>">
 
 <?php 
 // Tampilkan data siswa yang akan diedit
 $siswa = mysqli_query($conn, "SELECT * FROM tbl_siswa WHERE no_induk='$no_induk'");
 $dsiswa = mysqli_fetch_array($siswa); 
+$currentAgama = !empty($dsiswa['agama']) ? $dsiswa['agama'] : 'Islam';
 ?>
 
 <!-- No induk siswa -->
 <div class="form-group col-sm-4 pt-4">
     <label for="noinduk">NO INDUK SISWA:</label>
-    <input type="number" class="form-control" id="noinduk" name="noinduk" value="<?= $dsiswa['no_induk']; ?>" readonly>
-    <div class="valid-feedback">Valid.</div>
-    <div class="invalid-feedback">Harap diisi kolom ini.</div>
+    <input type="text" class="form-control" id="noinduk" name="noinduk" value="<?= htmlspecialchars($dsiswa['no_induk']); ?>" readonly>
   </div>
-<!-- No induk siswa -->
 
 <!-- Nama Siswa -->
 <div class="form-group col-sm-4">
     <label for="namasiswa">NAMA SISWA:</label>
-    <input type="text" class="form-control" id="nama" name="nama" value="<?= $dsiswa['nama_siswa']; ?>" readonly>
-    <div class="valid-feedback">Valid.</div>
-    <div class="invalid-feedback">Harap diisi kolom ini.</div>
+    <input type="text" class="form-control" id="nama" name="nama" value="<?= htmlspecialchars($dsiswa['nama_siswa']); ?>">
   </div>
-<!-- Nama Siswa -->
+
+<!-- Agama -->
+<div class="form-group col-sm-4">
+    <label for="agama">AGAMA:</label>
+    <select class="form-control" name="agama">
+        <option value="Islam" <?= (strcasecmp($currentAgama, 'Islam') === 0) ? 'selected' : '' ?>>Islam</option>
+        <option value="Kristen" <?= (strcasecmp($currentAgama, 'Kristen') === 0) ? 'selected' : '' ?>>Kristen</option>
+        <option value="Katolik" <?= (strcasecmp($currentAgama, 'Katolik') === 0) ? 'selected' : '' ?>>Katolik</option>
+        <option value="Hindu" <?= (strcasecmp($currentAgama, 'Hindu') === 0) ? 'selected' : '' ?>>Hindu</option>
+        <option value="Buddha" <?= (strcasecmp($currentAgama, 'Buddha') === 0) ? 'selected' : '' ?>>Buddha</option>
+        <option value="Khonghucu" <?= (strcasecmp($currentAgama, 'Khonghucu') === 0) ? 'selected' : '' ?>>Khonghucu</option>
+    </select>
+  </div>
 
 <!-- Kelas -->
 <div class="form-group col-sm-4">
@@ -106,42 +123,22 @@ $dsiswa = mysqli_fetch_array($siswa);
 		$kelas = mysqli_query($conn, "SELECT * FROM tbl_kelas ORDER BY id_kelas ASC");
 		while ($dkelas = mysqli_fetch_array($kelas)) { 
 			if($dkelas['kelas'] == $dsiswa['kelas']) { ?>
-				<option value="<?= $dkelas['kelas']; ?>" selected><?= $dkelas['kelas']; ?></option>
+				<option value="<?= htmlspecialchars($dkelas['kelas']); ?>" selected><?= htmlspecialchars($dkelas['kelas']); ?></option>
 			<?php } else { ?>
-				<option value="<?= $dkelas['kelas']; ?>"><?= $dkelas['kelas']; ?></option>
+				<option value="<?= htmlspecialchars($dkelas['kelas']); ?>"><?= htmlspecialchars($dkelas['kelas']); ?></option>
 			<?php } } ?>
-    </select>    
-    <div class="valid-feedback">Valid.</div>
-    <div class="invalid-feedback">Harap diisi kolom ini.</div>
+    </select>
   </div>
-<!-- Kelas -->
 
 <!-- Status -->
 <div class="form-group col-sm-4">
     <label for="status">STATUS SISWA:</label>
     <select class="form-control" name="status">
-        <?php if($dsiswa['status'] == "Aktif") : ?>
-		<option value="Aktif" selected>Aktif</option>
-		<option value="Non-Aktif">Non-Aktif</option>
-		<option value="Lulus">Lulus</option>
-		<?php endif; ?>
-		
-		<?php if($dsiswa['status'] == "Non-Aktif") : ?>
-		<option value="Aktif">Aktif</option>
-		<option value="Non-Aktif" selected>Non-Aktif</option>
-		<option value="Lulus">Lulus</option>
-		<?php endif; ?>
-		
-		<?php if($dsiswa['status'] == "Lulus") : ?>
-		<option value="Aktif">Aktif</option>
-		<option value="Non-Aktif">Non-Aktif</option>
-		<option value="Lulus" selected>Lulus</option>
-		<?php endif; ?>
-    </select>    
-    <div class="valid-feedback">Valid.</div>
-    <div class="invalid-feedback">Harap diisi kolom ini.</div>
+		<option value="Aktif" <?= ($dsiswa['status'] == "Aktif" || empty($dsiswa['status'])) ? 'selected' : '' ?>>Aktif</option>
+		<option value="Non-Aktif" <?= ($dsiswa['status'] == "Non-Aktif") ? 'selected' : '' ?>>Non-Aktif</option>
+		<option value="Lulus" <?= ($dsiswa['status'] == "Lulus") ? 'selected' : '' ?>>Lulus</option>
+    </select>
   </div>
-<!-- Status -->
 
 <!-- Jabatan -->
 <div class="form-group col-sm-4">
@@ -152,10 +149,9 @@ $dsiswa = mysqli_fetch_array($siswa);
     </select>
     <small class="text-muted">Ketua Kelas dapat konfirmasi kehadiran guru</small>
   </div>
-<!-- Jabatan -->
 
 <!-- Tombol Submit dan cancel -->
-<div class="form-group col-sm-2 pb-4">
+<div class="form-group col-sm-4 pb-4 pt-3">
 <table style="border: none;">
 <tr>
     <td><input type="submit" onclick="return confirm('Apakah data sudah benar?');" class="btn btn-success" id="submit" name="submit" value="Simpan"></td>
