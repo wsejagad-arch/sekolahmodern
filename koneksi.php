@@ -129,12 +129,18 @@ try {
     $connect_host = $host;
 
 
-    $conn = new mysqli($connect_host, $user, $password, $database, $port);
+    $conn = @new mysqli($connect_host, $user, $password, $database, $port);
     if ($conn->connect_error) {
         error_log('[koneksi.php] MySQL connect error: ' . $conn->connect_error);
         $conn = null;
     } else {
         mysqli_set_charset($conn, 'utf8');
+        // Auto-close koneksi saat script PHP selesai mengeksekusi
+        register_shutdown_function(function() use (&$conn) {
+            if ($conn instanceof mysqli) {
+                @$conn->close();
+            }
+        });
         require_once __DIR__ . '/multi_tenant.php';
         mt_bootstrap($conn);
         // Auto migrate dimatikan SEMENTARA karena menyebabkan Metadata Lock saat jam sibuk
