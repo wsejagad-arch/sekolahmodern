@@ -194,6 +194,37 @@ if($schedule){
         </div>
       </div>
 
+      <!-- ── Pengaturan Menu Siswa (Naik Kelas) ────────────────────────── -->
+      <?php
+      $showNaikKelasVal = '0';
+      $qNkVal = @mysqli_query($conn, "SELECT nilai FROM tbl_app_config WHERE kunci = 'show_naik_kelas' LIMIT 1");
+      if ($qNkVal && ($rNkVal = mysqli_fetch_assoc($qNkVal))) {
+          $showNaikKelasVal = $rNkVal['nilai'];
+      }
+      ?>
+      <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-warning text-white">
+          <h6 class="m-0 font-weight-bold">
+            <i class="fas fa-eye-slash mr-1"></i>Pengaturan Tombol Menu "Naik Kelas" Siswa
+          </h6>
+        </div>
+        <div class="card-body">
+          <p class="text-muted small mb-3">Atur apakah tombol menu <strong>Naik Kelas</strong> akan ditampilkan atau disembunyikan di dasbor siswa.</p>
+          <div class="custom-control custom-radio mb-2">
+            <input type="radio" id="nk_hide" name="show_naik_kelas" value="0" class="custom-control-input" <?= ($showNaikKelasVal !== '1') ? 'checked' : '' ?>>
+            <label class="custom-control-label text-danger font-weight-bold" for="nk_hide">
+              <i class="fas fa-eye-slash mr-1"></i>Sembunyikan (Hide) Tombol Naik Kelas Siswa (Default)
+            </label>
+          </div>
+          <div class="custom-control custom-radio">
+            <input type="radio" id="nk_show" name="show_naik_kelas" value="1" class="custom-control-input" <?= ($showNaikKelasVal === '1') ? 'checked' : '' ?>>
+            <label class="custom-control-label text-success font-weight-bold" for="nk_show">
+              <i class="fas fa-eye mr-1"></i>Tampilkan (Show) Tombol Naik Kelas Siswa
+            </label>
+          </div>
+        </div>
+      </div>
+
       <!-- Tombol Simpan -->
       <div class="d-flex mb-2">
         <button id="saveBtn" class="btn btn-primary mr-2">

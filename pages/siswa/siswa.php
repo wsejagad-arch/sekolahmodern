@@ -1126,7 +1126,13 @@ $notif_count = count($all_notifications);
       ['name' => 'Nilai',       'icon' => 'fa-chart-bar',           'color' => 'bg-green',  'link' => '#'],
       ['name' => 'Medsos',      'icon' => 'fa-hashtag',             'color' => 'bg-indigo', 'link' => 'medsos.php'],
     ];
-    if (preg_match('/\b(X|XI|10|11)\b/i', $studentClass)) {
+    // Cek pengaturan admin apakah tombol Naik Kelas ditampilkan atau disembunyikan
+    $showNaikKelas = '0';
+    $qNk = @mysqli_query($conn, "SELECT nilai FROM tbl_app_config WHERE kunci = 'show_naik_kelas' LIMIT 1");
+    if ($qNk && ($rNk = mysqli_fetch_assoc($qNk))) {
+        $showNaikKelas = $rNk['nilai'];
+    }
+    if ($showNaikKelas === '1' && preg_match('/\b(X|XI|10|11)\b/i', $studentClass)) {
         $menus[] = ['name' => 'Naik Kelas', 'icon' => 'fa-level-up-alt', 'color' => 'bg-orange', 'link' => 'naik-kelas.php'];
     }
     ?>

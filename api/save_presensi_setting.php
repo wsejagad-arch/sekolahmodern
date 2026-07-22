@@ -35,11 +35,16 @@ $radEsc = intval($radius);
 $schedEsc = mysqli_real_escape_string($conn, $schedule);
 $holEsc = mysqli_real_escape_string($conn, $holidays);
 
+// simpan/update setting show_naik_kelas ke tbl_app_config
+$showNaikKelas = isset($_POST['show_naik_kelas']) ? mysqli_real_escape_string($conn, $_POST['show_naik_kelas']) : '0';
+@mysqli_query($conn, "INSERT INTO tbl_app_config (kunci, nilai) VALUES ('show_naik_kelas', '$showNaikKelas') ON DUPLICATE KEY UPDATE nilai='$showNaikKelas'");
+
 $idSekolah = mt_current_school_id();
 mysqli_query($conn, "DELETE FROM tbl_presensi_setting WHERE id_sekolah = $idSekolah"); // keep only latest for this school
 $ins = mysqli_query($conn, "INSERT INTO tbl_presensi_setting (lat,lng,radius_m,schedule,holidays,id_sekolah) VALUES ('$latEsc','$lngEsc','$radEsc','$schedEsc','$holEsc',$idSekolah)");
 if($ins){
     $row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM tbl_presensi_setting WHERE id_sekolah = $idSekolah ORDER BY id DESC LIMIT 1"));
+    $row['show_naik_kelas'] = $showNaikKelas;
     echo json_encode(['success'=>true,'message'=>'Saved','data'=>$row]);
 } else { echo json_encode(['success'=>false,'message'=>'DB error: '.mysqli_error($conn)]); }
 
