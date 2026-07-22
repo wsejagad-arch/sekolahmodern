@@ -18,58 +18,79 @@ if ($_jabatanChk && mysqli_num_rows($_jabatanChk) === 0) {
 
 // Pemrosesan form
 if (isset($_POST['submit'])) {
-    //definisikan variabel dulu
-      $noinduk = trim(mysqli_real_escape_string($conn, $_POST['noinduk']));
-      $nami    = mysqli_real_escape_string($conn, $_POST['nama']);
-	  $kelas   = mysqli_real_escape_string($conn, $_POST['kelas']);
-	  $status  = mysqli_real_escape_string($conn, $_POST['status']);
-	  $agama   = mysqli_real_escape_string($conn, isset($_POST['agama']) ? $_POST['agama'] : 'Islam');
-	  $jabatan = in_array(isset($_POST['jabatan']) ? $_POST['jabatan'] : '', ['Siswa','Ketua Kelas']) ? $_POST['jabatan'] : 'Siswa';
-	  $tglskr  = date('Y-m-d H:i:s');
-	  $isilog  = "$nama mengubah data siswa dengan NIS $noinduk";
+    $no_induk_old = mysqli_real_escape_string($conn, $_GET['no_induk']);
+    $noinduk      = trim(mysqli_real_escape_string($conn, $_POST['noinduk']));
+    $nami         = trim(mysqli_real_escape_string($conn, $_POST['nama']));
+    $kelas        = mysqli_real_escape_string($conn, $_POST['kelas']);
+    $status       = mysqli_real_escape_string($conn, $_POST['status']);
+    $agama        = mysqli_real_escape_string($conn, isset($_POST['agama']) ? $_POST['agama'] : 'Islam');
+    $jabatan      = in_array(isset($_POST['jabatan']) ? $_POST['jabatan'] : '', ['Siswa','Ketua Kelas']) ? $_POST['jabatan'] : 'Siswa';
+    $tglskr       = date('Y-m-d H:i:s');
+    $isilog       = "$nama mengubah data siswa NIS $no_induk_old (Nama: $nami, NIS: $noinduk)";
+    $nisBentrok   = false;
 
-	  // Cek kolom yang benar-benar ADA di tbl_siswa
-	  $_siswaCols = [];
-	  $_colQs = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_siswa");
-	  if ($_colQs) {
-	      while ($_colRs = mysqli_fetch_assoc($_colQs)) {
-	          $_siswaCols[] = $_colRs['Field'];
-	      }
-	  }
+    // Cek jika NIS diubah & pastikan tidak bentrok dengan siswa lain
+    if ($noinduk !== '' && $noinduk !== $no_induk_old) {
+        $qCekExist = mysqli_query($conn, "SELECT no_induk FROM tbl_siswa WHERE no_induk = '$noinduk' AND no_induk != '$no_induk_old' LIMIT 1");
+        if ($qCekExist && mysqli_num_rows($qCekExist) > 0) {
+            echo "<script>Swal.fire('Gagal Menyimpan!', 'NIS $noinduk sudah digunakan oleh siswa lain!', 'error')</script>";
+            $nisBentrok = true;
+        }
+    }
 
-	  // Build SET clause dinamis
-	  $_setClauses = [];
-	  if ($nami !== '') $_setClauses[] = "nama_siswa='$nami'";
-	  if ($kelas !== '') $_setClauses[] = "kelas='$kelas'";
-	  if ($status !== '') $_setClauses[] = "status='$status'";
-	  if (in_array('agama', $_siswaCols)) $_setClauses[] = "agama='$agama'";
-	  if (in_array('jabatan', $_siswaCols)) $_setClauses[] = "jabatan='$jabatan'";
-	  
-	  if (empty($_setClauses)) {
-	      $_setClauses[] = "status='$status'";
-	  }
-	  $_setStrSiswa = implode(', ', $_setClauses);
+    if (!$nisBentrok) {
+        // Cek kolom yang benar-benar ADA di tbl_siswa
+        $_siswaCols = [];
+        $_colQs = @mysqli_query($conn, "SHOW COLUMNS FROM tbl_siswa");
+        if ($_colQs) {
+            while ($_colRs = mysqli_fetch_assoc($_colQs)) {
+                $_siswaCols[] = $_colRs['Field'];
+            }
+        }
 
-	  $update = mysqli_query($conn, "UPDATE tbl_siswa SET {$_setStrSiswa} WHERE no_induk='$no_induk'");
-	  if($update) {
-		mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr', '$isilog')");
-		?>
-		<script>
-			  Swal.fire({
-			  position: 'top-end',
-			  icon: 'success',
-			  title: 'Berhasil merubah data siswa!',
-			  showConfirmButton: false,
-			  timer: 1500
-			  }).then(function(){
-				  window.location.href = "?page=data-siswa";
-			  })
-		</script>
-	<?php } else {
-		$_dbErrSiswa = mysqli_error($conn);
-		?>
-		<script>Swal.fire('Gagal Menyimpan!', 'Error database: <?= htmlspecialchars($_dbErrSiswa) ?>', 'error')</script>
-	<?php }
+        // Build SET clause dinamis
+        $_setClauses = [];
+        if ($noinduk !== '') $_setClauses[] = "no_induk='$noinduk'";
+        if ($nami !== '')    $_setClauses[] = "nama_siswa='$nami'";
+        if ($kelas !== '')   $_setClauses[] = "kelas='$kelas'";
+        if ($status !== '')  $_setClauses[] = "status='$status'";
+        if (in_array('agama', $_siswaCols))   $_setClauses[] = "agama='$agama'";
+        if (in_array('jabatan', $_siswaCols)) $_setClauses[] = "jabatan='$jabatan'";
+
+        if (empty($_setClauses)) {
+            $_setClauses[] = "status='$status'";
+        }
+        $_setStrSiswa = implode(', ', $_setClauses);
+
+        $update = mysqli_query($conn, "UPDATE tbl_siswa SET {$_setStrSiswa} WHERE no_induk='$no_induk_old'");
+        if ($update) {
+            // Sinkronkan tbl_pengguna (user login) & tbl_absen jika NIS atau Nama berubah
+            if ($noinduk !== $no_induk_old || $nami !== '') {
+                @mysqli_query($conn, "UPDATE tbl_pengguna SET no_induk='$noinduk', nama='$nami' WHERE no_induk='$no_induk_old'");
+                @mysqli_query($conn, "UPDATE tbl_absen SET no_induk='$noinduk' WHERE no_induk='$no_induk_old'");
+            }
+
+            mysqli_query($conn, "INSERT INTO tbl_log(waktu, isi_log) VALUES('$tglskr', '$isilog')");
+            ?>
+            <script>
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Berhasil mengubah data siswa!',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(function(){
+                    window.location.href = "?page=data-siswa";
+                });
+            </script>
+            <?php
+        } else {
+            $_dbErrSiswa = mysqli_error($conn);
+            ?>
+            <script>Swal.fire('Gagal Menyimpan!', 'Error database: <?= htmlspecialchars($_dbErrSiswa) ?>', 'error')</script>
+            <?php
+        }
+    }
 }
 ?>
 
@@ -91,8 +112,8 @@ $currentAgama = !empty($dsiswa['agama']) ? $dsiswa['agama'] : 'Islam';
 
 <!-- No induk siswa -->
 <div class="form-group col-sm-4 pt-4">
-    <label for="noinduk">NO INDUK SISWA:</label>
-    <input type="text" class="form-control" id="noinduk" name="noinduk" value="<?= htmlspecialchars($dsiswa['no_induk']); ?>" readonly>
+    <label for="noinduk">NO INDUK SISWA (NIS):</label>
+    <input type="text" class="form-control" id="noinduk" name="noinduk" value="<?= htmlspecialchars($dsiswa['no_induk']); ?>" required>
   </div>
 
 <!-- Nama Siswa -->
