@@ -548,7 +548,8 @@ if (!$inputIdMapel || !in_array($inputIdMapel, $validInputIds, true)) {
     while ($it = mysqli_fetch_assoc($items)) { $itemList[] = $it; }
 
     // Ambil siswa kelas tsb dan simpan dalam array
-    $siswaQuery = mysqli_query($conn, "SELECT no_induk, nama_siswa FROM tbl_siswa WHERE {$tenantSiswa} AND kelas='".mysqli_real_escape_string($conn,$kls)."' AND status='Aktif' ORDER BY nama_siswa ASC");
+    $klsEsc = mysqli_real_escape_string($conn, $kls);
+    $siswaQuery = mysqli_query($conn, "SELECT no_induk, nama_siswa FROM tbl_siswa WHERE {$tenantSiswa} AND (kelas='$klsEsc' OR REPLACE(kelas, ' ', '') = REPLACE('$klsEsc', ' ', '')) AND (status='Aktif' OR status='aktif' OR status IS NULL OR status='') ORDER BY nama_siswa ASC");
     $siswaList = [];
     while ($s = mysqli_fetch_assoc($siswaQuery)) { $siswaList[] = $s; }
 
