@@ -258,7 +258,6 @@ if ($qCek && mysqli_num_rows($qCek) > 0) {
             notif_trigger_presensi($conn, $nisEsc, $statusAbsen);
         }
         jsonOut(['success' => true, 'message' => ($statusAbsen === 'T' ? '⚠️ Presensi dicatat TERLAMBAT: ' : 'Presensi berhasil: ') . $namaMapel, 'status' => 'inserted', 'status_absen' => $statusAbsen]);
-    }
     } else {
         // Mungkin kolom sumber belum ada, coba ulang tanpa sumber
         $insRes2 = mysqli_query($conn,
