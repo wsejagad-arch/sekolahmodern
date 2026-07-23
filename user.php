@@ -97,48 +97,6 @@ if (!isset($_SESSION["username"])) { ?>
                 </div>
             </div>
 
-            <!-- MODAL EDIT USER STAFF -->
-            <div class="modal fade" id="modalEditUser" tabindex="-1" role="dialog" aria-labelledby="modalEditUserLabel" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content shadow-lg" style="border-radius:12px;">
-                  <div class="modal-header" style="background:linear-gradient(135deg,#4e73df,#224abe); color:#fff; border-radius:12px 12px 0 0;">
-                    <h5 class="modal-title" id="modalEditUserLabel"><i class="fas fa-user-edit mr-2"></i>Edit Data User</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Tutup"><span>&times;</span></button>
-                  </div>
-                  <div class="modal-body px-4 py-3">
-                    <input type="hidden" id="edit_id_user" name="id_user">
-                    <div class="form-group">
-                      <label for="edit_nama" class="font-weight-bold">Nama Lengkap</label>
-                      <input type="text" class="form-control" id="edit_nama" placeholder="Nama lengkap" required>
-                    </div>
-                    <div class="form-group">
-                      <label for="edit_username" class="font-weight-bold">Username</label>
-                      <input type="text" class="form-control" id="edit_username" placeholder="Username login" required autocomplete="off">
-                    </div>
-                    <hr class="my-2">
-                    <p class="text-muted small mb-2"><i class="fas fa-info-circle"></i> Kosongkan password jika tidak ingin mengubah password.</p>
-                    <div class="form-group">
-                      <label for="edit_password" class="font-weight-bold">Password Baru <span class="text-muted font-weight-normal">(opsional)</span></label>
-                      <div class="input-group">
-                        <input type="password" class="form-control" id="edit_password" placeholder="Password baru (kosongkan jika tidak ubah)" autocomplete="new-password">
-                        <div class="input-group-append">
-                          <button class="btn btn-outline-secondary" type="button" id="togglePwd" title="Lihat/sembunyikan password">
-                            <i class="fas fa-eye" id="togglePwdIcon"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    <div id="editUserAlert" class="alert d-none mt-2 py-2" role="alert"></div>
-                  </div>
-                  <div class="modal-footer" style="border-top:1px solid #eee;">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Batal</button>
-                    <button type="button" class="btn btn-primary" id="btnSimpanEditUser"><i class="fas fa-save mr-1"></i>Simpan Perubahan</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- END MODAL -->
-
             <!-- TAB GURU -->
             <div class="tab-pane fade" id="guru" role="tabpanel" aria-labelledby="guru-tab">
                 <div class="table-responsive mt-3">
@@ -229,6 +187,48 @@ if (!isset($_SESSION["username"])) { ?>
 </div>
 </div>
 
+<!-- MODAL EDIT USER STAFF - diletakkan di luar semua container agar tidak terblokir overflow -->
+<div class="modal fade" id="modalEditUser" tabindex="-1" role="dialog" aria-labelledby="modalEditUserLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content shadow-lg" style="border-radius:12px;">
+      <div class="modal-header" style="background:linear-gradient(135deg,#4e73df,#224abe); color:#fff; border-radius:12px 12px 0 0;">
+        <h5 class="modal-title" id="modalEditUserLabel"><i class="fas fa-user-edit mr-2"></i>Edit Data User Staff</h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Tutup"><span>&times;</span></button>
+      </div>
+      <div class="modal-body px-4 py-3">
+        <input type="hidden" id="edit_id_user">
+        <div class="form-group">
+          <label for="edit_nama" class="font-weight-bold">Nama Lengkap <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="edit_nama" placeholder="Nama lengkap" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="edit_username" class="font-weight-bold">Username <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="edit_username" placeholder="Username login" autocomplete="off">
+        </div>
+        <hr class="my-2">
+        <p class="text-muted small mb-2"><i class="fas fa-info-circle"></i> Kosongkan password jika tidak ingin mengubah password.</p>
+        <div class="form-group">
+          <label for="edit_password" class="font-weight-bold">Password Baru <span class="text-muted font-weight-normal">(opsional)</span></label>
+          <div class="input-group">
+            <input type="password" class="form-control" id="edit_password" placeholder="Kosongkan jika tidak ingin ubah" autocomplete="new-password">
+            <div class="input-group-append">
+              <button class="btn btn-outline-secondary" type="button" id="togglePwdBtn" title="Tampilkan/sembunyikan">
+                <i class="fas fa-eye" id="togglePwdIcon"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="editUserAlert" class="alert d-none py-2" role="alert"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Batal</button>
+        <button type="button" class="btn btn-primary" id="btnSimpanEditUser"><i class="fas fa-save mr-1"></i>Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /MODAL EDIT USER -->
+
 <script>
 $(document).ready(function() {
     $(".datatable").DataTable();
@@ -250,7 +250,7 @@ $(document).ready(function() {
     });
 
     // Toggle show/hide password
-    $('#togglePwd').on('click', function() {
+    $('#togglePwdBtn').on('click', function() {
         var inp = $('#edit_password');
         var icon = $('#togglePwdIcon');
         if (inp.attr('type') === 'password') {

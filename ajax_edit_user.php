@@ -3,7 +3,10 @@
  * AJAX endpoint: Edit User Staff (tbl_user)
  * POST params: id_user, nama, username, password (opsional)
  */
-session_start();
+// Mulai session hanya jika belum aktif (agar tidak konflik dengan home.php)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 header('Content-Type: application/json');
 
 // Auth check
