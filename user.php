@@ -59,26 +59,33 @@ if (!isset($_SESSION["username"])) { ?>
                                     $hak = $duser["hak_akses"];
                                     $hakLabel = $hak == 1 ? "Admin" : ($hak == 4 ? "Satpam" : ($hak == 5 ? "Kepala Sekolah" : "Unknown ($hak)"));
                             ?>
-                                    <tr>
+                                    <tr id="row-user-<?= $duser['id_user']; ?>">
                                         <td class="text-center"><?= $no++; ?></td>
-                                        <td class="text-center"><strong><?= $duser["username"]; ?></strong></td>
-                                        <td><?= $duser["nama"]; ?></td>
+                                        <td class="text-center"><strong class="cell-username"><?= htmlspecialchars($duser["username"]); ?></strong></td>
+                                        <td class="cell-nama"><?= htmlspecialchars($duser["nama"]); ?></td>
                                         <td><span class="badge badge-primary"><?= $hakLabel; ?></span></td>
-                                        <td>
+                                        <td class="cell-password">
                                             <?php if(empty($duser["password_plain"])) { ?>
                                                 <i class="text-muted" style="font-size:0.8em">(Hanya MD5)</i>
                                             <?php } else { ?>
-                                                <span class="badge badge-light border text-dark font-weight-bold" style="font-size:0.9em; letter-spacing:1px;"><?= $duser["password_plain"]; ?></span>
+                                                <span class="badge badge-light border text-dark font-weight-bold" style="font-size:0.9em; letter-spacing:1px;"><?= htmlspecialchars($duser["password_plain"]); ?></span>
                                             <?php } ?>
                                         </td>
                                         <td class="text-center">
                                             <?php if($duser["username"] != "admin") { ?>
-                                            <a class="btn btn-sm btn-circle btn-info" title="Reset Password" href="?page=edit-user&id_user=<?= $duser["id_user"]; ?>&type=user"><i class="fas fa-lock"></i></a>
-                                            <a class="btn btn-sm btn-circle btn-danger" title="Hapus" href="delete-user.php?id_user=<?= $duser["id_user"]; ?>" onclick="return confirm(\
-Yakin
-hapus
-user
-ini?\);"><i class="fas fa-trash"></i></a>
+                                            <button class="btn btn-sm btn-circle btn-warning btn-edit-user"
+                                                title="Edit User"
+                                                data-id="<?= $duser['id_user']; ?>"
+                                                data-nama="<?= htmlspecialchars($duser['nama'], ENT_QUOTES); ?>"
+                                                data-username="<?= htmlspecialchars($duser['username'], ENT_QUOTES); ?>"
+                                                data-password="<?= htmlspecialchars($duser['password_plain'] ?? '', ENT_QUOTES); ?>">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <a class="btn btn-sm btn-circle btn-danger" title="Hapus"
+                                               href="delete-user.php?id_user=<?= $duser['id_user']; ?>"
+                                               onclick="return confirm('Yakin hapus user ini?');">
+                                               <i class="fas fa-trash"></i>
+                                            </a>
                                             <?php } else { ?>
                                             <button class="btn btn-sm btn-secondary" disabled>Default</button>
                                             <?php } ?>
@@ -89,7 +96,49 @@ ini?\);"><i class="fas fa-trash"></i></a>
                     </table>
                 </div>
             </div>
-            
+
+            <!-- MODAL EDIT USER STAFF -->
+            <div class="modal fade" id="modalEditUser" tabindex="-1" role="dialog" aria-labelledby="modalEditUserLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content shadow-lg" style="border-radius:12px;">
+                  <div class="modal-header" style="background:linear-gradient(135deg,#4e73df,#224abe); color:#fff; border-radius:12px 12px 0 0;">
+                    <h5 class="modal-title" id="modalEditUserLabel"><i class="fas fa-user-edit mr-2"></i>Edit Data User</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Tutup"><span>&times;</span></button>
+                  </div>
+                  <div class="modal-body px-4 py-3">
+                    <input type="hidden" id="edit_id_user" name="id_user">
+                    <div class="form-group">
+                      <label for="edit_nama" class="font-weight-bold">Nama Lengkap</label>
+                      <input type="text" class="form-control" id="edit_nama" placeholder="Nama lengkap" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="edit_username" class="font-weight-bold">Username</label>
+                      <input type="text" class="form-control" id="edit_username" placeholder="Username login" required autocomplete="off">
+                    </div>
+                    <hr class="my-2">
+                    <p class="text-muted small mb-2"><i class="fas fa-info-circle"></i> Kosongkan password jika tidak ingin mengubah password.</p>
+                    <div class="form-group">
+                      <label for="edit_password" class="font-weight-bold">Password Baru <span class="text-muted font-weight-normal">(opsional)</span></label>
+                      <div class="input-group">
+                        <input type="password" class="form-control" id="edit_password" placeholder="Password baru (kosongkan jika tidak ubah)" autocomplete="new-password">
+                        <div class="input-group-append">
+                          <button class="btn btn-outline-secondary" type="button" id="togglePwd" title="Lihat/sembunyikan password">
+                            <i class="fas fa-eye" id="togglePwdIcon"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div id="editUserAlert" class="alert d-none mt-2 py-2" role="alert"></div>
+                  </div>
+                  <div class="modal-footer" style="border-top:1px solid #eee;">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Batal</button>
+                    <button type="button" class="btn btn-primary" id="btnSimpanEditUser"><i class="fas fa-save mr-1"></i>Simpan Perubahan</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- END MODAL -->
+
             <!-- TAB GURU -->
             <div class="tab-pane fade" id="guru" role="tabpanel" aria-labelledby="guru-tab">
                 <div class="table-responsive mt-3">
@@ -181,11 +230,100 @@ ini?\);"><i class="fas fa-trash"></i></a>
 </div>
 
 <script>
-    $(document).ready(function() {
-        $(".datatable").DataTable();
+$(document).ready(function() {
+    $(".datatable").DataTable();
+
+    // ===== EDIT USER MODAL =====
+    // Buka modal & isi data
+    $(document).on('click', '.btn-edit-user', function() {
+        var id       = $(this).data('id');
+        var nama     = $(this).data('nama');
+        var username = $(this).data('username');
+        var password = $(this).data('password');
+
+        $('#edit_id_user').val(id);
+        $('#edit_nama').val(nama);
+        $('#edit_username').val(username);
+        $('#edit_password').val('');
+        $('#editUserAlert').addClass('d-none').text('');
+        $('#modalEditUser').modal('show');
     });
+
+    // Toggle show/hide password
+    $('#togglePwd').on('click', function() {
+        var inp = $('#edit_password');
+        var icon = $('#togglePwdIcon');
+        if (inp.attr('type') === 'password') {
+            inp.attr('type', 'text');
+            icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            inp.attr('type', 'password');
+            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+
+    // Simpan perubahan via AJAX
+    $('#btnSimpanEditUser').on('click', function() {
+        var id_user  = $('#edit_id_user').val();
+        var nama     = $.trim($('#edit_nama').val());
+        var username = $.trim($('#edit_username').val());
+        var password = $('#edit_password').val();
+
+        // Validasi client
+        if (!nama || !username) {
+            showEditAlert('danger', 'Nama dan username tidak boleh kosong.');
+            return;
+        }
+
+        var btn = $(this);
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...');
+
+        $.ajax({
+            url: 'ajax_edit_user.php',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                id_user:  id_user,
+                nama:     nama,
+                username: username,
+                password: password
+            },
+            success: function(res) {
+                btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i>Simpan Perubahan');
+                if (res.status === 'success') {
+                    // Update baris tabel langsung tanpa reload
+                    var row = $('#row-user-' + id_user);
+                    row.find('.cell-nama').text(res.nama);
+                    row.find('.cell-username').text(res.username);
+                    if (res.password) {
+                        row.find('.cell-password').html('<span class="badge badge-light border text-dark font-weight-bold" style="font-size:0.9em;letter-spacing:1px;">' + res.password + '</span>');
+                    }
+                    // Update data-attribute tombol edit
+                    row.find('.btn-edit-user')
+                        .data('nama', res.nama)
+                        .data('username', res.username)
+                        .data('password', res.password || row.find('.btn-edit-user').data('password'));
+
+                    $('#modalEditUser').modal('hide');
+                    Swal.fire({ icon: 'success', title: 'Berhasil!', text: res.message, timer: 1800, showConfirmButton: false });
+                } else {
+                    showEditAlert('danger', res.message || 'Terjadi kesalahan.');
+                }
+            },
+            error: function() {
+                btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i>Simpan Perubahan');
+                showEditAlert('danger', 'Koneksi gagal, coba lagi.');
+            }
+        });
+    });
+
+    function showEditAlert(type, msg) {
+        $('#editUserAlert').removeClass('d-none alert-success alert-danger alert-warning')
+            .addClass('alert-' + type).html('<i class="fas fa-exclamation-circle mr-1"></i>' + msg);
+    }
+});
 </script>
 
 <?php
-} 
+}
 ?>
