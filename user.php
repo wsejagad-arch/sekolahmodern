@@ -82,7 +82,7 @@ if (!isset($_SESSION["username"])) { ?>
                                                 <i class="fas fa-edit"></i>
                                             </button>
                                             <a class="btn btn-sm btn-circle btn-danger" title="Hapus"
-                                               href="delete-user.php?id_user=<?= $duser['id_user']; ?>"
+                                               href="../delete-user.php?id_user=<?= $duser['id_user']; ?>"
                                                onclick="return confirm('Yakin hapus user ini?');">
                                                <i class="fas fa-trash"></i>
                                             </a>
