@@ -73,7 +73,7 @@ if (!isset($_SESSION["username"])) { ?>
                                         </td>
                                         <td class="text-center">
                                             <?php if($duser["username"] != "admin") { ?>
-                                            <button class="btn btn-sm btn-circle btn-warning btn-edit-user"
+                                            <button type="button" class="btn btn-sm btn-circle btn-warning btn-edit-user"
                                                 title="Edit User"
                                                 data-id="<?= $duser['id_user']; ?>"
                                                 data-nama="<?= htmlspecialchars($duser['nama'], ENT_QUOTES); ?>"
@@ -235,7 +235,9 @@ $(document).ready(function() {
 
     // ===== EDIT USER MODAL =====
     // Buka modal & isi data
-    $(document).on('click', '.btn-edit-user', function() {
+    $(document).on('click', '.btn-edit-user', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         var id       = $(this).data('id');
         var nama     = $(this).data('nama');
         var username = $(this).data('username');
