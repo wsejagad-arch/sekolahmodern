@@ -138,11 +138,8 @@ $posts = $conn->query("SELECT * FROM posts ORDER BY created_at DESC");
             <?= $message ?>
 
             <div class="admin-section">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div style="margin-bottom: 1rem;">
                     <h2><?= $editData ? 'Edit' : 'Tulis' ?> Postingan</h2>
-                    <button id="generateAI" class="ai-btn" type="button">
-                        <span>✨</span> Generate AI Content
-                    </button>
                 </div>
                 
                 <form method="POST" action="posts.php" enctype="multipart/form-data">
@@ -223,58 +220,12 @@ $posts = $conn->query("SELECT * FROM posts ORDER BY created_at DESC");
         </div>
     </div>
 
-    <!-- Modal AI Loading (Optional) -->
-    <div id="aiModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
-        <div style="background:white; padding:30px; border-radius:12px; text-align:center; max-width:400px;">
-            <div style="font-size:2rem; margin-bottom:15px;">✨</div>
-            <h3 style="margin-bottom:10px;">Sedang Menghasilkan Konten...</h3>
-            <p style="color:#64748b; font-size:0.9rem;">AI sedang merangkai kata-kata untuk postingan Anda. Mohon tunggu sebentar.</p>
-        </div>
-    </div>
-
     <script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
     <script>
         var editor = CKEDITOR.replace('editor', {
             height: 400,
             versionCheck: false,
             filebrowserUploadUrl: 'upload_image.php?type=Files'
-        });
-
-        document.getElementById('generateAI').addEventListener('click', async function() {
-            const title = document.getElementById('postTitle').value;
-            if(!title) {
-                alert('Silakan masukkan judul postingan terlebih dahulu sebagai referensi AI.');
-                return;
-            }
-
-            const btn = this;
-            const modal = document.getElementById('aiModal');
-            
-            btn.disabled = true;
-            modal.style.display = 'flex';
-
-            try {
-                const response = await fetch('http://localhost:3003/api/generate-content', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt: `Buatlah konten artikel berita sekolah yang menarik dan profesional berdasarkan judul: "${title}". Gunakan format HTML yang rapi dengan paragraf.` })
-                });
-
-                if(!response.ok) throw new Error('Gagal menghubungi server AI');
-                
-                const data = await response.json();
-                if(data.content) {
-                    editor.setData(data.content);
-                } else {
-                    alert('Server AI tidak mengembalikan konten.');
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Error: ' + error.message + '. Pastikan server WASENDER (localhost:3003) sudah berjalan.');
-            } finally {
-                btn.disabled = false;
-                modal.style.display = 'none';
-            }
         });
     </script>
 </body>

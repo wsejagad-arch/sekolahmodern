@@ -112,15 +112,7 @@ $posts = $conn->query("SELECT * FROM posts ORDER BY created_at DESC");
                         <input type="text" name="title" class="form-control" required placeholder="Masukkan judul postingan...">
                     </div>
                     <div class="form-group">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <label style="margin-bottom: 0;">Konten</label>
-                            <button type="button" id="aiGenBtn" class="btn" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; padding: 0.4rem 1rem; font-size: 0.85rem; border: none; display: flex; align-items: center; gap: 8px;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855a.75.75 0 0 0-.124 1.329l4.995 3.178 3.178 4.995a.75.75 0 0 0 1.33-.124L15.964.686Zm-5.033 13.061L7.904 9.096l5.222-5.222-5.222 5.222-4.651-2.969L14.037 2.12l-3.106 11.627Z"/>
-                                </svg>
-                                Generate AI
-                            </button>
-                        </div>
+                        <label>Konten</label>
                         <textarea name="content" id="editor" class="form-control" rows="10" required placeholder="Tulis isi postingan di sini..."></textarea>
                     </div>
                     <div class="form-group">
@@ -188,46 +180,6 @@ $posts = $conn->query("SELECT * FROM posts ORDER BY created_at DESC");
             uiColor: '#f8fafc',
             versionCheck: false,
             filebrowserUploadUrl: 'upload_image.php'
-        });
-
-        // AI Generation Logic
-        document.getElementById('aiGenBtn').addEventListener('click', async function() {
-            const topic = prompt("Masukkan topik atau judul postingan yang ingin dibuat oleh AI:");
-            if (!topic) return;
-
-            const btn = this;
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<span>Sedang Menulis...</span>';
-
-            try {
-                // Call WASENDER AI API (Assuming it's running on port 3003 as per .env)
-                const response = await fetch('http://localhost:3003/api/ai/generate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-API-Key': '8718395e79d750dfc0fc0a30cf099bd4' // Key from .env
-                    },
-                    body: JSON.stringify({
-                        topic: topic,
-                        type: 'post'
-                    })
-                });
-
-                const result = await response.json();
-                if (result.status === 'success') {
-                    CKEDITOR.instances.editor.setData(result.data.content);
-                    document.querySelector('input[name="title"]').value = result.data.title;
-                } else {
-                    alert('Gagal generate konten: ' + result.message);
-                }
-            } catch (error) {
-                console.error('AI Error:', error);
-                alert('Gagal terhubung ke server AI. Pastikan bot WASENDER sudah dijalankan.');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
         });
     </script>
 </body>
