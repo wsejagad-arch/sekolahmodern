@@ -1,0 +1,15 @@
+# Prevent directory browsing
+Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "\.(sql|bak|config|log|env)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Specifically protect config directory (handled via FilesMatch or separate .htaccess)
