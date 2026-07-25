@@ -42,6 +42,18 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $hero_bg = $setting['hero_bg'];
     $principal_photo = $setting['principal_photo'];
 
+    // Auto-fix folder uploads permissions
+    $uploadPathGlobal = dirname(__DIR__) . "/uploads/";
+    if (!is_dir($uploadPathGlobal)) {
+        @mkdir($uploadPathGlobal, 0755, true);
+    }
+    if (!is_writable($uploadPathGlobal)) {
+        @chmod($uploadPathGlobal, 0755);
+        if (!is_writable($uploadPathGlobal)) {
+            @chmod($uploadPathGlobal, 0777);
+        }
+    }
+
     // Fungsi bantuan untuk upload
     function handleUpload($fileArray, $oldFile, $prefix, &$message) {
         if(isset($fileArray) && $fileArray['error'] != 4) { // 4 = UPLOAD_ERR_NO_FILE
