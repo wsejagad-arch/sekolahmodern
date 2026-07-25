@@ -20,4 +20,4 @@ jobs:
         server: ftp.sman1sumber.sch.id
         username: web2@sman1sumber.sch.id
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: /
+        server-dir: /public_html/
