@@ -34,14 +34,14 @@ while($row = $result->fetch_assoc()) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil Guru - <?= htmlspecialchars($setting['site_name']) ?></title>
     <link rel="icon" type="image/png" href="uploads/favicon.png">
-    <link rel="stylesheet" href="css/style.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/style.css?v=1.1">
 </head>
 <body>
     <header>
         <div class="nav-container">
             <a href="index.php" class="logo" style="display: flex; align-items: center; gap: 10px; text-align: left; flex: 1;">
                 <?php if(!empty($setting['logo']) && file_exists("uploads/" . $setting['logo'])): ?>
-                    <img src="uploads/<?= htmlspecialchars($setting['logo']) ?>" alt="Logo" style="height: 40px; width: auto; object-fit: contain;">
+                    <img src="uploads/<?= htmlspecialchars($setting['logo']) ?>" alt="Logo" loading="lazy" style="height: 40px; width: auto; object-fit: contain;">
                 <?php endif; ?>
                 <div style="display: flex; flex-direction: column; line-height: 1.1;">
                     <span style="font-size: 1.2rem; font-weight: 800; white-space: nowrap;"><?= htmlspecialchars($setting['site_name']) ?></span>
@@ -118,7 +118,7 @@ while($row = $result->fetch_assoc()) {
                             <div class="teacher-card">
                                 <div class="teacher-photo-wrapper">
                                     <?php if(!empty($row['foto']) && file_exists("uploads/" . $row['foto'])): ?>
-                                        <img src="uploads/<?= htmlspecialchars($row['foto']) ?>" alt="<?= htmlspecialchars($row['nama_guru']) ?>" class="teacher-photo">
+                                        <img src="uploads/<?= htmlspecialchars($row['foto']) ?>" alt="<?= htmlspecialchars($row['nama_guru']) ?>" loading="lazy" class="teacher-photo">
                                     <?php else: ?>
                                         <div class="teacher-photo-placeholder">Foto Belum Tersedia</div>
                                     <?php endif; ?>

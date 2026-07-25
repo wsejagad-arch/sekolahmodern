@@ -29,7 +29,7 @@ $setting = $setRes->fetch_assoc();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($post['title']) ?> - <?= htmlspecialchars($setting['site_name']) ?></title>
     <link rel="icon" type="image/png" href="uploads/favicon.png">
-    <link rel="stylesheet" href="css/style.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/style.css?v=1.1">
     <style>
         .post-detail-container {
             max-width: 800px;
@@ -97,7 +97,7 @@ $setting = $setRes->fetch_assoc();
         <div class="nav-container">
             <a href="index.php" class="logo" style="display: flex; align-items: center; gap: 10px; text-align: left; flex: 1;">
                 <?php if(!empty($setting['logo']) && file_exists("uploads/" . $setting['logo'])): ?>
-                    <img src="uploads/<?= htmlspecialchars($setting['logo']) ?>" alt="Logo" style="height: 40px; width: auto; object-fit: contain;">
+                    <img src="uploads/<?= htmlspecialchars($setting['logo']) ?>" alt="Logo" loading="lazy" style="height: 40px; width: auto; object-fit: contain;">
                 <?php endif; ?>
                 <div style="display: flex; flex-direction: column; line-height: 1.1;">
                     <span style="font-size: 1.2rem; font-weight: 800; white-space: nowrap;"><?= htmlspecialchars($setting['site_name']) ?></span>
@@ -157,7 +157,7 @@ $setting = $setRes->fetch_assoc();
             }
             if(!empty($image_src)): 
             ?>
-                <img src="<?= $image_src ?>" alt="<?= htmlspecialchars($post['title']) ?>" class="post-detail-image">
+                <img src="<?= $image_src ?>" alt="<?= htmlspecialchars($post['title']) ?>" loading="lazy" class="post-detail-image">
             <?php endif; ?>
 
             <div class="post-detail-content">

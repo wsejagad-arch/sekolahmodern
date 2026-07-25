@@ -13,14 +13,14 @@ $setting = $setRes->fetch_assoc();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kegiatan - <?= htmlspecialchars($setting['site_name']) ?></title>
     <link rel="icon" type="image/png" href="uploads/favicon.png">
-    <link rel="stylesheet" href="css/style.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/style.css?v=1.1">
 </head>
 <body>
     <header>
         <div class="nav-container">
             <a href="index.php" class="logo" style="display: flex; align-items: center; gap: 10px; text-align: left; flex: 1;">
                 <?php if(!empty($setting['logo']) && file_exists("uploads/" . $setting['logo'])): ?>
-                    <img src="uploads/<?= htmlspecialchars($setting['logo']) ?>" alt="Logo" style="height: 40px; width: auto; object-fit: contain;">
+                    <img src="uploads/<?= htmlspecialchars($setting['logo']) ?>" alt="Logo" loading="lazy" style="height: 40px; width: auto; object-fit: contain;">
                 <?php endif; ?>
                 <div style="display: flex; flex-direction: column; line-height: 1.1;">
                     <span style="font-size: 1.2rem; font-weight: 800; white-space: nowrap;"><?= htmlspecialchars($setting['site_name']) ?></span>
@@ -84,7 +84,7 @@ $setting = $setRes->fetch_assoc();
                 <a href="#" class="btn btn-light">Profil Sekolah</a>
             </div>
             <div class="hero-image-wrapper">
-                <img src="uploads/<?= htmlspecialchars($setting['principal_photo']) ?>" alt="Kepala Sekolah" class="hero-principal">
+                <img src="uploads/<?= htmlspecialchars($setting['principal_photo']) ?>" alt="Kepala Sekolah" loading="lazy" class="hero-principal">
                 <div class="hero-badge">
                     <strong><?= htmlspecialchars($setting['principal_name']) ?></strong>
                     <span><?= htmlspecialchars($setting['principal_welcome']) ?></span>
