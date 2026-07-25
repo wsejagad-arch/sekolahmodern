@@ -143,6 +143,7 @@ CREATE TABLE `tbl_guru` (
   `foto` varchar(100) NOT NULL,
   `status` varchar(15) NOT NULL,
   `is_guru_bk` tinyint(1) NOT NULL DEFAULT 0,
+  `jabatan` varchar(50) DEFAULT 'Guru',
   PRIMARY KEY (`id_guru`)
 ) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
