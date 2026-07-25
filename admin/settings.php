@@ -55,14 +55,18 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $ext = strtolower(pathinfo($fileArray['name'], PATHINFO_EXTENSION));
             if(in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
-                if(!empty($oldFile) && file_exists(__DIR__ . "/../uploads/".$oldFile) && !in_array($oldFile, ['school_banner.png', 'kepala_sekolah.png'])) {
-                    @unlink(__DIR__ . "/../uploads/".$oldFile);
+                $uploadPath = dirname(__DIR__) . "/uploads/";
+                if(!empty($oldFile) && file_exists($uploadPath . $oldFile) && !in_array($oldFile, ['school_banner.png', 'kepala_sekolah.png'])) {
+                    @unlink($uploadPath . $oldFile);
                 }
                 $newName = $prefix . '_' . time() . '.' . $ext;
-                if(move_uploaded_file($fileArray['tmp_name'], __DIR__ . "/../uploads/" . $newName)) {
+                if(move_uploaded_file($fileArray['tmp_name'], $uploadPath . $newName)) {
                     return $newName;
                 } else {
-                    $message .= '<div class="alert alert-error">Gagal menyimpan file gambar ke folder uploads. Pastikan permission folder sudah benar.</div>';
+                    $err = error_get_last();
+                    $errMsg = $err ? $err['message'] : 'Unknown error';
+                    $isWritable = is_writable($uploadPath) ? 'Ya' : 'Tidak';
+                    $message .= '<div class="alert alert-error">Gagal menyimpan file ' . $prefix . '. Writable: ' . $isWritable . '. Path: ' . $uploadPath . '. Error: ' . $errMsg . '</div>';
                     return $oldFile;
                 }
             } else {
@@ -85,11 +89,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         } else {
             $ext = strtolower(pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION));
             if(in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
-                if(!empty($setting['logo']) && file_exists(__DIR__ . "/../uploads/".$setting['logo'])) {
-                    @unlink(__DIR__ . "/../uploads/".$setting['logo']);
+                $uploadPath = dirname(__DIR__) . "/uploads/";
+                if(!empty($setting['logo']) && file_exists($uploadPath . $setting['logo'])) {
+                    @unlink($uploadPath . $setting['logo']);
                 }
                 $logo_name = 'logo_' . time() . '.' . $ext;
-                $target_path = __DIR__ . "/../uploads/" . $logo_name;
+                $target_path = $uploadPath . $logo_name;
                 if(move_uploaded_file($_FILES['logo']['tmp_name'], $target_path)) {
                     // Generate Favicon Otomatis (64x64)
                     try {
@@ -109,7 +114,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                             imagefilledrectangle($favicon, 0, 0, $favicon_size, $favicon_size, $transparent);
 
                             imagecopyresampled($favicon, $src_img, 0, 0, 0, 0, $favicon_size, $favicon_size, $old_x, $old_y);
-                            imagepng($favicon, __DIR__ . "/../uploads/favicon.png");
+                            imagepng($favicon, $uploadPath . "favicon.png");
                             imagedestroy($favicon);
                             imagedestroy($src_img);
                         }
@@ -117,7 +122,10 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                         // Silently fail favicon generation
                     }
                 } else {
-                    $message .= '<div class="alert alert-error">Gagal menyimpan file logo ke folder uploads.</div>';
+                    $err = error_get_last();
+                    $errMsg = $err ? $err['message'] : 'Unknown error';
+                    $isWritable = is_writable($uploadPath) ? 'Ya' : 'Tidak';
+                    $message .= '<div class="alert alert-error">Gagal menyimpan file logo. Writable: ' . $isWritable . '. Path: ' . $uploadPath . '. Error: ' . $errMsg . '</div>';
                     $logo_name = $setting['logo']; // revert
                 }
             } else {
