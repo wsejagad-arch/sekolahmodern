@@ -42,74 +42,87 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $hero_bg = $setting['hero_bg'];
     $principal_photo = $setting['principal_photo'];
 
-    // Handle Upload Logo
-    if(isset($_FILES['logo']) && $_FILES['logo']['error'] == 0) {
-        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-        $filename = $_FILES['logo']['name'];
-        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        
-        if(in_array($ext, $allowed)) {
-            // Hapus logo lama jika ada
-            if(!empty($setting['logo']) && file_exists("../uploads/".$setting['logo'])) {
-                unlink("../uploads/".$setting['logo']);
+    // Fungsi bantuan untuk upload
+    function handleUpload($fileArray, $oldFile, $prefix, &$message) {
+        if(isset($fileArray) && $fileArray['error'] != 4) { // 4 = UPLOAD_ERR_NO_FILE
+            if($fileArray['error'] == 1 || $fileArray['error'] == 2) {
+                $message .= '<div class="alert alert-error">Gagal upload gambar: Ukuran file terlalu besar! (Maksimal 2MB atau sesuai limit server)</div>';
+                return $oldFile;
+            } elseif($fileArray['error'] != 0) {
+                $message .= '<div class="alert alert-error">Gagal upload gambar: Terjadi kesalahan (Error Code: ' . $fileArray['error'] . ')</div>';
+                return $oldFile;
             }
-            
-            $logo_name = 'logo_' . time() . '.' . $ext;
-            $target_path = "../uploads/" . $logo_name;
-            move_uploaded_file($_FILES['logo']['tmp_name'], $target_path);
 
-            // Generate Favicon Otomatis (64x64)
-            try {
-                if($ext == 'png') $src_img = imagecreatefrompng($target_path);
-                elseif($ext == 'webp') $src_img = imagecreatefromwebp($target_path);
-                else $src_img = imagecreatefromjpeg($target_path);
-
-                if($src_img) {
-                    $old_x = imagesx($src_img);
-                    $old_y = imagesy($src_img);
-                    $favicon_size = 64;
-                    $favicon = imagecreatetruecolor($favicon_size, $favicon_size);
-                    
-                    // Handle transparency untuk PNG/WEBP
-                    imagealphablending($favicon, false);
-                    imagesavealpha($favicon, true);
-                    $transparent = imagecolorallocatealpha($favicon, 255, 255, 255, 127);
-                    imagefilledrectangle($favicon, 0, 0, $favicon_size, $favicon_size, $transparent);
-
-                    imagecopyresampled($favicon, $src_img, 0, 0, 0, 0, $favicon_size, $favicon_size, $old_x, $old_y);
-                    imagepng($favicon, "../uploads/favicon.png");
-                    imagedestroy($favicon);
-                    imagedestroy($src_img);
+            $ext = strtolower(pathinfo($fileArray['name'], PATHINFO_EXTENSION));
+            if(in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                if(!empty($oldFile) && file_exists("../uploads/".$oldFile) && !in_array($oldFile, ['school_banner.png', 'kepala_sekolah.png'])) {
+                    @unlink("../uploads/".$oldFile);
                 }
-            } catch (Exception $e) {
-                // Silently fail favicon generation
+                $newName = $prefix . '_' . time() . '.' . $ext;
+                if(move_uploaded_file($fileArray['tmp_name'], "../uploads/" . $newName)) {
+                    return $newName;
+                } else {
+                    $message .= '<div class="alert alert-error">Gagal menyimpan file gambar ke folder uploads. Pastikan permission folder sudah benar.</div>';
+                    return $oldFile;
+                }
+            } else {
+                $message .= '<div class="alert alert-error">Format file gambar tidak didukung! (Hanya JPG, PNG, WEBP)</div>';
+                return $oldFile;
             }
+        }
+        return $oldFile;
+    }
+
+    $hero_bg = handleUpload($_FILES['hero_bg'] ?? null, $setting['hero_bg'], 'hero', $message);
+    $principal_photo = handleUpload($_FILES['principal_photo'] ?? null, $setting['principal_photo'], 'principal', $message);
+
+    // Untuk logo ada favicon generation
+    if(isset($_FILES['logo']) && $_FILES['logo']['error'] != 4) {
+        if($_FILES['logo']['error'] == 1 || $_FILES['logo']['error'] == 2) {
+            $message .= '<div class="alert alert-error">Gagal upload logo: Ukuran file terlalu besar! (Maksimal 2MB)</div>';
+        } elseif($_FILES['logo']['error'] != 0) {
+            $message .= '<div class="alert alert-error">Gagal upload logo: Terjadi kesalahan (Error Code: ' . $_FILES['logo']['error'] . ')</div>';
         } else {
-            $message = '<div class="alert alert-error">Format logo tidak didukung! (Hanya JPG, PNG, WEBP)</div>';
-        }
-    }
+            $ext = strtolower(pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION));
+            if(in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                if(!empty($setting['logo']) && file_exists("../uploads/".$setting['logo'])) {
+                    @unlink("../uploads/".$setting['logo']);
+                }
+                $logo_name = 'logo_' . time() . '.' . $ext;
+                $target_path = "../uploads/" . $logo_name;
+                if(move_uploaded_file($_FILES['logo']['tmp_name'], $target_path)) {
+                    // Generate Favicon Otomatis (64x64)
+                    try {
+                        if($ext == 'png') $src_img = @imagecreatefrompng($target_path);
+                        elseif($ext == 'webp') $src_img = @imagecreatefromwebp($target_path);
+                        else $src_img = @imagecreatefromjpeg($target_path);
 
-    // Handle Upload Hero BG
-    if(isset($_FILES['hero_bg']) && $_FILES['hero_bg']['error'] == 0) {
-        $ext = strtolower(pathinfo($_FILES['hero_bg']['name'], PATHINFO_EXTENSION));
-        if(in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
-            if(!empty($setting['hero_bg']) && file_exists("../uploads/".$setting['hero_bg']) && $setting['hero_bg'] != 'school_banner.png') {
-                unlink("../uploads/".$setting['hero_bg']);
-            }
-            $hero_bg = 'hero_' . time() . '.' . $ext;
-            move_uploaded_file($_FILES['hero_bg']['tmp_name'], "../uploads/" . $hero_bg);
-        }
-    }
+                        if($src_img) {
+                            $old_x = imagesx($src_img);
+                            $old_y = imagesy($src_img);
+                            $favicon_size = 64;
+                            $favicon = imagecreatetruecolor($favicon_size, $favicon_size);
+                            
+                            imagealphablending($favicon, false);
+                            imagesavealpha($favicon, true);
+                            $transparent = imagecolorallocatealpha($favicon, 255, 255, 255, 127);
+                            imagefilledrectangle($favicon, 0, 0, $favicon_size, $favicon_size, $transparent);
 
-    // Handle Upload Principal Photo
-    if(isset($_FILES['principal_photo']) && $_FILES['principal_photo']['error'] == 0) {
-        $ext = strtolower(pathinfo($_FILES['principal_photo']['name'], PATHINFO_EXTENSION));
-        if(in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
-            if(!empty($setting['principal_photo']) && file_exists("../uploads/".$setting['principal_photo']) && $setting['principal_photo'] != 'kepala_sekolah.png') {
-                unlink("../uploads/".$setting['principal_photo']);
+                            imagecopyresampled($favicon, $src_img, 0, 0, 0, 0, $favicon_size, $favicon_size, $old_x, $old_y);
+                            imagepng($favicon, "../uploads/favicon.png");
+                            imagedestroy($favicon);
+                            imagedestroy($src_img);
+                        }
+                    } catch (Exception $e) {
+                        // Silently fail favicon generation
+                    }
+                } else {
+                    $message .= '<div class="alert alert-error">Gagal menyimpan file logo ke folder uploads.</div>';
+                    $logo_name = $setting['logo']; // revert
+                }
+            } else {
+                $message .= '<div class="alert alert-error">Format logo tidak didukung! (Hanya JPG, PNG, WEBP)</div>';
             }
-            $principal_photo = 'principal_' . time() . '.' . $ext;
-            move_uploaded_file($_FILES['principal_photo']['tmp_name'], "../uploads/" . $principal_photo);
         }
     }
 
