@@ -1,0 +1,7 @@
+---
+deployment:
+  tasks:
+    # Ganti 'username_cpanel_anda' dengan username cPanel asli Anda
+    # Hapus file ini jika Anda mendeploy secara manual (tanpa fitur Git Version Control)
+    - export DEPLOYPATH=/home/username_cpanel_anda/public_html
+    - /bin/cp -R * $DEPLOYPATH
