@@ -12,6 +12,12 @@ $setting = $setRes->fetch_assoc();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kegiatan - <?= htmlspecialchars($setting['site_name']) ?></title>
+    <?php if(!empty($setting['seo_keywords'])): ?>
+    <meta name="keywords" content="<?= htmlspecialchars($setting['seo_keywords']) ?>">
+    <?php endif; ?>
+    <?php if(!empty($setting['seo_description'])): ?>
+    <meta name="description" content="<?= htmlspecialchars($setting['seo_description']) ?>">
+    <?php endif; ?>
     <link rel="icon" type="image/png" href="uploads/favicon.png">
     <link rel="stylesheet" href="css/style.css?v=1.1">
 </head>
@@ -174,6 +180,9 @@ $setting = $setRes->fetch_assoc();
             </a>
         </div>
         <p><?= $setting['site_footer'] ?></p>
+        <p style="margin-top: 10px; font-size: 0.8rem;">
+            <a href="privacy.php" style="color: #94a3b8; text-decoration: none;">Privacy Policy</a>
+        </p>
     </footer>
     <?php include 'includes/mobile_nav.php'; ?>
 </body>

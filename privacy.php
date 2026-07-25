@@ -1,22 +1,6 @@
 <?php
 require_once 'config/database.php';
-
-if(!isset($_GET['id'])) {
-    header('Location: index.php');
-    exit;
-}
-
-$id = (int)$_GET['id'];
-$stmt = $conn->prepare("SELECT * FROM posts WHERE id = ?");
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result = $stmt->get_result();
-$post = $result->fetch_assoc();
-
-if(!$post) {
-    header('Location: index.php');
-    exit;
-}
+$result = $conn->query("SELECT * FROM posts ORDER BY created_at DESC LIMIT 5");
 
 // Ambil setting sekolah
 $setRes = $conn->query("SELECT * FROM settings WHERE id=1");
@@ -27,7 +11,7 @@ $setting = $setRes->fetch_assoc();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($post['title']) ?> - <?= htmlspecialchars($setting['site_name']) ?></title>
+    <title>Kebijakan Privasi - <?= htmlspecialchars($setting['site_name']) ?></title>
     <?php if(!empty($setting['seo_keywords'])): ?>
     <meta name="keywords" content="<?= htmlspecialchars($setting['seo_keywords']) ?>">
     <?php endif; ?>
@@ -36,67 +20,6 @@ $setting = $setRes->fetch_assoc();
     <?php endif; ?>
     <link rel="icon" type="image/png" href="uploads/favicon.png">
     <link rel="stylesheet" href="css/style.css?v=1.1">
-    <style>
-        .post-detail-container {
-            max-width: 800px;
-            margin: 4rem auto;
-            background: white;
-            padding: 2.5rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-        .post-detail-header {
-            margin-bottom: 2rem;
-        }
-        .post-detail-title {
-            font-size: 2.5rem;
-            color: #0f172a;
-            margin-bottom: 1rem;
-            line-height: 1.2;
-        }
-        .post-detail-meta {
-            color: #64748b;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .post-detail-image {
-            width: 100%;
-            height: auto;
-            max-height: 500px;
-            object-fit: cover;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-        }
-        .post-detail-content {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #334155;
-        }
-        .post-detail-content p {
-            margin-bottom: 1.5rem;
-        }
-        .post-detail-content img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin: 1.5rem 0;
-        }
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-            margin-bottom: 2rem;
-            transition: all 0.2s;
-        }
-        .back-btn:hover {
-            transform: translateX(-5px);
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -112,6 +35,11 @@ $setting = $setRes->fetch_assoc();
             </a>
             
             <div class="mobile-header-extras" style="display: none; gap: 10px; align-items: center;">
+                <a href="javascript:void(0)" onclick="toggleSearch()" style="color: white; background: #3b82f6; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;" title="Cari di Situs">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    </svg>
+                </a>
                 <a href="https://wa.me/<?= preg_replace('/\D/', '', $setting['phone']) ?>" style="color: white; background: #22c55e; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;" title="Contact Person">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.061 3.972L0 16l4.14-1.086A7.98 7.98 0 0 0 7.994 14.5c4.366 0 7.99-3.557 7.994-7.926a7.86 7.86 0 0 0-2.387-5.248zM7.994 13.255a6.62 6.62 0 0 1-3.371-.92l-.24-.143-2.513.658.67-2.457-.156-.248a6.622 6.622 0 0 1-1.034-3.52c.002-3.649 2.987-6.632 6.64-6.632a6.62 6.62 0 0 1 4.67 1.944 6.613 6.613 0 0 1 1.969 4.675c-.004 3.65-2.988 6.633-6.64 6.633z"/>
@@ -129,64 +57,87 @@ $setting = $setRes->fetch_assoc();
                     <a href="guru.php">Profil Guru</a>
                     <a href="kegiatan.php">Kegiatan</a>
                 </div>
+                <div class="nav-contact">
+                    <form action="search.php" method="GET" class="search-form-desktop" style="position: relative; display: flex; align-items: center; margin-right: 0.5rem;">
+                        <input type="text" name="q" placeholder="Cari..." style="padding: 0.5rem 1rem 0.5rem 2.2rem; border-radius: 12px; border: 1px solid var(--border); background: #f1f5f9; font-size: 0.85rem; width: 150px; transition: all 0.3s ease;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="var(--text-muted)" viewBox="0 0 16 16" style="position: absolute; left: 0.8rem;">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                    </form>
+                    <a href="https://wa.me/<?= preg_replace('/\D/', '', $setting['phone']) ?>" class="contact-link wa-badge" target="_blank" title="Chat WhatsApp">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M12.166 8.94c-.524-.232-1.864-.92-2.111-1.012-.247-.092-.426-.138-.606.138-.18.276-.693.874-.847 1.058-.155.183-.31.206-.834-.025-1.147-.573-2.019-1.339-2.74-2.592-.183-.313-.025-.483.13-.637.14-.139.31-.362.466-.544.155-.182.206-.31.31-.516.104-.206.052-.387-.026-.544-.078-.157-.606-1.459-.83-2-.22-.524-.442-.452-.606-.46L5.34 1.5c-.18 0-.473.068-.72.338-.247.27-1.002.978-1.002 2.39 0 1.41 1.026 2.775 1.17 2.96 1.156 1.554 2.168 2.302 3.513 2.87.82.35 1.458.558 1.956.716.824.262 1.572.225 2.165.137.66-.1 1.864-.761 2.127-1.46.264-.7.264-1.3.186-1.46-.078-.158-.283-.251-.807-.483z"/>
+                        </svg>
+                        <span><?= htmlspecialchars($setting['phone']) ?></span>
+                    </a>
+                    <div class="contact-link" style="cursor: default;" title="Lokasi Sekolah">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                        </svg>
+                        <span><?= htmlspecialchars($setting['address_name']) ?></span>
+                    </div>
+                </div>
             </nav>
         </div>
     </header>
 
-    <div class="container" style="display: block;">
-        <div class="post-detail-container">
-            <a href="index.php" class="back-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-                </svg>
-                Kembali ke Beranda
-            </a>
-
-            <div class="post-detail-header">
-                <div class="post-detail-meta">
-                    <span>📅 <?= date('d F Y', strtotime($post['created_at'])) ?></span>
-                    <span>✍️ Oleh Admin</span>
+    <div class="hero" style="background-image: url('uploads/<?= htmlspecialchars($setting['hero_bg']) ?>');">
+        <div class="hero-overlay"></div>
+        <div class="hero-content nav-container">
+            <div class="hero-text">
+                <h1><?= htmlspecialchars($setting['hero_title']) ?></h1>
+                <p><?= nl2br(htmlspecialchars($setting['hero_subtitle'])) ?></p>
+                <a href="#" class="btn btn-light">Profil Sekolah</a>
+            </div>
+            <div class="hero-image-wrapper">
+                <img src="uploads/<?= htmlspecialchars($setting['principal_photo']) ?>" alt="Kepala Sekolah" loading="lazy" class="hero-principal">
+                <div class="hero-badge">
+                    <strong><?= htmlspecialchars($setting['principal_name']) ?></strong>
+                    <span><?= htmlspecialchars($setting['principal_welcome']) ?></span>
                 </div>
-                <h1 class="post-detail-title"><?= htmlspecialchars($post['title']) ?></h1>
-            </div>
-
-            <?php 
-            $image_src = '';
-            if(!empty($post['image'])) {
-                if(filter_var($post['image'], FILTER_VALIDATE_URL)) {
-                    $image_src = $post['image'];
-                } elseif(file_exists("uploads/posts/" . $post['image'])) {
-                    $image_src = "uploads/posts/" . $post['image'];
-                } elseif(file_exists("uploads/" . $post['image'])) {
-                    $image_src = "uploads/" . $post['image'];
-                }
-            }
-            if(!empty($image_src)): 
-            ?>
-                <img src="<?= $image_src ?>" alt="<?= htmlspecialchars($post['title']) ?>" loading="lazy" class="post-detail-image">
-            <?php endif; ?>
-
-            <div class="post-detail-content">
-                <?= $post['content'] // Tampilkan HTML langsung karena ini dari CKEditor/WP ?>
-            </div>
-
-            <div class="ad-space" style="margin-top: 3rem; padding: 0; background: #f8fafc; border: 1px solid #e2e8f0; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 200px; border-radius: 12px;">
-                <?php if(!empty($setting['ads_code'])): ?>
-                    <?= $setting['ads_code'] ?>
-                <?php else: ?>
-                    <div style="width: 100%; min-height: 200px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; display: flex; align-items: center; justify-content: space-between; padding: 2rem; gap: 2rem;">
-                        <div style="flex: 1;">
-                            <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: white;"><?= htmlspecialchars($setting['ppdb_title']) ?></h3>
-                            <p style="font-size: 0.9rem; opacity: 0.9;"><?= nl2br(htmlspecialchars($setting['ppdb_subtitle'])) ?></p>
-                        </div>
-                        <a href="https://wa.me/<?= preg_replace('/\D/', '', $setting['phone']) ?>" class="btn" style="background: white; color: #6366f1; white-space: nowrap;"><?= htmlspecialchars($setting['ppdb_btn_text']) ?></a>
-                    </div>
-                <?php endif; ?>
             </div>
         </div>
     </div>
 
-    <footer style="margin-top: 4rem;">
+    <div class="container">
+        <main class="main-content">
+
+            <div id="privacy" class="post-detail-container" style="background: white; padding: 2rem; border-radius: 12px; border: 1px solid var(--border);">
+                <div class="section-header" style="margin-bottom: 2rem; text-align: left;">
+                    <h2 class="section-title" style="font-size: 2rem;">Kebijakan Privasi</h2>
+                    <p class="section-subtitle" style="margin: 0;">Kebijakan dan perlindungan data pengunjung <?= htmlspecialchars($setting['site_name']) ?>.</p>
+                </div>
+                <div class="post-detail-content" style="font-size: 1rem; line-height: 1.8; color: var(--text);">
+                    <?php 
+                    if (!empty($setting['privacy_policy'])) {
+                        echo $setting['privacy_policy'];
+                    } else {
+                        echo "<p>Kebijakan privasi belum ditambahkan oleh administrator.</p>";
+                    }
+                    ?>
+                </div>
+            </div>
+        </main>
+
+        <aside class="sidebar">
+            <div class="ad-space" style="padding: 0; background: #f8fafc; border: 1px solid #e2e8f0; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 600px;">
+                <?php if(!empty($setting['ads_code'])): ?>
+                    <?= $setting['ads_code'] ?>
+                <?php else: ?>
+                    <div style="width: 100%; height: 600px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem;">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: white;">Prestasi & Kegiatan</h3>
+                        <p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 2rem;">Siswa kami aktif berprestasi di tingkat Nasional dan Internasional.</p>
+                        <a href="https://wa.me/<?= preg_replace('/\D/', '', $setting['phone']) ?>" class="btn" style="background: white; color: #10b981;">Gabung Sekarang</a>
+                        <div style="margin-top: auto; font-size: 0.7rem; opacity: 0.5;">Space Google Ads 300x600</div>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </aside>
+    </div>
+
+
+    <footer>
         <div class="footer-social" style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
             <a href="<?= htmlspecialchars($setting['fb_link']) ?>" class="social-item" style="display: flex; align-items: center; gap: 8px; color: white; text-decoration: none; font-size: 0.9rem;" target="_blank">
                 <svg width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951z"/></svg>

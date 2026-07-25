@@ -34,6 +34,10 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $hero_title = $conn->real_escape_string($_POST['hero_title']);
     $hero_subtitle = $conn->real_escape_string($_POST['hero_subtitle']);
     $site_footer = $conn->real_escape_string($_POST['site_footer']);
+    $seo_keywords = $conn->real_escape_string($_POST['seo_keywords'] ?? '');
+    $seo_description = $conn->real_escape_string($_POST['seo_description'] ?? '');
+    $privacy_policy = $_POST['privacy_policy'] ?? '';
+    
     $logo_name = $setting['logo'];
     $hero_bg = $setting['hero_bg'];
     $principal_photo = $setting['principal_photo'];
@@ -110,8 +114,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if(empty($message)) {
-        $stmt = $conn->prepare("UPDATE settings SET phone=?, address_name=?, address_text=?, logo=?, ads_code=?, ppdb_title=?, ppdb_subtitle=?, ppdb_btn_text=?, hero_bg=?, principal_photo=?, fb_link=?, tiktok_link=?, threads_link=?, youtube_link=?, principal_name=?, principal_welcome=?, site_name=?, hero_title=?, hero_subtitle=?, site_subtitle=?, site_footer=? WHERE id=1");
-        $stmt->bind_param("sssssssssssssssssssss", $phone, $address_name, $address_text, $logo_name, $ads_code, $ppdb_title, $ppdb_subtitle, $ppdb_btn_text, $hero_bg, $principal_photo, $fb_link, $tiktok_link, $threads_link, $youtube_link, $principal_name, $principal_welcome, $site_name, $hero_title, $hero_subtitle, $site_subtitle, $site_footer);
+        $stmt = $conn->prepare("UPDATE settings SET phone=?, address_name=?, address_text=?, logo=?, ads_code=?, ppdb_title=?, ppdb_subtitle=?, ppdb_btn_text=?, hero_bg=?, principal_photo=?, fb_link=?, tiktok_link=?, threads_link=?, youtube_link=?, principal_name=?, principal_welcome=?, site_name=?, hero_title=?, hero_subtitle=?, site_subtitle=?, site_footer=?, seo_keywords=?, seo_description=?, privacy_policy=? WHERE id=1");
+        $stmt->bind_param("ssssssssssssssssssssssss", $phone, $address_name, $address_text, $logo_name, $ads_code, $ppdb_title, $ppdb_subtitle, $ppdb_btn_text, $hero_bg, $principal_photo, $fb_link, $tiktok_link, $threads_link, $youtube_link, $principal_name, $principal_welcome, $site_name, $hero_title, $hero_subtitle, $site_subtitle, $site_footer, $seo_keywords, $seo_description, $privacy_policy);
         
         if($stmt->execute()) {
             $message = '<div class="alert alert-success">Pengaturan berhasil diperbarui!</div>';
@@ -227,6 +231,21 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </div>
                         </div>
                     </div>
+
+
+                    <div class="admin-section" style="margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 2rem;">
+                        <h2 style="margin-bottom: 1rem;">Pengaturan SEO (Mesin Pencari)</h2>
+                        <div class="form-group">
+                            <label>Kata Kunci (Keywords) - Pisahkan dengan koma</label>
+                            <input type="text" name="seo_keywords" class="form-control" value="<?= htmlspecialchars($setting['seo_keywords'] ?? '') ?>" placeholder="Misal: sekolah modern, sman 1 sumber, sekolah favorit">
+                        </div>
+                        <div class="form-group">
+                            <label>Deskripsi Website (Meta Description)</label>
+                            <textarea name="seo_description" class="form-control" rows="3" placeholder="Deskripsi singkat tentang sekolah Anda untuk Google..."><?= htmlspecialchars($setting['seo_description'] ?? '') ?></textarea>
+                        </div>
+                    </div>
+
+                    <div class="admin-section" style="margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 2rem;">
                         <h2 style="margin-bottom: 1rem;">Pengaturan Iklan & Banner PPDB</h2>
                         
                         <div style="background: #f1f5f9; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
@@ -245,9 +264,17 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </div>
                         </div>
 
-                        <label>Script Google Ads 300x600</label>
+                        <label>Script Google Ads / AdSense / Ads Teks (300x600 dll)</label>
                         <textarea name="ads_code" class="form-control" rows="5" placeholder="Paste script iklan di sini..."><?= htmlspecialchars($setting['ads_code']) ?></textarea>
-                        <small style="color: #64748b; margin-top: 0.5rem; display: block;">* Jika script iklan diisi, banner PPDB di atas akan digantikan oleh iklan Google Ads di sidebar.</small>
+                        <small style="color: #64748b; margin-top: 0.5rem; display: block;">* Jika script iklan diisi, banner PPDB di atas akan digantikan oleh iklan di sidebar.</small>
+                    </div>
+
+                    <div class="admin-section" style="margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 2rem;">
+                        <h2 style="margin-bottom: 1rem;">Halaman Kebijakan Privasi (Privacy Policy)</h2>
+                        <div class="form-group">
+                            <label>Konten Kebijakan Privasi</label>
+                            <textarea name="privacy_policy" id="editor" class="form-control" rows="10"><?= htmlspecialchars($setting['privacy_policy'] ?? '') ?></textarea>
+                        </div>
                     </div>
 
                     <div class="admin-section" style="margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 2rem;">
@@ -277,4 +304,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 </body>
+    <script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace('editor', {
+            height: 300,
+            versionCheck: false
+        });
+    </script>
 </html>
