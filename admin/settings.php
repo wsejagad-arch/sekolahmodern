@@ -55,11 +55,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $ext = strtolower(pathinfo($fileArray['name'], PATHINFO_EXTENSION));
             if(in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
-                if(!empty($oldFile) && file_exists("../uploads/".$oldFile) && !in_array($oldFile, ['school_banner.png', 'kepala_sekolah.png'])) {
-                    @unlink("../uploads/".$oldFile);
+                if(!empty($oldFile) && file_exists(__DIR__ . "/../uploads/".$oldFile) && !in_array($oldFile, ['school_banner.png', 'kepala_sekolah.png'])) {
+                    @unlink(__DIR__ . "/../uploads/".$oldFile);
                 }
                 $newName = $prefix . '_' . time() . '.' . $ext;
-                if(move_uploaded_file($fileArray['tmp_name'], "../uploads/" . $newName)) {
+                if(move_uploaded_file($fileArray['tmp_name'], __DIR__ . "/../uploads/" . $newName)) {
                     return $newName;
                 } else {
                     $message .= '<div class="alert alert-error">Gagal menyimpan file gambar ke folder uploads. Pastikan permission folder sudah benar.</div>';
@@ -85,11 +85,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         } else {
             $ext = strtolower(pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION));
             if(in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
-                if(!empty($setting['logo']) && file_exists("../uploads/".$setting['logo'])) {
-                    @unlink("../uploads/".$setting['logo']);
+                if(!empty($setting['logo']) && file_exists(__DIR__ . "/../uploads/".$setting['logo'])) {
+                    @unlink(__DIR__ . "/../uploads/".$setting['logo']);
                 }
                 $logo_name = 'logo_' . time() . '.' . $ext;
-                $target_path = "../uploads/" . $logo_name;
+                $target_path = __DIR__ . "/../uploads/" . $logo_name;
                 if(move_uploaded_file($_FILES['logo']['tmp_name'], $target_path)) {
                     // Generate Favicon Otomatis (64x64)
                     try {
@@ -109,7 +109,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                             imagefilledrectangle($favicon, 0, 0, $favicon_size, $favicon_size, $transparent);
 
                             imagecopyresampled($favicon, $src_img, 0, 0, 0, 0, $favicon_size, $favicon_size, $old_x, $old_y);
-                            imagepng($favicon, "../uploads/favicon.png");
+                            imagepng($favicon, __DIR__ . "/../uploads/favicon.png");
                             imagedestroy($favicon);
                             imagedestroy($src_img);
                         }
