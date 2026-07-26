@@ -332,8 +332,8 @@ $setting = $setRes->fetch_assoc();
     </div>
 
     <?php if($action != 'list'): ?>
-    <!-- TinyMCE 7 CDN -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+    <!-- TinyMCE 7 CDN (Open Source Version) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/7.2.1/tinymce.min.js" referrerpolicy="origin"></script>
     <script>
         tinymce.init({
             selector: '#modern-editor',
@@ -360,10 +360,7 @@ $setting = $setRes->fetch_assoc();
             
             // Pengaturan Image/Media
             image_title: true,
-            file_picker_types: 'image',
-            
-            // Konfigurasi Bahasa
-            language: 'id'
+            file_picker_types: 'image'
         });
     </script>
     <?php endif; ?>
