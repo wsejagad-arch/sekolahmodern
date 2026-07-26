@@ -27,7 +27,7 @@ $setting = $setRes->fetch_assoc();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($post['title']) ?> - <?= htmlspecialchars($setting['site_name']) ?></title>
+    <title><?= htmlspecialchars($post['title'] ?? '') ?> - <?= htmlspecialchars($setting['site_name'] ?? '') ?></title>
     <?php if(!empty($setting['seo_keywords'])): ?>
     <meta name="keywords" content="<?= htmlspecialchars($setting['seo_keywords']) ?>">
     <?php endif; ?>
@@ -152,10 +152,14 @@ $setting = $setRes->fetch_assoc();
 
             <div class="post-detail-header">
                 <div class="post-detail-meta">
-                    <span>📅 <?= date('d F Y', strtotime($post['created_at'])) ?></span>
+                    <?php
+                    $timestamp = strtotime($post['created_at']);
+                    $date_str = ($timestamp !== false && $timestamp > 0) ? date('d F Y', $timestamp) : 'Baru saja';
+                    ?>
+                    <span>📅 <?= $date_str ?></span>
                     <span>✍️ Oleh Admin</span>
                 </div>
-                <h1 class="post-detail-title"><?= htmlspecialchars($post['title']) ?></h1>
+                <h1 class="post-detail-title"><?= htmlspecialchars($post['title'] ?? '') ?></h1>
             </div>
 
             <?php 
@@ -171,7 +175,7 @@ $setting = $setRes->fetch_assoc();
             }
             if(!empty($image_src)): 
             ?>
-                <img src="<?= $image_src ?>" alt="<?= htmlspecialchars($post['title']) ?>" loading="lazy" class="post-detail-image">
+                <img src="<?= $image_src ?>" alt="<?= htmlspecialchars($post['title'] ?? '') ?>" loading="lazy" class="post-detail-image">
             <?php endif; ?>
 
             <div class="post-detail-content">
