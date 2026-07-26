@@ -1,5 +1,12 @@
 <?php
 session_start();
+
+// Mencegah akses langsung ke file ini jika bukan lewat URL rahasia
+if (strpos($_SERVER['REQUEST_URI'], 'admin-rahasia') === false) {
+    header('Location: ../index.php');
+    exit;
+}
+
 require_once '../config/database.php';
 
 // Redirect jika sudah login

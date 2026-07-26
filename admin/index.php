@@ -4,7 +4,7 @@ require_once '../config/database.php';
 
 // Cek login
 if(!isset($_SESSION['admin_logged_in'])) {
-    header('Location: login.php');
+    header('Location: /admin-rahasia');
     exit;
 }
 

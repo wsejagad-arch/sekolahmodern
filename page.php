@@ -133,7 +133,7 @@ $setting = $setRes->fetch_assoc();
             <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($setting['site_name']) ?>. All rights reserved.</p>
             <div style="margin-top: 10px; font-size: 0.9rem;">
                 <a href="privacy.php" style="color: #94a3b8; text-decoration: none; margin: 0 10px;">Kebijakan Privasi</a>
-                <a href="admin/login.php" style="color: #94a3b8; text-decoration: none; margin: 0 10px;">Login Admin</a>
+                <a href="admin-rahasia" style="color: #94a3b8; text-decoration: none; margin: 0 10px;">Login Admin</a>
             </div>
         </div>
     </footer>
