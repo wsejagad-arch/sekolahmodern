@@ -112,24 +112,30 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_page'])) {
     }
 
     if(empty($message)) {
-        if($id > 0) {
-            if(!empty($image_name)) {
-                $stmt = $conn->prepare("UPDATE pages SET title=?, slug=?, content=?, image=?, show_in_menu=? WHERE id=?");
-                $stmt->bind_param("ssssii", $title, $slug, $content, $image_name, $show_in_menu, $id);
+        try {
+            if($id > 0) {
+                if(!empty($image_name)) {
+                    $stmt = $conn->prepare("UPDATE pages SET title=?, slug=?, content=?, image=?, show_in_menu=? WHERE id=?");
+                    $stmt->bind_param("ssssii", $title, $slug, $content, $image_name, $show_in_menu, $id);
+                } else {
+                    $stmt = $conn->prepare("UPDATE pages SET title=?, slug=?, content=?, show_in_menu=? WHERE id=?");
+                    $stmt->bind_param("sssii", $title, $slug, $content, $show_in_menu, $id);
+                }
             } else {
-                $stmt = $conn->prepare("UPDATE pages SET title=?, slug=?, content=?, show_in_menu=? WHERE id=?");
-                $stmt->bind_param("sssii", $title, $slug, $content, $show_in_menu, $id);
+                $stmt = $conn->prepare("INSERT INTO pages (title, slug, content, image, show_in_menu) VALUES (?, ?, ?, ?, ?)");
+                $stmt->bind_param("ssssi", $title, $slug, $content, $image_name, $show_in_menu);
             }
-        } else {
-            $stmt = $conn->prepare("INSERT INTO pages (title, slug, content, image, show_in_menu) VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssssi", $title, $slug, $content, $image_name, $show_in_menu);
-        }
 
-        if($stmt->execute()) {
-            $message = '<div class="alert alert-success">Halaman berhasil disimpan!</div>';
-            $action = 'list';
-        } else {
-            $message = '<div class="alert alert-error">Gagal menyimpan halaman. ' . $conn->error . '</div>';
+            if($stmt && $stmt->execute()) {
+                $message = '<div class="alert alert-success">Halaman berhasil disimpan!</div>';
+                $action = 'list';
+            } else {
+                $message = '<div class="alert alert-error">Gagal menyimpan halaman. ' . $conn->error . '</div>';
+                $action = $id > 0 ? 'edit' : 'add';
+                $_GET['id'] = $id;
+            }
+        } catch (Exception $e) {
+            $message = '<div class="alert alert-error">Terjadi kesalahan sistem saat menyimpan: ' . $e->getMessage() . '</div>';
             $action = $id > 0 ? 'edit' : 'add';
             $_GET['id'] = $id;
         }

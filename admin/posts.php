@@ -8,6 +8,9 @@ if(!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
+// Ensure content column can handle large data (base64 images)
+$conn->query("ALTER TABLE posts MODIFY content LONGTEXT");
+
 $message = '';
 $action = isset($_GET['action']) ? $_GET['action'] : 'list';
 
@@ -75,24 +78,30 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_post'])) {
     }
 
     if(empty($message)) {
-        if($id > 0) {
-            if(!empty($image_name)) {
-                $stmt = $conn->prepare("UPDATE posts SET title=?, content=?, image=? WHERE id=?");
-                $stmt->bind_param("sssi", $title, $content, $image_name, $id);
+        try {
+            if($id > 0) {
+                if(!empty($image_name)) {
+                    $stmt = $conn->prepare("UPDATE posts SET title=?, content=?, image=? WHERE id=?");
+                    $stmt->bind_param("sssi", $title, $content, $image_name, $id);
+                } else {
+                    $stmt = $conn->prepare("UPDATE posts SET title=?, content=? WHERE id=?");
+                    $stmt->bind_param("ssi", $title, $content, $id);
+                }
             } else {
-                $stmt = $conn->prepare("UPDATE posts SET title=?, content=? WHERE id=?");
-                $stmt->bind_param("ssi", $title, $content, $id);
+                $stmt = $conn->prepare("INSERT INTO posts (title, content, image) VALUES (?, ?, ?)");
+                $stmt->bind_param("sss", $title, $content, $image_name);
             }
-        } else {
-            $stmt = $conn->prepare("INSERT INTO posts (title, content, image) VALUES (?, ?, ?)");
-            $stmt->bind_param("sss", $title, $content, $image_name);
-        }
 
-        if($stmt->execute()) {
-            $message = '<div class="alert alert-success">Postingan berhasil disimpan!</div>';
-            $action = 'list';
-        } else {
-            $message = '<div class="alert alert-error">Gagal menyimpan postingan. ' . $conn->error . '</div>';
+            if($stmt && $stmt->execute()) {
+                $message = '<div class="alert alert-success">Postingan berhasil disimpan!</div>';
+                $action = 'list';
+            } else {
+                $message = '<div class="alert alert-error">Gagal menyimpan postingan. ' . $conn->error . '</div>';
+                $action = $id > 0 ? 'edit' : 'add';
+                $_GET['id'] = $id;
+            }
+        } catch (Exception $e) {
+            $message = '<div class="alert alert-error">Terjadi kesalahan sistem saat menyimpan: ' . $e->getMessage() . '</div>';
             $action = $id > 0 ? 'edit' : 'add';
             $_GET['id'] = $id;
         }
