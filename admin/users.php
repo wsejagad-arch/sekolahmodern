@@ -74,10 +74,9 @@ $admins = $conn->query("SELECT * FROM admin ORDER BY id ASC");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Admin</title>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .dashboard-container { display: flex; min-height: 100vh; background: #f8fafc; }
-        .main-content { flex: 1; padding: 2rem; overflow-y: auto; }
         .card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 2rem; }
         .table-wrapper { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; }
@@ -94,10 +93,10 @@ $admins = $conn->query("SELECT * FROM admin ORDER BY id ASC");
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
+    <div class="admin-layout">
         <?php include 'sidebar.php'; ?>
 
-        <div class="main-content">
+        <div class="admin-main">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                 <h1 style="font-size: 1.5rem;">Kelola Admin</h1>
                 <button onclick="openModal('addModal')" class="btn" style="display: flex; align-items: center; gap: 0.5rem;">
