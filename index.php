@@ -147,7 +147,7 @@ $setting = $setRes->fetch_assoc();
                             <div class="post-content">
                                 <span class="post-date"><?= date('d F Y, H:i', strtotime($row['created_at'])) ?></span>
                                 <h2 class="post-title"><?= htmlspecialchars($row['title']) ?></h2>
-                                <p class="post-excerpt"><?= nl2br(htmlspecialchars(substr(strip_tags($row['content']), 0, 200))) ?>...</p>
+                                <p class="post-excerpt"><?= nl2br(htmlspecialchars(mb_substr(html_entity_decode(strip_tags($row['content']), ENT_QUOTES, 'UTF-8'), 0, 200, 'UTF-8'))) ?>...</p>
                                 <a href="post.php?id=<?= $row['id'] ?>" class="btn">Baca Selengkapnya</a>
                             </div>
                         </article>

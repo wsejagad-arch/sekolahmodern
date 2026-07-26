@@ -119,7 +119,7 @@ if (!empty($query)) {
                                 <div class="post-content">
                                     <span class="post-date"><?= date('d M Y', strtotime($row['created_at'])) ?></span>
                                     <h3 class="post-title" style="font-size: 1.5rem;"><?= htmlspecialchars($row['title']) ?></h3>
-                                    <p class="post-excerpt"><?= substr(strip_tags($row['content']), 0, 200) ?>...</p>
+                                    <p class="post-excerpt"><?= nl2br(htmlspecialchars(mb_substr(html_entity_decode(strip_tags($row['content']), ENT_QUOTES, 'UTF-8'), 0, 200, 'UTF-8'))) ?>...</p>
                                     <a href="index.php#berita" class="btn-text">Selengkapnya &rarr;</a>
                                 </div>
                             </article>
