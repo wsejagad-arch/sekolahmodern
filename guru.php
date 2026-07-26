@@ -78,6 +78,14 @@ while($row = $result->fetch_assoc()) {
                     <a href="index.php">Beranda</a>
                     <a href="guru.php" class="active" style="color: white;">Profil Guru</a>
                     <a href="kegiatan.php">Kegiatan</a>
+                    <?php 
+                    $menuRes = $conn->query("SELECT title, slug FROM pages WHERE show_in_menu = 1 ORDER BY id ASC");
+                    if($menuRes && $menuRes->num_rows > 0) {
+                        while($m = $menuRes->fetch_assoc()) {
+                            echo '<a href="page.php?slug='.$m['slug'].'">'.htmlspecialchars($m['title']).'</a>';
+                        }
+                    }
+                    ?>
                 </div>
                 <div class="nav-contact">
                     <form action="search.php" method="GET" class="search-form-desktop" style="position: relative; display: flex; align-items: center; margin-right: 0.5rem;">

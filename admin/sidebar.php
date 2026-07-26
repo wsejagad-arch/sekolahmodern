@@ -24,6 +24,10 @@ $setting = $setRes->fetch_assoc();
             <span class="menu-icon">📝</span>
             <span class="menu-text">Kelola Postingan</span>
         </a>
+        <a href="pages.php" class="<?= basename($_SERVER['PHP_SELF']) == 'pages.php' ? 'active' : '' ?>">
+            <span class="menu-icon">📄</span>
+            <span class="menu-text">Halaman Statis</span>
+        </a>
         <a href="teachers.php" class="<?= basename($_SERVER['PHP_SELF']) == 'teachers.php' ? 'active' : '' ?>">
             <span class="menu-icon">👨‍🏫</span>
             <span class="menu-text">Data Guru</span>
