@@ -86,9 +86,14 @@ $posts = $conn->query("SELECT * FROM posts ORDER BY created_at DESC");
         <?php include 'sidebar.php'; ?>
 
         <div class="admin-main">
-            <div class="dashboard-header">
-                <h1>Dashboard Admin</h1>
-                <p>Selamat datang kembali! Berikut adalah ringkasan sistem Anda hari ini.</p>
+            <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h1>Dashboard Admin</h1>
+                    <p>Selamat datang kembali! Berikut adalah ringkasan sistem Anda hari ini.</p>
+                </div>
+                <a href="logout.php" class="btn" style="background: #ef4444; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-sign-out-alt"></i> Keluar
+                </a>
             </div>
 
             <div class="stat-grid">
