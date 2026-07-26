@@ -8,7 +8,7 @@ $setting = $setRes->fetch_assoc();
         <?php if(!empty($setting['logo']) && file_exists("../uploads/" . $setting['logo'])): ?>
             <img src="../uploads/<?= htmlspecialchars($setting['logo']) ?>" alt="Logo" style="height: 35px; width: auto; object-fit: contain;">
         <?php endif; ?>
-        <a href="../index.php" class="logo" style="color:white; font-size:1.3rem; text-decoration:none; font-weight:bold;"><?= htmlspecialchars($setting['site_name']) ?></a>
+        <a href="index.php" class="logo" style="color:white; font-size:1.3rem; text-decoration:none; font-weight:bold;"><?= htmlspecialchars($setting['site_name']) ?></a>
     </div>
     
     <nav class="sidebar-nav">
