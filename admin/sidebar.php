@@ -48,6 +48,10 @@ $setting = $setRes->fetch_assoc();
             <span class="menu-icon">⚙️</span>
             <span class="menu-text">Pengaturan Web</span>
         </a>
+        <a href="logout.php" style="color: #ef4444; margin-top: 10px;">
+            <span class="menu-icon">🚪</span>
+            <span class="menu-text">Logout</span>
+        </a>
     </nav>
 
     <div class="sidebar-footer">
