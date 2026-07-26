@@ -40,6 +40,9 @@ Options -Indexes
 <IfModule mod_rewrite.c>
   RewriteEngine On
   
+  # Secret Admin Login Route
+  RewriteRule ^admin-rahasia$ admin/login.php [L]
+
   # Force HTTPS
   RewriteCond %{HTTPS} off
   RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
