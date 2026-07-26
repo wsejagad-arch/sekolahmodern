@@ -10,7 +10,11 @@ if (strpos($_SERVER['REQUEST_URI'], 'admin-rahasia') === false) {
 require_once __DIR__ . '/../config/database.php';
 
 // Auto-migrate database (tambah kolom role jika belum ada)
-@$conn->query("ALTER TABLE admin ADD COLUMN role ENUM('superadmin', 'author') NOT NULL DEFAULT 'superadmin' AFTER password");
+try {
+    $conn->query("ALTER TABLE admin ADD COLUMN role ENUM('superadmin', 'author') NOT NULL DEFAULT 'superadmin' AFTER password");
+} catch (Throwable $e) {
+    // Abaikan error duplicate column
+}
 
 // Redirect jika sudah login
 if(isset($_SESSION['admin_logged_in'])) {
