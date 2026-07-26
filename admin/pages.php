@@ -8,6 +8,11 @@ if(!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
+if($_SESSION['admin_role'] !== 'superadmin') {
+    header('Location: index.php');
+    exit;
+}
+
 // Auto-create table if not exists
 $conn->query("
 CREATE TABLE IF NOT EXISTS `pages` (

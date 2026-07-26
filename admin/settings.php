@@ -8,6 +8,11 @@ if(!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
+if($_SESSION['admin_role'] !== 'superadmin') {
+    header('Location: index.php');
+    exit;
+}
+
 // Ambil data setting awal
 $setRes = $conn->query("SELECT * FROM settings WHERE id=1");
 $setting = $setRes->fetch_assoc();

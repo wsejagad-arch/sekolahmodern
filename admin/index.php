@@ -96,10 +96,12 @@ $posts = $conn->query("SELECT * FROM posts ORDER BY created_at DESC");
                     <h3>Total Postingan</h3>
                     <p><?= $countPosts ?></p>
                 </div>
+                <?php if($_SESSION['admin_role'] === 'superadmin'): ?>
                 <div class="stat-card">
                     <h3>Total Guru</h3>
                     <p><?= $countTeachers ?></p>
                 </div>
+                <?php endif; ?>
             </div>
 
             <?= $message ?>

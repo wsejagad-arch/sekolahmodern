@@ -24,6 +24,8 @@ $setting = $setRes->fetch_assoc();
             <span class="menu-icon">📝</span>
             <span class="menu-text">Kelola Postingan</span>
         </a>
+        
+        <?php if(isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === 'superadmin'): ?>
         <a href="pages.php" class="<?= basename($_SERVER['PHP_SELF']) == 'pages.php' ? 'active' : '' ?>">
             <span class="menu-icon">📄</span>
             <span class="menu-text">Halaman Statis</span>
@@ -52,6 +54,12 @@ $setting = $setRes->fetch_assoc();
             <span class="menu-icon">⚙️</span>
             <span class="menu-text">Pengaturan Web</span>
         </a>
+        <a href="users.php" class="<?= basename($_SERVER['PHP_SELF']) == 'users.php' ? 'active' : '' ?>">
+            <span class="menu-icon">👥</span>
+            <span class="menu-text">Kelola Admin</span>
+        </a>
+        <?php endif; ?>
+
         <a href="logout.php" style="color: #ef4444; margin-top: 10px;">
             <span class="menu-icon">🚪</span>
             <span class="menu-text">Logout</span>

@@ -9,6 +9,9 @@ if (strpos($_SERVER['REQUEST_URI'], 'admin-rahasia') === false) {
 
 require_once '../config/database.php';
 
+// Auto-migrate database (tambah kolom role jika belum ada)
+@$conn->query("ALTER TABLE admin ADD COLUMN role ENUM('superadmin', 'author') NOT NULL DEFAULT 'superadmin' AFTER password");
+
 // Redirect jika sudah login
 if(isset($_SESSION['admin_logged_in'])) {
     header('Location: index.php');
@@ -34,6 +37,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         $admin = $result->fetch_assoc();
         if(password_verify($password, $admin['password'])) {
             $_SESSION['admin_logged_in'] = true;
+            $_SESSION['admin_id'] = $admin['id'];
+            $_SESSION['admin_role'] = $admin['role'] ?? 'superadmin';
             header('Location: index.php');
             exit;
         } else {
