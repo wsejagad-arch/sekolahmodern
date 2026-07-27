@@ -206,7 +206,7 @@ if ($action === 'load_monitoring') {
                     <i class="fas fa-chevron-circle-left" style="font-size: 1.1rem;"></i> Kembali
                 </a>
                 <div class="d-flex align-items-center" style="gap:15px;">
-                    <a href="javascript:void(0)" onclick="cetakRaport()" class="btn btn-sm btn-success shadow-sm rounded-pill font-weight-bold px-3"><i class="fas fa-print"></i> Cetak Raport</a>
+                    <a href="javascript:void(0)" data-toggle="modal" data-target="#modalCetakRaport" class="btn btn-sm btn-success shadow-sm rounded-pill font-weight-bold px-3"><i class="fas fa-print"></i> Cetak Raport</a>
                     <h5 class="mt-2 font-weight-bold mb-0 text-right" style="color:#0ea5e9; font-size:1.1rem;"><i class="fas fa-book-reader"></i> Literasi SIMANIS</h5>
                 </div>
             </nav>
@@ -431,6 +431,41 @@ if ($action === 'load_monitoring') {
 
                 <?php endif; ?>
             </div>
+            
+            <!-- Modal Cetak Raport -->
+            <div class="modal fade" id="modalCetakRaport" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <form method="GET" action="cetak-raport-literasi.php" target="_blank">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title font-weight-bold">Cetak Raport Literasi</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label>Pilih Kelas</label>
+                                    <select name="kelas" class="form-control" required>
+                                        <option value="">-- Pilih Kelas --</option>
+                                        <?php if (!empty($ampuh_classes)): ?>
+                                            <?php foreach ($ampuh_classes as $k): ?>
+                                                <option value="<?= htmlspecialchars($k) ?>"><?= htmlspecialchars($k) ?></option>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </select>
+                                    <small class="text-muted">Hanya menampilkan kelas literasi yang Anda ampu.</small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                <button type="submit" class="btn btn-success"><i class="fas fa-print"></i> Cetak</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -548,13 +583,6 @@ if ($action === 'load_monitoring') {
     $(document).on('click', '.btn-del-row', function() {
         $(this).closest('tr').remove();
     });
-
-    function cetakRaport() {
-        let kelas = prompt("Masukkan nama kelas yang ingin dicetak (contoh: X-1):");
-        if (kelas) {
-            window.open('cetak-raport-literasi.php?kelas=' + encodeURIComponent(kelas), '_blank');
-        }
-    }
 
     // Default 1 soal
     addSoal();
