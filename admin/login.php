@@ -18,7 +18,11 @@ try {
 
 // Redirect jika sudah login
 if(isset($_SESSION['admin_logged_in'])) {
-    header('Location: /admin/index.php');
+    if (isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === 'superadmin') {
+        header('Location: /admin/index.php');
+    } else {
+        header('Location: /admin/posts.php');
+    }
     exit;
 }
 
@@ -43,7 +47,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['admin_logged_in'] = true;
             $_SESSION['admin_id'] = $admin['id'];
             $_SESSION['admin_role'] = $admin['role'] ?? 'superadmin';
-            header('Location: /admin/index.php');
+            
+            if ($_SESSION['admin_role'] === 'superadmin') {
+                header('Location: /admin/index.php');
+            } else {
+                header('Location: /admin/posts.php');
+            }
             exit;
         } else {
             $error = 'Password salah!';

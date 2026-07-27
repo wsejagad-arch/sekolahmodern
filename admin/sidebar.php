@@ -16,10 +16,14 @@ $setting = $setRes->fetch_assoc();
             <span class="menu-icon">🌐</span>
             <span class="menu-text">Lihat Tampilan Web</span>
         </a>
+        
+        <?php if(isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === 'superadmin'): ?>
         <a href="index.php" class="<?= basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : '' ?>">
             <span class="menu-icon">📊</span>
             <span class="menu-text">Lihat Statistik / Dashboard</span>
         </a>
+        <?php endif; ?>
+        
         <a href="posts.php" class="<?= basename($_SERVER['PHP_SELF']) == 'posts.php' ? 'active' : '' ?>">
             <span class="menu-icon">📝</span>
             <span class="menu-text">Kelola Postingan</span>

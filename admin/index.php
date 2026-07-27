@@ -8,6 +8,11 @@ if(!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
+if(isset($_SESSION['admin_role']) && $_SESSION['admin_role'] !== 'superadmin') {
+    header('Location: posts.php');
+    exit;
+}
+
 $message = '';
 
 // Ambil statistik
