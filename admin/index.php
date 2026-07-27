@@ -13,6 +13,18 @@ $message = '';
 // Ambil statistik
 $countPosts = $conn->query("SELECT COUNT(*) as total FROM posts")->fetch_assoc()['total'];
 $countTeachers = $conn->query("SELECT COUNT(*) as total FROM teachers")->fetch_assoc()['total'];
+$countAdmins = $conn->query("SELECT COUNT(*) as total FROM admin")->fetch_assoc()['total'];
+$dbVersion = $conn->query("SELECT VERSION() as version")->fetch_assoc()['version'];
+
+// Informasi Server & Website
+$serverInfo = [
+    'php_version' => phpversion(),
+    'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
+    'upload_max' => ini_get('upload_max_filesize'),
+    'memory_limit' => ini_get('memory_limit'),
+    'db_version' => $dbVersion,
+    'total_admins' => $countAdmins
+];
 
 // Handle Hapus
 if(isset($_GET['delete'])) {
@@ -110,6 +122,36 @@ $posts = $conn->query("SELECT * FROM posts ORDER BY created_at DESC");
             </div>
 
             <?= $message ?>
+
+            <div class="admin-section" style="margin-top: 2rem;">
+                <h2>Analisis & Monitoring Website</h2>
+                <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                    <div class="stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: none;">
+                        <h3 style="font-size: 0.9rem; color: #64748b;">PHP Version</h3>
+                        <p style="font-size: 1.5rem; color: #334155;"><?= htmlspecialchars($serverInfo['php_version']) ?></p>
+                    </div>
+                    <div class="stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: none;">
+                        <h3 style="font-size: 0.9rem; color: #64748b;">Database Version</h3>
+                        <p style="font-size: 1.5rem; color: #334155;"><?= htmlspecialchars($serverInfo['db_version']) ?></p>
+                    </div>
+                    <div class="stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: none;">
+                        <h3 style="font-size: 0.9rem; color: #64748b;">Max Upload Size</h3>
+                        <p style="font-size: 1.5rem; color: #334155;"><?= htmlspecialchars($serverInfo['upload_max']) ?></p>
+                    </div>
+                    <div class="stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: none;">
+                        <h3 style="font-size: 0.9rem; color: #64748b;">Memory Limit</h3>
+                        <p style="font-size: 1.5rem; color: #334155;"><?= htmlspecialchars($serverInfo['memory_limit']) ?></p>
+                    </div>
+                    <div class="stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: none;">
+                        <h3 style="font-size: 0.9rem; color: #64748b;">Total Admin</h3>
+                        <p style="font-size: 1.5rem; color: #334155;"><?= $serverInfo['total_admins'] ?></p>
+                    </div>
+                    <div class="stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: none;">
+                        <h3 style="font-size: 0.9rem; color: #64748b;">Server Software</h3>
+                        <p style="font-size: 1.2rem; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<?= htmlspecialchars($serverInfo['server_software']) ?>"><?= htmlspecialchars($serverInfo['server_software']) ?></p>
+                    </div>
+                </div>
+            </div>
 
             <div class="admin-section">
                 <h2>Buat Postingan Baru</h2>
