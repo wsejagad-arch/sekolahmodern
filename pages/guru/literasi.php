@@ -100,13 +100,18 @@ if ($action === 'create_task') {
     if (isset($_POST['soal_pertanyaan']) && is_array($_POST['soal_pertanyaan'])) {
         foreach ($_POST['soal_pertanyaan'] as $i => $q) {
             $q = mysqli_real_escape_string($conn, $q);
-            $a = mysqli_real_escape_string($conn, $_POST['soal_a'][$i]);
-            $b = mysqli_real_escape_string($conn, $_POST['soal_b'][$i]);
-            $c = mysqli_real_escape_string($conn, $_POST['soal_c'][$i]);
-            $d = mysqli_real_escape_string($conn, $_POST['soal_d'][$i]);
-            $ans = mysqli_real_escape_string($conn, $_POST['soal_ans'][$i]);
+            $tipe = mysqli_real_escape_string($conn, $_POST['soal_tipe'][$i] ?? 'pg');
             
-            mysqli_query($conn, "INSERT INTO tbl_literasi_soal (id_tugas, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, jawaban_benar) VALUES ($tugas_id, '$q', '$a', '$b', '$c', '$d', '$ans')");
+            $a = mysqli_real_escape_string($conn, $_POST['soal_a'][$i] ?? '');
+            $b = mysqli_real_escape_string($conn, $_POST['soal_b'][$i] ?? '');
+            $c = mysqli_real_escape_string($conn, $_POST['soal_c'][$i] ?? '');
+            $d = mysqli_real_escape_string($conn, $_POST['soal_d'][$i] ?? '');
+            $e = mysqli_real_escape_string($conn, $_POST['soal_e'][$i] ?? '');
+            
+            $ans = mysqli_real_escape_string($conn, $_POST['soal_ans'][$i] ?? '');
+            $data_soal = mysqli_real_escape_string($conn, $_POST['soal_data'][$i] ?? '');
+            
+            mysqli_query($conn, "INSERT INTO tbl_literasi_soal (id_tugas, pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, opsi_e, tipe_soal, jawaban_benar, data_soal) VALUES ($tugas_id, '$q', '$a', '$b', '$c', '$d', '$e', '$tipe', '$ans', '$data_soal')");
         }
     }
     
@@ -200,7 +205,10 @@ if ($action === 'load_monitoring') {
                 <a href="../../home.php" class="btn btn-outline-primary btn-sm rounded-pill font-weight-bold d-flex align-items-center px-3 shadow-sm" style="gap: 6px; width: fit-content;">
                     <i class="fas fa-chevron-circle-left" style="font-size: 1.1rem;"></i> Kembali
                 </a>
-                <h5 class="mt-2 font-weight-bold mb-0 text-right" style="color:#0ea5e9; font-size:1.1rem;"><i class="fas fa-book-reader"></i> Literasi SIMANIS</h5>
+                <div class="d-flex align-items-center" style="gap:15px;">
+                    <a href="javascript:void(0)" onclick="cetakRaport()" class="btn btn-sm btn-success shadow-sm rounded-pill font-weight-bold px-3"><i class="fas fa-print"></i> Cetak Raport</a>
+                    <h5 class="mt-2 font-weight-bold mb-0 text-right" style="color:#0ea5e9; font-size:1.1rem;"><i class="fas fa-book-reader"></i> Literasi SIMANIS</h5>
+                </div>
             </nav>
 
             <div class="container-fluid">
@@ -317,9 +325,18 @@ if ($action === 'load_monitoring') {
                                     <hr>
                                     <h6 class="font-weight-bold">Soal Evaluasi (Auto-Grading)</h6>
                                     <div id="soalContainer"></div>
-                                    <button type="button" class="btn btn-sm btn-outline-info mb-3 w-100" onclick="addSoal()"><i class="fas fa-plus"></i> Tambah Soal Pilihan Ganda</button>
+                                    <div class="d-flex mb-3" style="gap: 10px;">
+                                        <select id="pilihTipeSoal" class="form-control form-control-sm" style="width: auto;">
+                                            <option value="pg">Pilihan Ganda (A-E)</option>
+                                            <option value="pg_majemuk">Pilihan Ganda Majemuk</option>
+                                            <option value="menjodohkan">Menjodohkan</option>
+                                            <option value="benar_salah">Benar / Salah</option>
+                                        </select>
+                                        <button type="button" class="btn btn-sm btn-outline-info flex-grow-1" onclick="addSoal()"><i class="fas fa-plus"></i> Tambah Soal</button>
+                                    </div>
                                     
                                     <button type="submit" class="btn btn-primary w-100 btn-lg shadow"><i class="fas fa-paper-plane"></i> Publikasikan Misi</button>
+
                                 </form>
                             </div>
                         </div>
@@ -438,38 +455,143 @@ if ($action === 'load_monitoring') {
         }
     });
 
-    let soalIdx = 0;
+    let soalIdx = -1;
     function addSoal() {
+        let tipe = $('#pilihTipeSoal').val();
         soalIdx++;
+        let idx = soalIdx;
         let html = `
-            <div class="p-3 border rounded mb-3 bg-light" id="soalBox_${soalIdx}">
+            <div class="p-3 border rounded mb-3 bg-light soal-box" data-idx="${idx}" data-tipe="${tipe}" id="soalBox_${idx}">
                 <div class="d-flex justify-content-between mb-2">
-                    <label class="font-weight-bold text-primary">Pertanyaan ${soalIdx}</label>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="$('#soalBox_${soalIdx}').remove()"><i class="fas fa-times"></i></button>
+                    <label class="font-weight-bold text-primary">Pertanyaan ${idx+1} <span class="badge badge-secondary ml-2">${tipe.replace('_', ' ').toUpperCase()}</span></label>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="$('#soalBox_${idx}').remove()"><i class="fas fa-times"></i></button>
                 </div>
-                <textarea class="form-control mb-2" name="soal_pertanyaan[]" placeholder="Ketik soal..." required></textarea>
+                <input type="hidden" name="soal_tipe[]" value="${tipe}">
+                <input type="hidden" name="soal_data[]" class="hidden-data">
+                <input type="hidden" name="soal_ans[]" class="hidden-ans">
+                <textarea class="form-control mb-2" name="soal_pertanyaan[]" placeholder="Ketik stimulus/pertanyaan soal..." required></textarea>
+        `;
+        
+        if (tipe === 'pg') {
+            html += `
                 <div class="row">
                     <div class="col-6 mb-1"><div class="input-group"><div class="input-group-prepend"><span class="input-group-text">A</span></div><input type="text" class="form-control" name="soal_a[]" required></div></div>
                     <div class="col-6 mb-1"><div class="input-group"><div class="input-group-prepend"><span class="input-group-text">B</span></div><input type="text" class="form-control" name="soal_b[]" required></div></div>
                     <div class="col-6 mb-1"><div class="input-group"><div class="input-group-prepend"><span class="input-group-text">C</span></div><input type="text" class="form-control" name="soal_c[]" required></div></div>
                     <div class="col-6 mb-1"><div class="input-group"><div class="input-group-prepend"><span class="input-group-text">D</span></div><input type="text" class="form-control" name="soal_d[]" required></div></div>
+                    <div class="col-12 mb-1"><div class="input-group"><div class="input-group-prepend"><span class="input-group-text">E</span></div><input type="text" class="form-control" name="soal_e[]"></div></div>
                 </div>
                 <div class="mt-2">
                     <label>Kunci Jawaban</label>
-                    <select class="form-control w-25 d-inline" name="soal_ans[]" required>
-                        <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
+                    <select class="form-control w-25 d-inline" onchange="$(this).closest('.soal-box').find('.hidden-ans').val(this.value)">
+                        <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option><option value="E">E</option>
                     </select>
                 </div>
-            </div>
-        `;
+            `;
+        } else if (tipe === 'pg_majemuk') {
+            html += `
+                <div class="row">
+                    <div class="col-6 mb-1"><div class="input-group"><div class="input-group-prepend"><div class="input-group-text"><input type="checkbox" value="A" class="kunci-majemuk"> A</div></div><input type="text" class="form-control" name="soal_a[]" required></div></div>
+                    <div class="col-6 mb-1"><div class="input-group"><div class="input-group-prepend"><div class="input-group-text"><input type="checkbox" value="B" class="kunci-majemuk"> B</div></div><input type="text" class="form-control" name="soal_b[]" required></div></div>
+                    <div class="col-6 mb-1"><div class="input-group"><div class="input-group-prepend"><div class="input-group-text"><input type="checkbox" value="C" class="kunci-majemuk"> C</div></div><input type="text" class="form-control" name="soal_c[]" required></div></div>
+                    <div class="col-6 mb-1"><div class="input-group"><div class="input-group-prepend"><div class="input-group-text"><input type="checkbox" value="D" class="kunci-majemuk"> D</div></div><input type="text" class="form-control" name="soal_d[]" required></div></div>
+                    <div class="col-12 mb-1"><div class="input-group"><div class="input-group-prepend"><div class="input-group-text"><input type="checkbox" value="E" class="kunci-majemuk"> E</div></div><input type="text" class="form-control" name="soal_e[]"></div></div>
+                </div>
+                <small class="text-muted">Centang kotak di sebelah opsi yang merupakan jawaban benar.</small>
+            `;
+        } else if (tipe === 'menjodohkan') {
+            html += `
+                <input type="hidden" name="soal_a[]" value=""><input type="hidden" name="soal_b[]" value=""><input type="hidden" name="soal_c[]" value=""><input type="hidden" name="soal_d[]" value=""><input type="hidden" name="soal_e[]" value="">
+                <table class="table table-sm table-bordered mt-2 tbl-jodoh">
+                    <thead><tr><th>Premis (Kiri)</th><th>Respons (Kanan / Kunci)</th><th></th></tr></thead>
+                    <tbody>
+                        <tr><td><input type="text" class="form-control jodoh-kiri" required></td><td><input type="text" class="form-control jodoh-kanan" required></td><td><button type="button" class="btn btn-sm btn-danger btn-del-row"><i class="fas fa-trash"></i></button></td></tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-sm btn-success btn-add-row" data-tipe="menjodohkan"><i class="fas fa-plus"></i> Tambah Pasangan</button>
+            `;
+        } else if (tipe === 'benar_salah') {
+            html += `
+                <input type="hidden" name="soal_a[]" value=""><input type="hidden" name="soal_b[]" value=""><input type="hidden" name="soal_c[]" value=""><input type="hidden" name="soal_d[]" value=""><input type="hidden" name="soal_e[]" value="">
+                <table class="table table-sm table-bordered mt-2 tbl-bs">
+                    <thead><tr><th>Pernyataan</th><th width="150">Kunci Jawaban</th><th></th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" class="form-control bs-stmt" required></td>
+                            <td><select class="form-control bs-ans"><option value="B">Benar</option><option value="S">Salah</option></select></td>
+                            <td><button type="button" class="btn btn-sm btn-danger btn-del-row"><i class="fas fa-trash"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-sm btn-success btn-add-row" data-tipe="bs"><i class="fas fa-plus"></i> Tambah Pernyataan</button>
+            `;
+        }
+        
+        html += `</div>`;
         $('#soalContainer').append(html);
+        
+        // set default answer for PG
+        let newBox = $('#soalBox_' + idx);
+        if (tipe === 'pg') newBox.find('.hidden-ans').val('A');
     }
     
+    // Dynamic Row Events
+    $(document).on('click', '.btn-add-row', function() {
+        let tbody = $(this).siblings('table').find('tbody');
+        let tipe = $(this).data('tipe');
+        if (tipe === 'menjodohkan') {
+            tbody.append('<tr><td><input type="text" class="form-control jodoh-kiri" required></td><td><input type="text" class="form-control jodoh-kanan" required></td><td><button type="button" class="btn btn-sm btn-danger btn-del-row"><i class="fas fa-trash"></i></button></td></tr>');
+        } else {
+            tbody.append('<tr><td><input type="text" class="form-control bs-stmt" required></td><td><select class="form-control bs-ans"><option value="B">Benar</option><option value="S">Salah</option></select></td><td><button type="button" class="btn btn-sm btn-danger btn-del-row"><i class="fas fa-trash"></i></button></td></tr>');
+        }
+    });
+    $(document).on('click', '.btn-del-row', function() {
+        $(this).closest('tr').remove();
+    });
+
+    function cetakRaport() {
+        let kelas = prompt("Masukkan nama kelas yang ingin dicetak (contoh: X-1):");
+        if (kelas) {
+            window.open('cetak-raport-literasi.php?kelas=' + encodeURIComponent(kelas), '_blank');
+        }
+    }
+
     // Default 1 soal
     addSoal();
 
     $('#formCreateTask').submit(function(e) {
         e.preventDefault();
+        
+        // Serialize complex fields before submit
+        $('.soal-box').each(function() {
+            let box = $(this);
+            let tipe = box.attr('data-tipe');
+            
+            if (tipe === 'pg_majemuk') {
+                let ans = [];
+                box.find('.kunci-majemuk:checked').each(function(){ ans.push($(this).val()); });
+                box.find('.hidden-ans').val(ans.join(','));
+            } else if (tipe === 'menjodohkan') {
+                let data = [];
+                box.find('tbody tr').each(function(){
+                    data.push({
+                        kiri: $(this).find('.jodoh-kiri').val(),
+                        kanan: $(this).find('.jodoh-kanan').val()
+                    });
+                });
+                box.find('.hidden-data').val(JSON.stringify(data));
+            } else if (tipe === 'benar_salah') {
+                let data = [];
+                box.find('tbody tr').each(function(){
+                    data.push({
+                        stmt: $(this).find('.bs-stmt').val(),
+                        ans: $(this).find('.bs-ans').val()
+                    });
+                });
+                box.find('.hidden-data').val(JSON.stringify(data));
+            }
+        });
+
         let btn = $(this).find('button[type="submit"]');
         btn.prop('disabled', true).html('Menyimpan...');
         

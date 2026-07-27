@@ -40,17 +40,55 @@ while($s = mysqli_fetch_assoc($qSoal)){
 
 // Processing Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $benar = 0;
+    $poin = 0;
     $total = count($soals);
     
     foreach ($soals as $s) {
-        $ans = $_POST['jawaban_'.$s['id']] ?? '';
-        if ($ans === $s['jawaban_benar']) {
-            $benar++;
+        $tipe = $s['tipe_soal'] ?? 'pg';
+        if ($tipe === 'pg') {
+            $ans = $_POST['jawaban_'.$s['id']] ?? '';
+            if ($ans === $s['jawaban_benar']) $poin += 1;
+        } elseif ($tipe === 'pg_majemuk') {
+            $ansArr = isset($_POST['jawaban_'.$s['id']]) && is_array($_POST['jawaban_'.$s['id']]) ? $_POST['jawaban_'.$s['id']] : [];
+            $kunciArr = explode(',', $s['jawaban_benar']);
+            $benarChecked = 0;
+            foreach($ansArr as $a) {
+                if(in_array($a, $kunciArr)) $benarChecked++;
+            }
+            if (count($kunciArr) > 0) {
+                $salahChecked = count($ansArr) - $benarChecked;
+                $skorItem = ($benarChecked / count($kunciArr)) - ($salahChecked * 0.2); // slight penalty for wrong answers
+                if($skorItem < 0) $skorItem = 0;
+                $poin += $skorItem;
+            }
+        } elseif ($tipe === 'menjodohkan') {
+            $ansArr = isset($_POST['jawaban_'.$s['id']]) && is_array($_POST['jawaban_'.$s['id']]) ? $_POST['jawaban_'.$s['id']] : [];
+            $data = json_decode($s['data_soal'], true);
+            if ($data && count($data) > 0) {
+                $benarJodoh = 0;
+                foreach($data as $i => $item) {
+                    if(isset($ansArr[$i]) && $ansArr[$i] === $item['kanan']) {
+                        $benarJodoh++;
+                    }
+                }
+                $poin += ($benarJodoh / count($data));
+            }
+        } elseif ($tipe === 'benar_salah') {
+            $ansArr = isset($_POST['jawaban_'.$s['id']]) && is_array($_POST['jawaban_'.$s['id']]) ? $_POST['jawaban_'.$s['id']] : [];
+            $data = json_decode($s['data_soal'], true);
+            if ($data && count($data) > 0) {
+                $benarBS = 0;
+                foreach($data as $i => $item) {
+                    if(isset($ansArr[$i]) && $ansArr[$i] === $item['ans']) {
+                        $benarBS++;
+                    }
+                }
+                $poin += ($benarBS / count($data));
+            }
         }
     }
     
-    $nilai = ($total > 0) ? round(($benar / $total) * 100) : 100;
+    $nilai = ($total > 0) ? round(($poin / $total) * 100) : 100;
     
     // Get waktu_mulai
     $waktu_mulai_str = $prog['waktu_mulai'];
@@ -146,26 +184,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     <?php else: ?>
         <form method="post" onsubmit="return confirm('Yakin ingin mengumpulkan jawaban?');">
-            <?php foreach($soals as $idx => $s): ?>
+            <?php foreach($soals as $idx => $s): 
+                $tipe = $s['tipe_soal'] ?? 'pg';
+            ?>
             <div class="card soal-card p-4">
-                <h5 class="font-weight-bold mb-4 text-gray-800"><?= ($idx+1) ?>. <?= htmlspecialchars($s['pertanyaan']) ?></h5>
+                <h5 class="font-weight-bold mb-4 text-gray-800"><?= ($idx+1) ?>. <?= nl2br(htmlspecialchars($s['pertanyaan'])) ?></h5>
                 
-                <label class="mb-2">
-                    <input type="radio" name="jawaban_<?= $s['id'] ?>" value="A" required>
-                    <div class="opsi-label">A. <?= htmlspecialchars($s['opsi_a']) ?></div>
-                </label>
-                <label class="mb-2">
-                    <input type="radio" name="jawaban_<?= $s['id'] ?>" value="B">
-                    <div class="opsi-label">B. <?= htmlspecialchars($s['opsi_b']) ?></div>
-                </label>
-                <label class="mb-2">
-                    <input type="radio" name="jawaban_<?= $s['id'] ?>" value="C">
-                    <div class="opsi-label">C. <?= htmlspecialchars($s['opsi_c']) ?></div>
-                </label>
-                <label class="mb-0">
-                    <input type="radio" name="jawaban_<?= $s['id'] ?>" value="D">
-                    <div class="opsi-label">D. <?= htmlspecialchars($s['opsi_d']) ?></div>
-                </label>
+                <?php if ($tipe === 'pg'): ?>
+                    <?php foreach(['a','b','c','d','e'] as $opt): 
+                        if (empty($s['opsi_'.$opt])) continue;
+                    ?>
+                    <label class="mb-2">
+                        <input type="radio" name="jawaban_<?= $s['id'] ?>" value="<?= strtoupper($opt) ?>" required>
+                        <div class="opsi-label"><?= strtoupper($opt) ?>. <?= htmlspecialchars($s['opsi_'.$opt]) ?></div>
+                    </label>
+                    <?php endforeach; ?>
+                
+                <?php elseif ($tipe === 'pg_majemuk'): ?>
+                    <p class="text-info small"><i class="fas fa-info-circle"></i> Pilih satu atau lebih jawaban yang benar.</p>
+                    <?php foreach(['a','b','c','d','e'] as $opt): 
+                        if (empty($s['opsi_'.$opt])) continue;
+                    ?>
+                    <label class="mb-2">
+                        <input type="checkbox" name="jawaban_<?= $s['id'] ?>[]" value="<?= strtoupper($opt) ?>">
+                        <div class="opsi-label"><?= strtoupper($opt) ?>. <?= htmlspecialchars($s['opsi_'.$opt]) ?></div>
+                    </label>
+                    <?php endforeach; ?>
+                
+                <?php elseif ($tipe === 'menjodohkan'): 
+                    $data = json_decode($s['data_soal'], true) ?? [];
+                    // Extract all right side answers and shuffle them for the dropdown
+                    $kanan_options = array_column($data, 'kanan');
+                    shuffle($kanan_options);
+                ?>
+                    <p class="text-info small"><i class="fas fa-info-circle"></i> Jodohkan premis di sebelah kiri dengan jawaban yang tepat.</p>
+                    <table class="table table-bordered">
+                        <?php foreach($data as $i => $item): ?>
+                        <tr>
+                            <td class="align-middle"><?= htmlspecialchars($item['kiri']) ?></td>
+                            <td width="300">
+                                <select name="jawaban_<?= $s['id'] ?>[<?= $i ?>]" class="form-control" required>
+                                    <option value="">-- Pilih Pasangan --</option>
+                                    <?php foreach($kanan_options as $opt): ?>
+                                    <option value="<?= htmlspecialchars($opt) ?>"><?= htmlspecialchars($opt) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </table>
+                
+                <?php elseif ($tipe === 'benar_salah'): 
+                    $data = json_decode($s['data_soal'], true) ?? [];
+                ?>
+                    <p class="text-info small"><i class="fas fa-info-circle"></i> Tentukan apakah setiap pernyataan berikut Benar atau Salah.</p>
+                    <table class="table table-bordered text-center">
+                        <thead>
+                            <tr class="bg-light">
+                                <th class="text-left">Pernyataan</th>
+                                <th width="100">Benar</th>
+                                <th width="100">Salah</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach($data as $i => $item): ?>
+                            <tr>
+                                <td class="text-left"><?= htmlspecialchars($item['stmt']) ?></td>
+                                <td><input type="radio" name="jawaban_<?= $s['id'] ?>[<?= $i ?>]" value="B" required style="transform: scale(1.5);"></td>
+                                <td><input type="radio" name="jawaban_<?= $s['id'] ?>[<?= $i ?>]" value="S" required style="transform: scale(1.5);"></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+                
             </div>
             <?php endforeach; ?>
             
