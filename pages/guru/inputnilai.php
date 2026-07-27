@@ -31,43 +31,10 @@ if (isset($_POST['getDetail']) || isset($_GET['getDetail'])) {
     $raw = isset($_POST['getDetail']) ? $_POST['getDetail'] : $_GET['getDetail'];
     $idmapel = mysqli_real_escape_string($conn, $raw);
     
+
     // Query biasa untuk kompatibilitas hosting
     $nipguru_escaped = mysqli_real_escape_string($conn, $nipguru);
     $query = "SELECT * FROM tbl_mapel_ampu WHERE {$tenantMapelAmpu} AND id_mapel = '$idmapel' AND no_induk = '$nipguru_escaped' LIMIT 1";
-    $result = mysqli_query($conn, $query);
-    $m = mysqli_fetch_assoc($result);
-    
-    if (!$m) { 
-        echo '<div class="alert alert-danger" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i>Mata pelajaran tidak ditemukan atau Anda tidak memiliki akses.
-              </div>'; 
-        exit; 
-    }
-    
-    $kelas = $m['kelas'];
-    $mapel = $m['nama_mapel'];
-    $tanggal = date('Y-m-d');
-
-    // Buat tabel penilaian dinamis jika belum ada
-    mysqli_query($conn, "CREATE TABLE IF NOT EXISTS tbl_penilaian_item (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        tanggal DATE NOT NULL,
-        id_mapel INT NOT NULL,
-        kelas VARCHAR(50) NOT NULL,
-        mapel VARCHAR(100) NOT NULL,
-        no_induk_guru VARCHAR(50) NOT NULL,
-        kode_penilaian VARCHAR(20) NOT NULL,
-        materi VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE KEY uniq_item (tanggal, id_mapel, kode_penilaian)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-
-    mysqli_query($conn, "CREATE TABLE IF NOT EXISTS tbl_nilai_item (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        id_item INT NOT NULL,
-        no_induk_siswa VARCHAR(50) NOT NULL,
-        nilai FLOAT DEFAULT 0,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     $result = mysqli_query($conn, $query);
     $m = mysqli_fetch_assoc($result);
     
