@@ -187,7 +187,7 @@ if ($__tblLit && mysqli_num_rows($__tblLit) > 0) {
     $activeLit = FileCache::get($cacheKeyLit);
     if ($activeLit === false) {
         $activeLit = [];
-        $__qLit = @mysqli_query($conn, "SELECT id, judul FROM tbl_literasi_tugas WHERE kelas='$klsEsc' AND status='aktif' ORDER BY id DESC LIMIT 20");
+        $__qLit = @mysqli_query($conn, "SELECT id, judul FROM tbl_literasi_tugas WHERE kelas='$klsEsc' AND id_sekolah=$idSekolah ORDER BY id DESC LIMIT 20");
         if ($__qLit) {
             while($lit = mysqli_fetch_assoc($__qLit)) {
                 $activeLit[] = $lit;
@@ -322,7 +322,7 @@ if ($__tblLiterasi && mysqli_num_rows($__tblLiterasi) > 0 && $__tblLiterasiProg 
         SELECT t.id, t.judul, t.batas_waktu 
         FROM tbl_literasi_tugas t 
         LEFT JOIN tbl_literasi_progress p ON t.id = p.id_tugas AND p.no_induk_siswa = '$nisEsc' 
-        WHERE t.kelas = '$klsEsc' AND (p.id IS NULL OR p.status != 'Selesai') 
+        WHERE t.kelas = '$klsEsc' AND t.id_sekolah = $idSekolah AND (p.id IS NULL OR p.status != 'Selesai') 
         ORDER BY t.batas_waktu ASC LIMIT 5");
     if ($qLit) {
         while($lit = mysqli_fetch_assoc($qLit)) {
