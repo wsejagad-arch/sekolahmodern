@@ -1,19 +1,19 @@
 <?php
-// === KONFIGURASI DATABASE UTAMA (VPS) ===
+// === KONFIGURASI DATABASE UTAMA (LOKAL XAMPP) ===
 $db_primary = [
-    'host' => '203.175.125.118',
-    'port' => 3306, // Port MySQL bawaan di VPS
-    'user' => 'vps_jurnal',
-    'password' => 'WahyuJurnal123!',
-    'database' => 'sijurnal'
-];
-
-// === KONFIGURASI DATABASE CADANGAN (LOKAL) ===
-$db_fallback = [
     'host' => 'localhost',
     'port' => 3306,
     'user' => 'root',
     'password' => '',
+    'database' => 'sekolahku'
+];
+
+// === KONFIGURASI DATABASE CADANGAN (VPS) ===
+$db_fallback = [
+    'host' => '203.175.125.118',
+    'port' => 3306,
+    'user' => 'vps_jurnal',
+    'password' => 'WahyuJurnal123!',
     'database' => 'sijurnal'
 ];
 
