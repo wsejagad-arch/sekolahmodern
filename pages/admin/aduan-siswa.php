@@ -264,8 +264,19 @@ if (!empty($aduanRows)) {
                     <div class="card-body">
                         <div class="p-3 mb-3" style="background:#f8fafc; border-radius:14px;">
                             <div class="small text-muted font-weight-bold mb-1">Identitas Pelapor</div>
-                            <div><strong>Pelapor Anonim</strong> - <?= adm_ad_h($row['kelas_pelapor']); ?></div>
-                            <div class="small text-muted">Aduan ini bersifat anonim untuk menjaga privasi pelapor.</div>
+                            <div id="identitas-anonim-<?= $row['id_aduan'] ?>">
+                                <strong>Pelapor Anonim</strong> - <?= adm_ad_h($row['kelas_pelapor']); ?>
+                                <?php if ($isAdminAduan): ?>
+                                    <a href="javascript:void(0)" onclick="$('#identitas-anonim-<?= $row['id_aduan'] ?>').hide(); $('#identitas-asli-<?= $row['id_aduan'] ?>').show();" class="badge badge-warning ml-2" title="Tampilkan Identitas Asli"><i class="fas fa-eye"></i> Tampilkan</a>
+                                <?php endif; ?>
+                            </div>
+                            <?php if ($isAdminAduan): ?>
+                            <div id="identitas-asli-<?= $row['id_aduan'] ?>" style="display:none;">
+                                <strong><?= adm_ad_h($row['nama_pelapor']); ?></strong> (<?= adm_ad_h($row['no_induk_pelapor']); ?>) - <?= adm_ad_h($row['kelas_pelapor']); ?>
+                                <a href="javascript:void(0)" onclick="$('#identitas-asli-<?= $row['id_aduan'] ?>').hide(); $('#identitas-anonim-<?= $row['id_aduan'] ?>').show();" class="badge badge-secondary ml-2" title="Sembunyikan Identitas"><i class="fas fa-eye-slash"></i> Sembunyikan</a>
+                            </div>
+                            <?php endif; ?>
+                            <div class="small text-muted mt-1">Aduan ini bersifat anonim untuk menjaga privasi pelapor.</div>
                         </div>
                         <div class="mb-2"><strong>Lokasi:</strong> <?= adm_ad_h($row['lokasi'] ?: '-'); ?></div>
                         <div class="mb-3"><strong>Tanggal kejadian:</strong> <?= $row['tanggal_kejadian'] ? date('d M Y', strtotime($row['tanggal_kejadian'])) : '-'; ?></div>
