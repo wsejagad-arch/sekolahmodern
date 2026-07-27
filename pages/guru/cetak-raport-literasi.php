@@ -28,7 +28,7 @@ while ($t = mysqli_fetch_assoc($qTugas)) {
 }
 
 // Get All Siswa in this class
-$qSiswa = mysqli_query($conn, "SELECT no_induk, nama_siswa FROM tbl_siswa WHERE kelas='$kelasEsc' AND id_sekolah=$idSekolah AND (status IS NULL OR UPPER(status)='AKTIF') ORDER BY nama_siswa ASC");
+$qSiswa = mysqli_query($conn, "SELECT no_induk, nama_siswa FROM tbl_siswa WHERE (kelas='$kelasEsc' OR REPLACE(REPLACE(kelas, ' ', ''), '-', '') = REPLACE(REPLACE('$kelasEsc', ' ', ''), '-', '')) AND id_sekolah=$idSekolah AND (status IS NULL OR UPPER(status)='AKTIF') ORDER BY nama_siswa ASC");
 $siswaList = [];
 while ($s = mysqli_fetch_assoc($qSiswa)) {
     $siswaList[] = $s;

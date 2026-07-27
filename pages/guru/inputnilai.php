@@ -76,7 +76,7 @@ if (isset($_POST['getDetail']) || isset($_GET['getDetail'])) {
 
     // Ambil siswa - gunakan query biasa untuk kompatibilitas
     $kelas_escaped = mysqli_real_escape_string($conn, $kelas);
-    $queryS = "SELECT no_induk, nama_siswa FROM tbl_siswa WHERE {$tenantSiswa} AND (kelas = '$kelas_escaped' OR REPLACE(kelas, ' ', '') = REPLACE('$kelas_escaped', ' ', '')) AND (status = 'Aktif' OR status = 'aktif' OR status IS NULL OR status = '') ORDER BY nama_siswa ASC";
+    $queryS = "SELECT no_induk, nama_siswa FROM tbl_siswa WHERE {$tenantSiswa} AND (kelas = '$kelas_escaped' OR REPLACE(REPLACE(kelas, ' ', ''), '-', '') = REPLACE(REPLACE('$kelas_escaped', ' ', ''), '-', '')) AND (status = 'Aktif' OR status = 'aktif' OR status IS NULL OR status = '') ORDER BY nama_siswa ASC";
     $siswa = mysqli_query($conn, $queryS);
 
     // Ambil item penilaian untuk tanggal & mapel ini

@@ -141,7 +141,7 @@ if ($action === 'load_monitoring') {
         SELECT s.nama_siswa, p.status, p.skor_evaluasi as nilai, p.durasi_detik, p.skor_durasi, p.skor_literasi
         FROM tbl_siswa s
         LEFT JOIN tbl_literasi_progress p ON p.no_induk_siswa = s.no_induk AND p.id_tugas = $id
-        WHERE s.kelas = '$kelasEsc' AND (s.status IS NULL OR UPPER(s.status)='AKTIF') AND s.id_sekolah=$idSekolah
+        WHERE (s.kelas = '$kelasEsc' OR REPLACE(REPLACE(s.kelas, ' ', ''), '-', '') = REPLACE(REPLACE('$kelasEsc', ' ', ''), '-', '')) AND (s.status IS NULL OR UPPER(s.status)='AKTIF') AND s.id_sekolah=$idSekolah
         ORDER BY s.nama_siswa ASC
     ");
     
@@ -364,7 +364,7 @@ if ($action === 'load_monitoring') {
                                             <?php 
                                             $tugas_q = mysqli_query($conn, "
                                                 SELECT t.*, 
-                                                    (SELECT COUNT(no_induk) FROM tbl_siswa WHERE kelas=t.kelas AND (status IS NULL OR UPPER(status)='AKTIF') AND id_sekolah=$idSekolah) as total_siswa,
+                                                    (SELECT COUNT(no_induk) FROM tbl_siswa WHERE (kelas=t.kelas OR REPLACE(REPLACE(kelas, ' ', ''), '-', '') = REPLACE(REPLACE(t.kelas, ' ', ''), '-', '')) AND (status IS NULL OR UPPER(status)='AKTIF') AND id_sekolah=$idSekolah) as total_siswa,
                                                     (SELECT COUNT(id) FROM tbl_literasi_progress WHERE id_tugas=t.id AND status='selesai') as total_selesai
                                                 FROM tbl_literasi_tugas t 
                                                 WHERE t.no_induk_guru='$nipEsc' AND t.id_sekolah=$idSekolah 
