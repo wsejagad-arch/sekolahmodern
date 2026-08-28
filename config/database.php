@@ -1,13 +1,16 @@
 <?php
-// Konfigurasi Database - Sesuaikan saat upload ke cPanel
-$host = "localhost";
-$user = "smasumb1_web1";       // Ganti dengan username database cPanel (contoh: user_dbsekolah)
-$pass = "W@hyu123465";           // Ganti dengan password database cPanel
-$db   = "smasumb1_smanis1"; // Ganti dengan nama database cPanel (contoh: user_sekolahdb)
+$host = getenv('DB_HOST') ?: getenv('MYSQL_HOST') ?: 'localhost';
+$user = getenv('DB_USER') ?: getenv('MYSQL_USER') ?: 'root';
+$pass = getenv('DB_PASS') ?: getenv('MYSQL_PASSWORD') ?: '';
+$db   = getenv('DB_NAME') ?: getenv('MYSQL_DATABASE') ?: 'sekolahmodern';
 
 $conn = new mysqli($host, $user, $pass, $db);
 
 if ($conn->connect_error) {
-    die("Koneksi gagal: " . $conn->connect_error);
+    http_response_code(500);
+    error_log('Database connection failed: ' . $conn->connect_error);
+    die('Database configuration error.');
 }
+
+$conn->set_charset('utf8mb4');
 ?>

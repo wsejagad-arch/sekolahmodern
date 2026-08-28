@@ -1,4 +1,12 @@
 <?php
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443),
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+session_name('sekolah_modern_admin');
 session_start();
 
 // Mencegah akses langsung ke file ini jika bukan lewat URL rahasia
@@ -30,35 +38,40 @@ $error = '';
 
 // Ambil setting untuk judul
 $setRes = $conn->query("SELECT site_name FROM settings WHERE id=1");
-$setting = $setRes->fetch_assoc();
+$setting = $setRes ? $setRes->fetch_assoc() : null;
 
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    $username = trim((string)($_POST['username'] ?? ''));
+    $password = (string)($_POST['password'] ?? '');
 
-    $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if($result->num_rows > 0) {
-        $admin = $result->fetch_assoc();
-        if(password_verify($password, $admin['password'])) {
-            $_SESSION['admin_logged_in'] = true;
-            $_SESSION['admin_id'] = $admin['id'];
-            $_SESSION['admin_role'] = $admin['role'] ?? 'superadmin';
-            
-            if ($_SESSION['admin_role'] === 'superadmin') {
-                header('Location: /admin/index.php');
-            } else {
-                header('Location: /admin/posts.php');
-            }
-            exit;
-        } else {
-            $error = 'Password salah!';
-        }
+    if ($username === '' || $password === '') {
+        $error = 'Username dan password wajib diisi!';
     } else {
-        $error = 'Username tidak ditemukan!';
+        $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if($result->num_rows > 0) {
+            $admin = $result->fetch_assoc();
+            if(password_verify($password, $admin['password'] ?? '')) {
+                session_regenerate_id(true);
+                $_SESSION['admin_logged_in'] = true;
+                $_SESSION['admin_id'] = (int)$admin['id'];
+                $_SESSION['admin_role'] = $admin['role'] ?? 'superadmin';
+                
+                if ($_SESSION['admin_role'] === 'superadmin') {
+                    header('Location: /admin/index.php');
+                } else {
+                    header('Location: /admin/posts.php');
+                }
+                exit;
+            } else {
+                $error = 'Password salah!';
+            }
+        } else {
+            $error = 'Username tidak ditemukan!';
+        }
     }
 }
 ?>

@@ -1,4 +1,12 @@
 <?php
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443),
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+session_name('sekolah_modern_admin');
 session_start();
 if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_role'] !== 'superadmin') {
     header('Location: index.php');

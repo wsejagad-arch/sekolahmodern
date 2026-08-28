@@ -1,6 +1,26 @@
 # Prevent directory browsing
 Options -Indexes
 
+# Restrict sensitive files from public view
+<FilesMatch "\.(sql|log|bak|old|inc|env)$">
+    Require all denied
+</FilesMatch>
+
+<Files "error_log*">
+    Require all denied
+</Files>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; object-src 'none'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:"
+    Header always unset X-Powered-By
+    Header set Connection keep-alive
+</IfModule>
+
 <IfModule mime_module>
   AddHandler application/x-httpd-ea-php81 .php .php8 .phtml
 </IfModule>
@@ -25,15 +45,13 @@ Options -Indexes
   ExpiresDefault "access plus 2 days"
 </IfModule>
 
-# KEEPALIVE
-<IfModule mod_headers.c>
-  Header set Connection keep-alive
-</IfModule>
-
 # PHP VALUES
 <IfModule mod_php.c>
   php_value upload_max_filesize 20M
   php_value post_max_size 25M
+  php_value session.cookie_httponly 1
+  php_value session.cookie_secure 1
+  php_value session.use_strict_mode 1
 </IfModule>
 
 # URL REWRITING (Hide .php and Force HTTPS)
