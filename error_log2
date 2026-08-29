@@ -1,0 +1,16 @@
+[25-Jul-2026 16:24:09 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'root'@'localhost' (using password: NO) in /home/smasumb1/public_html/config/database.php:8
+Stack trace:
+#0 /home/smasumb1/public_html/config/database.php(8): mysqli->__construct('localhost', 'root', '', 'sekolah_db')
+#1 /home/smasumb1/public_html/index.php(2): require_once('/home/smasumb1/...')
+#2 {main}
+  thrown in /home/smasumb1/public_html/config/database.php on line 8
+[25-Jul-2026 16:26:57 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'g.jabatan' in 'ORDER BY' in /home/smasumb1/public_html/guru.php:3
+Stack trace:
+#0 /home/smasumb1/public_html/guru.php(3): mysqli->query('SELECT g.*, m.n...')
+#1 {main}
+  thrown in /home/smasumb1/public_html/guru.php on line 3
+[25-Jul-2026 16:30:11 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown column 'g.jabatan' in 'ORDER BY' in /home/smasumb1/public_html/guru.php:3
+Stack trace:
+#0 /home/smasumb1/public_html/guru.php(3): mysqli->query('SELECT g.*, m.n...')
+#1 {main}
+  thrown in /home/smasumb1/public_html/guru.php on line 3

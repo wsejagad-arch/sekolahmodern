@@ -1,0 +1,248 @@
+<?php
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443),
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+session_name('sekolah_modern_admin');
+session_start();
+require_once '../config/database.php';
+
+// Cek login
+if(!isset($_SESSION['admin_logged_in'])) {
+    header('Location: /logsman1s');
+    exit;
+}
+
+if(isset($_SESSION['admin_role']) && $_SESSION['admin_role'] !== 'superadmin') {
+    header('Location: posts.php');
+    exit;
+}
+
+$message = '';
+
+// Ambil statistik
+$countPosts = $conn->query("SELECT COUNT(*) as total FROM posts")->fetch_assoc()['total'];
+$countTeachers = $conn->query("SELECT COUNT(*) as total FROM teachers")->fetch_assoc()['total'];
+$countAdmins = $conn->query("SELECT COUNT(*) as total FROM admin")->fetch_assoc()['total'];
+$dbVersion = $conn->query("SELECT VERSION() as version")->fetch_assoc()['version'];
+
+// Informasi Server & Website
+$serverInfo = [
+    'php_version' => phpversion(),
+    'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
+    'upload_max' => ini_get('upload_max_filesize'),
+    'memory_limit' => ini_get('memory_limit'),
+    'db_version' => $dbVersion,
+    'total_admins' => $countAdmins
+];
+
+// Handle Hapus
+if(isset($_GET['delete'])) {
+    $id = (int)$_GET['delete'];
+    
+    // Ambil gambar untuk dihapus filenya
+    $res = $conn->query("SELECT image FROM posts WHERE id = $id");
+    if($res->num_rows > 0) {
+        $row = $res->fetch_assoc();
+        if(!empty($row['image']) && file_exists("../uploads/posts/".$row['image'])) {
+            unlink("../uploads/posts/".$row['image']);
+        }
+    }
+
+    if($conn->query("DELETE FROM posts WHERE id = $id")) {
+        $message = '<div class="alert alert-success">Postingan berhasil dihapus.</div>';
+    }
+}
+
+// Handle Tambah Postingan
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $title = $conn->real_escape_string($_POST['title']);
+    $content = $conn->real_escape_string($_POST['content']);
+    $image_name = '';
+    
+    // Handle Jadwal Tayang
+    $created_at = !empty($_POST['created_at']) ? date('Y-m-d H:i:s', strtotime($_POST['created_at'])) : date('Y-m-d H:i:s');
+
+    // Handle Upload Gambar
+    if(isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+        $filename = $_FILES['image']['name'];
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        
+        if(in_array($ext, $allowed)) {
+            $image_name = time() . '_' . $filename;
+            if(!file_exists("../uploads/posts/")) mkdir("../uploads/posts/", 0777, true);
+            move_uploaded_file($_FILES['image']['tmp_name'], "../uploads/posts/" . $image_name);
+        } else {
+            $message = '<div class="alert alert-error">Format gambar tidak didukung! (Hanya JPG, PNG, WEBP)</div>';
+        }
+    }
+
+    if(empty($message)) {
+        $stmt = $conn->prepare("INSERT INTO posts (title, content, image, created_at) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("ssss", $title, $content, $image_name, $created_at);
+        
+        if($stmt->execute()) {
+            $message = '<div class="alert alert-success">Postingan berhasil ditambahkan!</div>';
+        } else {
+            $message = '<div class="alert alert-error">Gagal menambah postingan.</div>';
+        }
+    }
+}
+
+// Ambil semua postingan
+$posts = $conn->query("SELECT * FROM posts ORDER BY created_at DESC");
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - <?= htmlspecialchars($setting['site_name']) ?></title>
+    <link rel="icon" type="image/png" href="../uploads/favicon.png">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <?php include 'sidebar.php'; ?>
+
+        <div class="admin-main">
+            <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h1>Dashboard Admin</h1>
+                    <p>Selamat datang kembali! Berikut adalah ringkasan sistem Anda hari ini.</p>
+                </div>
+                <a href="logout.php" class="btn" style="background: #ef4444; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-sign-out-alt"></i> Keluar
+                </a>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <h3>Total Postingan</h3>
+                    <p><?= $countPosts ?></p>
+                </div>
+                <?php if($_SESSION['admin_role'] === 'superadmin'): ?>
+                <div class="stat-card">
+                    <h3>Total Guru</h3>
+                    <p><?= $countTeachers ?></p>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <?= $message ?>
+
+            <div class="admin-section" style="margin-top: 2rem;">
+                <h2>Analisis & Monitoring Website</h2>
+                <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                    <div class="stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: none;">
+                        <h3 style="font-size: 0.9rem; color: #64748b;">PHP Version</h3>
+                        <p style="font-size: 1.5rem; color: #334155;"><?= htmlspecialchars($serverInfo['php_version']) ?></p>
+                    </div>
+                    <div class="stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: none;">
+                        <h3 style="font-size: 0.9rem; color: #64748b;">Database Version</h3>
+                        <p style="font-size: 1.5rem; color: #334155;"><?= htmlspecialchars($serverInfo['db_version']) ?></p>
+                    </div>
+                    <div class="stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: none;">
+                        <h3 style="font-size: 0.9rem; color: #64748b;">Max Upload Size</h3>
+                        <p style="font-size: 1.5rem; color: #334155;"><?= htmlspecialchars($serverInfo['upload_max']) ?></p>
+                    </div>
+                    <div class="stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: none;">
+                        <h3 style="font-size: 0.9rem; color: #64748b;">Memory Limit</h3>
+                        <p style="font-size: 1.5rem; color: #334155;"><?= htmlspecialchars($serverInfo['memory_limit']) ?></p>
+                    </div>
+                    <div class="stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: none;">
+                        <h3 style="font-size: 0.9rem; color: #64748b;">Total Admin</h3>
+                        <p style="font-size: 1.5rem; color: #334155;"><?= $serverInfo['total_admins'] ?></p>
+                    </div>
+                    <div class="stat-card" style="background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: none;">
+                        <h3 style="font-size: 0.9rem; color: #64748b;">Server Software</h3>
+                        <p style="font-size: 1.2rem; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<?= htmlspecialchars($serverInfo['server_software']) ?>"><?= htmlspecialchars($serverInfo['server_software']) ?></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <h2>Buat Postingan Baru</h2>
+                <form method="POST" action="" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Judul Postingan</label>
+                        <input type="text" name="title" class="form-control" required placeholder="Masukkan judul postingan...">
+                    </div>
+                    <div class="form-group">
+                        <label>Konten</label>
+                        <textarea name="content" id="editor" class="form-control" rows="10" required placeholder="Tulis isi postingan di sini..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Gambar Utama (Opsional)</label>
+                        <input type="file" name="image" class="form-control" accept="image/*" style="background: white; border: 1px dashed #cbd5e1; padding: 1.5rem;">
+                    </div>
+                    <div class="form-group">
+                        <label>Jadwal Tayang (Opsional)</label>
+                        <input type="datetime-local" name="created_at" class="form-control" title="Kosongkan jika ingin langsung diterbitkan saat ini juga">
+                        <small style="color: #64748b; margin-top: 0.5rem; display: block;">* Jika diisi dengan waktu di masa depan, postingan tidak akan muncul di beranda sampai waktu tersebut tiba (Otomatis Terjadwal).</small>
+                    </div>
+                    <button type="submit" class="btn" style="padding: 0.8rem 2rem; font-size: 1rem;">Publish Postingan</button>
+                </form>
+            </div>
+
+            <div class="admin-section">
+                <h2>Daftar Postingan Terbaru</h2>
+                <div class="table-responsive">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Judul</th>
+                                <th style="text-align: right;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if($posts && $posts->num_rows > 0): ?>
+                                <?php while($row = $posts->fetch_assoc()): ?>
+                                    <tr>
+                                        <td>
+                                            <span style="font-weight: 600; color: #475569; display: block;"><?= date('d M Y, H:i', strtotime($row['created_at'])) ?></span>
+                                            <?php if(strtotime($row['created_at']) > time()): ?>
+                                                <span style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-top: 0.3rem;">Terjadwal</span>
+                                            <?php else: ?>
+                                                <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-top: 0.3rem;">Terbit</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <span style="font-weight: 500;"><?= htmlspecialchars($row['title']) ?></span>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <a href="../post.php?id=<?= $row['id'] ?>" target="_blank" class="btn" style="background: #f1f5f9; color: #475569; padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">Lihat</a>
+                                            <a href="posts.php?edit=<?= $row['id'] ?>" class="btn" style="background: #eff6ff; color: #2563eb; padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;">Edit</a>
+                                            <a href="?delete=<?= $row['id'] ?>" class="btn" style="background-color: #fee2e2; color: #dc2626; padding: 0.4rem 1rem; font-size: 0.85rem; border-radius: 6px;" onclick="return confirm('Yakin ingin menghapus postingan ini?')">Hapus</a>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="3" style="text-align: center; padding: 3rem; color: #94a3b8;">Belum ada postingan</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace('editor', {
+            height: 350,
+            removeButtons: 'Save,NewPage,ExportPdf,Preview,Print,Templates,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField',
+            uiColor: '#f8fafc',
+            versionCheck: false,
+            filebrowserUploadUrl: 'upload_image.php'
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --admin-bg: #f8fafc;
+    --admin-sidebar-bg: #0f172a;
+    --admin-primary: #3b82f6;
+    --admin-text-main: #0f172a;
+    --admin-text-muted: #64748b;
+    --admin-border: #e2e8f0;
+}
+
+.admin-layout { 
+    display: flex; 
+    min-height: 100vh; 
+    background-color: var(--admin-bg); 
+    font-family: 'Inter', sans-serif; 
+}
+
+.admin-sidebar { 
+    width: 280px; 
+    background: var(--admin-sidebar-bg); 
+    color: white; 
+    display: flex; 
+    flex-direction: column; 
+    position: fixed; 
+    height: 100vh; 
+    left: 0; 
+    top: 0; 
+    box-shadow: 4px 0 10px rgba(0,0,0,0.05); 
+    z-index: 1000;
+}
+
+.sidebar-header { 
+    padding: 2rem; 
+    border-bottom: 1px solid rgba(255,255,255,0.05); 
+}
+
+.sidebar-nav { 
+    padding: 1.5rem 0 !important; 
+    flex: 1 !important; 
+    display: flex !important; 
+    flex-direction: column !important; 
+    gap: 0.25rem !important; 
+    overflow-y: auto !important;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    width: 6px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+}
+
+.sidebar-nav a { 
+    display: flex !important; 
+    align-items: center !important; 
+    justify-content: flex-start !important; 
+    padding: 0.9rem 2rem !important; 
+    color: #94a3b8 !important; 
+    text-decoration: none !important; 
+    transition: all 0.2s ease !important; 
+    border-radius: 0 30px 30px 0 !important; 
+    margin-right: 1.5rem !important; 
+    width: 100% !important; 
+    box-sizing: border-box !important; 
+}
+
+.sidebar-nav a:hover, .sidebar-nav a.active { 
+    background: rgba(59, 130, 246, 0.1) !important; 
+    color: #ffffff !important; 
+    border-left: 4px solid var(--admin-primary) !important; 
+}
+
+.menu-icon { 
+    font-size: 1.3rem !important; 
+    width: 35px !important; 
+    text-align: left !important; 
+    display: inline-block !important; 
+    transition: transform 0.2s !important; 
+    flex-shrink: 0 !important; 
+    margin-right: 10px !important; 
+}
+
+.sidebar-nav a:hover .menu-icon { 
+    transform: scale(1.1) !important; 
+}
+
+.menu-text { 
+    font-size: 0.95rem !important; 
+    font-weight: 500 !important; 
+    text-align: left !important; 
+    white-space: nowrap !important; 
+    flex: 1 !important; 
+    display: block !important; 
+}
+
+.sidebar-footer { 
+    padding: 1.5rem; 
+    border-top: 1px solid rgba(255,255,255,0.05); 
+    background: rgba(0,0,0,0.1); 
+}
+
+.contact-info { 
+    background: rgba(255,255,255,0.05); 
+    padding: 1rem; 
+    border-radius: 12px; 
+    margin-bottom: 1rem; 
+}
+
+.logout-btn { 
+    display: block; 
+    text-align: center; 
+    background: #ef4444; 
+    color: white; 
+    text-decoration: none; 
+    padding: 0.75rem; 
+    border-radius: 8px; 
+    font-weight: 600; 
+    transition: background 0.2s; 
+}
+
+.logout-btn:hover { 
+    background: #dc2626; 
+}
+
+.admin-main { 
+    flex: 1; 
+    margin-left: 280px; 
+    padding: 3rem; 
+    overflow-y: auto; 
+}
+
+.dashboard-header { 
+    margin-bottom: 3rem; 
+}
+
+.dashboard-header h1 { 
+    font-size: 2rem; 
+    font-weight: 800; 
+    color: var(--admin-text-main); 
+    margin-bottom: 0.5rem; 
+    letter-spacing: -0.5px; 
+}
+
+.dashboard-header p { 
+    color: var(--admin-text-muted); 
+    font-size: 1rem; 
+}
+
+.admin-section { 
+    background: white; 
+    border-radius: 16px; 
+    padding: 2rem; 
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); 
+    border: 1px solid var(--admin-border); 
+    margin-bottom: 3rem; 
+}
+
+.admin-section h2 { 
+    font-size: 1.25rem; 
+    font-weight: 700; 
+    color: var(--admin-text-main); 
+    margin-bottom: 1.5rem; 
+    padding-bottom: 1rem; 
+    border-bottom: 1px solid #f1f5f9; 
+}
+
+table th { 
+    background-color: #f8fafc; 
+    color: var(--admin-text-muted); 
+    font-size: 0.85rem; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px; 
+    padding: 1rem; 
+    border-bottom: 2px solid var(--admin-border); 
+}
+
+table td { 
+    padding: 1.25rem 1rem; 
+    border-bottom: 1px solid #f1f5f9; 
+    color: var(--admin-text-main); 
+    vertical-align: middle; 
+}
+
+.badge { 
+    padding: 4px 12px; 
+    border-radius: 12px; 
+    font-size: 0.75rem; 
+    font-weight: bold; 
+    display: inline-block; 
+}
+
+.badge-Penting { background: #fee2e2; color: #ef4444; }
+.badge-Biasa { background: #f1f5f9; color: #64748b; }
+.badge-Kegiatan { background: #dcfce3; color: #22c55e; }
+
+body > header { display: none; }
