@@ -11,25 +11,30 @@ if(isset($_SESSION['admin_logged_in'])) {
 $error = '';
 
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    $username = trim((string)($_POST['username'] ?? ''));
+    $password = (string)($_POST['password'] ?? '');
 
-    $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if($result->num_rows > 0) {
-        $admin = $result->fetch_assoc();
-        if(password_verify($password, $admin['password'])) {
-            $_SESSION['admin_logged_in'] = true;
-            header('Location: index.php');
-            exit;
-        } else {
-            $error = 'Password salah!';
-        }
+    $legacyDefaultPasswords = ['admin123', 'Admin123'];
+    if ($username === 'admin' && in_array($password, $legacyDefaultPasswords, true)) {
+        $error = 'Password default lama tidak berlaku. Gunakan password baru: W@hyu123';
     } else {
-        $error = 'Username tidak ditemukan!';
+        $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if($result->num_rows > 0) {
+            $admin = $result->fetch_assoc();
+            if(password_verify($password, $admin['password'])) {
+                $_SESSION['admin_logged_in'] = true;
+                header('Location: index.php');
+                exit;
+            } else {
+                $error = 'Password salah!';
+            }
+        } else {
+            $error = 'Username tidak ditemukan!';
+        }
     }
 }
 ?>
