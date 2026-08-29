@@ -2,9 +2,9 @@
 // Database configuration untuk hosting
 $host = "localhost";
 $port = "3306";
-$user = "smasumb1_simanis1";
-$password = "W@hyu123!";
-$database = "smasumb1_simanis";
+$user = "smasumb1_web1";
+$password = "wahyu1234567890";
+$database = "smasumb1_smanis1";
 
 // Create connection
 $conn = new mysqli($host, $user, $password, $database, $port);

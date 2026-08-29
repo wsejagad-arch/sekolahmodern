@@ -11,5 +11,5 @@ if (isset($_SESSION['username']) && (is_admin() || is_guru() || is_siswa())) {
 }
 
 // Redirect immediately to login for maximum speed
-header('Location: login.php', true, 301);
+header('Location: v2/public/', true, 301);
 exit;

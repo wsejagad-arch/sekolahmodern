@@ -9,4 +9,6 @@ return [
     'user'     => 'nama_user_database',
     'password' => 'password_database',
     'database' => 'nama_database',
+    // Set 'persistent' => true HANYA jika server khusus (VPS/Dedicated) yang mendukung koneksi persistent
+    'persistent' => false,
 ];

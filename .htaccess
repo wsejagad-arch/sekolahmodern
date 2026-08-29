@@ -4,10 +4,11 @@ Options -Indexes +FollowSymLinks
 
 <IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteBase /
+RewriteBase /sekolahku/
 
 # --- Menyembunyikan Ekstensi .PHP ---
 # 1. Jika URL diminta memiliki .php dan itu adalah GET request, Redirect ke URL tanpa .php
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
 RewriteCond %{REQUEST_METHOD} GET
 RewriteCond %{REQUEST_URI} \.php$
 RewriteCond %{REQUEST_URI} !^/router\.php

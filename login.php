@@ -1,4 +1,7 @@
 <?php
+header("Location: v2/public/login", true, 301);
+exit;
+
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/nocache.php';
 require_once __DIR__ . '/google_auth.php';

@@ -1,3 +1,0 @@
-﻿Agen Continue telah dijalankan dengan konfigurasi lokal dari workspace ini.
-
- Status: Agen Continue aktif dan siap digunakan.

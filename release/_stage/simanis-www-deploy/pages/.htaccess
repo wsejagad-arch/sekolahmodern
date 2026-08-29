@@ -1,2 +1,0 @@
-# File ini dinonaktifkan karena aturan rute sudah ditangani oleh .htaccess di folder utama (root).
-# Menghapus aturan di sini untuk mencegah konflik path (/jurnal/ vs /) di server hosting.

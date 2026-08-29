@@ -1,7 +1,0 @@
-venv/
-__pycache__/
-*.pyc
-.env
-notifications.db
-*.zip
-node_modules/
