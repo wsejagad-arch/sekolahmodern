@@ -49,7 +49,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         $legacyDefaultPasswords = ['admin123', 'Admin123'];
         if ($username === 'admin' && in_array($password, $legacyDefaultPasswords, true)) {
-            $error = 'Password default lama tidak berlaku. Gunakan password baru: W@hyu123';
+            $error = 'Password yang digunakan tidak valid. Silakan gunakan kredensial terbaru.';
         } else {
             $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
             $stmt->bind_param("s", $username);
