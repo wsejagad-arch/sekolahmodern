@@ -12,44 +12,59 @@ if (isset($_SESSION['setup_completed'])) {
     die('Setup sudah pernah dijalankan. File ini akan dihapus otomatis.');
 }
 
-require_once __DIR__ . '/config/database.php';
-
 $output = '';
 $success = false;
+$db_error = '';
+
+// Try to connect to database
+$host = 'localhost';
+$user = 'smasumb1_web1';
+$pass = 'wahyu1234567890';
+$db   = 'smasumb1_smanis1';
+
+$conn = new mysqli($host, $user, $pass, $db);
+
+if ($conn->connect_error) {
+    $db_error = 'Database Connection Error: ' . htmlspecialchars($conn->connect_error);
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'setup') {
-    try {
-        // Create admin table if not exists
-        $conn->query("CREATE TABLE IF NOT EXISTS `admin` (
-          `id` int(11) NOT NULL AUTO_INCREMENT,
-          `username` varchar(50) NOT NULL,
-          `password` varchar(255) NOT NULL,
-          `role` ENUM('superadmin', 'author') NOT NULL DEFAULT 'superadmin',
-          PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    if ($db_error) {
+        $output = '❌ Database Error: ' . $db_error;
+    } else {
+        try {
+            // Create admin table if not exists
+            $conn->query("CREATE TABLE IF NOT EXISTS `admin` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `username` varchar(50) NOT NULL,
+              `password` varchar(255) NOT NULL,
+              `role` ENUM('superadmin', 'author') NOT NULL DEFAULT 'superadmin',
+              PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-        // Update admin password (W@hyu123)
-        $hash = '$2y$10$AjIJVQqB7kXjEIob77Wut.HzFGLmh5cK/hObFc9ihyNzj462F1ffi';
-        $conn->query("UPDATE `admin` SET `password` = '$hash', `role` = 'superadmin' WHERE `username` = 'admin'");
+            // Update admin password (W@hyu123)
+            $hash = '$2y$10$AjIJVQqB7kXjEIob77Wut.HzFGLmh5cK/hObFc9ihyNzj462F1ffi';
+            $conn->query("UPDATE `admin` SET `password` = '$hash', `role` = 'superadmin' WHERE `username` = 'admin'");
 
-        // If no admin user exists, insert one
-        $checkAdmin = $conn->query("SELECT id FROM admin WHERE username='admin' LIMIT 1");
-        if ($checkAdmin->num_rows === 0) {
-            $conn->query("INSERT INTO `admin` (`username`, `password`, `role`) VALUES ('admin', '$hash', 'superadmin')");
-            $output = '✅ Tabel admin dibuat dan admin user ditambahkan dengan password: w@wahyu123';
-        } else {
-            $output = '✅ Password admin berhasil diupdate ke: w@wahyu123';
+            // If no admin user exists, insert one
+            $checkAdmin = $conn->query("SELECT id FROM admin WHERE username='admin' LIMIT 1");
+            if ($checkAdmin->num_rows === 0) {
+                $conn->query("INSERT INTO `admin` (`username`, `password`, `role`) VALUES ('admin', '$hash', 'superadmin')");
+                $output = '✅ Tabel admin dibuat dan admin user ditambahkan dengan password: w@wahyu123';
+            } else {
+                $output = '✅ Password admin berhasil diupdate ke: w@wahyu123';
+            }
+
+            $_SESSION['setup_completed'] = true;
+            $success = true;
+
+            // Self-delete this file
+            if (file_exists(__FILE__)) {
+                unlink(__FILE__);
+            }
+        } catch (Throwable $e) {
+            $output = '❌ Error: ' . htmlspecialchars($e->getMessage());
         }
-
-        $_SESSION['setup_completed'] = true;
-        $success = true;
-
-        // Self-delete this file
-        if (file_exists(__FILE__)) {
-            unlink(__FILE__);
-        }
-    } catch (Throwable $e) {
-        $output = '❌ Error: ' . htmlspecialchars($e->getMessage());
     }
 }
 ?>
@@ -156,6 +171,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             border-left-color: #dc3545;
             color: #721c24;
         }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
         .next-steps {
             background: #e7f3ff;
             border-left: 4px solid #2196F3;
@@ -178,6 +199,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 ℹ️ Skrip ini akan membuat tabel <strong>admin</strong> dan mengatur ulang password admin ke <strong>w@wahyu123</strong>.
             </div>
 
+            <?php if ($db_error): ?>
+                <div class="output error">
+                    <strong>⚠️ Database Connection Error:</strong><br>
+                    <?= $db_error ?><br><br>
+                    <strong>Credentials yang digunakan:</strong><br>
+                    Host: <code>localhost</code><br>
+                    User: <code>smasumb1_web1</code><br>
+                    Database: <code>smasumb1_smanis1</code><br><br>
+                    <strong>Solusi:</strong><br>
+                    1. Pastikan database user dan database name sudah benar<br>
+                    2. Hubungi hosting provider jika ada error
+                </div>
+            <?php endif; ?>
+
             <div class="credentials">
                 <strong>✅ Login Credentials:</strong>
                 Username: <code>admin</code><br>
@@ -187,7 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             <form method="POST">
                 <input type="hidden" name="action" value="setup">
-                <button type="submit">Setup Database Sekarang</button>
+                <button type="submit" <?= $db_error ? 'disabled' : '' ?>>Setup Database Sekarang</button>
             </form>
         <?php else: ?>
             <div class="output">
