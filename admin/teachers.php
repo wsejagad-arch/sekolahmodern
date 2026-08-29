@@ -4,9 +4,7 @@ require_once '../config/database.php';
 
 // Cek login
 if(!isset($_SESSION['admin_logged_in'])) {
-    header('Location: /admin-rahasia');
-    exit;
-}
+        header('Location: /logsman1s');
 
 if($_SESSION['admin_role'] !== 'superadmin') {
     header('Location: index.php');

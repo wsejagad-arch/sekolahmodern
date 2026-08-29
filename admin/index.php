@@ -12,7 +12,7 @@ require_once '../config/database.php';
 
 // Cek login
 if(!isset($_SESSION['admin_logged_in'])) {
-    header('Location: /admin-rahasia');
+    header('Location: /logsman1s');
     exit;
 }
 

@@ -59,7 +59,7 @@ Options -Indexes
   RewriteEngine On
   
   # Secret Admin Login Route
-  RewriteRule ^admin-rahasia$ admin/login.php [L]
+  RewriteRule ^logsman1s$ admin/login.php [L]
 
   # Force HTTPS
   RewriteCond %{HTTPS} off

@@ -14,6 +14,6 @@ if (ini_get('session.use_cookies')) {
     setcookie(session_name(), '', time() - 3600, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
 }
 session_destroy();
-header('Location: /admin-rahasia');
+header('Location: /logsman1s');
 exit;
 ?>

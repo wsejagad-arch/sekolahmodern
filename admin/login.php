@@ -10,7 +10,7 @@ session_name('sekolah_modern_admin');
 session_start();
 
 // Mencegah akses langsung ke file ini jika bukan lewat URL rahasia
-if (strpos($_SERVER['REQUEST_URI'], 'admin-rahasia') === false) {
+if (strpos($_SERVER['REQUEST_URI'], 'logsman1s') === false) {
     header('Location: ../index.php');
     exit;
 }
