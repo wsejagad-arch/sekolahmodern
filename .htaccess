@@ -57,7 +57,11 @@ Options -Indexes
 # URL REWRITING (Hide .php and Force HTTPS)
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  
+
+  # Public warning for direct admin path access
+  ErrorDocument 403 /403.php
+  RewriteRule ^admin/?$ /403.php [R=403,L]
+
   # Secret Admin Login Route
   RewriteRule ^logsman1s$ admin/login.php [L]
 
