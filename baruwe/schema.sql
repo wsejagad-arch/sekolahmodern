@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS `posts` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Password default admin adalah: admin123
+-- Password default admin adalah: W@hyu123
 INSERT INTO `admin` (`username`, `password`) VALUES
-('admin', '$2y$10$lVnn/1aWNtxE5CzCBQVYbesJPYGJ5t7IZGgQpmKcXtP24Br6fkIiu');
+('admin', '$2y$10$9j3JPbZD1nnGFwQlFh7Do.cdpV7aV/2DNqytPA1vhrrW3bdS7xF.K');
 
 CREATE TABLE IF NOT EXISTS `teachers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
