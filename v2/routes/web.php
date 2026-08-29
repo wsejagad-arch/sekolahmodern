@@ -51,3 +51,28 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// Temporary route to create an admin user for hosting
+Route::get('/setup-admin', function () {
+    try {
+        // Create admin user in tbl_pengguna
+        $admin = App\Models\User::updateOrCreate(
+            ['no_induk' => 'admin'],
+            [
+                'password' => Illuminate\Support\Facades\Hash::make('admin123'),
+                'hak_akses' => 1,
+                'password_plain' => 'admin123',
+            ]
+        );
+
+        // Make sure tbl_admin_pusat exists and insert name if needed
+        Illuminate\Support\Facades\DB::table('tbl_admin_pusat')->updateOrInsert(
+            ['username' => 'admin'],
+            ['nama' => 'Administrator Utama']
+        );
+
+        return 'Admin user created successfully! Username: admin, Password: admin123. Please remove this route for security.';
+    } catch (\Exception $e) {
+        return 'Error creating admin: ' . $e->getMessage();
+    }
+});
