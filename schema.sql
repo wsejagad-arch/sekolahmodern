@@ -2,7 +2,9 @@ CREATE TABLE IF NOT EXISTS `admin` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`)
+  `role` enum('superadmin','author') NOT NULL DEFAULT 'superadmin',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `posts` (
@@ -15,8 +17,10 @@ CREATE TABLE IF NOT EXISTS `posts` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Password default admin adalah: W@hyu123
-INSERT INTO `admin` (`username`, `password`) VALUES
-('admin', '$2y$10$AjIJVQqB7kXjEIob77Wut.HzFGLmh5cK/hObFc9ihyNzj462F1ffi');
+INSERT INTO `admin` (`username`, `password`, `role`) VALUES
+('admin', '$2y$10$AjIJVQqB7kXjEIob77Wut.HzFGLmh5cK/hObFc9ihyNzj462F1ffi', 'superadmin'),
+('superadmin', '$2y$10$XUni6qKCTpqQN0e5hBnbsu0dqI82qZNSpoIfdAEAkA0Ply1HzOWsW', 'superadmin')
+ON DUPLICATE KEY UPDATE `password` = VALUES(`password`), `role` = VALUES(`role`);
 
 CREATE TABLE IF NOT EXISTS `teachers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
