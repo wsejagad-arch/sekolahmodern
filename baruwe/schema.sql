@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `posts` (
 
 -- Password default admin adalah: W@hyu123
 INSERT INTO `admin` (`username`, `password`) VALUES
-('admin', '$2y$10$9j3JPbZD1nnGFwQlFh7Do.cdpV7aV/2DNqytPA1vhrrW3bdS7xF.K');
+('admin', '$2y$10$AjIJVQqB7kXjEIob77Wut.HzFGLmh5cK/hObFc9ihyNzj462F1ffi');
 
 CREATE TABLE IF NOT EXISTS `teachers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
